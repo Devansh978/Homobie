@@ -37,6 +37,37 @@ const isSuperAdmin = (req: Request, res: Response, next: Function) => {
 export async function registerRoutes(app: Express): Promise<Server> {
   // Set up authentication routes
   setupAuth(app);
+  
+  // Initialize superadmin
+  app.post("/api/init-superadmin", async (req, res, next) => {
+    try {
+      // Check if user already exists
+      const existingUser = await storage.getUserByEmail("devanshchourey@gmail.com");
+      
+      if (existingUser) {
+        // If exists but not superadmin, update role
+        if (existingUser.role !== "superadmin") {
+          const updatedUser = await storage.updateUserRole(existingUser.id, "superadmin");
+          return res.status(200).json({ message: "User role updated to superadmin", user: updatedUser });
+        }
+        return res.status(200).json({ message: "Superadmin already exists", user: existingUser });
+      }
+      
+      // Otherwise create a new superadmin
+      const superAdmin = await storage.createUser({
+        username: "devanshchourey",
+        email: "devanshchourey@gmail.com",
+        password: "123456", // This will be hashed in storage.createUser
+        fullName: "Devansh Chourey",
+        role: "superadmin",
+        phone: "1234567890" // Placeholder
+      });
+      
+      res.status(201).json({ message: "Superadmin created successfully", user: superAdmin });
+    } catch (error) {
+      next(error);
+    }
+  });
 
   // Loan Applications
   app.post("/api/loan-applications", isAuthenticated, async (req, res, next) => {
