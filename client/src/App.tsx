@@ -20,10 +20,16 @@ function Router() {
     <Switch>
       <Route path="/" component={HomePage} />
       <Route path="/auth" component={AuthPage} />
+      <Route path="/loan-application">
+        <LoanApplicationPage />
+      </Route>
+      <Route path="/consultation">
+        <ConsultationPage />
+      </Route>
+      <Route path="/sip">
+        <SipPage />
+      </Route>
       <ProtectedRoute path="/dashboard" component={DashboardPage} />
-      <ProtectedRoute path="/loan-application" component={LoanApplicationPage} />
-      <ProtectedRoute path="/consultation" component={ConsultationPage} />
-      <ProtectedRoute path="/sip" component={SipPage} />
       <ProtectedRoute path="/admin" component={AdminPage} />
       <ProtectedRoute path="/super-admin" component={SuperAdminPage} />
       <Route component={NotFound} />

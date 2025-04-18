@@ -53,38 +53,28 @@ export function Footer() {
             <h4 className="font-semibold text-lg mb-4">Quick Links</h4>
             <ul className="space-y-2">
               <li>
-                <Link href="/loan-application?type=home-loan">
-                  <a className="text-neutral-400 hover:text-white transition-colors">
-                    Home Loans
-                  </a>
+                <Link href="/loan-application?type=home-loan" className="text-neutral-400 hover:text-white transition-colors">
+                  Home Loans
                 </Link>
               </li>
               <li>
-                <Link href="/loan-application?type=lap">
-                  <a className="text-neutral-400 hover:text-white transition-colors">
-                    Loan Against Property
-                  </a>
+                <Link href="/loan-application?type=lap" className="text-neutral-400 hover:text-white transition-colors">
+                  Loan Against Property
                 </Link>
               </li>
               <li>
-                <Link href="/loan-application?type=bt-topup">
-                  <a className="text-neutral-400 hover:text-white transition-colors">
-                    Balance Transfer
-                  </a>
+                <Link href="/loan-application?type=bt-topup" className="text-neutral-400 hover:text-white transition-colors">
+                  Balance Transfer
                 </Link>
               </li>
               <li>
-                <Link href="/sip">
-                  <a className="text-neutral-400 hover:text-white transition-colors">
-                    SIP Investments
-                  </a>
+                <Link href="/sip" className="text-neutral-400 hover:text-white transition-colors">
+                  SIP Investments
                 </Link>
               </li>
               <li>
-                <Link href="/consultation">
-                  <a className="text-neutral-400 hover:text-white transition-colors">
-                    Free Consultation
-                  </a>
+                <Link href="/consultation" className="text-neutral-400 hover:text-white transition-colors">
+                  Free Consultation
                 </Link>
               </li>
             </ul>
