@@ -4,11 +4,17 @@ import {
   Consultation, InsertConsultation,
   SipInvestment, InsertSipInvestment,
   KycDocument, InsertKycDocument,
-  Transaction, InsertTransaction
+  Transaction, InsertTransaction,
+  users, loanApplications, consultations, sipInvestments, kycDocuments, transactions
 } from "@shared/schema";
 import session from "express-session";
 import createMemoryStore from "memorystore";
+import { db } from "./db";
+import { eq } from "drizzle-orm";
+import connectPg from "connect-pg-simple";
+import { pool } from "./db";
 
+const PostgresSessionStore = connectPg(session);
 const MemoryStore = createMemoryStore(session);
 
 export interface IStorage {
@@ -48,247 +54,218 @@ export interface IStorage {
   getTransactionsByUserId(userId: number): Promise<Transaction[]>;
 
   // Session store
-  sessionStore: session.SessionStore;
+  sessionStore: any;
 }
 
-export class MemStorage implements IStorage {
-  private users: Map<number, User>;
-  private loanApplications: Map<number, LoanApplication>;
-  private consultations: Map<number, Consultation>;
-  private sipInvestments: Map<number, SipInvestment>;
-  private kycDocuments: Map<number, KycDocument>;
-  private transactions: Map<number, Transaction>;
-  
-  sessionStore: session.SessionStore;
-  
-  private userIdCounter: number;
-  private loanApplicationIdCounter: number;
-  private consultationIdCounter: number;
-  private sipInvestmentIdCounter: number;
-  private kycDocumentIdCounter: number;
-  private transactionIdCounter: number;
+export class DatabaseStorage implements IStorage {
+  sessionStore: any;
 
   constructor() {
-    this.users = new Map();
-    this.loanApplications = new Map();
-    this.consultations = new Map();
-    this.sipInvestments = new Map();
-    this.kycDocuments = new Map();
-    this.transactions = new Map();
-    
-    this.userIdCounter = 1;
-    this.loanApplicationIdCounter = 1;
-    this.consultationIdCounter = 1;
-    this.sipInvestmentIdCounter = 1;
-    this.kycDocumentIdCounter = 1;
-    this.transactionIdCounter = 1;
-    
-    this.sessionStore = new MemoryStore({
-      checkPeriod: 86400000, // prune expired entries every 24h
+    this.sessionStore = new PostgresSessionStore({ 
+      pool,
+      createTableIfMissing: true
     });
 
-    // Create a superadmin user for testing
-    this.createUser({
-      username: "admin",
-      password: "password123", // In a real app, this would be hashed
-      email: "admin@finsecure.com",
-      fullName: "Admin User",
-      phoneNumber: "1234567890"
-    }).then(user => {
-      this.updateUserRole(user.id, "superadmin");
+    // Create a superadmin user for testing if none exists
+    this.getUserByUsername("admin").then(user => {
+      if (!user) {
+        this.createUser({
+          username: "admin",
+          password: "password123", // In a real app, this would be hashed
+          email: "admin@finsecure.com",
+          fullName: "Admin User",
+          phoneNumber: "1234567890"
+        }).then(user => {
+          this.updateUserRole(user.id, "superadmin");
+        });
+      }
     });
   }
 
   // User Management
   async getUser(id: number): Promise<User | undefined> {
-    return this.users.get(id);
+    const [user] = await db.select().from(users).where(eq(users.id, id));
+    return user;
   }
 
   async getUserByUsername(username: string): Promise<User | undefined> {
-    return Array.from(this.users.values()).find(
-      (user) => user.username.toLowerCase() === username.toLowerCase()
-    );
+    const [user] = await db
+      .select()
+      .from(users)
+      .where(eq(users.username, username));
+    return user;
   }
 
   async getUserByEmail(email: string): Promise<User | undefined> {
-    return Array.from(this.users.values()).find(
-      (user) => user.email.toLowerCase() === email.toLowerCase()
-    );
+    const [user] = await db
+      .select()
+      .from(users)
+      .where(eq(users.email, email));
+    return user;
   }
 
   async createUser(insertUser: InsertUser): Promise<User> {
-    const id = this.userIdCounter++;
-    const now = new Date();
-    const user: User = { 
-      ...insertUser, 
-      id, 
-      role: "user",
-      createdAt: now
-    };
-    this.users.set(id, user);
+    const [user] = await db
+      .insert(users)
+      .values({
+        ...insertUser,
+        role: "user"
+      })
+      .returning();
     return user;
   }
 
   async getAllUsers(): Promise<User[]> {
-    return Array.from(this.users.values());
+    return await db.select().from(users);
   }
 
   async updateUserRole(id: number, role: string): Promise<User | undefined> {
-    const user = this.users.get(id);
-    if (!user) return undefined;
-    
-    const updatedUser: User = { ...user, role };
-    this.users.set(id, updatedUser);
+    const [updatedUser] = await db
+      .update(users)
+      .set({ role })
+      .where(eq(users.id, id))
+      .returning();
     return updatedUser;
   }
 
   // Loan Applications
   async createLoanApplication(application: InsertLoanApplication): Promise<LoanApplication> {
-    const id = this.loanApplicationIdCounter++;
-    const now = new Date();
-    const loanApplication: LoanApplication = {
-      ...application,
-      id,
-      status: "pending",
-      appliedAt: now,
-      updatedAt: now
-    };
-    this.loanApplications.set(id, loanApplication);
+    const [loanApplication] = await db
+      .insert(loanApplications)
+      .values({
+        ...application,
+        status: "pending"
+      })
+      .returning();
     return loanApplication;
   }
 
   async getLoanApplication(id: number): Promise<LoanApplication | undefined> {
-    return this.loanApplications.get(id);
+    const [loanApplication] = await db
+      .select()
+      .from(loanApplications)
+      .where(eq(loanApplications.id, id));
+    return loanApplication;
   }
 
   async getLoanApplicationsByUserId(userId: number): Promise<LoanApplication[]> {
-    return Array.from(this.loanApplications.values()).filter(
-      (application) => application.userId === userId
-    );
+    return await db
+      .select()
+      .from(loanApplications)
+      .where(eq(loanApplications.userId, userId));
   }
 
   async getAllLoanApplications(): Promise<LoanApplication[]> {
-    return Array.from(this.loanApplications.values());
+    return await db.select().from(loanApplications);
   }
 
   async updateLoanApplicationStatus(id: number, status: string): Promise<LoanApplication | undefined> {
-    const application = this.loanApplications.get(id);
-    if (!application) return undefined;
-    
-    const now = new Date();
-    const updatedApplication: LoanApplication = { 
-      ...application, 
-      status, 
-      updatedAt: now
-    };
-    this.loanApplications.set(id, updatedApplication);
+    const [updatedApplication] = await db
+      .update(loanApplications)
+      .set({ status, updatedAt: new Date() })
+      .where(eq(loanApplications.id, id))
+      .returning();
     return updatedApplication;
   }
 
   // Consultations
   async createConsultation(consultation: InsertConsultation): Promise<Consultation> {
-    const id = this.consultationIdCounter++;
-    const now = new Date();
-    const newConsultation: Consultation = {
-      ...consultation,
-      id,
-      status: "scheduled",
-      bookedAt: now
-    };
-    this.consultations.set(id, newConsultation);
+    const [newConsultation] = await db
+      .insert(consultations)
+      .values({
+        ...consultation,
+        status: "scheduled"
+      })
+      .returning();
     return newConsultation;
   }
 
   async getConsultationsByUserId(userId: number): Promise<Consultation[]> {
-    return Array.from(this.consultations.values()).filter(
-      (consultation) => consultation.userId === userId
-    );
+    return await db
+      .select()
+      .from(consultations)
+      .where(eq(consultations.userId, userId));
   }
 
   async getAllConsultations(): Promise<Consultation[]> {
-    return Array.from(this.consultations.values());
+    return await db.select().from(consultations);
   }
 
   async updateConsultationStatus(id: number, status: string): Promise<Consultation | undefined> {
-    const consultation = this.consultations.get(id);
-    if (!consultation) return undefined;
-    
-    const updatedConsultation: Consultation = { ...consultation, status };
-    this.consultations.set(id, updatedConsultation);
+    const [updatedConsultation] = await db
+      .update(consultations)
+      .set({ status })
+      .where(eq(consultations.id, id))
+      .returning();
     return updatedConsultation;
   }
 
   // SIP Investments
   async createSipInvestment(investment: InsertSipInvestment): Promise<SipInvestment> {
-    const id = this.sipInvestmentIdCounter++;
-    const now = new Date();
-    const newInvestment: SipInvestment = {
-      ...investment,
-      id,
-      status: "active",
-      createdAt: now
-    };
-    this.sipInvestments.set(id, newInvestment);
+    const [newInvestment] = await db
+      .insert(sipInvestments)
+      .values({
+        ...investment,
+        status: "active"
+      })
+      .returning();
     return newInvestment;
   }
 
   async getSipInvestmentsByUserId(userId: number): Promise<SipInvestment[]> {
-    return Array.from(this.sipInvestments.values()).filter(
-      (investment) => investment.userId === userId
-    );
+    return await db
+      .select()
+      .from(sipInvestments)
+      .where(eq(sipInvestments.userId, userId));
   }
 
   async getAllSipInvestments(): Promise<SipInvestment[]> {
-    return Array.from(this.sipInvestments.values());
+    return await db.select().from(sipInvestments);
   }
 
   // KYC Documents
   async createKycDocument(document: InsertKycDocument): Promise<KycDocument> {
-    const id = this.kycDocumentIdCounter++;
-    const now = new Date();
-    const newDocument: KycDocument = {
-      ...document,
-      id,
-      verificationStatus: "pending",
-      uploadedAt: now
-    };
-    this.kycDocuments.set(id, newDocument);
+    const [newDocument] = await db
+      .insert(kycDocuments)
+      .values({
+        ...document,
+        verificationStatus: "pending"
+      })
+      .returning();
     return newDocument;
   }
 
   async getKycDocumentsByUserId(userId: number): Promise<KycDocument[]> {
-    return Array.from(this.kycDocuments.values()).filter(
-      (document) => document.userId === userId
-    );
+    return await db
+      .select()
+      .from(kycDocuments)
+      .where(eq(kycDocuments.userId, userId));
   }
 
   async updateKycDocumentStatus(id: number, status: string): Promise<KycDocument | undefined> {
-    const document = this.kycDocuments.get(id);
-    if (!document) return undefined;
-    
-    const updatedDocument: KycDocument = { ...document, verificationStatus: status };
-    this.kycDocuments.set(id, updatedDocument);
+    const [updatedDocument] = await db
+      .update(kycDocuments)
+      .set({ verificationStatus: status })
+      .where(eq(kycDocuments.id, id))
+      .returning();
     return updatedDocument;
   }
 
   // Transactions
   async createTransaction(transaction: InsertTransaction): Promise<Transaction> {
-    const id = this.transactionIdCounter++;
-    const now = new Date();
-    const newTransaction: Transaction = {
-      ...transaction,
-      id,
-      transactionDate: now
-    };
-    this.transactions.set(id, newTransaction);
+    const [newTransaction] = await db
+      .insert(transactions)
+      .values(transaction)
+      .returning();
     return newTransaction;
   }
 
   async getTransactionsByUserId(userId: number): Promise<Transaction[]> {
-    return Array.from(this.transactions.values()).filter(
-      (transaction) => transaction.userId === userId
-    );
+    return await db
+      .select()
+      .from(transactions)
+      .where(eq(transactions.userId, userId));
   }
 }
 
-export const storage = new MemStorage();
+export const storage = new DatabaseStorage();
