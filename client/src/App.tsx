@@ -13,6 +13,7 @@ import ConsultationPage from "@/pages/consultation-page";
 import SipPage from "@/pages/sip-page";
 import { ProtectedRoute } from "./lib/protected-route";
 import { ThemeProvider } from "next-themes";
+import { AuthProvider } from "@/hooks/use-auth";
 
 function Router() {
   return (
@@ -35,7 +36,9 @@ function App() {
     <ThemeProvider attribute="class" defaultTheme="light">
       <TooltipProvider>
         <Toaster />
-        <Router />
+        <AuthProvider>
+          <Router />
+        </AuthProvider>
       </TooltipProvider>
     </ThemeProvider>
   );
