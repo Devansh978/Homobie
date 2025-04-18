@@ -46,7 +46,7 @@ export function LoanCard({
         </ul>
         <Link href={`/loan-application?type=${type}`}>
           <Button
-            className={`w-full py-2 px-4 bg-${buttonColor} text-white rounded-lg hover:bg-${hoverColor} transition-colors`}
+            className="w-full text-white"
             style={{ backgroundColor: buttonColor }}
           >
             {buttonText}

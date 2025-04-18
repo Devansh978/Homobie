@@ -20,6 +20,7 @@ export const insertUserSchema = createInsertSchema(users).pick({
   email: true,
   fullName: true,
   phoneNumber: true,
+  role: true,
 });
 
 // KYC Documents schema

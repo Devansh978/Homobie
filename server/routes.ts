@@ -12,7 +12,7 @@ import {
 
 // Middleware to check if user is authenticated
 const isAuthenticated = (req: Request, res: Response, next: Function) => {
-  if (req.isAuthenticated()) {
+  if (req.isAuthenticated() && req.user) {
     return next();
   }
   res.status(401).json({ message: "Unauthorized" });
@@ -20,7 +20,7 @@ const isAuthenticated = (req: Request, res: Response, next: Function) => {
 
 // Middleware to check if user is admin
 const isAdmin = (req: Request, res: Response, next: Function) => {
-  if (req.isAuthenticated() && (req.user.role === "admin" || req.user.role === "superadmin")) {
+  if (req.isAuthenticated() && req.user && (req.user.role === "admin" || req.user.role === "superadmin")) {
     return next();
   }
   res.status(403).json({ message: "Forbidden" });
@@ -28,7 +28,7 @@ const isAdmin = (req: Request, res: Response, next: Function) => {
 
 // Middleware to check if user is super admin
 const isSuperAdmin = (req: Request, res: Response, next: Function) => {
-  if (req.isAuthenticated() && req.user.role === "superadmin") {
+  if (req.isAuthenticated() && req.user && req.user.role === "superadmin") {
     return next();
   }
   res.status(403).json({ message: "Forbidden" });
@@ -60,7 +60,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         password: "123456", // This will be hashed in storage.createUser
         fullName: "Devansh Chourey",
         role: "superadmin",
-        phone: "1234567890" // Placeholder
+        phoneNumber: "1234567890" // Placeholder
       });
       
       res.status(201).json({ message: "Superadmin created successfully", user: superAdmin });
