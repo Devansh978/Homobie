@@ -172,12 +172,10 @@ export default function ConsultationPage() {
     createConsultationMutation.mutate(data);
   };
 
-  // If no authenticated user, redirect to auth page
+  // Allow viewing the page without authentication
   useEffect(() => {
-    if (!user && !isSubmitting) {
-      navigate("/auth");
-    }
-  }, [user, navigate, isSubmitting]);
+    // No redirect here, users will be prompted to login on form submission
+  }, []);
 
   return (
     <div className="min-h-screen flex flex-col">

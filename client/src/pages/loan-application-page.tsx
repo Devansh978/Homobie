@@ -173,12 +173,11 @@ export default function LoanApplicationPage() {
     createLoanMutation.mutate(data);
   };
 
-  // If no authenticated user, redirect to auth page
+  // Track if user is authenticated - we'll only enforce auth on submission
   useEffect(() => {
-    if (!user && !isSubmitting) {
-      navigate("/auth");
-    }
-  }, [user, navigate, isSubmitting]);
+    // No redirect here, allow users to view the page without authentication
+    // They'll be prompted to log in when they try to submit
+  }, []);
 
   return (
     <div className="min-h-screen flex flex-col">
