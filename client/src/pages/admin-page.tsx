@@ -738,6 +738,36 @@ export default function AdminPage() {
         </DialogContent>
       </Dialog>
 
+      <Dialog open={consultationStatusDialogOpen} onOpenChange={setConsultationStatusDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>
+              Update Consultation Status
+            </DialogTitle>
+            <DialogDescription>
+              {newConsultationStatus === 'scheduled' && 'Mark this consultation as scheduled?'}
+              {newConsultationStatus === 'completed' && 'Mark this consultation as completed?'}
+              {newConsultationStatus === 'cancelled' && 'Are you sure you want to cancel this consultation?'}
+            </DialogDescription>
+          </DialogHeader>
+          
+          <DialogFooter>
+            <Button 
+              variant="outline" 
+              onClick={() => setConsultationStatusDialogOpen(false)}
+            >
+              Cancel
+            </Button>
+            <Button 
+              onClick={handleConsultationStatusUpdate}
+              disabled={consultationStatusMutation.isPending}
+            >
+              {consultationStatusMutation.isPending ? 'Updating...' : 'Confirm'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
       <Footer />
     </div>
   );

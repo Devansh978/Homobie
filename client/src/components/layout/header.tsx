@@ -3,13 +3,17 @@ import { Link, useLocation } from "wouter";
 import { useAuth } from "@/hooks/use-auth";
 import { Button } from "@/components/ui/button";
 import { 
-  Shield, 
   Menu, 
   X, 
   User,
   LogOut,
   LayoutDashboard, 
-  Settings
+  Settings,
+  Clock,
+  Phone,
+  Mail,
+  MapPin,
+  Shield
 } from "lucide-react";
 import {
   DropdownMenu,
@@ -18,6 +22,8 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { companyInfo } from "@/lib/company-info";
+import homobieLogo from "@/assets/homobie-logo.png";
 
 export function Header() {
   const [location] = useLocation();
@@ -47,9 +53,9 @@ export function Header() {
   return (
     <header className="bg-white shadow-sm sticky top-0 z-50">
       <div className="container mx-auto px-4 py-3 flex justify-between items-center">
-        <Link href="/" className="flex items-center space-x-1">
-          <Shield className="h-8 w-8 text-primary" />
-          <span className="font-bold text-xl text-primary">FinSecure</span>
+        <Link href="/" className="flex items-center space-x-2">
+          <img src={homobieLogo} alt="Homobie Logo" className="h-8" />
+          <span className="font-bold text-xl text-primary">{companyInfo.name}</span>
         </Link>
 
         <nav className="hidden md:flex space-x-8">
