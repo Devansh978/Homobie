@@ -131,6 +131,38 @@ export const insertTransactionSchema = createInsertSchema(transactions).pick({
   description: true,
 });
 
+// Payment Records schema
+export const payments = pgTable("payments", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").notNull(),
+  amount: numeric("amount").notNull(),
+  currency: text("currency").default("INR").notNull(),
+  status: text("status").notNull(), // created, authorized, captured, failed, refunded
+  orderId: text("order_id").notNull(),
+  paymentId: text("payment_id"),
+  signature: text("signature"),
+  paymentFor: text("payment_for").notNull(), // loan_application, sip_investment, consultation, processing_fee
+  relatedId: integer("related_id"), // ID of the related entity (loan, sip, consultation)
+  receipt: text("receipt"),
+  notes: json("notes"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+export const insertPaymentSchema = createInsertSchema(payments).pick({
+  userId: true,
+  amount: true,
+  currency: true,
+  status: true,
+  orderId: true,
+  paymentId: true,
+  signature: true,
+  paymentFor: true,
+  relatedId: true,
+  receipt: true,
+  notes: true,
+});
+
 // Type exports
 export type User = typeof users.$inferSelect;
 export type InsertUser = z.infer<typeof insertUserSchema>;
@@ -149,3 +181,6 @@ export type InsertConsultation = z.infer<typeof insertConsultationSchema>;
 
 export type Transaction = typeof transactions.$inferSelect;
 export type InsertTransaction = z.infer<typeof insertTransactionSchema>;
+
+export type Payment = typeof payments.$inferSelect;
+export type InsertPayment = z.infer<typeof insertPaymentSchema>;

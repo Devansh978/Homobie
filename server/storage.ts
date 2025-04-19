@@ -5,7 +5,8 @@ import {
   SipInvestment, InsertSipInvestment,
   KycDocument, InsertKycDocument,
   Transaction, InsertTransaction,
-  users, loanApplications, consultations, sipInvestments, kycDocuments, transactions
+  Payment, InsertPayment,
+  users, loanApplications, consultations, sipInvestments, kycDocuments, transactions, payments
 } from "@shared/schema";
 import session from "express-session";
 import createMemoryStore from "memorystore";
@@ -52,6 +53,13 @@ export interface IStorage {
   // Transactions
   createTransaction(transaction: InsertTransaction): Promise<Transaction>;
   getTransactionsByUserId(userId: number): Promise<Transaction[]>;
+
+  // Payments
+  createPayment(payment: InsertPayment): Promise<Payment>;
+  getPayment(id: number): Promise<Payment | undefined>;
+  getPaymentByOrderId(orderId: string): Promise<Payment | undefined>;
+  getPaymentsByUserId(userId: number): Promise<Payment[]>;
+  updatePaymentStatus(id: number, status: string, paymentId?: string, signature?: string): Promise<Payment | undefined>;
 
   // Session store
   sessionStore: any;

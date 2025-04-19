@@ -94,7 +94,7 @@ export default function HomePage() {
         <div className="container mx-auto px-4">
           <div className="text-center mb-16">
             <h2 className="text-3xl font-bold text-neutral-800 mb-4">
-              Why Choose FinSecure?
+              Why Choose Homobie?
             </h2>
             <p className="text-neutral-600 max-w-2xl mx-auto">
               Our comprehensive financial solutions are designed to provide
