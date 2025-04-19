@@ -298,7 +298,7 @@ export default function HomePage() {
             </h2>
             <p className="text-neutral-600 max-w-2xl mx-auto">
               Join thousands of satisfied customers who have transformed their
-              financial future with FinSecure.
+              financial future with Homobie.
             </p>
           </div>
 
@@ -310,7 +310,7 @@ export default function HomePage() {
               avatarUrl="https://images.unsplash.com/photo-1494790108377-be9c29b29330?ixlib=rb-1.2.1&auto=format&fit=crop&w=64&h=64&q=80"
             />
             <TestimonialCard
-              quote="I was paying high EMIs until I discovered FinSecure's Balance Transfer Top-Up. Reduced my EMI by almost 25% and got additional funds for my business expansion. Excellent service!"
+              quote="I was paying high EMIs until I discovered Homobie's Balance Transfer Top-Up. Reduced my EMI by almost 25% and got additional funds for my business expansion. Excellent service!"
               name="Rahul Mehta"
               role="BT Top-Up Customer"
               avatarUrl="https://images.unsplash.com/photo-1570295999919-56ceb5ecca61?ixlib=rb-1.2.1&auto=format&fit=crop&w=64&h=64&q=80"

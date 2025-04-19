@@ -15,6 +15,8 @@ import SipPage from "@/pages/sip-page";
 import { ProtectedRoute } from "./lib/protected-route";
 import { ThemeProvider } from "next-themes";
 import { AuthProvider } from "@/hooks/use-auth";
+import { Header } from "@/components/layout/header";
+import { Footer } from "@/components/layout/footer";
 
 function Router() {
   return (
@@ -45,7 +47,13 @@ function App() {
       <TooltipProvider>
         <Toaster />
         <AuthProvider>
-          <Router />
+          <div className="flex flex-col min-h-screen">
+            <Header />
+            <main className="flex-grow">
+              <Router />
+            </main>
+            <Footer />
+          </div>
         </AuthProvider>
       </TooltipProvider>
     </ThemeProvider>
