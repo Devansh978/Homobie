@@ -274,6 +274,64 @@ export class DatabaseStorage implements IStorage {
       .from(transactions)
       .where(eq(transactions.userId, userId));
   }
+
+  // Payments
+  async createPayment(payment: InsertPayment): Promise<Payment> {
+    const [newPayment] = await db
+      .insert(payments)
+      .values({
+        ...payment,
+        status: payment.status || "created",
+        updatedAt: new Date()
+      })
+      .returning();
+    return newPayment;
+  }
+
+  async getPayment(id: number): Promise<Payment | undefined> {
+    const [payment] = await db
+      .select()
+      .from(payments)
+      .where(eq(payments.id, id));
+    return payment;
+  }
+
+  async getPaymentByOrderId(orderId: string): Promise<Payment | undefined> {
+    const [payment] = await db
+      .select()
+      .from(payments)
+      .where(eq(payments.orderId, orderId));
+    return payment;
+  }
+
+  async getPaymentsByUserId(userId: number): Promise<Payment[]> {
+    return await db
+      .select()
+      .from(payments)
+      .where(eq(payments.userId, userId));
+  }
+
+  async updatePaymentStatus(id: number, status: string, paymentId?: string, signature?: string): Promise<Payment | undefined> {
+    const updateData: any = { 
+      status, 
+      updatedAt: new Date() 
+    };
+    
+    if (paymentId) {
+      updateData.paymentId = paymentId;
+    }
+    
+    if (signature) {
+      updateData.signature = signature;
+    }
+    
+    const [updatedPayment] = await db
+      .update(payments)
+      .set(updateData)
+      .where(eq(payments.id, id))
+      .returning();
+    return updatedPayment;
+  }
 }
 
 export const storage = new DatabaseStorage();

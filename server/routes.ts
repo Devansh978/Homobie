@@ -2,12 +2,14 @@ import type { Express, Request, Response } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { setupAuth } from "./auth";
+import { registerPaymentRoutes } from "./payment-routes";
 import { z } from "zod";
 import {
   insertLoanApplicationSchema,
   insertConsultationSchema,
   insertSipInvestmentSchema,
-  insertKycDocumentSchema
+  insertKycDocumentSchema,
+  insertTransactionSchema
 } from "@shared/schema";
 
 // Middleware to check if user is authenticated
@@ -37,6 +39,9 @@ const isSuperAdmin = (req: Request, res: Response, next: Function) => {
 export async function registerRoutes(app: Express): Promise<Server> {
   // Set up authentication routes
   setupAuth(app);
+  
+  // Register payment routes
+  registerPaymentRoutes(app);
   
   // Initialize superadmin
   app.post("/api/init-superadmin", async (req, res, next) => {
