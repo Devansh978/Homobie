@@ -5,8 +5,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useAuth } from "@/hooks/use-auth";
 import { insertUserSchema } from "@shared/schema";
-import { Header } from "@/components/layout/header";
-import { Footer } from "@/components/layout/footer";
+
 import { ChatbotButton } from "@/components/layout/chatbot-button";
 import { Shield } from "lucide-react";
 import {
@@ -93,10 +92,8 @@ export default function AuthPage() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col">
-      <Header />
-
-      <main className="flex-grow py-12 bg-neutral-50">
+    <div>
+      <main className="py-12 bg-neutral-50">
         <div className="container mx-auto px-4">
           <div className="flex flex-col md:flex-row gap-8 items-center">
             <div className="md:w-1/2">
@@ -340,7 +337,6 @@ export default function AuthPage() {
         </div>
       </main>
 
-      <Footer />
       <ChatbotButton />
     </div>
   );

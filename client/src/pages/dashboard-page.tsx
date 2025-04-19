@@ -2,8 +2,7 @@ import React from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { Link } from "wouter";
 import { useAuth } from "@/hooks/use-auth";
-import { Header } from "@/components/layout/header";
-import { Footer } from "@/components/layout/footer";
+
 import { ChatbotButton } from "@/components/layout/chatbot-button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -98,10 +97,8 @@ export default function DashboardPage() {
   }, 0);
 
   return (
-    <div className="min-h-screen flex flex-col">
-      <Header />
-
-      <main className="flex-grow">
+    <div>
+      <main>
         <div className="container mx-auto px-4 py-8">
           <div className="mb-8">
             <h1 className="text-3xl font-bold text-neutral-800">Dashboard</h1>
@@ -683,7 +680,6 @@ export default function DashboardPage() {
         </div>
       </main>
 
-      <Footer />
       <ChatbotButton />
     </div>
   );
