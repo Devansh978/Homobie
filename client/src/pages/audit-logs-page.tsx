@@ -68,11 +68,11 @@ export default function AuditLogsPage() {
 
   // Get unique entity types and action types for filters
   const entityTypes = data?.logs 
-    ? [...new Set(data.logs.map(log => log.entityType).filter(Boolean))] 
+    ? Array.from(new Set(data.logs.map(log => log.entityType).filter(Boolean) as string[])) 
     : [];
     
   const actionTypes = data?.logs 
-    ? [...new Set(data.logs.map(log => log.actionType))] 
+    ? Array.from(new Set(data.logs.map(log => log.actionType))) 
     : [];
 
   // Calculate pagination
@@ -83,7 +83,7 @@ export default function AuditLogsPage() {
   );
 
   // Helper function to format JSON for display
-  const formatJsonValue = (value: any) => {
+  const formatJsonValue = (value: any): React.ReactNode => {
     if (!value) return "N/A";
     if (typeof value === "object") {
       return (

@@ -84,6 +84,7 @@ export default function AdminPage() {
       loanStats: { total: 0, pending: 0, approved: 0, rejected: 0 },
       consultations: { total: 0, scheduled: 0, completed: 0 },
       sipInvestments: { total: 0, active: 0 },
+      auditLogs: { total: 0 },
     }, 
     isLoading: isLoadingAnalytics 
   } = useQuery({
@@ -243,6 +244,9 @@ export default function AdminPage() {
               <TabsTrigger value="users">User Management</TabsTrigger>
               <TabsTrigger value="consultations">Consultations</TabsTrigger>
               <TabsTrigger value="analytics">Analytics</TabsTrigger>
+              <TabsTrigger value="auditLogs" onClick={() => window.location.href = "/audit-logs"}>
+                Audit Logs
+              </TabsTrigger>
             </TabsList>
 
             <TabsContent value="loans">

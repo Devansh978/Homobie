@@ -33,6 +33,7 @@ function Router() {
       <ProtectedRoute path="/dashboard" component={DashboardPage} />
       <ProtectedRoute path="/admin" component={AdminPage} />
       <ProtectedRoute path="/super-admin" component={SuperAdminPage} />
+      <ProtectedRoute path="/audit-logs" component={AuditLogsPage} />
       <Route component={NotFound} />
     </Switch>
   );

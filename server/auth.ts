@@ -1,11 +1,30 @@
 import passport from "passport";
 import { Strategy as LocalStrategy } from "passport-local";
-import { Express } from "express";
+import { Express, Request } from "express";
 import session from "express-session";
 import { scrypt, randomBytes, timingSafeEqual } from "crypto";
 import { promisify } from "util";
 import { storage } from "./storage";
 import { User as SelectUser } from "@shared/schema";
+
+// Utility function to create audit logs for auth actions
+const createAuthAuditLog = async (req: Request, actionType: string, userId: number, description?: string) => {
+  try {
+    const log = await storage.createAuditLog({
+      userId,
+      actionType,
+      entityType: 'user',
+      entityId: userId,
+      description: description || `User authentication: ${actionType}`,
+      ipAddress: req.ip,
+      userAgent: req.headers['user-agent']
+    });
+    
+    return log;
+  } catch (error) {
+    console.error('Error creating auth audit log:', error);
+  }
+};
 
 declare global {
   namespace Express {
@@ -88,8 +107,17 @@ export function setupAuth(app: Express) {
         password: await hashPassword(req.body.password),
       });
 
-      req.login(user, (err) => {
+      req.login(user, async (err) => {
         if (err) return next(err);
+        
+        // Log user registration
+        await createAuthAuditLog(
+          req, 
+          "user_register", 
+          user.id, 
+          `User ${user.username} registered with email ${user.email}`
+        );
+        
         res.status(201).json(user);
       });
     } catch (error) {
@@ -97,13 +125,38 @@ export function setupAuth(app: Express) {
     }
   });
 
-  app.post("/api/login", passport.authenticate("local"), (req, res) => {
+  app.post("/api/login", passport.authenticate("local"), async (req, res) => {
+    // Log successful login
+    if (req.user) {
+      await createAuthAuditLog(
+        req, 
+        "user_login", 
+        req.user.id, 
+        `User ${req.user.username} logged in`
+      );
+    }
+    
     res.status(200).json(req.user);
   });
 
   app.post("/api/logout", (req, res, next) => {
-    req.logout((err) => {
+    // Store user info before logout
+    const userId = req.user?.id;
+    const username = req.user?.username;
+    
+    req.logout(async (err) => {
       if (err) return next(err);
+      
+      // Log logout if we have user info
+      if (userId) {
+        await createAuthAuditLog(
+          req, 
+          "user_logout", 
+          userId, 
+          `User ${username} logged out`
+        );
+      }
+      
       res.sendStatus(200);
     });
   });
