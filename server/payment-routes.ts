@@ -52,7 +52,7 @@ export function registerPaymentRoutes(app: Express) {
       // Store the payment record in the database
       const payment = await storage.createPayment({
         userId: req.user!.id,
-        amount: processingFee,
+        amount: processingFee.toString(),
         currency: "INR",
         status: "created",
         orderId: order.id,
@@ -116,7 +116,7 @@ export function registerPaymentRoutes(app: Express) {
       // Store the payment record in the database
       const payment = await storage.createPayment({
         userId: req.user!.id,
-        amount,
+        amount: amount.toString(),
         currency: "INR",
         status: "created",
         orderId: order.id,
@@ -195,7 +195,7 @@ export function registerPaymentRoutes(app: Express) {
           : payment.paymentFor === "sip_investment" 
             ? "sip_contribution"
             : "other_payment",
-        amount: parseFloat(payment.amount.toString()),
+        amount: payment.amount.toString(),
         relatedId: payment.relatedId,
         description: `Payment for ${payment.paymentFor} with ID ${payment.relatedId}`
       });

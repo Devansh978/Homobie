@@ -1,11 +1,13 @@
 import React, { useEffect, useState } from "react";
-import { useLocation } from "wouter";
+import { useLocation, Link } from "wouter";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useMutation } from "@tanstack/react-query";
 import { useAuth } from "@/hooks/use-auth";
 import { apiRequest, queryClient } from "@/lib/queryClient";
+import { useToast } from "@/hooks/use-toast";
+import { PaymentGateway } from "@/components/ui/payment-gateway";
 import { insertSipInvestmentSchema } from "@shared/schema";
 import { Header } from "@/components/layout/header";
 import { Footer } from "@/components/layout/footer";
@@ -191,22 +193,33 @@ export default function SipPage() {
     }
   }, [selectedPlan, selectedPlanDetails, form, amountParam, periodParam]);
 
+  // Initialize toast
+  const { toast } = useToast();
+  
+  // Track submitted data for payment
+  const [submittedData, setSubmittedData] = useState<any>(null);
+  
   // Create SIP investment mutation
   const createSipMutation = useMutation({
     mutationFn: async (data: SipFormValues) => {
       const res = await apiRequest("POST", "/api/sip-investments", data);
       return await res.json();
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ["/api/sip-investments"] });
+      setSubmittedData(data);
       setIsSuccess(true);
-      setTimeout(() => {
-        navigate("/dashboard");
-      }, 3000);
+      setIsSubmitting(false);
+      // Remove automatic navigation to allow payment process
     },
     onError: (error) => {
       console.error("Error creating SIP investment:", error);
       setIsSubmitting(false);
+      toast({
+        title: "Error",
+        description: "Failed to create SIP investment. Please try again.",
+        variant: "destructive"
+      });
     }
   });
 
@@ -236,20 +249,66 @@ export default function SipPage() {
       <main className="flex-grow bg-neutral-50 py-12">
         <div className="container mx-auto px-4">
           {isSuccess ? (
-            <Card className="max-w-3xl mx-auto mb-8">
-              <CardContent className="pt-6 pb-8 text-center">
-                <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <Check className="h-8 w-8 text-green-600" />
-                </div>
-                <h2 className="text-2xl font-bold text-gray-900 mb-2">SIP Plan Started Successfully!</h2>
-                <p className="text-gray-600 mb-6">
-                  Your SIP investment has been set up. Your first contribution will be processed on the selected start date.
-                </p>
-                <Button onClick={() => navigate("/dashboard")}>
-                  Go to Dashboard
-                </Button>
-              </CardContent>
-            </Card>
+            <div className="max-w-3xl mx-auto space-y-8">
+              <Card className="mb-8">
+                <CardContent className="pt-6 pb-8 text-center">
+                  <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <Check className="h-8 w-8 text-green-600" />
+                  </div>
+                  <h2 className="text-2xl font-bold text-gray-900 mb-2">SIP Plan Created Successfully!</h2>
+                  <p className="text-gray-600 mb-2">
+                    Your SIP investment plan has been set up. Plan ID: <span className="font-medium">{submittedData?.id}</span>
+                  </p>
+                  <p className="text-gray-600 mb-6">
+                    To activate your SIP, please complete your first contribution payment below.
+                  </p>
+                </CardContent>
+              </Card>
+              
+              <Card>
+                <CardHeader>
+                  <CardTitle>First SIP Contribution</CardTitle>
+                  <CardDescription>
+                    Make your first contribution to activate your SIP plan. Subsequent payments will be automatically processed 
+                    on the same date each month.
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  {user ? (
+                    <PaymentGateway 
+                      paymentType="sip-investment" 
+                      itemId={submittedData?.id} 
+                      buttonText="Make First Contribution"
+                      description="Pay your first monthly contribution to activate your SIP"
+                      onSuccess={(data) => {
+                        toast({
+                          title: "Payment Successful",
+                          description: "Your SIP has been activated successfully. Next payment will be on the scheduled date.",
+                        });
+                      }}
+                      onFailure={(error) => {
+                        toast({
+                          title: "Payment Failed",
+                          description: error?.message || "There was an error processing your payment.",
+                          variant: "destructive"
+                        });
+                      }}
+                    />
+                  ) : (
+                    <div className="bg-yellow-50 border border-yellow-200 rounded-md p-4">
+                      <p className="text-yellow-700 mb-2">Please login to make a payment</p>
+                      <Button asChild>
+                        <Link href="/auth">Login or Register</Link>
+                      </Button>
+                    </div>
+                  )}
+                </CardContent>
+                <CardFooter className="flex justify-between">
+                  <Button variant="outline" onClick={() => navigate("/")}>Back to Home</Button>
+                  <Button onClick={() => navigate("/dashboard")}>Go to Dashboard</Button>
+                </CardFooter>
+              </Card>
+            </div>
           ) : (
             <>
               <div className="max-w-4xl mx-auto mb-12 text-center">
