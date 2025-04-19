@@ -8,6 +8,7 @@ import AuthPage from "@/pages/auth-page";
 import DashboardPage from "@/pages/dashboard-page";
 import AdminPage from "@/pages/admin-page";
 import SuperAdminPage from "@/pages/super-admin-page";
+import AuditLogsPage from "@/pages/audit-logs-page";
 import LoanApplicationPage from "@/pages/loan-application-page";
 import ConsultationPage from "@/pages/consultation-page";
 import SipPage from "@/pages/sip-page";

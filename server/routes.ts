@@ -9,7 +9,8 @@ import {
   insertConsultationSchema,
   insertSipInvestmentSchema,
   insertKycDocumentSchema,
-  insertTransactionSchema
+  insertTransactionSchema,
+  insertAuditLogSchema
 } from "@shared/schema";
 
 // Middleware to check if user is authenticated
@@ -34,6 +35,29 @@ const isSuperAdmin = (req: Request, res: Response, next: Function) => {
     return next();
   }
   res.status(403).json({ message: "Forbidden" });
+};
+
+// Utility function to create audit logs
+const createAuditLog = async (req: Request, actionType: string, entityType?: string, entityId?: number, oldValue?: any, newValue?: any, description?: string) => {
+  if (!req.user) return;
+  
+  try {
+    const log = await storage.createAuditLog({
+      userId: req.user.id,
+      actionType,
+      entityType,
+      entityId,
+      oldValue,
+      newValue,
+      description: description || `${actionType} performed on ${entityType || 'unknown entity'}${entityId ? ` #${entityId}` : ''}`,
+      ipAddress: req.ip,
+      userAgent: req.headers['user-agent']
+    });
+    
+    return log;
+  } catch (error) {
+    console.error('Error creating audit log:', error);
+  }
 };
 
 export async function registerRoutes(app: Express): Promise<Server> {
@@ -137,11 +161,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "Invalid status" });
       }
       
-      const updatedApplication = await storage.updateLoanApplicationStatus(id, status);
+      // Get the original application before update
+      const originalApplication = await storage.getLoanApplication(id);
       
-      if (!updatedApplication) {
+      if (!originalApplication) {
         return res.status(404).json({ message: "Loan application not found" });
       }
+      
+      const updatedApplication = await storage.updateLoanApplicationStatus(id, status);
+      
+      // Log the status change in audit logs
+      await createAuditLog(
+        req, 
+        "update_loan_status", 
+        "loan_application", 
+        id, 
+        { status: originalApplication.status }, 
+        { status: updatedApplication.status }, 
+        `Changed Loan #${id} status from "${originalApplication.status}" to "${status}"`
+      );
       
       res.json(updatedApplication);
     } catch (error) {
@@ -241,11 +279,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "Invalid role" });
       }
       
-      const updatedUser = await storage.updateUserRole(id, role);
+      // Get the user before update
+      const originalUser = await storage.getUser(id);
       
-      if (!updatedUser) {
+      if (!originalUser) {
         return res.status(404).json({ message: "User not found" });
       }
+      
+      const updatedUser = await storage.updateUserRole(id, role);
+      
+      // Log the role change in audit logs
+      await createAuditLog(
+        req, 
+        "update_user_role", 
+        "user", 
+        id, 
+        { role: originalUser.role }, 
+        { role: updatedUser.role }, 
+        `Changed user #${id} role from "${originalUser.role}" to "${role}"`
+      );
       
       res.json(updatedUser);
     } catch (error) {
@@ -270,6 +322,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const applications = await storage.getAllLoanApplications();
       const consultations = await storage.getAllConsultations();
       const sipInvestments = await storage.getAllSipInvestments();
+      const auditLogsCount = await storage.getAuditLogsCount();
       
       const analytics = {
         totalUsers: users.length,
@@ -287,10 +340,76 @@ export async function registerRoutes(app: Express): Promise<Server> {
         sipInvestments: {
           total: sipInvestments.length,
           active: sipInvestments.filter(sip => sip.status === "active").length,
+        },
+        auditLogs: {
+          total: auditLogsCount
         }
       };
       
       res.json(analytics);
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  // Audit Logs API
+  app.get("/api/audit-logs", isAdmin, async (req, res, next) => {
+    try {
+      const limit = req.query.limit ? parseInt(req.query.limit as string) : 50;
+      const offset = req.query.offset ? parseInt(req.query.offset as string) : 0;
+      
+      const logs = await storage.getAuditLogs(limit, offset);
+      const count = await storage.getAuditLogsCount();
+      
+      res.json({
+        logs,
+        pagination: {
+          total: count,
+          limit,
+          offset,
+          hasMore: offset + logs.length < count
+        }
+      });
+      
+      // Log this audit log access
+      await createAuditLog(req, "view_audit_logs", "audit_logs", undefined, undefined, undefined, 
+        `Admin user viewed audit logs (${logs.length} entries)`);
+      
+    } catch (error) {
+      next(error);
+    }
+  });
+  
+  // Get audit logs by entity type
+  app.get("/api/audit-logs/entity/:entityType", isAdmin, async (req, res, next) => {
+    try {
+      const entityType = req.params.entityType;
+      const logs = await storage.getAuditLogsByEntityType(entityType);
+      
+      res.json(logs);
+      
+      await createAuditLog(req, "view_entity_audit_logs", entityType, undefined, undefined, undefined, 
+        `Admin user viewed ${entityType} audit logs (${logs.length} entries)`);
+      
+    } catch (error) {
+      next(error);
+    }
+  });
+  
+  // Get admin activity logs
+  app.get("/api/audit-logs/admin/:adminId", isSuperAdmin, async (req, res, next) => {
+    try {
+      const adminId = parseInt(req.params.adminId);
+      const limit = req.query.limit ? parseInt(req.query.limit as string) : 50;
+      const offset = req.query.offset ? parseInt(req.query.offset as string) : 0;
+      
+      const logs = await storage.getAuditLogsByAdmin(adminId, limit, offset);
+      
+      res.json(logs);
+      
+      await createAuditLog(req, "view_admin_audit_logs", "user", adminId, undefined, undefined, 
+        `Super admin viewed admin user #${adminId} audit logs (${logs.length} entries)`);
+      
     } catch (error) {
       next(error);
     }
