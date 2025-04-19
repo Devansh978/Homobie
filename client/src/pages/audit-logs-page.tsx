@@ -17,8 +17,8 @@ export default function AuditLogsPage() {
   const { toast } = useToast();
   const [currentPage, setCurrentPage] = useState(1);
   const [searchTerm, setSearchTerm] = useState("");
-  const [entityTypeFilter, setEntityTypeFilter] = useState<string>("");
-  const [actionTypeFilter, setActionTypeFilter] = useState<string>("");
+  const [entityTypeFilter, setEntityTypeFilter] = useState<string>("all_entities");
+  const [actionTypeFilter, setActionTypeFilter] = useState<string>("all_actions");
   const [filteredLogs, setFilteredLogs] = useState<AuditLog[]>([]);
   const pageSize = 10;
 
@@ -53,12 +53,12 @@ export default function AuditLogsPage() {
       }
       
       // Apply entity type filter
-      if (entityTypeFilter) {
+      if (entityTypeFilter && entityTypeFilter !== "all_entities") {
         filtered = filtered.filter(log => log.entityType === entityTypeFilter);
       }
       
       // Apply action type filter
-      if (actionTypeFilter) {
+      if (actionTypeFilter && actionTypeFilter !== "all_actions") {
         filtered = filtered.filter(log => log.actionType === actionTypeFilter);
       }
       
@@ -171,7 +171,7 @@ export default function AuditLogsPage() {
                     </div>
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">All Entities</SelectItem>
+                    <SelectItem value="all_entities">All Entities</SelectItem>
                     {entityTypes.map((type) => (
                       <SelectItem key={type} value={type}>
                         {type}
@@ -192,7 +192,7 @@ export default function AuditLogsPage() {
                     </div>
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">All Actions</SelectItem>
+                    <SelectItem value="all_actions">All Actions</SelectItem>
                     {actionTypes.map((type) => (
                       <SelectItem key={type} value={type}>
                         {type.replace(/_/g, " ")}
