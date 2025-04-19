@@ -9,8 +9,7 @@ import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { PaymentGateway } from "@/components/ui/payment-gateway";
 import { insertLoanApplicationSchema } from "@shared/schema";
-import { Header } from "@/components/layout/header";
-import { Footer } from "@/components/layout/footer";
+
 import { ChatbotButton } from "@/components/layout/chatbot-button";
 import { LoanCalculator } from "@/components/ui/calculator";
 import { 
@@ -193,10 +192,8 @@ export default function LoanApplicationPage() {
   }, []);
 
   return (
-    <div className="min-h-screen flex flex-col">
-      <Header />
-
-      <main className="flex-grow bg-neutral-50 py-12">
+    <div>
+      <main className="bg-neutral-50 py-12">
         <div className="container mx-auto px-4">
           <div className="max-w-4xl mx-auto">
             {isSuccess ? (
@@ -719,7 +716,6 @@ export default function LoanApplicationPage() {
         </div>
       </main>
 
-      <Footer />
       <ChatbotButton />
     </div>
   );
