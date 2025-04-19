@@ -23,8 +23,9 @@ export function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
           {/* Company Info */}
           <div>
-            <div className="flex items-center mb-6">
-              <img src={homobieLogo} alt="Homobie Logo" className="h-12" />
+            <div className="flex items-center space-x-2 mb-6">
+              <img src={homobieLogo} alt="Homobie Logo" className="h-10" />
+              <span className="font-bold text-2xl text-white">{companyInfo.name}</span>
             </div>
             <p className="text-neutral-400 mb-6">
               Providing innovative financial solutions to help you achieve your dreams.

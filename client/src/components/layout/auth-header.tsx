@@ -10,8 +10,9 @@ function SimpleHeader() {
   return (
     <header className="bg-white shadow-sm sticky top-0 z-50">
       <div className="container mx-auto px-4 py-3 flex justify-between items-center">
-        <Link href="/" className="flex items-center">
-          <img src={homobieLogo} alt="Homobie Logo" className="h-10" />
+        <Link href="/" className="flex items-center space-x-2">
+          <img src={homobieLogo} alt="Homobie Logo" className="h-8" />
+          <span className="font-bold text-xl text-primary">{companyInfo.name}</span>
         </Link>
         
         <div className="flex items-center space-x-4">
