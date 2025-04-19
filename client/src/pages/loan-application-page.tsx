@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from "react";
-import { useLocation } from "wouter";
+import { useLocation, Link } from "wouter";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { useAuth } from "@/hooks/use-auth";
 import { apiRequest, queryClient } from "@/lib/queryClient";
+import { useToast } from "@/hooks/use-toast";
+import { PaymentGateway } from "@/components/ui/payment-gateway";
 import { insertLoanApplicationSchema } from "@shared/schema";
 import { Header } from "@/components/layout/header";
 import { Footer } from "@/components/layout/footer";
@@ -131,22 +133,33 @@ export default function LoanApplicationPage() {
     }
   }
 
+  // Initialize toast
+  const { toast } = useToast();
+  
+  // Track submitted data for payment
+  const [submittedData, setSubmittedData] = useState<any>(null);
+  
   // Create loan application mutation
   const createLoanMutation = useMutation({
     mutationFn: async (data: LoanFormValues) => {
       const res = await apiRequest("POST", "/api/loan-applications", data);
       return await res.json();
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ["/api/loan-applications"] });
+      setSubmittedData(data);
       setIsSuccess(true);
-      setTimeout(() => {
-        navigate("/dashboard");
-      }, 3000);
+      setIsSubmitting(false);
+      // Remove the automatic navigation to allow payment
     },
     onError: (error) => {
       console.error("Error creating loan application:", error);
       setIsSubmitting(false);
+      toast({
+        title: "Error",
+        description: "Failed to submit loan application. Please try again.",
+        variant: "destructive"
+      });
     }
   });
   
@@ -187,20 +200,65 @@ export default function LoanApplicationPage() {
         <div className="container mx-auto px-4">
           <div className="max-w-4xl mx-auto">
             {isSuccess ? (
-              <Card className="mb-8">
-                <CardContent className="pt-6 pb-8 text-center">
-                  <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <Check className="h-8 w-8 text-green-600" />
-                  </div>
-                  <h2 className="text-2xl font-bold text-gray-900 mb-2">Application Submitted Successfully!</h2>
-                  <p className="text-gray-600 mb-6">
-                    Your loan application has been submitted. We will review your application and contact you shortly.
-                  </p>
-                  <Button onClick={() => navigate("/dashboard")}>
-                    Go to Dashboard
-                  </Button>
-                </CardContent>
-              </Card>
+              <div className="space-y-8">
+                <Card className="mb-8">
+                  <CardContent className="pt-6 pb-8 text-center">
+                    <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                      <Check className="h-8 w-8 text-green-600" />
+                    </div>
+                    <h2 className="text-2xl font-bold text-gray-900 mb-2">Application Submitted Successfully!</h2>
+                    <p className="text-gray-600 mb-4">
+                      Your loan application has been submitted. Application ID: <span className="font-medium">{submittedData?.id}</span>
+                    </p>
+                    <p className="text-gray-600 mb-6">
+                      To proceed with your application, please complete the processing fee payment.
+                    </p>
+                  </CardContent>
+                </Card>
+                
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Processing Fee Payment</CardTitle>
+                    <CardDescription>
+                      A processing fee of 0.5% of the loan amount is required to proceed with your application.
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    {user ? (
+                      <PaymentGateway 
+                        paymentType="loan-processing-fee" 
+                        itemId={submittedData?.id} 
+                        buttonText="Pay Processing Fee"
+                        description="Pay processing fee to continue with your loan application"
+                        onSuccess={(data) => {
+                          toast({
+                            title: "Payment Successful",
+                            description: "Your loan application is now being processed.",
+                          });
+                        }}
+                        onFailure={(error) => {
+                          toast({
+                            title: "Payment Failed",
+                            description: error?.message || "There was an error processing your payment.",
+                            variant: "destructive"
+                          });
+                        }}
+                      />
+                    ) : (
+                      <div className="bg-yellow-50 border border-yellow-200 rounded-md p-4">
+                        <p className="text-yellow-700 mb-2">Please login to make a payment</p>
+                        <Button asChild>
+                          <Link href="/auth">Login or Register</Link>
+                        </Button>
+                      </div>
+                    )}
+                  </CardContent>
+                  <CardFooter className="flex justify-between">
+                    <Button variant="outline" onClick={() => navigate("/")}>Back to Home</Button>
+                    <Button onClick={() => navigate("/dashboard")}>Go to Dashboard</Button>
+                  </CardFooter>
+                </Card>
+              </div>
             ) : (
               <>
                 <div className="mb-8">
