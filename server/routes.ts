@@ -210,6 +210,51 @@ export async function registerRoutes(app: Express): Promise<Server> {
       next(error);
     }
   });
+  
+  // Admin - Consultation Management
+  app.get("/api/admin/consultations", isAdmin, async (req, res, next) => {
+    try {
+      const consultations = await storage.getAllConsultations();
+      res.json(consultations);
+    } catch (error) {
+      next(error);
+    }
+  });
+  
+  app.patch("/api/admin/consultations/:id", isAdmin, async (req, res, next) => {
+    try {
+      const id = parseInt(req.params.id);
+      const { status } = req.body;
+      
+      if (!["pending", "scheduled", "completed", "cancelled"].includes(status)) {
+        return res.status(400).json({ message: "Invalid status" });
+      }
+      
+      // Get the original consultation before update
+      const originalConsultation = await storage.getConsultation(id);
+      
+      if (!originalConsultation) {
+        return res.status(404).json({ message: "Consultation not found" });
+      }
+      
+      const updatedConsultation = await storage.updateConsultationStatus(id, status);
+      
+      // Log the status change in audit logs
+      await createAuditLog(
+        req, 
+        "update_consultation_status", 
+        "consultation", 
+        id, 
+        { status: originalConsultation.status }, 
+        { status: updatedConsultation?.status }, 
+        `Changed Consultation #${id} status from "${originalConsultation.status}" to "${status}"`
+      );
+      
+      res.json(updatedConsultation);
+    } catch (error) {
+      next(error);
+    }
+  });
 
   // SIP Investments
   app.post("/api/sip-investments", isAuthenticated, async (req, res, next) => {

@@ -37,6 +37,7 @@ export interface IStorage {
 
   // Consultations
   createConsultation(consultation: InsertConsultation): Promise<Consultation>;
+  getConsultation(id: number): Promise<Consultation | undefined>;
   getConsultationsByUserId(userId: number): Promise<Consultation[]>;
   getAllConsultations(): Promise<Consultation[]>;
   updateConsultationStatus(id: number, status: string): Promise<Consultation | undefined>;
@@ -195,6 +196,14 @@ export class DatabaseStorage implements IStorage {
       })
       .returning();
     return newConsultation;
+  }
+  
+  async getConsultation(id: number): Promise<Consultation | undefined> {
+    const [consultation] = await db
+      .select()
+      .from(consultations)
+      .where(eq(consultations.id, id));
+    return consultation;
   }
 
   async getConsultationsByUserId(userId: number): Promise<Consultation[]> {

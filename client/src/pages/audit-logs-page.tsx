@@ -239,13 +239,13 @@ export default function AuditLogsPage() {
                         {log.oldValue && (
                           <div>
                             <div className="font-medium mb-1">Previous State:</div>
-                            {formatJsonValue(log.oldValue)}
+                            {formatJsonValue(log.oldValue as Record<string, unknown>)}
                           </div>
                         )}
                         {log.newValue && (
                           <div>
                             <div className="font-medium mb-1">New State:</div>
-                            {formatJsonValue(log.newValue)}
+                            {formatJsonValue(log.newValue as Record<string, unknown>)}
                           </div>
                         )}
                       </div>
