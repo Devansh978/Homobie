@@ -1,7 +1,6 @@
 import React, { useState } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
-import { Header } from "@/components/layout/header";
-import { Footer } from "@/components/layout/footer";
+
 import { useAuth } from "@/hooks/use-auth";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -125,9 +124,8 @@ export default function SuperAdminPage() {
 
   if (!user || user.role !== 'superadmin') {
     return (
-      <div className="min-h-screen flex flex-col">
-        <Header />
-        <main className="flex-grow flex items-center justify-center">
+      <div>
+        <main className="flex items-center justify-center min-h-[80vh]">
           <Alert className="max-w-md">
             <Shield className="h-4 w-4" />
             <AlertTitle>Access Denied</AlertTitle>
@@ -136,16 +134,13 @@ export default function SuperAdminPage() {
             </AlertDescription>
           </Alert>
         </main>
-        <Footer />
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen flex flex-col">
-      <Header />
-
-      <main className="flex-grow bg-neutral-50">
+    <div>
+      <main className="bg-neutral-50">
         <div className="container mx-auto px-4 py-8">
           <div className="flex justify-between items-center mb-8">
             <div>
@@ -561,7 +556,6 @@ export default function SuperAdminPage() {
         </DialogContent>
       </Dialog>
 
-      <Footer />
     </div>
   );
 }
