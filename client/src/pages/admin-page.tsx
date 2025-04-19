@@ -49,8 +49,11 @@ export default function AdminPage() {
   const { user } = useAuth();
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedLoanId, setSelectedLoanId] = useState<number | null>(null);
+  const [selectedConsultationId, setSelectedConsultationId] = useState<number | null>(null);
   const [statusDialogOpen, setStatusDialogOpen] = useState(false);
+  const [consultationStatusDialogOpen, setConsultationStatusDialogOpen] = useState(false);
   const [newStatus, setNewStatus] = useState<string>("");
+  const [newConsultationStatus, setNewConsultationStatus] = useState<string>("");
   const [rejectionReason, setRejectionReason] = useState("");
 
   // Fetch all loan applications
@@ -102,8 +105,24 @@ export default function AdminPage() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/admin/loan-applications"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/analytics"] });
       setStatusDialogOpen(false);
       setRejectionReason("");
+    },
+  });
+  
+  // Consultation status update mutation
+  const consultationStatusMutation = useMutation({
+    mutationFn: async (data: { id: number; status: string }) => {
+      const res = await apiRequest("PATCH", `/api/admin/consultations/${data.id}`, { 
+        status: data.status
+      });
+      return await res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/consultations"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/analytics"] });
+      setConsultationStatusDialogOpen(false);
     },
   });
 
@@ -123,7 +142,7 @@ export default function AdminPage() {
     );
   });
 
-  // Handle status change
+  // Handle loan status change
   const handleStatusChange = (id: number, status: string) => {
     setSelectedLoanId(id);
     setNewStatus(status);
@@ -133,13 +152,30 @@ export default function AdminPage() {
     setStatusDialogOpen(true);
   };
 
-  // Handle status update submission
+  // Handle loan status update submission
   const handleStatusUpdate = () => {
     if (selectedLoanId && newStatus) {
       statusMutation.mutate({ 
         id: selectedLoanId, 
         status: newStatus,
         rejectionReason: newStatus === 'rejected' ? rejectionReason : undefined
+      });
+    }
+  };
+  
+  // Handle consultation status change
+  const handleConsultationStatusChange = (id: number, status: string) => {
+    setSelectedConsultationId(id);
+    setNewConsultationStatus(status);
+    setConsultationStatusDialogOpen(true);
+  };
+  
+  // Handle consultation status update submission
+  const handleConsultationStatusUpdate = () => {
+    if (selectedConsultationId && newConsultationStatus) {
+      consultationStatusMutation.mutate({
+        id: selectedConsultationId,
+        status: newConsultationStatus
       });
     }
   };
@@ -467,10 +503,43 @@ export default function AdminPage() {
                               </TableCell>
                               <TableCell>{formatDate(consultation.bookedAt)}</TableCell>
                               <TableCell className="text-right">
-                                <Button variant="ghost" size="sm">
-                                  <FileSearch className="h-4 w-4 mr-2" />
-                                  Details
-                                </Button>
+                                <DropdownMenu>
+                                  <DropdownMenuTrigger asChild>
+                                    <Button variant="ghost" className="h-8 w-8 p-0">
+                                      <span className="sr-only">Open menu</span>
+                                      <Calendar className="h-4 w-4" />
+                                    </Button>
+                                  </DropdownMenuTrigger>
+                                  <DropdownMenuContent align="end">
+                                    <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                                    <DropdownMenuSeparator />
+                                    <DropdownMenuItem 
+                                      onSelect={() => handleConsultationStatusChange(consultation.id, 'scheduled')}
+                                      disabled={consultation.status === 'scheduled'}
+                                    >
+                                      <Calendar className="mr-2 h-4 w-4 text-blue-600" />
+                                      <span>Mark as Scheduled</span>
+                                    </DropdownMenuItem>
+                                    <DropdownMenuItem 
+                                      onSelect={() => handleConsultationStatusChange(consultation.id, 'completed')}
+                                      disabled={consultation.status === 'completed'}
+                                    >
+                                      <CheckIcon className="mr-2 h-4 w-4 text-green-600" />
+                                      <span>Mark as Completed</span>
+                                    </DropdownMenuItem>
+                                    <DropdownMenuItem 
+                                      onSelect={() => handleConsultationStatusChange(consultation.id, 'cancelled')}
+                                      disabled={consultation.status === 'cancelled'}
+                                    >
+                                      <XIcon className="mr-2 h-4 w-4 text-red-600" />
+                                      <span>Cancel</span>
+                                    </DropdownMenuItem>
+                                    <DropdownMenuItem>
+                                      <FileSearch className="mr-2 h-4 w-4" />
+                                      <span>View Details</span>
+                                    </DropdownMenuItem>
+                                  </DropdownMenuContent>
+                                </DropdownMenu>
                               </TableCell>
                             </TableRow>
                           );
