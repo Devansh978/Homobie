@@ -7,8 +7,7 @@ import { useMutation } from "@tanstack/react-query";
 import { useAuth } from "@/hooks/use-auth";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { insertConsultationSchema } from "@shared/schema";
-import { Header } from "@/components/layout/header";
-import { Footer } from "@/components/layout/footer";
+
 import { ChatbotButton } from "@/components/layout/chatbot-button";
 import { 
   Form, 
@@ -178,10 +177,8 @@ export default function ConsultationPage() {
   }, []);
 
   return (
-    <div className="min-h-screen flex flex-col">
-      <Header />
-
-      <main className="flex-grow bg-neutral-50 py-12">
+    <div>
+      <main className="bg-neutral-50 py-12">
         <div className="container mx-auto px-4">
           <div className="max-w-6xl mx-auto">
             {isSuccess ? (
@@ -608,7 +605,6 @@ export default function ConsultationPage() {
         </div>
       </main>
 
-      <Footer />
       <ChatbotButton />
     </div>
   );
