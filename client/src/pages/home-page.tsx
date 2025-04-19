@@ -1,7 +1,6 @@
 import React from "react";
 import { Link } from "wouter";
-import { AuthHeader } from "@/components/layout/auth-header";
-import { Footer } from "@/components/layout/footer";
+// Header and Footer now provided in App.tsx layout
 import { ChatbotButton } from "@/components/layout/chatbot-button";
 import { LoanCalculator } from "@/components/ui/calculator";
 import { SipCalculator } from "@/components/ui/sip-calculator";
@@ -31,7 +30,6 @@ export default function HomePage() {
 
   return (
     <div className="min-h-screen flex flex-col">
-      <AuthHeader />
 
       {/* Hero Section */}
       <section className="bg-gradient-to-r from-primary to-[#004080] text-white">
@@ -355,7 +353,6 @@ export default function HomePage() {
         </div>
       </section>
 
-      <Footer />
       <ChatbotButton />
     </div>
   );
