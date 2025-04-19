@@ -8,7 +8,7 @@ const razorpay = new Razorpay({
 });
 
 export interface PaymentOrderOptions {
-  amount: number;  // in smallest currency unit (paise for INR)
+  amount: string;  // in smallest currency unit (paise for INR) - as string to handle large numbers
   currency: string;
   receipt: string;
   notes?: Record<string, string>;
@@ -99,13 +99,11 @@ export const razorpayService = {
    */
   async refundPayment(paymentId: string, amount?: number) {
     try {
-      const refundOptions: Record<string, any> = { payment_id: paymentId };
-      
-      if (amount) {
-        refundOptions.amount = amount;
-      }
-      
-      return await razorpay.refunds.create(refundOptions);
+      // Type casting to avoid TypeScript errors with potentially incomplete Razorpay type definitions
+      // This is safe because at runtime, the Razorpay SDK accepts this function call
+      return await (razorpay as any).payments.refund(paymentId, amount ? { 
+        amount: amount 
+      } : undefined);
     } catch (error) {
       console.error('Error refunding payment:', error);
       throw error;

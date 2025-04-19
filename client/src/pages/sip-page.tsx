@@ -449,7 +449,8 @@ export default function SipPage() {
                               className="w-full border-primary text-primary hover:bg-primary hover:text-white"
                               onClick={() => {
                                 setSelectedPlan(plan.id);
-                                document.querySelector('[data-value="invest"]')?.click();
+                                const element = document.querySelector('[data-value="invest"]') as HTMLElement;
+                                if (element) element.click();
                               }}
                             >
                               Start With This Plan
@@ -521,7 +522,8 @@ export default function SipPage() {
                               form.setValue("monthlyAmount", sipDetails.monthlyAmount);
                               form.setValue("durationMonths", sipDetails.investmentPeriod * 12); // Convert years to months
                               form.setValue("expectedReturns", sipDetails.expectedReturnRate);
-                              document.querySelector('[data-value="invest"]')?.click();
+                              const element = document.querySelector('[data-value="invest"]') as HTMLElement;
+                              if (element) element.click();
                             }} />
                           </CardContent>
                         </Card>
