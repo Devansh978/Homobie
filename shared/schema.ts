@@ -163,6 +163,33 @@ export const insertPaymentSchema = createInsertSchema(payments).pick({
   notes: true,
 });
 
+// Audit Logs schema
+export const auditLogs = pgTable("audit_logs", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").notNull(),
+  actionType: text("action_type").notNull(), // login, update_loan_status, update_user_role, update_settings, etc.
+  entityType: text("entity_type"), // user, loan, consultation, etc.
+  entityId: integer("entity_id"), // The ID of the affected entity
+  oldValue: json("old_value"), // Previous state (if applicable)
+  newValue: json("new_value"), // New state (if applicable)
+  description: text("description").notNull(), // Human-readable description of the action
+  ipAddress: text("ip_address"), // IP address of the user
+  userAgent: text("user_agent"), // Browser/device info
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+export const insertAuditLogSchema = createInsertSchema(auditLogs).pick({
+  userId: true,
+  actionType: true,
+  entityType: true,
+  entityId: true,
+  oldValue: true,
+  newValue: true,
+  description: true,
+  ipAddress: true,
+  userAgent: true,
+});
+
 // Type exports
 export type User = typeof users.$inferSelect;
 export type InsertUser = z.infer<typeof insertUserSchema>;
@@ -184,3 +211,6 @@ export type InsertTransaction = z.infer<typeof insertTransactionSchema>;
 
 export type Payment = typeof payments.$inferSelect;
 export type InsertPayment = z.infer<typeof insertPaymentSchema>;
+
+export type AuditLog = typeof auditLogs.$inferSelect;
+export type InsertAuditLog = z.infer<typeof insertAuditLogSchema>;

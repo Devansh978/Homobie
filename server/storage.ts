@@ -6,12 +6,13 @@ import {
   KycDocument, InsertKycDocument,
   Transaction, InsertTransaction,
   Payment, InsertPayment,
-  users, loanApplications, consultations, sipInvestments, kycDocuments, transactions, payments
+  AuditLog, InsertAuditLog,
+  users, loanApplications, consultations, sipInvestments, kycDocuments, transactions, payments, auditLogs
 } from "@shared/schema";
 import session from "express-session";
 import createMemoryStore from "memorystore";
 import { db } from "./db";
-import { eq } from "drizzle-orm";
+import { eq, desc, count } from "drizzle-orm";
 import connectPg from "connect-pg-simple";
 import { pool } from "./db";
 
@@ -60,6 +61,14 @@ export interface IStorage {
   getPaymentByOrderId(orderId: string): Promise<Payment | undefined>;
   getPaymentsByUserId(userId: number): Promise<Payment[]>;
   updatePaymentStatus(id: number, status: string, paymentId?: string, signature?: string): Promise<Payment | undefined>;
+
+  // Audit Logs
+  createAuditLog(log: InsertAuditLog): Promise<AuditLog>;
+  getAuditLogsByUserId(userId: number): Promise<AuditLog[]>;
+  getAuditLogsByEntityType(entityType: string): Promise<AuditLog[]>;
+  getAuditLogs(limit?: number, offset?: number): Promise<AuditLog[]>;
+  getAuditLogsByAdmin(adminId: number, limit?: number, offset?: number): Promise<AuditLog[]>;
+  getAuditLogsCount(): Promise<number>;
 
   // Session store
   sessionStore: any;
@@ -331,6 +340,57 @@ export class DatabaseStorage implements IStorage {
       .where(eq(payments.id, id))
       .returning();
     return updatedPayment;
+  }
+
+  // Audit Logs
+  async createAuditLog(log: InsertAuditLog): Promise<AuditLog> {
+    const [newLog] = await db
+      .insert(auditLogs)
+      .values(log)
+      .returning();
+    return newLog;
+  }
+
+  async getAuditLogsByUserId(userId: number): Promise<AuditLog[]> {
+    return await db
+      .select()
+      .from(auditLogs)
+      .where(eq(auditLogs.userId, userId))
+      .orderBy(desc(auditLogs.createdAt));
+  }
+
+  async getAuditLogsByEntityType(entityType: string): Promise<AuditLog[]> {
+    return await db
+      .select()
+      .from(auditLogs)
+      .where(eq(auditLogs.entityType, entityType))
+      .orderBy(desc(auditLogs.createdAt));
+  }
+
+  async getAuditLogs(limit = 50, offset = 0): Promise<AuditLog[]> {
+    return await db
+      .select()
+      .from(auditLogs)
+      .orderBy(desc(auditLogs.createdAt))
+      .limit(limit)
+      .offset(offset);
+  }
+
+  async getAuditLogsByAdmin(adminId: number, limit = 50, offset = 0): Promise<AuditLog[]> {
+    return await db
+      .select()
+      .from(auditLogs)
+      .where(eq(auditLogs.userId, adminId))
+      .orderBy(desc(auditLogs.createdAt))
+      .limit(limit)
+      .offset(offset);
+  }
+
+  async getAuditLogsCount(): Promise<number> {
+    const [result] = await db
+      .select({ count: count() })
+      .from(auditLogs);
+    return result?.count || 0;
   }
 }
 
