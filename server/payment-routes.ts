@@ -204,6 +204,9 @@ export function registerPaymentRoutes(app: Express) {
       if (payment.paymentFor === "processing_fee" && payment.relatedId) {
         // Update the loan application status
         await storage.updateLoanApplicationStatus(payment.relatedId, "processing");
+      } else if (payment.paymentFor === "consultation" && payment.relatedId) {
+        // Update the consultation status to scheduled
+        await storage.updateConsultationStatus(payment.relatedId, "scheduled");
       }
       
       res.status(200).json({ 
@@ -233,6 +236,75 @@ export function registerPaymentRoutes(app: Express) {
       }
       
       res.json(payment);
+    } catch (error) {
+      next(error);
+    }
+  });
+  
+  // Create a payment order for consultation
+  app.post("/api/payments/consultation/:consultationId", isAuthenticated, async (req, res, next) => {
+    try {
+      const consultationId = parseInt(req.params.consultationId);
+      const consultation = await storage.getConsultation(consultationId);
+      
+      if (!consultation) {
+        return res.status(404).json({ message: "Consultation not found" });
+      }
+      
+      // Check if the user is authorized to create the payment
+      if (consultation.userId !== req.user!.id) {
+        return res.status(403).json({ message: "Forbidden" });
+      }
+      
+      // Consultation fee - fixed at 999 INR or can be dynamic based on consultation type
+      const consultationFee = 999; // In INR
+      
+      // Create a Razorpay order
+      const receipt = `cons-${consultationId}-${uuidv4().substring(0, 8)}`;
+      const orderOptions: PaymentOrderOptions = {
+        amount: Math.round(consultationFee * 100).toString(), // Convert to paise
+        currency: "INR",
+        receipt,
+        paymentFor: "consultation",
+        customerId: req.user!.id,
+        notes: {
+          consultationId: consultationId.toString(),
+          topic: consultation.topic,
+          preferredDate: consultation.preferredDate
+        }
+      };
+      
+      const order = await razorpayService.createOrder(orderOptions);
+      
+      // Store the payment record in the database
+      const payment = await storage.createPayment({
+        userId: req.user!.id,
+        amount: consultationFee.toString(),
+        currency: "INR",
+        status: "created",
+        orderId: order.id,
+        paymentFor: "consultation",
+        relatedId: consultationId,
+        receipt,
+        notes: orderOptions.notes
+      });
+      
+      res.status(201).json({
+        ...payment,
+        razorpay: {
+          key: process.env.RAZORPAY_KEY_ID,
+          order_id: order.id,
+          amount: order.amount,
+          currency: order.currency,
+          name: "Homobie",
+          description: `Consultation Fee for ${consultation.topic}`,
+          prefill: {
+            name: req.user!.fullName,
+            email: req.user!.email,
+            contact: req.user!.phoneNumber
+          }
+        }
+      });
     } catch (error) {
       next(error);
     }

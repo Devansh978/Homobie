@@ -13,7 +13,7 @@ declare global {
 }
 
 interface PaymentGatewayProps {
-  paymentType: "loan-processing-fee" | "sip-investment";
+  paymentType: "loan-processing-fee" | "sip-investment" | "consultation";
   itemId: number;
   onSuccess?: (data: any) => void;
   onFailure?: (error: any) => void;
