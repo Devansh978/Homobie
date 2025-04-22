@@ -16,6 +16,44 @@ import { eq, desc, count } from "drizzle-orm";
 import connectPg from "connect-pg-simple";
 import { pool } from "./db";
 
+// Helper function to retry database operations with exponential backoff
+async function withRetry<T>(operation: () => Promise<T>, maxRetries = 3): Promise<T> {
+  let lastError: Error | undefined;
+  
+  for (let attempt = 0; attempt <= maxRetries; attempt++) {
+    try {
+      return await operation();
+    } catch (error: any) {
+      console.error(`Database operation failed (attempt ${attempt + 1}/${maxRetries + 1}):`, error);
+      lastError = error;
+      
+      // Check if this is a connection-related error that we should retry
+      const isRetryableError = 
+        error.code === '57P01' || // Terminating connection due to admin command
+        error.code === '08006' || // Connection failure
+        error.code === '08001' || // Unable to establish connection
+        error.code === '08004' || // Rejected connection
+        error.code === '08007';   // Transaction resolution unknown
+      
+      if (!isRetryableError || attempt === maxRetries) {
+        throw error; // Either not retryable or we've exhausted our retries
+      }
+      
+      // Calculate exponential backoff delay with jitter
+      const baseDelay = 100; // Start with 100ms delay
+      const maxDelay = 3000; // Max delay of 3 seconds
+      const delay = Math.min(baseDelay * Math.pow(2, attempt), maxDelay);
+      const jitter = delay * 0.2 * Math.random(); // Add up to 20% jitter
+      
+      // Wait before the next retry
+      await new Promise(resolve => setTimeout(resolve, delay + jitter));
+    }
+  }
+  
+  // This should never be reached due to the loop structure, but TypeScript needs it
+  throw lastError || new Error('Unknown error during database operation retry');
+}
+
 const PostgresSessionStore = connectPg(session);
 const MemoryStore = createMemoryStore(session);
 
@@ -79,58 +117,79 @@ export class DatabaseStorage implements IStorage {
   sessionStore: any;
 
   constructor() {
-    this.sessionStore = new PostgresSessionStore({ 
-      pool,
-      createTableIfMissing: true
-    });
+    // Initialize session store with retry capability
+    try {
+      this.sessionStore = new PostgresSessionStore({ 
+        pool,
+        createTableIfMissing: true
+      });
+    } catch (error) {
+      console.error('Failed to initialize PostgreSQL session store:', error);
+      console.log('Falling back to memory session store');
+      this.sessionStore = new MemoryStore({
+        checkPeriod: 86400000 // Prune expired entries every 24h
+      });
+    }
 
-    // Create a superadmin user for testing if none exists
-    this.getUserByUsername("admin").then(user => {
-      if (!user) {
-        this.createUser({
-          username: "admin",
-          password: "password123", // In a real app, this would be hashed
-          email: "admin@finsecure.com",
-          fullName: "Admin User",
-          phoneNumber: "1234567890"
-        }).then(user => {
-          this.updateUserRole(user.id, "superadmin");
-        });
+    // Create a superadmin user for testing if none exists - wrapped in retry logic
+    (async () => {
+      try {
+        const user = await this.getUserByUsername("admin");
+        if (!user) {
+          const newUser = await this.createUser({
+            username: "admin",
+            password: "password123", // In a real app, this would be hashed
+            email: "admin@finsecure.com",
+            fullName: "Admin User",
+            phoneNumber: "1234567890"
+          });
+          await this.updateUserRole(newUser.id, "superadmin");
+        }
+      } catch (error) {
+        console.error('Failed to create admin user:', error);
       }
-    });
+    })();
   }
 
   // User Management
   async getUser(id: number): Promise<User | undefined> {
-    const [user] = await db.select().from(users).where(eq(users.id, id));
-    return user;
+    return withRetry(async () => {
+      const [user] = await db.select().from(users).where(eq(users.id, id));
+      return user;
+    });
   }
 
   async getUserByUsername(username: string): Promise<User | undefined> {
-    const [user] = await db
-      .select()
-      .from(users)
-      .where(eq(users.username, username));
-    return user;
+    return withRetry(async () => {
+      const [user] = await db
+        .select()
+        .from(users)
+        .where(eq(users.username, username));
+      return user;
+    });
   }
 
   async getUserByEmail(email: string): Promise<User | undefined> {
-    const [user] = await db
-      .select()
-      .from(users)
-      .where(eq(users.email, email));
-    return user;
+    return withRetry(async () => {
+      const [user] = await db
+        .select()
+        .from(users)
+        .where(eq(users.email, email));
+      return user;
+    });
   }
 
   async createUser(insertUser: InsertUser): Promise<User> {
-    const [user] = await db
-      .insert(users)
-      .values({
-        ...insertUser,
-        role: "user"
-      })
-      .returning();
-    return user;
+    return withRetry(async () => {
+      const [user] = await db
+        .insert(users)
+        .values({
+          ...insertUser,
+          role: "user"
+        })
+        .returning();
+      return user;
+    });
   }
 
   async getAllUsers(): Promise<User[]> {
@@ -138,32 +197,38 @@ export class DatabaseStorage implements IStorage {
   }
 
   async updateUserRole(id: number, role: string): Promise<User | undefined> {
-    const [updatedUser] = await db
-      .update(users)
-      .set({ role })
-      .where(eq(users.id, id))
-      .returning();
-    return updatedUser;
+    return withRetry(async () => {
+      const [updatedUser] = await db
+        .update(users)
+        .set({ role })
+        .where(eq(users.id, id))
+        .returning();
+      return updatedUser;
+    });
   }
 
   // Loan Applications
   async createLoanApplication(application: InsertLoanApplication): Promise<LoanApplication> {
-    const [loanApplication] = await db
-      .insert(loanApplications)
-      .values({
-        ...application,
-        status: "pending"
-      })
-      .returning();
-    return loanApplication;
+    return withRetry(async () => {
+      const [loanApplication] = await db
+        .insert(loanApplications)
+        .values({
+          ...application,
+          status: "pending"
+        })
+        .returning();
+      return loanApplication;
+    });
   }
 
   async getLoanApplication(id: number): Promise<LoanApplication | undefined> {
-    const [loanApplication] = await db
-      .select()
-      .from(loanApplications)
-      .where(eq(loanApplications.id, id));
-    return loanApplication;
+    return withRetry(async () => {
+      const [loanApplication] = await db
+        .select()
+        .from(loanApplications)
+        .where(eq(loanApplications.id, id));
+      return loanApplication;
+    });
   }
 
   async getLoanApplicationsByUserId(userId: number): Promise<LoanApplication[]> {

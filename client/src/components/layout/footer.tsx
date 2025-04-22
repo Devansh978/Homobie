@@ -25,7 +25,7 @@ export function Footer() {
           <div>
             <div className="flex items-center space-x-2 mb-6">
               <img src={homobieLogo} alt="Homobie Logo" className="h-10" />
-              <span className="font-bold text-2xl text-white">{companyInfo.name}</span>
+              <span className="font-bold text-2xl text-white">{}</span>
             </div>
             <p className="text-neutral-400 mb-6">
               Providing innovative financial solutions to help you achieve your dreams.
