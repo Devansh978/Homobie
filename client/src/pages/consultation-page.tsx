@@ -9,6 +9,7 @@ import { apiRequest, queryClient } from "@/lib/queryClient";
 import { insertConsultationSchema } from "@shared/schema";
 
 import { ChatbotButton } from "@/components/layout/chatbot-button";
+import { PaymentGateway } from "@/components/ui/payment-gateway";
 import { 
   Form, 
   FormControl, 
@@ -94,6 +95,8 @@ export default function ConsultationPage() {
   const [location, navigate] = useLocation();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
+  const [showPayment, setShowPayment] = useState(false);
+  const [consultationId, setConsultationId] = useState<number | null>(null);
   
   // Consultation topics
   const consultationTopics = [
@@ -147,18 +150,37 @@ export default function ConsultationPage() {
       const res = await apiRequest("POST", "/api/consultations", apiData);
       return await res.json();
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ["/api/consultations"] });
-      setIsSuccess(true);
-      setTimeout(() => {
-        navigate("/dashboard");
-      }, 3000);
+      setIsSubmitting(false);
+      
+      // Set the consultation ID and show the payment gateway
+      setConsultationId(data.id);
+      setShowPayment(true);
     },
     onError: (error) => {
       console.error("Error creating consultation:", error);
       setIsSubmitting(false);
     }
   });
+  
+  // Handle payment success
+  const handlePaymentSuccess = (paymentData: any) => {
+    console.log("Payment successful:", paymentData);
+    setShowPayment(false);
+    setIsSuccess(true);
+    
+    // Navigate to dashboard after a delay
+    setTimeout(() => {
+      navigate("/dashboard");
+    }, 3000);
+  };
+  
+  // Handle payment failure
+  const handlePaymentFailure = (error: any) => {
+    console.error("Payment failed:", error);
+    // Keep the payment component open to retry
+  };
 
   // Handle form submission
   const onSubmit = (data: ConsultationFormValues) => {
@@ -196,14 +218,40 @@ export default function ConsultationPage() {
                   </Button>
                 </CardContent>
               </Card>
+            ) : showPayment && consultationId ? (
+              <div className="max-w-md mx-auto">
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Consultation Payment</CardTitle>
+                    <CardDescription>
+                      Complete your payment to confirm your consultation
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="mb-6">
+                      Your consultation has been reserved. To confirm your booking, please complete the payment. 
+                      The consultation fee is ₹999 and includes personalized financial advice from our expert advisors.
+                    </p>
+                    <PaymentGateway
+                      paymentType="consultation"
+                      itemId={consultationId}
+                      onSuccess={handlePaymentSuccess}
+                      onFailure={handlePaymentFailure}
+                      buttonText="Pay ₹999 to Confirm Booking"
+                      description="Secure payment via Razorpay"
+                    />
+                  </CardContent>
+                </Card>
+              </div>
             ) : (
               <>
                 <div className="mb-8 text-center">
                   <h1 className="text-3xl font-bold text-neutral-800 mb-2">
-                    Book Your Free Financial Consultation
+                    Book Your Financial Consultation
                   </h1>
                   <p className="text-neutral-600 max-w-3xl mx-auto">
                     Our financial experts will help you understand your options and create a personalized plan to achieve your financial goals.
+                    <span className="block mt-2 text-sm font-semibold">Consultation fee: ₹999</span>
                   </p>
                 </div>
 
