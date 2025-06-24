@@ -29,6 +29,18 @@ export const razorpayService = {
    */
   async createOrder(options: PaymentOrderOptions) {
     try {
+      // Validate API keys before making request
+      if (!process.env.RAZORPAY_KEY_ID || !process.env.RAZORPAY_KEY_SECRET) {
+        throw new Error('Razorpay API keys are not configured properly');
+      }
+
+      console.log('Creating Razorpay order with options:', {
+        amount: options.amount,
+        currency: options.currency,
+        receipt: options.receipt,
+        paymentFor: options.paymentFor
+      });
+
       const order = await razorpay.orders.create({
         amount: options.amount,
         currency: options.currency || 'INR',
@@ -50,6 +62,12 @@ export const razorpayService = {
       };
     } catch (error) {
       console.error('Error creating Razorpay order:', error);
+      
+      // Check if it's an authentication error
+      if (error.statusCode === 401) {
+        throw new Error('Razorpay authentication failed. Please verify your API keys are correct and active.');
+      }
+      
       throw error;
     }
   },

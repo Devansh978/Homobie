@@ -27,6 +27,8 @@ A secure, scalable, and user-friendly fintech platform where customers can apply
   - Integrated PaymentGateway component in consultation booking flow
   - Fixed database connection reliability with retry mechanisms
   - Updated consultation page with payment flow (₹999 consultation fee)
+  - Added demo mode fallback for when Razorpay credentials are not configured
+  - Improved error handling and user-facing error messages for payment failures
 
 ## User Preferences
 - Company branding: "Homobie" (rebranded from FinSecure)

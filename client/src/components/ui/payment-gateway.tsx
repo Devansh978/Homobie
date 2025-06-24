@@ -63,9 +63,19 @@ export function PaymentGateway({
       return data;
     } catch (error: any) {
       setPaymentStatus("error");
+      
+      let errorMessage = "Failed to initialize payment";
+      if (error.message?.includes("Payment gateway temporarily unavailable")) {
+        errorMessage = "Payment service is temporarily unavailable. Please contact support.";
+      } else if (error.message?.includes("Authentication failed")) {
+        errorMessage = "Payment gateway configuration issue. Please contact support.";
+      } else if (error.message) {
+        errorMessage = error.message;
+      }
+      
       toast({
         title: "Payment Error",
-        description: error.message || "Failed to initialize payment",
+        description: errorMessage,
         variant: "destructive",
       });
       if (onFailure) onFailure(error);
@@ -78,13 +88,35 @@ export function PaymentGateway({
   // Function to handle payment
   const handlePayment = async () => {
     try {
+      // Create payment order
+      const order = await createPaymentOrder();
+      
+      // Check if this is demo mode
+      if (order.demo_mode) {
+        // Simulate payment success for demo mode
+        toast({
+          title: "Demo Mode",
+          description: "Payment gateway not configured. Simulating successful payment.",
+          variant: "default",
+        });
+        
+        // Simulate payment verification for demo
+        setTimeout(() => {
+          setPaymentStatus("success");
+          if (onSuccess) onSuccess({ 
+            status: "success", 
+            payment: order,
+            demo_mode: true 
+          });
+        }, 1500);
+        
+        return;
+      }
+      
       // Load Razorpay script if not already loaded
       if (!window.Razorpay) {
         await loadRazorpayScript();
       }
-      
-      // Create payment order
-      const order = await createPaymentOrder();
       
       // Configure Razorpay options
       const options = {

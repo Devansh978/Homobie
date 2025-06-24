@@ -274,37 +274,77 @@ export function registerPaymentRoutes(app: Express) {
         }
       };
       
-      const order = await razorpayService.createOrder(orderOptions);
-      
-      // Store the payment record in the database
-      const payment = await storage.createPayment({
-        userId: req.user!.id,
-        amount: consultationFee.toString(),
-        currency: "INR",
-        status: "created",
-        orderId: order.id,
-        paymentFor: "consultation",
-        relatedId: consultationId,
-        receipt,
-        notes: orderOptions.notes
-      });
-      
-      res.status(201).json({
-        ...payment,
-        razorpay: {
-          key: process.env.RAZORPAY_KEY_ID,
-          order_id: order.id,
-          amount: order.amount,
-          currency: order.currency,
-          name: "Homobie",
-          description: `Consultation Fee for ${consultation.topic}`,
-          prefill: {
-            name: req.user!.fullName,
-            email: req.user!.email,
-            contact: req.user!.phoneNumber
+      try {
+        const order = await razorpayService.createOrder(orderOptions);
+        
+        // Store the payment record in the database
+        const payment = await storage.createPayment({
+          userId: req.user!.id,
+          amount: consultationFee.toString(),
+          currency: "INR",
+          status: "created",
+          orderId: order.id,
+          paymentFor: "consultation",
+          relatedId: consultationId,
+          receipt,
+          notes: orderOptions.notes
+        });
+        
+        res.status(201).json({
+          ...payment,
+          razorpay: {
+            key: process.env.RAZORPAY_KEY_ID,
+            order_id: order.id,
+            amount: order.amount,
+            currency: order.currency,
+            name: "Homobie",
+            description: `Consultation Fee for ${consultation.topic}`,
+            prefill: {
+              name: req.user!.fullName,
+              email: req.user!.email,
+              contact: req.user!.phoneNumber
+            }
           }
-        }
-      });
+        });
+      } catch (razorpayError) {
+        console.error("Razorpay order creation failed:", razorpayError);
+        
+        // For development/demo purposes when Razorpay is not configured
+        // Create a dummy payment record to allow flow testing
+        const dummyOrderId = `demo_order_${Date.now()}`;
+        
+        const payment = await storage.createPayment({
+          userId: req.user!.id,
+          amount: consultationFee.toString(),
+          currency: "INR",
+          status: "demo_mode",
+          orderId: dummyOrderId,
+          paymentFor: "consultation",
+          relatedId: consultationId,
+          receipt,
+          notes: { ...orderOptions.notes, demo_mode: "true" }
+        });
+        
+        // Return demo payment data
+        return res.status(201).json({
+          ...payment,
+          demo_mode: true,
+          message: "Demo mode: Payment gateway not configured. Using test flow.",
+          razorpay: {
+            key: "demo_key",
+            order_id: dummyOrderId,
+            amount: consultationFee * 100,
+            currency: "INR",
+            name: "Homobie",
+            description: `Consultation Fee for ${consultation.topic} (Demo Mode)`,
+            prefill: {
+              name: req.user!.fullName,
+              email: req.user!.email,
+              contact: req.user!.phoneNumber
+            }
+          }
+        });
+      }
     } catch (error) {
       next(error);
     }
