@@ -588,7 +588,7 @@ export default function ConsultationPage() {
                   </div>
                 </div>
                 
-                <div className="mt-8 bg-neutral-100 rounded-xl p-8">
+                {/* <div className="mt-8 bg-neutral-100 rounded-xl p-8">
                   <h2 className="text-2xl font-bold text-center mb-8">What Our Clients Say</h2>
                   
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -646,7 +646,7 @@ export default function ConsultationPage() {
                       </CardContent>
                     </Card>
                   </div>
-                </div>
+                </div> */}
               </>
             )}
           </div>

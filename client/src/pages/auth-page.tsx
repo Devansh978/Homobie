@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { useLocation } from "wouter";
+import { Redirect, useLocation } from "wouter";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -26,6 +26,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import HomePage from "./home-page";
 
 // Login form schema
 const loginSchema = z.object({
@@ -58,7 +59,12 @@ export default function AuthPage() {
       password: "",
     },
   });
-
+  useEffect(() => {
+    if (user) {
+      navigate("/dashboard");
+    }
+  }, [user, navigate]);
+  
   // Register form
   const registerForm = useForm<RegisterFormData>({
     resolver: zodResolver(registerSchema),
@@ -109,7 +115,7 @@ export default function AuthPage() {
                     <CardDescription className="text-center">
                       {activeTab === "login"
                         ? "Login to your account to access all features"
-                        : "Register to get started with FinSecure"}
+                        : "Register to get started with Homobie"}
                     </CardDescription>
                   </CardHeader>
                   <CardContent>
@@ -292,7 +298,7 @@ export default function AuthPage() {
 
             <div className="md:w-1/2 space-y-6 text-center md:text-left">
               <h1 className="text-3xl md:text-4xl font-bold text-primary">
-                Welcome to FinSecure
+                Welcome to Homobie
               </h1>
               <p className="text-lg text-neutral-700">
                 Your trusted partner for all financial solutions.

@@ -1,0 +1,128 @@
+Unexpected error on idle client error: terminating connection due to administrator command
+    at cn.parseErrorMessage (file:///home/runner/workspace/node_modules/@neondatabase/serverless/index.mjs:1182:6)
+    at cn.handlePacket (file:///home/runner/workspace/node_modules/@neondatabase/serverless/index.mjs:1143:13)
+    at cn.parse (file:///home/runner/workspace/node_modules/@neondatabase/serverless/index.mjs:1127:36)
+    at v.<anonymous> (file:///home/runner/workspace/node_modules/@neondatabase/serverless/index.mjs:1190:16)
+    at v.emit (file:///home/runner/workspace/node_modules/@neondatabase/serverless/index.mjs:397:12)
+    at WebSocket.<anonymous> (file:///home/runner/workspace/node_modules/@neondatabase/serverless/index.mjs:987:80)
+    at callListener (/home/runner/workspace/node_modules/ws/lib/event-target.js:290:14)
+    at WebSocket.onMessage (/home/runner/workspace/node_modules/ws/lib/event-target.js:209:9)
+    at WebSocket.emit (node:events:518:28)
+    at Receiver.receiverOnMessage (/home/runner/workspace/node_modules/ws/lib/websocket.js:1220:20)
+    at Receiver.emit (node:events:518:28)
+    at Receiver.dataMessage (/home/runner/workspace/node_modules/ws/lib/receiver.js:569:14)
+    at Receiver.getData (/home/runner/workspace/node_modules/ws/lib/receiver.js:496:10)
+    at Receiver.startLoop (/home/runner/workspace/node_modules/ws/lib/receiver.js:167:16)
+    at Receiver._write (/home/runner/workspace/node_modules/ws/lib/receiver.js:94:10)
+    at writeOrBuffer (node:internal/streams/writable:572:12)
+    at _write (node:internal/streams/writable:501:10)
+    at Writable.write (node:internal/streams/writable:510:10)
+    at TLSSocket.socketOnData (/home/runner/workspace/node_modules/ws/lib/websocket.js:1355:35)
+    at TLSSocket.emit (node:events:518:28)
+    at addChunk (node:internal/streams/readable:561:12)
+    at readableAddChunkPushByteMode (node:internal/streams/readable:512:3)
+    at Readable.push (node:internal/streams/readable:392:5)
+    at TLSWrap.onStreamRead (node:internal/stream_base_commons:191:23) {
+  length: 116,
+  severity: 'FATAL',
+  code: '57P01',
+  detail: undefined,
+  hint: undefined,
+  position: undefined,
+  internalPosition: undefined,
+  internalQuery: undefined,
+  where: undefined,
+  schema: undefined,
+  table: undefined,
+  column: undefined,
+  dataType: undefined,
+  constraint: undefined,
+  file: 'postgres.c',
+  line: '3289',
+  routine: 'ProcessInterrupts',
+  client: NeonClient {
+    _events: [Object: null prototype] { error: [Function (anonymous)] },
+    _eventsCount: 1,
+    _maxListeners: undefined,
+    connectionParameters: ConnectionParameters {
+      user: 'neondb_owner',
+      database: 'neondb',
+      port: 5432,
+      host: 'ep-calm-star-a6iloc71.us-west-2.aws.neon.tech',
+      binary: false,
+      options: undefined,
+      ssl: {},
+      client_encoding: '',
+      replication: undefined,
+      isDomainSocket: false,
+      application_name: undefined,
+      fallback_application_name: undefined,
+      statement_timeout: false,
+      lock_timeout: false,
+      idle_in_transaction_session_timeout: false,
+      query_timeout: false,
+      connect_timeout: 10
+    },
+    user: 'neondb_owner',
+    database: 'neondb',
+    port: 5432,
+    host: 'ep-calm-star-a6iloc71.us-west-2.aws.neon.tech',
+    replication: undefined,
+    _Promise: [Function: Promise],
+    _types: TypeOverrides { _types: [Object], text: {}, binary: {} },
+    _ending: true,
+    _connecting: false,
+    _connected: true,
+    _connectionError: false,
+    _queryable: false,
+    connection: Connection {
+      _events: [Object: null prototype],
+      _eventsCount: 22,
+      _maxListeners: undefined,
+      stream: [Socket],
+      _keepAlive: false,
+      _keepAliveInitialDelayMillis: 0,
+      lastBuffer: false,
+      parsedStatements: {},
+      ssl: false,
+      _ending: true,
+      _emitMessage: false,
+      _connecting: true
+    },
+    queryQueue: [],
+    binary: false,
+    processID: 644716423,
+    secretKey: -1259104509,
+    ssl: false,
+    _connectionTimeoutMillis: 10000,
+    config: {
+      connectionString: 'postgresql://neondb_owner:npg_2ECd4ZTSWgUq@ep-calm-star-a6iloc71.us-west-2.aws.neon.tech/neondb?sslmode=require',
+      max: 20,
+      idleTimeoutMillis: 30000,
+      connectionTimeoutMillis: 10000,
+      maxUses: 100,
+      allowExitOnIdle: false,
+      maxLifetimeSeconds: 0
+    },
+    _connectionCallback: null,
+    connectionTimeoutHandle: Timeout {
+      _idleTimeout: -1,
+      _idlePrev: null,
+      _idleNext: null,
+      _idleStart: 77836,
+      _onTimeout: null,
+      _timerArgs: undefined,
+      _repeat: null,
+      _destroyed: true,
+      [Symbol(refed)]: true,
+      [Symbol(kHasPrimitive)]: false,
+      [Symbol(asyncId)]: 6756,
+      [Symbol(triggerId)]: 0
+    },
+    release: [Function (anonymous)],
+    activeQuery: null,
+    readyForQuery: true,
+    hasExecuted: true,
+    _poolUseCount: 6
+  }
+}

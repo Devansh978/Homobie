@@ -30,17 +30,16 @@ export default function HomePage() {
   return (
     <div>
       {/* Hero Section */}
-      <section className="bg-gradient-to-r from-primary to-[#004080] text-white">
+      <section className="bg-gradient-to-r from-[#5f4411] to-[#34445f] text-white">
         <div className="container mx-auto px-4 py-16 md:py-24">
           <div className="flex flex-col md:flex-row items-center">
             <div className="md:w-1/2 space-y-6 mb-8 md:mb-0">
               <h1 className="text-4xl md:text-5xl font-bold leading-tight">
-                Your Financial{" "}
-                <span className="text-[#FFB800]">Freedom</span> Starts Here
+                A simpler,  {" "}
+                <span className="text-[#FFB800]">smarter,</span> and fairer way to finance your future.
               </h1>
               <p className="text-lg text-neutral-100">
-                Get instant approvals on home loans, property loans, and smart
-                investment plans tailored to your needs.
+                At Homobie, we’re transforming the way India experiences financial access—starting with smarter home loans, flexible loan against property options, and wealth-building tools like SIP investment planning.
               </p>
               <div className="pt-4 flex flex-wrap gap-4">
                 <Link href="/loan-application?type=home-loan">
@@ -55,7 +54,7 @@ export default function HomePage() {
                 </Link>
               </div>
               <div className="flex items-center space-x-4 pt-2">
-                <div className="flex -space-x-2">
+                {/* <div className="flex -space-x-2">
                   <img
                     src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?ixlib=rb-1.2.1&auto=format&fit=crop&w=64&h=64&q=80"
                     className="w-8 h-8 rounded-full border-2 border-white"
@@ -71,16 +70,23 @@ export default function HomePage() {
                     className="w-8 h-8 rounded-full border-2 border-white"
                     alt="User"
                   />
-                </div>
+                </div> */}
                 <p className="text-sm text-neutral-200">
-                  Trusted by 10,000+ customers
+                  Trusted by Many customers
                 </p>
               </div>
             </div>
 
-            <div className="md:w-1/2 md:pl-12" id="calculator">
+            {/* <div className="md:w-1/2 md:pl-12" id="calculator">
               <LoanCalculator onApply={handleLoanCalculatorApply} />
-            </div>
+            </div> */}
+             <div className="md:w-1/2 md:pl-12">
+            <img
+              src="src/assets/5571a411-806b-406e-babc-48586ad632c2-removebg-preview.png"
+              className="rounded-xl shadow-lg w-full"
+              alt="User"
+            />
+             </div>
           </div>
         </div>
       </section>
@@ -260,7 +266,7 @@ export default function HomePage() {
           <div className="flex flex-col md:flex-row items-center">
             <div className="md:w-1/2 mb-8 md:mb-0">
               <img
-                src="https://images.unsplash.com/photo-1573497491765-dccce02b29df?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&h=600&q=80"
+                src="https://i.pinimg.com/736x/1c/5a/72/1c5a72bd9e391f3cd4ad2be04aaa55e2.jpg"
                 alt="Financial Consultation"
                 className="rounded-xl shadow-lg w-full"
               />
@@ -285,8 +291,8 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Testimonials Section */}
-      <section className="py-16 bg-white">
+        {/* Testimonials Section  */}
+      {/* <section className="py-16 bg-white">
         <div className="container mx-auto px-4">
           <div className="text-center mb-16">
             <h2 className="text-3xl font-bold text-neutral-800 mb-4">
@@ -296,9 +302,9 @@ export default function HomePage() {
               Join thousands of satisfied customers who have transformed their
               financial future with Homobie.
             </p>
-          </div>
+          </div> 
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             <TestimonialCard
               quote="The home loan process was incredibly smooth. I got pre-approved within minutes and had my loan disbursed in just 7 days. The interest rate was also better than what other banks offered!"
               name="Priya Sharma"
@@ -319,7 +325,7 @@ export default function HomePage() {
             />
           </div>
         </div>
-      </section>
+      </section>  */}
 
       {/* CTA Section */}
       <section className="py-16 bg-gradient-to-r from-primary to-[#004080] text-white">

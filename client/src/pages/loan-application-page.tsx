@@ -175,16 +175,180 @@ export default function LoanApplicationPage() {
   );
 
   // Handle form submission
-  const onSubmit = (data: LoanFormValues) => {
-    if (!user) {
-      navigate("/auth");
-      return;
-    }
-    
-    setIsSubmitting(true);
-    createLoanMutation.mutate(data);
-  };
+  // const onSubmit = async (data: LoanFormValues) => {
+  //   if (!user) {
+  //     navigate("/auth");
+  //     return;
+  //   }
 
+  //   setIsSubmitting(true);
+
+  //   try {
+  //     // 1. First submit to your backend API
+  //     const apiResponse = await createLoanMutation.mutateAsync({
+  //       ...data,
+  //       userId: user.id // Ensure user ID is included
+  //     });
+
+  //     // 2. Then submit to Google Sheets (as secondary storage)
+  //     try {
+  //       const formData = new URLSearchParams();
+
+  //       // Prepare data for Google Sheets
+  //       const sheetsData = {
+  //         ...data,
+  //         applicationId: apiResponse.id,
+  //         submissionDate: new Date().toISOString(),
+  //         userId: user.id,
+  //         userEmail: user.email,
+  //         // userName: user.name,
+  //         userPhone: user.phoneNumber
+  //       };
+
+  //       // Convert all values to strings
+  //       Object.entries(sheetsData).forEach(([key, value]) => {
+  //         formData.append(key, String(value !== undefined ? value : ''));
+  //       });
+
+  //       // Submit to Google Sheets
+  //       const sheetsResponse = await fetch(
+  //         "https://script.google.com/macros/s/AKfycbyO0YWyiac2VrIHOXOHVWAwAGhwX6DeRC41-71O1Ip3yC6yUxZcUBLUVtpQy1NWDGhZ/exec",
+  //         {
+  //           method: "POST",
+  //           headers: {
+  //             "Content-Type": "application/x-www-form-urlencoded",
+  //           },
+  //           body: formData.toString(),
+  //           mode: "no-cors",
+  //         }
+  //       );
+
+  //       // Log successful submission (even though we can't read response in no-cors mode)
+  //       console.log("Submitted to Google Sheets");
+  //     } catch (sheetsError) {
+  //       console.warn("Google Sheets submission failed (non-critical):", sheetsError);
+  //       // This is non-critical, so we don't show error to user
+  //     }
+
+  //     // Success handling
+  //     setSubmittedData(apiResponse);
+  //     setIsSuccess(true);
+
+  //     toast({
+  //       title: "Success",
+  //       description: "Loan application submitted successfully!",
+  //     });
+
+  //   } catch (error) {
+  //     console.error("Submission failed:", error);
+
+  //     let errorMessage = "Failed to submit application";
+  //     if (error instanceof Error) {
+  //       errorMessage = error.message.includes("502") 
+  //         ? "Backend service unavailable. Please try again later."
+  //         : error.message;
+  //     }
+
+  //     toast({
+  //       title: "Error",
+  //       description: errorMessage,
+  //       variant: "destructive",
+  //     });
+  //   } finally {
+  //     setIsSubmitting(false);
+  //   }
+  // };
+  function onSubmit(data: LoanFormValues) {
+    // Set loading state
+    setIsSubmitting(true);
+
+    // First, submit to our backend API
+    fetch("/api/loan-applications", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        ...data,
+        userId: user?.id, // Include user info if available
+        // userName: user?.name,
+        userEmail: user?.email
+      }),
+    })
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error("Failed to submit loan application to server");
+        }
+        return response.json();
+      })
+      .then((apiResponse) => {
+        console.log("Successfully submitted to database:", apiResponse);
+
+        // Prepare the row data for Google Sheets
+        const rowData = [
+          new Date().toISOString(),
+          apiResponse.id || '',
+          data.loanType || '',
+          data.amount || '',
+          data.tenure || '',
+          data.interestRate || '',
+          data.monthlyIncome || '',
+          data.propertyValue || '',
+          data.propertyAddress || '',
+          data.purpose || '',
+          data.employmentType || '',
+          data.existingLoanDetails?.lenderName || '',
+          data.existingLoanDetails?.accountNumber || '',
+          data.existingLoanDetails?.outstandingAmount || '',
+          data.existingLoanDetails?.currentRate || '',
+          user?.id || '',
+          user?.name || '',
+          user?.email || ''
+        ];
+
+        // Create form data for Google Script
+        const formData = new URLSearchParams();
+        rowData.forEach((value, index) => {
+          formData.append(`col${index + 1}`, value.toString());
+        });
+
+        // Send to Google Sheets script as secondary storage
+        return fetch(
+          "https://script.google.com/macros/s/AKfycbyO0YWyiac2VrIHOXOHVWAwAGhwX6DeRC41-71O1Ip3yC6yUxZcUBLUVtpQy1NWDGhZ/exec",
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/x-www-form-urlencoded",
+            },
+            body: formData.toString(),
+            mode: "no-cors",
+          }
+        ).catch((err) => {
+          console.warn("Google Sheets submission had an issue:", err);
+          return Promise.resolve();
+        });
+      })
+      .then(() => {
+        // Show success message
+        toast({
+          title: "Application Submitted",
+          description: "Your loan application has been received successfully!",
+        });
+        setIsSuccess(true);
+        setSubmittedData(data);
+      })
+      .catch((error) => {
+        console.error("Form submission error:", error);
+        toast({
+          title: "Submission Failed",
+          description: error.message || "There was a problem submitting your application.",
+          variant: "destructive",
+        });
+      })
+      .finally(() => {
+        setIsSubmitting(false);
+      });
+  }
   // Track if user is authenticated - we'll only enforce auth on submission
   useEffect(() => {
     // No redirect here, allow users to view the page without authentication

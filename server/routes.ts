@@ -98,47 +98,40 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Loan Applications
+  // Loan Applications//
+  // Updated loan applications route with better error handling
   app.post("/api/loan-applications", isAuthenticated, async (req, res, next) => {
     try {
+      if (!req.user) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
+
       const validatedData = insertLoanApplicationSchema.parse({
         ...req.body,
         userId: req.user.id,
       });
-      
+
       const loanApplication = await storage.createLoanApplication(validatedData);
-      res.status(201).json(loanApplication);
-    } catch (error) {
-      next(error);
-    }
-  });
 
-  app.get("/api/loan-applications", isAuthenticated, async (req, res, next) => {
-    try {
-      const applications = await storage.getLoanApplicationsByUserId(req.user.id);
-      res.json(applications);
-    } catch (error) {
-      next(error);
-    }
-  });
+      res.status(201).json({
+        success: true,
+        data: loanApplication
+      });
 
-  app.get("/api/loan-applications/:id", isAuthenticated, async (req, res, next) => {
-    try {
-      const id = parseInt(req.params.id);
-      const application = await storage.getLoanApplication(id);
-      
-      if (!application) {
-        return res.status(404).json({ message: "Loan application not found" });
-      }
-      
-      // Check if the user is authorized to view this application
-      if (application.userId !== req.user.id && req.user.role !== "admin" && req.user.role !== "superadmin") {
-        return res.status(403).json({ message: "Forbidden" });
-      }
-      
-      res.json(application);
     } catch (error) {
-      next(error);
+      console.error('Loan application creation error:', error);
+
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({
+          success: false,
+          errors: error.errors
+        });
+      }
+
+      res.status(500).json({
+        success: false,
+        message: "Internal server error"
+      });
     }
   });
 

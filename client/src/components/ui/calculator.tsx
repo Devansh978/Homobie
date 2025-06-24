@@ -87,7 +87,7 @@ export function LoanCalculator({ onApply }: LoanCalculatorProps) {
     <Card className="bg-white rounded-xl shadow-lg">
       <CardContent className="p-6">
         <h2 className="text-primary text-xl font-semibold mb-4">
-          Loan EMI Calculator
+           EMI Calculator
         </h2>
 
         <div className="space-y-6">
@@ -120,7 +120,7 @@ export function LoanCalculator({ onApply }: LoanCalculatorProps) {
             </div>
             <Slider
               min={100000}
-              max={10000000}
+              max={100000000}
               step={100000}
               value={[amount]}
               onValueChange={(values) => setAmount(values[0])}
@@ -128,7 +128,7 @@ export function LoanCalculator({ onApply }: LoanCalculatorProps) {
             />
             <div className="flex justify-between text-xs text-neutral-500 mt-1">
               <span>₹1L</span>
-              <span>₹1Cr</span>
+              <span>₹10Cr</span>
             </div>
           </div>
 
@@ -143,7 +143,7 @@ export function LoanCalculator({ onApply }: LoanCalculatorProps) {
             </div>
             <Slider
               min={5}
-              max={15}
+              max={30}
               step={0.1}
               value={[interestRate]}
               onValueChange={(values) => setInterestRate(values[0])}
@@ -151,7 +151,7 @@ export function LoanCalculator({ onApply }: LoanCalculatorProps) {
             />
             <div className="flex justify-between text-xs text-neutral-500 mt-1">
               <span>5%</span>
-              <span>15%</span>
+              <span>30%</span>
             </div>
           </div>
 

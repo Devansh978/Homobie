@@ -60,7 +60,7 @@ export function ChatbotButton() {
           <CardHeader className="bg-primary text-white py-3 px-4">
             <CardTitle className="text-base font-medium flex items-center">
               <MessageSquare className="h-5 w-5 mr-2" />
-              FinSecure Assistant
+              Homobie Assistant
             </CardTitle>
           </CardHeader>
           <CardContent className="p-0 h-96 flex flex-col">

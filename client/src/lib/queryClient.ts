@@ -55,3 +55,31 @@ export const queryClient = new QueryClient({
     },
   },
 });
+// src/lib/queryClient.ts
+// export const apiRequest = async (method: string, endpoint: string, data?: any) => {
+//   // Use environment variable for base URL or default to localhost
+//   const baseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000';
+
+//   const response = await fetch(`${baseUrl}${endpoint}`, {
+//     method,
+//     headers: {
+//       'Content-Type': 'application/json',
+//       'Authorization': `Bearer ${localStorage.getItem('token')}` // Add auth token
+//     },
+//     credentials: 'include', // For cookies if using session auth
+//     body: data ? JSON.stringify(data) : undefined,
+//   });
+
+//   if (!response.ok) {
+//     let errorMessage = `HTTP error ${response.status}`;
+//     try {
+//       const errorData = await response.json();
+//       errorMessage = errorData.message || errorMessage;
+//     } catch {
+//       // If response isn't JSON, use default message
+//     }
+//     throw new Error(errorMessage);
+//   }
+
+//   return response;
+// };

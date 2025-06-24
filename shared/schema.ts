@@ -23,6 +23,23 @@ export const insertUserSchema = createInsertSchema(users).pick({
   role: true,
 });
 
+// For the leads table
+// export const leads = pgTable("leads",
+// export const leadSchema = z.object({
+//   id: z.string().optional(),
+//   name: z.string().min(1, "Name is required"),
+//   email: z.string().email("Invalid email address"),
+//   phone: z.string().min(1, "Phone number is required"),
+//   status: z.enum(["new", "contacted", "qualified", "lost"]).default("new"),
+//   source: z.string().min(1, "Source is required"),
+//   notes: z.string().optional(),
+//   assignedTo: z.string().optional(), // User ID
+//   createdAt: z.date().optional(),
+//   updatedAt: z.date().optional(),
+// });
+
+// export type Lead = z.infer<typeof leadSchema>;
+
 // KYC Documents schema
 export const kycDocuments = pgTable("kyc_documents", {
   id: serial("id").primaryKey(),
