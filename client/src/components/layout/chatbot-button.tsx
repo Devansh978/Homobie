@@ -20,13 +20,51 @@ export function ChatbotButton() {
     setInputValue(e.target.value);
   };
 
-  const handleSendMessage = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!inputValue.trim()) return;
+  // const handleSendMessage = (e: React.FormEvent) => {
+  //   e.preventDefault();
+  //   if (!inputValue.trim()) return;
+const handleSendMessage = async (e: React.FormEvent) => {
+  e.preventDefault();
+  if (!inputValue.trim()) return;
 
-    // Add user message
-    setMessages([...messages, { role: 'user', content: inputValue }]);
-    setInputValue('');
+  const userMessage = { role: 'user', content: inputValue };
+  setMessages([...messages, userMessage]);
+  setInputValue('');
+
+  try {
+    const response = await fetch("https://api.anthropic.com/v1/messages", {
+      method: "POST",
+      headers: {
+        "x-api-key": "ThiAIzaSyBfcQf_K4tfaL3FzR2w_yg04kMwA6rsjUQs", 
+        "Content-Type": "application/json",
+        "anthropic-version": "2023-06-01",
+      },
+      body: JSON.stringify({
+        model: "claude-3-opus-20240229",
+        messages: [
+          { role: "user", content: inputValue }
+        ],
+        max_tokens: 1000,
+      }),
+    });
+
+    const data = await response.json();
+    const reply = data?.content?.[0]?.text || "Sorry, no response received.";
+    setMessages(prev => [...prev, { role: 'bot', content: reply }]);
+  } catch (error) {
+    console.error("Claude API error:", error);
+    setMessages(prev => [...prev, {
+      role: 'bot',
+      content: "Something went wrong while contacting Claude.",
+    }]);
+  }
+
+
+
+
+    // // Add user message
+    // setMessages([...messages, { role: 'user', content: inputValue }]);
+    // setInputValue('');
 
     // Simulate bot response
     setTimeout(() => {

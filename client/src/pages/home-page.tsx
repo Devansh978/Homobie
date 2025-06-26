@@ -80,12 +80,15 @@ export default function HomePage() {
             {/* <div className="md:w-1/2 md:pl-12" id="calculator">
               <LoanCalculator onApply={handleLoanCalculatorApply} />
             </div> */}
-             <div className="md:w-1/2 md:pl-12">
-            <img
-              src="src/assets/5571a411-806b-406e-babc-48586ad632c2-removebg-preview.png"
-              className="rounded-xl shadow-lg w-full"
-              alt="User"
-            />
+               <div className="md:w-1/2 md:pl-12">
+                 <img
+                   src="src/assets/5571a411-806b-406e-babc-48586ad632c2-removebg-preview.png"
+                   className="rounded-xl w-full transform hover:scale-105 transition duration-500 ease-in-out shadow-[0_10px_25px_rgba(0,0,0,0.3)]"
+                   alt="User"
+                 />
+              
+
+
              </div>
           </div>
         </div>
