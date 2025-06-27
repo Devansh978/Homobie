@@ -25,7 +25,17 @@ import {
   Sparkles,
   Target,
   Heart,
-  Star
+  Star,
+  Rocket,
+  BookOpen,
+  Eye,
+  Calculator,
+  Clock,
+  Lightbulb,
+  Globe,
+  Handshake,
+  FileText,
+  CheckSquare
 } from "lucide-react";
 
 export default function HomePage() {
@@ -403,189 +413,537 @@ We believe finance shouldn’t be confusing, biased, or built only for the  priv
       </section>
 
       {/* Mission Section */}
-      <section className="py-16 bg-white">
-        <div className="container mx-auto px-4">
-          <div className="max-w-4xl mx-auto text-center">
-            <h2 className="text-3xl md:text-4xl font-bold text-neutral-800 mb-8">
-               Our Mission
-            </h2>
+      <section className="py-20 bg-gradient-to-br from-white via-amber-50 to-orange-50 relative overflow-hidden">
+        {/* Floating background elements */}
+        <div className="absolute inset-0 overflow-hidden">
+          <div className="absolute -top-20 -right-20 w-60 h-60 bg-gradient-to-br from-orange-200/20 to-amber-200/20 rounded-full blur-3xl animate-bounce"></div>
+          <div className="absolute -bottom-20 -left-20 w-60 h-60 bg-gradient-to-br from-amber-200/20 to-yellow-200/20 rounded-full blur-3xl animate-bounce delay-1000"></div>
+        </div>
+
+        <div className="container mx-auto px-4 relative z-10">
+          <div className="max-w-6xl mx-auto">
+            <motion.div
+              initial={{ opacity: 0, y: 50 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8 }}
+              viewport={{ once: true }}
+              className="text-center mb-16"
+            >
+              <div className="inline-flex items-center space-x-2 bg-gradient-to-r from-orange-500/20 to-amber-500/20 backdrop-blur-sm border border-orange-300/20 rounded-full px-6 py-3 mb-6">
+                <Rocket className="w-5 h-5 text-orange-600" />
+                <span className="text-orange-600 font-medium">Our Mission</span>
+              </div>
+              <h2 className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-[#5f4411] to-orange-600 bg-clip-text text-transparent mb-6">
+                Empowering Financial Dreams
+              </h2>
+              <div className="w-32 h-1 bg-gradient-to-r from-[#5f4411] to-orange-600 mx-auto rounded-full"></div>
+            </motion.div>
             
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12">
-              <div className="p-6">
-                <div className="text-4xl mb-4"></div>
-                <p className="text-neutral-700">Bridge the financial literacy gap in home financing</p>
-              </div>
-              <div className="p-6">
-                <div className="text-4xl mb-4"></div>
-                <p className="text-neutral-700">Eliminate middleman exploitation through technology integration</p>
-              </div>
-              <div className="p-6">
-                <div className="text-4xl mb-4"></div>
-                <p className="text-neutral-700">Empower every Indian with a clear, personalized, and strategic loan repayment plan</p>
-              </div>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-16">
+              {[
+                {
+                  icon: BookOpen,
+                  title: "Bridge Financial Literacy Gap",
+                  description: "Bridge the financial literacy gap in home financing",
+                  gradient: "from-blue-500 to-cyan-500",
+                  delay: 0
+                },
+                {
+                  icon: Shield,
+                  title: "Eliminate Middleman Exploitation",
+                  description: "Eliminate middleman exploitation through technology integration",
+                  gradient: "from-green-500 to-emerald-500",
+                  delay: 0.1
+                },
+                {
+                  icon: Users,
+                  title: "Empower Every Indian",
+                  description: "Empower every Indian with a clear, personalized, and strategic loan repayment plan",
+                  gradient: "from-purple-500 to-pink-500",
+                  delay: 0.2
+                }
+              ].map((mission, index) => (
+                <motion.div
+                  key={index}
+                  initial={{ opacity: 0, y: 50 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.6, delay: mission.delay }}
+                  viewport={{ once: true }}
+                  whileHover={{ scale: 1.05, y: -10 }}
+                  className="group relative"
+                >
+                  <div className="bg-white/70 backdrop-blur-sm border border-white/40 p-8 rounded-2xl shadow-xl hover:shadow-2xl transition-all duration-500 hover:bg-white/80">
+                    <div className={`w-16 h-16 bg-gradient-to-r ${mission.gradient} rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-all duration-300 shadow-lg mx-auto`}>
+                      <mission.icon className="w-8 h-8 text-white" />
+                    </div>
+                    <h3 className="text-xl font-bold text-gray-800 mb-4 text-center group-hover:text-orange-600 transition-colors duration-300">
+                      {mission.title}
+                    </h3>
+                    <p className="text-gray-600 leading-relaxed text-center group-hover:text-gray-800 transition-colors duration-300">
+                      {mission.description}
+                    </p>
+                    <div className={`w-0 h-1 bg-gradient-to-r ${mission.gradient} rounded-full mt-4 group-hover:w-full transition-all duration-500 mx-auto`}></div>
+                  </div>
+                </motion.div>
+              ))}
             </div>
             
-            <div className="bg-gradient-to-r from-[#5f4411] to-[#34445f] text-white p-8 rounded-xl">
-              <h3 className="text-2xl md:text-3xl font-bold mb-4">
-                With Homobie, homeownership isn't just affordable—
-                <span className="text-[#FFB800]">it's financially smart</span>
-              </h3>
-            </div>
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9 }}
+              whileInView={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.8, delay: 0.4 }}
+              viewport={{ once: true }}
+              className="relative"
+            >
+              <div className="bg-gradient-to-r from-[#5f4411] to-[#34445f] p-10 rounded-3xl text-white shadow-2xl border border-amber-400/20 relative overflow-hidden">
+                {/* Animated background pattern */}
+                <div className="absolute inset-0 opacity-10">
+                  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white to-transparent transform -skew-x-12 animate-pulse"></div>
+                </div>
+                
+                <div className="relative z-10 text-center">
+                  <motion.div
+                    initial={{ scale: 0 }}
+                    whileInView={{ scale: 1 }}
+                    transition={{ duration: 0.6, delay: 0.6 }}
+                    viewport={{ once: true }}
+                    className="inline-flex items-center space-x-3 mb-6"
+                  >
+                    <div className="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center">
+                      <Home className="w-6 h-6 text-white animate-pulse" />
+                    </div>
+                    <h3 className="text-3xl md:text-4xl font-bold">
+                      With Homobie, homeownership isn't just affordable—
+                      <span className="text-[#FFB800] block mt-2">it's financially smart</span>
+                    </h3>
+                    <div className="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center">
+                      <TrendingUp className="w-6 h-6 text-white animate-pulse" />
+                    </div>
+                  </motion.div>
+                </div>
+              </div>
+            </motion.div>
           </div>
         </div>
       </section>
 
       {/* Vision Section */}
-      <section className="py-16 bg-neutral-50">
-        <div className="container mx-auto px-4">
-          <div className="max-w-4xl mx-auto">
-            <div className="text-center mb-12">
-              <h2 className="text-3xl md:text-4xl font-bold text-neutral-800 mb-6">
-                 Our Vision
+      <section className="py-20 bg-gradient-to-br from-indigo-900 via-purple-900 to-pink-900 relative overflow-hidden">
+        {/* Floating background elements */}
+        <div className="absolute inset-0 overflow-hidden">
+          <div className="absolute top-1/4 left-1/4 w-40 h-40 bg-blue-500/10 rounded-full blur-2xl animate-pulse"></div>
+          <div className="absolute bottom-1/4 right-1/4 w-32 h-32 bg-purple-500/10 rounded-full blur-2xl animate-pulse delay-1000"></div>
+          <div className="absolute top-3/4 left-3/4 w-24 h-24 bg-pink-500/10 rounded-full blur-2xl animate-pulse delay-500"></div>
+        </div>
+
+        <div className="container mx-auto px-4 relative z-10">
+          <div className="max-w-6xl mx-auto">
+            <motion.div
+              initial={{ opacity: 0, y: 50 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8 }}
+              viewport={{ once: true }}
+              className="text-center mb-16"
+            >
+              <div className="inline-flex items-center space-x-2 bg-gradient-to-r from-purple-500/20 to-pink-500/20 backdrop-blur-sm border border-purple-300/20 rounded-full px-6 py-3 mb-6">
+                <Eye className="w-5 h-5 text-purple-400" />
+                <span className="text-purple-400 font-medium">Our Vision</span>
+              </div>
+              <h2 className="text-4xl md:text-5xl font-bold text-white mb-6">
+                A Future of Financial Equality
               </h2>
-              <p className="text-lg text-neutral-700">
+              <p className="text-xl text-purple-100 max-w-4xl mx-auto leading-relaxed mb-6">
                 We see a future where every Indian has equal access to:
               </p>
+              <div className="w-32 h-1 bg-gradient-to-r from-purple-400 to-pink-400 mx-auto rounded-full"></div>
+            </motion.div>
+            
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-16">
+              {[
+                {
+                  icon: Shield,
+                  title: "Transparent Credit Options",
+                  description: "Transparent credit options like loan against property and mortgage loans",
+                  gradient: "from-blue-500 to-cyan-500",
+                  delay: 0
+                },
+                {
+                  icon: Calculator,
+                  title: "Smart Planning Tools",
+                  description: "Easy-to-use planning tools like the free EMI calculator online and SIP calculator online",
+                  gradient: "from-green-500 to-emerald-500",
+                  delay: 0.1
+                },
+                {
+                  icon: Lightbulb,
+                  title: "Clear Financial Guidance",
+                  description: "Clear guidance on responsible borrowing, smart investing, and real-time financial decisions",
+                  gradient: "from-orange-500 to-red-500",
+                  delay: 0.2
+                }
+              ].map((vision, index) => (
+                <motion.div
+                  key={index}
+                  initial={{ opacity: 0, y: 50 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.6, delay: vision.delay }}
+                  viewport={{ once: true }}
+                  whileHover={{ scale: 1.05, y: -10 }}
+                  className="group relative"
+                >
+                  <div className="bg-white/10 backdrop-blur-sm border border-white/20 p-8 rounded-2xl shadow-xl hover:shadow-2xl transition-all duration-500 hover:bg-white/15">
+                    <div className={`w-16 h-16 bg-gradient-to-r ${vision.gradient} rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-all duration-300 shadow-lg mx-auto`}>
+                      <vision.icon className="w-8 h-8 text-white" />
+                    </div>
+                    <h3 className="text-xl font-bold text-white mb-4 text-center group-hover:text-purple-200 transition-colors duration-300">
+                      {vision.title}
+                    </h3>
+                    <p className="text-purple-100 leading-relaxed text-center group-hover:text-white transition-colors duration-300">
+                      {vision.description}
+                    </p>
+                    <div className={`w-0 h-1 bg-gradient-to-r ${vision.gradient} rounded-full mt-4 group-hover:w-full transition-all duration-500 mx-auto`}></div>
+                  </div>
+                </motion.div>
+              ))}
             </div>
             
-            <div className="space-y-6 mb-12">
-              <div className="flex items-start space-x-4 bg-white p-6 rounded-lg">
-                <div className="text-2xl"></div>
-                <p className="text-neutral-700">Transparent credit options like loan against property and mortgage loans</p>
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9 }}
+              whileInView={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.8, delay: 0.4 }}
+              viewport={{ once: true }}
+              className="relative"
+            >
+              <div className="bg-gradient-to-r from-purple-600 to-pink-600 p-10 rounded-3xl text-white shadow-2xl border border-purple-400/20 relative overflow-hidden">
+                {/* Animated background pattern */}
+                <div className="absolute inset-0 opacity-10">
+                  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white to-transparent transform -skew-x-12 animate-pulse"></div>
+                </div>
+                
+                <div className="relative z-10 text-center">
+                  <motion.div
+                    initial={{ scale: 0 }}
+                    whileInView={{ scale: 1 }}
+                    transition={{ duration: 0.6, delay: 0.6 }}
+                    viewport={{ once: true }}
+                    className="inline-flex items-center space-x-3 mb-6"
+                  >
+                    <div className="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center">
+                      <Target className="w-6 h-6 text-white animate-pulse" />
+                    </div>
+                    <h3 className="text-2xl md:text-3xl font-bold">Our Ultimate Goal</h3>
+                    <div className="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center">
+                      <CheckCircle className="w-6 h-6 text-white animate-pulse" />
+                    </div>
+                  </motion.div>
+                  
+                  <p className="text-xl text-white/90 max-w-4xl mx-auto leading-relaxed">
+                    Our goal is to empower borrowers to build wealth, repay smarter, and confidently manage everything from balance transfers to SIP investments—all in one place.
+                  </p>
+                </div>
               </div>
-              <div className="flex items-start space-x-4 bg-white p-6 rounded-lg">
-                <div className="text-2xl"></div>
-                <p className="text-neutral-700">Easy-to-use planning tools like the free EMI calculator online and SIP calculator online</p>
-              </div>
-              <div className="flex items-start space-x-4 bg-white p-6 rounded-lg">
-                <div className="text-2xl"></div>
-                <p className="text-neutral-700">Clear guidance on responsible borrowing, smart investing, and real-time financial decisions</p>
-              </div>
-            </div>
-            
-            <div className="text-center">
-              <p className="text-lg text-neutral-700">
-                Our goal is to empower borrowers to build wealth, repay smarter, and confidently manage everything from balance transfers to SIP investments—all in one place.
-              </p>
-            </div>
+            </motion.div>
           </div>
         </div>
       </section>
 
       {/* Why Choose Homobie Section */}
-      <section className="py-16 bg-white">
-        <div className="container mx-auto px-4">
-          <div className="max-w-5xl mx-auto">
-            <div className="text-center mb-12">
-              <h2 className="text-3xl md:text-4xl font-bold text-neutral-800 mb-6">
-                 Why Choose Homobie?
+      <section className="py-20 bg-gradient-to-br from-emerald-50 via-green-50 to-teal-50 relative overflow-hidden">
+        {/* Floating background elements */}
+        <div className="absolute inset-0 overflow-hidden">
+          <div className="absolute top-1/4 right-1/4 w-48 h-48 bg-gradient-to-br from-green-200/20 to-emerald-200/20 rounded-full blur-3xl animate-pulse"></div>
+          <div className="absolute bottom-1/4 left-1/4 w-40 h-40 bg-gradient-to-br from-teal-200/20 to-cyan-200/20 rounded-full blur-3xl animate-pulse delay-1000"></div>
+        </div>
+
+        <div className="container mx-auto px-4 relative z-10">
+          <div className="max-w-6xl mx-auto">
+            <motion.div
+              initial={{ opacity: 0, y: 50 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8 }}
+              viewport={{ once: true }}
+              className="text-center mb-16"
+            >
+              <div className="inline-flex items-center space-x-2 bg-gradient-to-r from-green-500/20 to-emerald-500/20 backdrop-blur-sm border border-green-300/20 rounded-full px-6 py-3 mb-6">
+                <CheckSquare className="w-5 h-5 text-green-600" />
+                <span className="text-green-600 font-medium">Why Choose Us</span>
+              </div>
+              <h2 className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text text-transparent mb-6">
+                Why Choose Homobie?
               </h2>
-              <p className="text-lg text-neutral-700 max-w-3xl mx-auto">
+              <p className="text-xl text-gray-700 max-w-4xl mx-auto leading-relaxed">
                 Unlike traditional DSAs or lead-gen portals, Homobie is a human-first platform. No sales pressure. No hidden agendas. Just financial services that put you first.
               </p>
-            </div>
+              <div className="w-32 h-1 bg-gradient-to-r from-green-500 to-emerald-500 mx-auto rounded-full mt-6"></div>
+            </motion.div>
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-              <div className="bg-neutral-50 p-8 rounded-xl">
-                <div className="flex items-start space-x-4 mb-4">
-                  <div className="text-3xl">💬</div>
-                  <h3 className="text-xl font-semibold text-neutral-800">Real Guidance, Not Sales</h3>
-                </div>
-                <p className="text-neutral-700">We explain loan terms and SIP strategies clearly—so you can choose, not be sold to.</p>
-              </div>
-              
-              <div className="bg-neutral-50 p-8 rounded-xl">
-                <div className="flex items-start space-x-4 mb-4">
-                  <div className="text-3xl">🤝</div>
-                  <h3 className="text-xl font-semibold text-neutral-800">Zero Agents. No Hidden Fees.</h3>
-                </div>
-                <p className="text-neutral-700">What you see is what you get. We work with banks and NBFCs directly.</p>
-              </div>
-              
-              <div className="bg-neutral-50 p-8 rounded-xl">
-                <div className="flex items-start space-x-4 mb-4">
-                  <div className="text-3xl">📈</div>
-                  <h3 className="text-xl font-semibold text-neutral-800">Smarter Repayment with SIP + EMI</h3>
-                </div>
-                <p className="text-neutral-700">We help you plan SIP investments that grow while you repay, using our built-in SIP calculator and expert guidance.</p>
-              </div>
-              
-              <div className="bg-neutral-50 p-8 rounded-xl">
-                <div className="flex items-start space-x-4 mb-4">
-                  <div className="text-3xl">📲</div>
-                  <h3 className="text-xl font-semibold text-neutral-800">100% Digital and Paper-Lite</h3>
-                </div>
-                <p className="text-neutral-700">From applying for a loan against property to exploring credit card balance transfers, everything is managed on your mobile.</p>
-              </div>
+              {[
+                {
+                  icon: Handshake,
+                  title: "Real Guidance, Not Sales",
+                  description: "We explain loan terms and SIP strategies clearly—so you can choose, not be sold to.",
+                  gradient: "from-blue-500 to-cyan-500",
+                  delay: 0
+                },
+                {
+                  icon: Shield,
+                  title: "Zero Agents. No Hidden Fees.",
+                  description: "What you see is what you get. We work with banks and NBFCs directly.",
+                  gradient: "from-green-500 to-emerald-500",
+                  delay: 0.1
+                },
+                {
+                  icon: TrendingUp,
+                  title: "Smarter Repayment with SIP + EMI",
+                  description: "We help you plan SIP investments that grow while you repay, using our built-in SIP calculator and expert guidance.",
+                  gradient: "from-purple-500 to-pink-500",
+                  delay: 0.2
+                },
+                {
+                  icon: Globe,
+                  title: "100% Digital and Paper-Lite",
+                  description: "From applying for a loan against property to exploring credit card balance transfers, everything is managed on your mobile.",
+                  gradient: "from-orange-500 to-red-500",
+                  delay: 0.3
+                }
+              ].map((feature, index) => (
+                <motion.div
+                  key={index}
+                  initial={{ opacity: 0, y: 50 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.6, delay: feature.delay }}
+                  viewport={{ once: true }}
+                  whileHover={{ scale: 1.05, y: -10 }}
+                  className="group relative"
+                >
+                  <div className="bg-white/70 backdrop-blur-sm border border-white/40 p-8 rounded-2xl shadow-xl hover:shadow-2xl transition-all duration-500 hover:bg-white/90">
+                    <div className="flex items-start space-x-4 mb-4">
+                      <div className={`w-16 h-16 bg-gradient-to-r ${feature.gradient} rounded-2xl flex items-center justify-center group-hover:scale-110 transition-all duration-300 shadow-lg`}>
+                        <feature.icon className="w-8 h-8 text-white" />
+                      </div>
+                      <div className="flex-1">
+                        <h3 className="text-xl font-bold text-gray-800 mb-3 group-hover:text-green-600 transition-colors duration-300">
+                          {feature.title}
+                        </h3>
+                        <p className="text-gray-600 leading-relaxed group-hover:text-gray-800 transition-colors duration-300">
+                          {feature.description}
+                        </p>
+                      </div>
+                    </div>
+                    <div className={`w-0 h-1 bg-gradient-to-r ${feature.gradient} rounded-full mt-4 group-hover:w-full transition-all duration-500`}></div>
+                  </div>
+                </motion.div>
+              ))}
             </div>
           </div>
         </div>
       </section>
 
       {/* Who We Serve Section */}
-      <section className="py-16 bg-neutral-50">
-        <div className="container mx-auto px-4">
-          <div className="max-w-4xl mx-auto text-center">
-            <h2 className="text-3xl md:text-4xl font-bold text-neutral-800 mb-12">
-               Who We Serve
-            </h2>
+      <section className="py-20 bg-gradient-to-br from-slate-900 via-gray-900 to-zinc-900 relative overflow-hidden">
+        {/* Floating background elements */}
+        <div className="absolute inset-0 overflow-hidden">
+          <div className="absolute top-1/3 left-1/3 w-36 h-36 bg-blue-500/10 rounded-full blur-2xl animate-pulse"></div>
+          <div className="absolute bottom-1/3 right-1/3 w-28 h-28 bg-purple-500/10 rounded-full blur-2xl animate-pulse delay-700"></div>
+          <div className="absolute top-2/3 right-1/4 w-32 h-32 bg-cyan-500/10 rounded-full blur-2xl animate-pulse delay-1000"></div>
+        </div>
+
+        <div className="container mx-auto px-4 relative z-10">
+          <div className="max-w-6xl mx-auto">
+            <motion.div
+              initial={{ opacity: 0, y: 50 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8 }}
+              viewport={{ once: true }}
+              className="text-center mb-16"
+            >
+              <div className="inline-flex items-center space-x-2 bg-gradient-to-r from-blue-500/20 to-purple-500/20 backdrop-blur-sm border border-blue-300/20 rounded-full px-6 py-3 mb-6">
+                <Users className="w-5 h-5 text-blue-400" />
+                <span className="text-blue-400 font-medium">Our Community</span>
+              </div>
+              <h2 className="text-4xl md:text-5xl font-bold text-white mb-6">
+                Who We Serve
+              </h2>
+              <div className="w-32 h-1 bg-gradient-to-r from-blue-400 to-purple-400 mx-auto rounded-full"></div>
+            </motion.div>
             
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              <div className="bg-white p-6 rounded-lg shadow-sm">
-                <div className="text-3xl mb-4">👨‍💼</div>
-                <h3 className="font-semibold text-neutral-800 mb-2">Self-employed professionals</h3>
-              </div>
-              <div className="bg-white p-6 rounded-lg shadow-sm">
-                <div className="text-3xl mb-4">🏠</div>
-                <h3 className="font-semibold text-neutral-800 mb-2">First-time homebuyers</h3>
-              </div>
-              <div className="bg-white p-6 rounded-lg shadow-sm">
-                <div className="text-3xl mb-4">📊</div>
-                <h3 className="font-semibold text-neutral-800 mb-2">Borrowers with thin or no credit history</h3>
-              </div>
-              <div className="bg-white p-6 rounded-lg shadow-sm">
-                <div className="text-3xl mb-4">🏢</div>
-                <h3 className="font-semibold text-neutral-800 mb-2">Property owners exploring loan against property loans</h3>
-              </div>
-              <div className="bg-white p-6 rounded-lg shadow-sm">
-                <div className="text-3xl mb-4">💳</div>
-                <h3 className="font-semibold text-neutral-800 mb-2">People interested in cash transfer, balance transfer credit card options</h3>
-              </div>
-              <div className="bg-white p-6 rounded-lg shadow-sm">
-                <div className="text-3xl mb-4">📈</div>
-                <h3 className="font-semibold text-neutral-800 mb-2">Long-term SIP investment enthusiasts</h3>
-              </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+              {[
+                {
+                  icon: UserCheck,
+                  title: "Self-employed professionals",
+                  gradient: "from-blue-500 to-cyan-500",
+                  delay: 0
+                },
+                {
+                  icon: Home,
+                  title: "First-time homebuyers",
+                  gradient: "from-green-500 to-emerald-500",
+                  delay: 0.1
+                },
+                {
+                  icon: ChartLine,
+                  title: "Borrowers with thin or no credit history",
+                  gradient: "from-purple-500 to-pink-500",
+                  delay: 0.2
+                },
+                {
+                  icon: Building,
+                  title: "Property owners exploring loan against property loans",
+                  gradient: "from-orange-500 to-red-500",
+                  delay: 0.3
+                },
+                {
+                  icon: DollarSign,
+                  title: "People interested in cash transfer, balance transfer credit card options",
+                  gradient: "from-teal-500 to-cyan-500",
+                  delay: 0.4
+                },
+                {
+                  icon: TrendingUp,
+                  title: "Long-term SIP investment enthusiasts",
+                  gradient: "from-indigo-500 to-purple-500",
+                  delay: 0.5
+                }
+              ].map((audience, index) => (
+                <motion.div
+                  key={index}
+                  initial={{ opacity: 0, y: 50 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.6, delay: audience.delay }}
+                  viewport={{ once: true }}
+                  whileHover={{ scale: 1.05, y: -10 }}
+                  className="group relative"
+                >
+                  <div className="bg-white/10 backdrop-blur-sm border border-white/20 p-8 rounded-2xl shadow-xl hover:shadow-2xl transition-all duration-500 hover:bg-white/15 text-center">
+                    <div className={`w-16 h-16 bg-gradient-to-r ${audience.gradient} rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-all duration-300 shadow-lg mx-auto`}>
+                      <audience.icon className="w-8 h-8 text-white" />
+                    </div>
+                    <h3 className="text-lg font-bold text-white mb-4 group-hover:text-blue-200 transition-colors duration-300">
+                      {audience.title}
+                    </h3>
+                    <div className={`w-0 h-1 bg-gradient-to-r ${audience.gradient} rounded-full group-hover:w-full transition-all duration-500 mx-auto`}></div>
+                  </div>
+                </motion.div>
+              ))}
             </div>
           </div>
         </div>
       </section>
 
       {/* Our Promise Section */}
-      <section className="py-16 bg-white">
-        <div className="container mx-auto px-4">
-          <div className="max-w-4xl mx-auto text-center">
-            <h2 className="text-3xl md:text-4xl font-bold text-neutral-800 mb-12">
-               Our Promise
-            </h2>
+      <section className="py-20 bg-gradient-to-br from-yellow-50 via-orange-50 to-red-50 relative overflow-hidden">
+        {/* Floating background elements */}
+        <div className="absolute inset-0 overflow-hidden">
+          <div className="absolute top-1/4 left-1/4 w-44 h-44 bg-gradient-to-br from-yellow-200/20 to-orange-200/20 rounded-full blur-3xl animate-pulse"></div>
+          <div className="absolute bottom-1/4 right-1/4 w-36 h-36 bg-gradient-to-br from-orange-200/20 to-red-200/20 rounded-full blur-3xl animate-pulse delay-1000"></div>
+        </div>
+
+        <div className="container mx-auto px-4 relative z-10">
+          <div className="max-w-6xl mx-auto">
+            <motion.div
+              initial={{ opacity: 0, y: 50 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8 }}
+              viewport={{ once: true }}
+              className="text-center mb-16"
+            >
+              <div className="inline-flex items-center space-x-2 bg-gradient-to-r from-yellow-500/20 to-orange-500/20 backdrop-blur-sm border border-yellow-300/20 rounded-full px-6 py-3 mb-6">
+                <FileText className="w-5 h-5 text-orange-600" />
+                <span className="text-orange-600 font-medium">Our Commitment</span>
+              </div>
+              <h2 className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-orange-600 to-red-600 bg-clip-text text-transparent mb-6">
+                Our Promise
+              </h2>
+              <div className="w-32 h-1 bg-gradient-to-r from-orange-500 to-red-500 mx-auto rounded-full"></div>
+            </motion.div>
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-              <div className="flex items-start space-x-4">
-                <div className="text-green-600 text-2xl"></div>
-                <p className="text-neutral-700 text-left">Transparent rates and real offers</p>
-              </div>
-              <div className="flex items-start space-x-4">
-                <div className="text-green-600 text-2xl"></div>
-                <p className="text-neutral-700 text-left">Data security and RBI-compliant partners</p>
-              </div>
-              <div className="flex items-start space-x-4">
-                <div className="text-green-600 text-2xl"></div>
-                <p className="text-neutral-700 text-left">Advisory you can trust, in your language</p>
-              </div>
-              <div className="flex items-start space-x-4">
-                <div className="text-green-600 text-2xl"></div>
-                <p className="text-neutral-700 text-left">Tools like EMI calculators and SIP plan calculators you can actually understand</p>
-              </div>
+              {[
+                {
+                  icon: CheckCircle,
+                  title: "Transparent rates and real offers",
+                  gradient: "from-blue-500 to-cyan-500",
+                  delay: 0
+                },
+                {
+                  icon: Shield,
+                  title: "Data security and RBI-compliant partners",
+                  gradient: "from-green-500 to-emerald-500",
+                  delay: 0.1
+                },
+                {
+                  icon: Heart,
+                  title: "Advisory you can trust, in your language",
+                  gradient: "from-purple-500 to-pink-500",
+                  delay: 0.2
+                },
+                {
+                  icon: Calculator,
+                  title: "Tools like EMI calculators and SIP plan calculators you can actually understand",
+                  gradient: "from-orange-500 to-red-500",
+                  delay: 0.3
+                }
+              ].map((promise, index) => (
+                <motion.div
+                  key={index}
+                  initial={{ opacity: 0, y: 50 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.6, delay: promise.delay }}
+                  viewport={{ once: true }}
+                  whileHover={{ scale: 1.05, y: -10 }}
+                  className="group relative"
+                >
+                  <div className="bg-white/70 backdrop-blur-sm border border-white/40 p-8 rounded-2xl shadow-xl hover:shadow-2xl transition-all duration-500 hover:bg-white/90">
+                    <div className="flex items-start space-x-4">
+                      <div className={`w-16 h-16 bg-gradient-to-r ${promise.gradient} rounded-2xl flex items-center justify-center group-hover:scale-110 transition-all duration-300 shadow-lg flex-shrink-0`}>
+                        <promise.icon className="w-8 h-8 text-white" />
+                      </div>
+                      <div className="flex-1">
+                        <h3 className="text-lg font-bold text-gray-800 group-hover:text-orange-600 transition-colors duration-300">
+                          {promise.title}
+                        </h3>
+                      </div>
+                    </div>
+                    <div className={`w-0 h-1 bg-gradient-to-r ${promise.gradient} rounded-full mt-4 group-hover:w-full transition-all duration-500`}></div>
+                  </div>
+                </motion.div>
+              ))}
             </div>
+            
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9 }}
+              whileInView={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.8, delay: 0.5 }}
+              viewport={{ once: true }}
+              className="mt-16 text-center"
+            >
+              <div className="bg-gradient-to-r from-orange-600 to-red-600 p-10 rounded-3xl text-white shadow-2xl border border-orange-400/20 relative overflow-hidden">
+                {/* Animated background pattern */}
+                <div className="absolute inset-0 opacity-10">
+                  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white to-transparent transform -skew-x-12 animate-pulse"></div>
+                </div>
+                
+                <div className="relative z-10">
+                  <motion.div
+                    initial={{ scale: 0 }}
+                    whileInView={{ scale: 1 }}
+                    transition={{ duration: 0.6, delay: 0.7 }}
+                    viewport={{ once: true }}
+                    className="inline-flex items-center space-x-3 mb-6"
+                  >
+                    <div className="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center">
+                      <Star className="w-6 h-6 text-white animate-pulse" />
+                    </div>
+                    <h3 className="text-2xl md:text-3xl font-bold">Built on Trust, Powered by Technology</h3>
+                    <div className="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center">
+                      <Award className="w-6 h-6 text-white animate-pulse" />
+                    </div>
+                  </motion.div>
+                </div>
+              </div>
+            </motion.div>
           </div>
         </div>
       </section>
