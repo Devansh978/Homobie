@@ -14,7 +14,7 @@ const SEO = ({
     <link rel="canonical" href={url} />
     <meta name="robots" content="index, follow" />
     <meta name="author" content="HomoBie Team" />
-    <meta name="keywords" content="Home Loan, Loan Against Property, LAP, Balance Transfer, HomoBie, Low EMI Loan, Online Loan Application" />
+    <meta name="keywords" content="Home Loan, Loan Against Property, LAP, Balance Transfer, Homobie, Low EMI Loan, Online Loan Application" />
 
     {/* Open Graph / Facebook */}
     <meta property="og:type" content="website" />

@@ -38,8 +38,17 @@ export default function HomePage() {
                 A simpler,  {" "}
                 <span className="text-[#FFB800]">smarter,</span> and fairer way to finance your future.
               </h1>
-              <p className="text-lg text-neutral-100">
-                At Homobie, we’re transforming the way India experiences financial access—starting with smarter home loans, flexible loan against property options, and wealth-building tools like SIP investment planning.
+                <h4 className="text-2xl md:text-3xl font-bold leading-tight">
+                  At  {" "}
+                  <span className="text-[#FFB800]">Homobie,</span> </h4>
+                  <p className="text-lg text-neutral-100"> we’re transforming the way India experiences financial access—starting with smarter home loans, flexible loan against property options, and wealth-building tools like SIP investment planning.
+                <br />
+                <br />
+We believe finance shouldn’t be confusing, biased, or built only for the  privileged. Whether you’re self-employed, managing household income, or navigating loans for the first time, Homobie is here to connect you with financial solutions that are practical, transparent, and built for your life.
+                <br />
+                <br />
+                Through our digital-first platform, zero-cost consultations, and real-time tools like our free EMI calculator online and SIP calculator online, we help every borrower make confident, informed decisions.
+                
               </p>
               <div className="pt-4 flex flex-wrap gap-4">
                 <Link href="/loan-application?type=home-loan">
@@ -94,35 +103,322 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Features Section */}
+      {/* Built for People Section */}
       <section className="py-16 bg-white">
         <div className="container mx-auto px-4">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl font-bold text-neutral-800 mb-4">
-              Why Choose Homobie?
-            </h2>
-            <p className="text-neutral-600 max-w-2xl mx-auto">
-              Our comprehensive financial solutions are designed to provide
-              maximum value and flexibility for your needs.
-            </p>
+          <div className="max-w-4xl mx-auto">
+            <div className="text-center mb-12">
+              <h2 className="text-3xl md:text-4xl font-bold text-neutral-800 mb-6">
+                🔹 Built for People, Not Just Paperwork
+              </h2>
+            </div>
+            
+            <div className="prose prose-lg mx-auto text-neutral-700 leading-relaxed">
+              <p className="text-lg mb-6">
+                In India, applying for a loan often means dealing with outdated systems, long waits, and biased approvals. Most platforms still cater to only high-credit-score, salaried applicants.
+              </p>
+              
+              <div className="bg-neutral-50 p-6 rounded-lg my-8">
+                <p className="mb-4 font-medium">But what if you're self-employed with variable income?</p>
+                <p className="mb-4 font-medium">What if you don't have a credit card or haven't taken loans before?</p>
+                <p className="mb-4 font-medium">What if you're financially capable but excluded by the system?</p>
+              </div>
+              
+              <p className="text-xl font-semibold text-[#5f4411] mb-6">
+                That's where Homobie steps in.
+              </p>
+              
+              <p className="text-lg">
+                We make things simple. Whether you're comparing mortgage loan options, calculating repayment with our EMI calculator, or exploring a balance transfer credit card, our platform is here to guide—not sell. We treat you like a person, not a profile.
+              </p>
+            </div>
           </div>
+        </div>
+      </section>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <FeatureCard
-              icon={Zap}
-              title="Instant Approval"
-              description="Get pre-approved for your loan in minutes, not days, with our streamlined application process."
-            />
-            <FeatureCard
-              icon={Percent}
-              title="Competitive Rates"
-              description="Our partnerships with leading financial institutions ensure you get the most competitive interest rates available."
-            />
-            <FeatureCard
-              icon={UserCheck}
-              title="Expert Guidance"
-              description="Our financial consultants provide personalized advice to help you make informed decisions."
-            />
+      {/* What We Do Section */}
+      <section className="py-16 bg-neutral-50">
+        <div className="container mx-auto px-4">
+          <div className="max-w-5xl mx-auto">
+            <div className="text-center mb-12">
+              <h2 className="text-3xl md:text-4xl font-bold text-neutral-800 mb-6">
+                🔹 What We Do
+              </h2>
+              <p className="text-lg text-neutral-700 max-w-3xl mx-auto">
+                Homobie is a next-gen financial platform built around home loans, loan against property loans, and smart repayment strategies powered by SIP plans. We serve real people with real goals—not just those who fit into boxes.
+              </p>
+            </div>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-12">
+              <div className="bg-white p-8 rounded-xl shadow-sm border border-neutral-100">
+                <div className="flex items-start space-x-4">
+                  <div className="text-green-600 text-2xl">✅</div>
+                  <div>
+                    <h3 className="text-xl font-semibold text-neutral-800 mb-3">Home Loan Advisory</h3>
+                    <p className="text-neutral-600">Personalized guidance to help you find the right lender, the right amount, and the right terms</p>
+                  </div>
+                </div>
+              </div>
+              
+              <div className="bg-white p-8 rounded-xl shadow-sm border border-neutral-100">
+                <div className="flex items-start space-x-4">
+                  <div className="text-green-600 text-2xl">✅</div>
+                  <div>
+                    <h3 className="text-xl font-semibold text-neutral-800 mb-3">Loans Against Property</h3>
+                    <p className="text-neutral-600">Unlock the value of your property for personal or business needs</p>
+                  </div>
+                </div>
+              </div>
+              
+              <div className="bg-white p-8 rounded-xl shadow-sm border border-neutral-100">
+                <div className="flex items-start space-x-4">
+                  <div className="text-green-600 text-2xl">✅</div>
+                  <div>
+                    <h3 className="text-xl font-semibold text-neutral-800 mb-3">SIP-Linked Repayment Planning</h3>
+                    <p className="text-neutral-600">An innovative way to repay your loan and build long-term wealth through monthly investments</p>
+                  </div>
+                </div>
+              </div>
+              
+              <div className="bg-white p-8 rounded-xl shadow-sm border border-neutral-100">
+                <div className="flex items-start space-x-4">
+                  <div className="text-green-600 text-2xl">✅</div>
+                  <div>
+                    <h3 className="text-xl font-semibold text-neutral-800 mb-3">Zero-Fee Digital Consultation</h3>
+                    <p className="text-neutral-600">No cost, no pressure, no agents—just expert, honest advice</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <div className="text-center bg-[#5f4411] text-white p-8 rounded-xl">
+              <h3 className="text-2xl font-bold mb-4">Zero-Fee Consultation – 100% unbiased, 100% online</h3>
+              <p className="text-lg opacity-90">
+                We partner directly with India's top banks and NBFCs, cutting out commission-driven agents and helping you find clarity instead of confusion.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Mission Section */}
+      <section className="py-16 bg-white">
+        <div className="container mx-auto px-4">
+          <div className="max-w-4xl mx-auto text-center">
+            <h2 className="text-3xl md:text-4xl font-bold text-neutral-800 mb-8">
+              🔹 Our Mission
+            </h2>
+            
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12">
+              <div className="p-6">
+                <div className="text-4xl mb-4">🌉</div>
+                <p className="text-neutral-700">Bridge the financial literacy gap in home financing</p>
+              </div>
+              <div className="p-6">
+                <div className="text-4xl mb-4">🔧</div>
+                <p className="text-neutral-700">Eliminate middleman exploitation through technology integration</p>
+              </div>
+              <div className="p-6">
+                <div className="text-4xl mb-4">💪</div>
+                <p className="text-neutral-700">Empower every Indian with a clear, personalized, and strategic loan repayment plan</p>
+              </div>
+            </div>
+            
+            <div className="bg-gradient-to-r from-[#5f4411] to-[#34445f] text-white p-8 rounded-xl">
+              <h3 className="text-2xl md:text-3xl font-bold mb-4">
+                With Homobie, homeownership isn't just affordable—
+                <span className="text-[#FFB800]">it's financially smart</span>
+              </h3>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Vision Section */}
+      <section className="py-16 bg-neutral-50">
+        <div className="container mx-auto px-4">
+          <div className="max-w-4xl mx-auto">
+            <div className="text-center mb-12">
+              <h2 className="text-3xl md:text-4xl font-bold text-neutral-800 mb-6">
+                🔹 Our Vision
+              </h2>
+              <p className="text-lg text-neutral-700">
+                We see a future where every Indian has equal access to:
+              </p>
+            </div>
+            
+            <div className="space-y-6 mb-12">
+              <div className="flex items-start space-x-4 bg-white p-6 rounded-lg">
+                <div className="text-2xl">🔍</div>
+                <p className="text-neutral-700">Transparent credit options like loan against property and mortgage loans</p>
+              </div>
+              <div className="flex items-start space-x-4 bg-white p-6 rounded-lg">
+                <div className="text-2xl">🧮</div>
+                <p className="text-neutral-700">Easy-to-use planning tools like the free EMI calculator online and SIP calculator online</p>
+              </div>
+              <div className="flex items-start space-x-4 bg-white p-6 rounded-lg">
+                <div className="text-2xl">💡</div>
+                <p className="text-neutral-700">Clear guidance on responsible borrowing, smart investing, and real-time financial decisions</p>
+              </div>
+            </div>
+            
+            <div className="text-center">
+              <p className="text-lg text-neutral-700">
+                Our goal is to empower borrowers to build wealth, repay smarter, and confidently manage everything from balance transfers to SIP investments—all in one place.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Why Choose Homobie Section */}
+      <section className="py-16 bg-white">
+        <div className="container mx-auto px-4">
+          <div className="max-w-5xl mx-auto">
+            <div className="text-center mb-12">
+              <h2 className="text-3xl md:text-4xl font-bold text-neutral-800 mb-6">
+                🔹 Why Choose Homobie?
+              </h2>
+              <p className="text-lg text-neutral-700 max-w-3xl mx-auto">
+                Unlike traditional DSAs or lead-gen portals, Homobie is a human-first platform. No sales pressure. No hidden agendas. Just financial services that put you first.
+              </p>
+            </div>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+              <div className="bg-neutral-50 p-8 rounded-xl">
+                <div className="flex items-start space-x-4 mb-4">
+                  <div className="text-3xl">💬</div>
+                  <h3 className="text-xl font-semibold text-neutral-800">Real Guidance, Not Sales</h3>
+                </div>
+                <p className="text-neutral-700">We explain loan terms and SIP strategies clearly—so you can choose, not be sold to.</p>
+              </div>
+              
+              <div className="bg-neutral-50 p-8 rounded-xl">
+                <div className="flex items-start space-x-4 mb-4">
+                  <div className="text-3xl">🤝</div>
+                  <h3 className="text-xl font-semibold text-neutral-800">Zero Agents. No Hidden Fees.</h3>
+                </div>
+                <p className="text-neutral-700">What you see is what you get. We work with banks and NBFCs directly.</p>
+              </div>
+              
+              <div className="bg-neutral-50 p-8 rounded-xl">
+                <div className="flex items-start space-x-4 mb-4">
+                  <div className="text-3xl">📈</div>
+                  <h3 className="text-xl font-semibold text-neutral-800">Smarter Repayment with SIP + EMI</h3>
+                </div>
+                <p className="text-neutral-700">We help you plan SIP investments that grow while you repay, using our built-in SIP calculator and expert guidance.</p>
+              </div>
+              
+              <div className="bg-neutral-50 p-8 rounded-xl">
+                <div className="flex items-start space-x-4 mb-4">
+                  <div className="text-3xl">📲</div>
+                  <h3 className="text-xl font-semibold text-neutral-800">100% Digital and Paper-Lite</h3>
+                </div>
+                <p className="text-neutral-700">From applying for a loan against property to exploring credit card balance transfers, everything is managed on your mobile.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Who We Serve Section */}
+      <section className="py-16 bg-neutral-50">
+        <div className="container mx-auto px-4">
+          <div className="max-w-4xl mx-auto text-center">
+            <h2 className="text-3xl md:text-4xl font-bold text-neutral-800 mb-12">
+              🔹 Who We Serve
+            </h2>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              <div className="bg-white p-6 rounded-lg shadow-sm">
+                <div className="text-3xl mb-4">👨‍💼</div>
+                <h3 className="font-semibold text-neutral-800 mb-2">Self-employed professionals</h3>
+              </div>
+              <div className="bg-white p-6 rounded-lg shadow-sm">
+                <div className="text-3xl mb-4">🏠</div>
+                <h3 className="font-semibold text-neutral-800 mb-2">First-time homebuyers</h3>
+              </div>
+              <div className="bg-white p-6 rounded-lg shadow-sm">
+                <div className="text-3xl mb-4">📊</div>
+                <h3 className="font-semibold text-neutral-800 mb-2">Borrowers with thin or no credit history</h3>
+              </div>
+              <div className="bg-white p-6 rounded-lg shadow-sm">
+                <div className="text-3xl mb-4">🏢</div>
+                <h3 className="font-semibold text-neutral-800 mb-2">Property owners exploring loan against property loans</h3>
+              </div>
+              <div className="bg-white p-6 rounded-lg shadow-sm">
+                <div className="text-3xl mb-4">💳</div>
+                <h3 className="font-semibold text-neutral-800 mb-2">People interested in cash transfer, balance transfer credit card options</h3>
+              </div>
+              <div className="bg-white p-6 rounded-lg shadow-sm">
+                <div className="text-3xl mb-4">📈</div>
+                <h3 className="font-semibold text-neutral-800 mb-2">Long-term SIP investment enthusiasts</h3>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Our Promise Section */}
+      <section className="py-16 bg-white">
+        <div className="container mx-auto px-4">
+          <div className="max-w-4xl mx-auto text-center">
+            <h2 className="text-3xl md:text-4xl font-bold text-neutral-800 mb-12">
+              🔹 Our Promise
+            </h2>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+              <div className="flex items-start space-x-4">
+                <div className="text-green-600 text-2xl">✅</div>
+                <p className="text-neutral-700 text-left">Transparent rates and real offers</p>
+              </div>
+              <div className="flex items-start space-x-4">
+                <div className="text-green-600 text-2xl">✅</div>
+                <p className="text-neutral-700 text-left">Data security and RBI-compliant partners</p>
+              </div>
+              <div className="flex items-start space-x-4">
+                <div className="text-green-600 text-2xl">✅</div>
+                <p className="text-neutral-700 text-left">Advisory you can trust, in your language</p>
+              </div>
+              <div className="flex items-start space-x-4">
+                <div className="text-green-600 text-2xl">✅</div>
+                <p className="text-neutral-700 text-left">Tools like EMI calculators and SIP plan calculators you can actually understand</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Join Us Section */}
+      <section className="py-16 bg-gradient-to-r from-[#5f4411] to-[#34445f] text-white">
+        <div className="container mx-auto px-4">
+          <div className="max-w-4xl mx-auto text-center">
+            <h2 className="text-3xl md:text-4xl font-bold mb-8">
+              🔹 Join Us
+            </h2>
+            
+            <div className="space-y-6 mb-12">
+              <p className="text-xl">
+                India's borrowers deserve better—and Homobie is building that future.
+              </p>
+              <p className="text-lg opacity-90">
+                If you've ever felt excluded, misinformed, or unsure, we're here to change that.
+              </p>
+            </div>
+            
+            <div className="bg-white/10 p-8 rounded-xl mb-8">
+              <h3 className="text-2xl font-bold mb-4 text-[#FFB800]">
+                BOOK YOUR FREE LOAN CONSULTATION TODAY
+              </h3>
+              <p className="text-lg mb-6">
+                and take the first step toward smarter financial freedom.
+              </p>
+              <Link href="/consultation">
+                <Button className="px-8 py-4 bg-[#FFB800] text-neutral-900 font-semibold text-lg rounded-lg hover:bg-[#D99B00] transition-colors">
+                  Let's Get Started →
+                </Button>
+              </Link>
+            </div>
           </div>
         </div>
       </section>
