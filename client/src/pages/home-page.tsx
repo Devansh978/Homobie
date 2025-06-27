@@ -4,16 +4,28 @@ import { ChatbotButton } from "@/components/layout/chatbot-button";
 import { LoanCalculator } from "@/components/ui/calculator";
 import { SipCalculator } from "@/components/ui/sip-calculator";
 import { LoanCard } from "@/components/layout/loan-card";
-import { TestimonialCard } from "@/components/layout/testimonial-card";
 import { FeatureCard } from "@/components/layout/feature-card";
 import { Button } from "@/components/ui/button";
+import { motion } from "framer-motion";
 import { 
   Zap, 
   Percent, 
   UserCheck, 
   ChartLine, 
   Calendar, 
-  DollarSign
+  DollarSign,
+  Home,
+  Building,
+  TrendingUp,
+  Shield,
+  Users,
+  Award,
+  CheckCircle,
+  ArrowRight,
+  Sparkles,
+  Target,
+  Heart,
+  Star
 } from "lucide-react";
 
 export default function HomePage() {
@@ -80,9 +92,9 @@ We believe finance shouldn’t be confusing, biased, or built only for the  priv
                     alt="User"
                   />
                 </div> */}
-                <p className="text-sm text-neutral-200">
+                {/* <p className="text-sm text-neutral-200">
                   Trusted by Many customers
-                </p>
+                </p> */}
               </div>
             </div>
 
@@ -104,99 +116,288 @@ We believe finance shouldn’t be confusing, biased, or built only for the  priv
       </section>
 
       {/* Built for People Section */}
-      <section className="py-16 bg-white">
-        <div className="container mx-auto px-4">
-          <div className="max-w-4xl mx-auto">
-            <div className="text-center mb-12">
-              <h2 className="text-3xl md:text-4xl font-bold text-neutral-800 mb-6">
-                🔹 Built for People, Not Just Paperwork
-              </h2>
-            </div>
-            
-            <div className="prose prose-lg mx-auto text-neutral-700 leading-relaxed">
-              <p className="text-lg mb-6">
-                In India, applying for a loan often means dealing with outdated systems, long waits, and biased approvals. Most platforms still cater to only high-credit-score, salaried applicants.
-              </p>
-              
-              <div className="bg-neutral-50 p-6 rounded-lg my-8">
-                <p className="mb-4 font-medium">But what if you're self-employed with variable income?</p>
-                <p className="mb-4 font-medium">What if you don't have a credit card or haven't taken loans before?</p>
-                <p className="mb-4 font-medium">What if you're financially capable but excluded by the system?</p>
+      <section className="py-20 bg-gradient-to-br from-white via-blue-50 to-amber-50 relative overflow-hidden">
+        {/* Floating background elements */}
+        <div className="absolute inset-0 overflow-hidden">
+          <div className="absolute -top-40 -right-40 w-80 h-80 bg-gradient-to-br from-blue-200/20 to-amber-200/20 rounded-full blur-3xl animate-pulse"></div>
+          <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-gradient-to-br from-amber-200/20 to-blue-200/20 rounded-full blur-3xl animate-pulse delay-1000"></div>
+        </div>
+        
+        <div className="container mx-auto px-4 relative z-10">
+          <div className="max-w-6xl mx-auto">
+            <motion.div 
+              initial={{ opacity: 0, y: 50 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8 }}
+              viewport={{ once: true }}
+              className="text-center mb-16"
+            >
+              <div className="inline-flex items-center justify-center p-2 bg-gradient-to-r from-[#5f4411] to-[#FFB800] rounded-full mb-6">
+                <Heart className="w-8 h-8 text-white animate-pulse" />
               </div>
+              <h2 className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-[#5f4411] to-[#34445f] bg-clip-text text-transparent mb-6">
+                Built for People, Not Just Paperwork
+              </h2>
+              <div className="w-24 h-1 bg-gradient-to-r from-[#5f4411] to-[#FFB800] mx-auto rounded-full"></div>
+            </motion.div>
+            
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+              <motion.div 
+                initial={{ opacity: 0, x: -50 }}
+                whileInView={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.8, delay: 0.2 }}
+                viewport={{ once: true }}
+                className="space-y-8"
+              >
+                <div className="bg-white/70 backdrop-blur-sm p-8 rounded-2xl shadow-xl border border-white/20 hover:shadow-2xl transition-all duration-500 hover:scale-[1.02]">
+                  <p className="text-lg text-neutral-700 leading-relaxed mb-6">
+                    In India, applying for a loan often means dealing with <span className="font-semibold text-red-600">outdated systems</span>, <span className="font-semibold text-red-600">long waits</span>, and <span className="font-semibold text-red-600">biased approvals</span>. Most platforms still cater to only high-credit-score, salaried applicants.
+                  </p>
+                  
+                  <div className="space-y-4">
+                    {[
+                      "But what if you're self-employed with variable income?",
+                      "What if you don't have a credit card or haven't taken loans before?", 
+                      "What if you're financially capable but excluded by the system?"
+                    ].map((question, index) => (
+                      <motion.div
+                        key={index}
+                        initial={{ opacity: 0, x: -20 }}
+                        whileInView={{ opacity: 1, x: 0 }}
+                        transition={{ duration: 0.5, delay: 0.1 * index }}
+                        viewport={{ once: true }}
+                        className="flex items-start space-x-3 p-4 bg-gradient-to-r from-red-50 to-orange-50 rounded-lg border-l-4 border-red-400"
+                      >
+                        <div className="w-2 h-2 rounded-full bg-red-400 mt-3 animate-pulse"></div>
+                        <p className="font-medium text-neutral-700">{question}</p>
+                      </motion.div>
+                    ))}
+                  </div>
+                </div>
+                
+                <motion.div
+                  initial={{ opacity: 0, scale: 0.9 }}
+                  whileInView={{ opacity: 1, scale: 1 }}
+                  transition={{ duration: 0.6, delay: 0.4 }}
+                  viewport={{ once: true }}
+                  className="bg-gradient-to-r from-[#5f4411] to-[#34445f] p-8 rounded-2xl text-white shadow-2xl relative overflow-hidden"
+                >
+                  <div className="absolute inset-0 bg-gradient-to-r from-yellow-400/10 to-blue-400/10 animate-pulse"></div>
+                  <div className="relative z-10">
+                    <div className="flex items-center space-x-3 mb-4">
+                      <Sparkles className="w-8 h-8 text-[#FFB800] animate-spin" />
+                      <h3 className="text-2xl font-bold">That's where Homobie steps in.</h3>
+                    </div>
+                    <p className="text-lg text-white/90">
+                      We make things simple. Whether you're comparing mortgage loan options, calculating repayment with our EMI calculator, or exploring a balance transfer credit card, our platform is here to guide—not sell. We treat you like a person, not a profile.
+                    </p>
+                  </div>
+                </motion.div>
+              </motion.div>
               
-              <p className="text-xl font-semibold text-[#5f4411] mb-6">
-                That's where Homobie steps in.
-              </p>
-              
-              <p className="text-lg">
-                We make things simple. Whether you're comparing mortgage loan options, calculating repayment with our EMI calculator, or exploring a balance transfer credit card, our platform is here to guide—not sell. We treat you like a person, not a profile.
-              </p>
+              <motion.div
+                initial={{ opacity: 0, x: 50 }}
+                whileInView={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.8, delay: 0.3 }}
+                viewport={{ once: true }}
+                className="relative"
+              >
+                <div className="bg-gradient-to-br from-white to-blue-50 p-8 rounded-3xl shadow-2xl border border-white/30">
+                  <div className="grid grid-cols-2 gap-6">
+                    {[
+                      { icon: Home, label: "Home Loans", color: "from-blue-500 to-blue-600", delay: 0 },
+                      { icon: Building, label: "Property Loans", color: "from-green-500 to-green-600", delay: 0.1 },
+                      { icon: TrendingUp, label: "SIP Planning", color: "from-purple-500 to-purple-600", delay: 0.2 },
+                      { icon: Shield, label: "Secure Process", color: "from-orange-500 to-orange-600", delay: 0.3 }
+                    ].map((item, index) => (
+                      <motion.div
+                        key={index}
+                        initial={{ opacity: 0, scale: 0.8 }}
+                        whileInView={{ opacity: 1, scale: 1 }}
+                        transition={{ duration: 0.5, delay: item.delay }}
+                        viewport={{ once: true }}
+                        whileHover={{ scale: 1.05, rotate: 2 }}
+                        className="bg-white p-6 rounded-xl shadow-lg border border-gray-100 hover:shadow-xl transition-all duration-300"
+                      >
+                        <div className={`w-12 h-12 bg-gradient-to-r ${item.color} rounded-lg flex items-center justify-center mb-3 mx-auto`}>
+                          <item.icon className="w-6 h-6 text-white" />
+                        </div>
+                        <p className="text-sm font-semibold text-gray-700 text-center">{item.label}</p>
+                      </motion.div>
+                    ))}
+                  </div>
+                  
+                  <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.6, delay: 0.5 }}
+                    viewport={{ once: true }}
+                    className="mt-8 text-center"
+                  >
+                    <div className="inline-flex items-center space-x-2 bg-gradient-to-r from-[#FFB800] to-[#5f4411] text-white px-6 py-3 rounded-full shadow-lg">
+                      <Users className="w-5 h-5" />
+                      <span className="font-semibold">Human-First Approach</span>
+                    </div>
+                  </motion.div>
+                </div>
+              </motion.div>
             </div>
           </div>
         </div>
       </section>
 
       {/* What We Do Section */}
-      <section className="py-16 bg-neutral-50">
-        <div className="container mx-auto px-4">
-          <div className="max-w-5xl mx-auto">
-            <div className="text-center mb-12">
-              <h2 className="text-3xl md:text-4xl font-bold text-neutral-800 mb-6">
-                🔹 What We Do
+      <section className="py-20 bg-gradient-to-br from-gray-900 via-blue-900 to-purple-900 relative overflow-hidden">
+        {/* Animated background */}
+        <div className="absolute inset-0">
+          <div className="absolute top-1/4 left-1/4 w-32 h-32 bg-blue-500/10 rounded-full blur-xl animate-pulse"></div>
+          <div className="absolute top-3/4 right-1/4 w-24 h-24 bg-purple-500/10 rounded-full blur-xl animate-pulse delay-700"></div>
+          <div className="absolute bottom-1/4 left-1/2 w-20 h-20 bg-cyan-500/10 rounded-full blur-xl animate-pulse delay-1000"></div>
+        </div>
+        
+        <div className="container mx-auto px-4 relative z-10">
+          <div className="max-w-6xl mx-auto">
+            <motion.div 
+              initial={{ opacity: 0, y: 50 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8 }}
+              viewport={{ once: true }}
+              className="text-center mb-16"
+            >
+              <div className="inline-flex items-center space-x-2 bg-gradient-to-r from-blue-500/20 to-purple-500/20 backdrop-blur-sm border border-white/10 rounded-full px-6 py-3 mb-6">
+                <Target className="w-5 h-5 text-blue-400" />
+                <span className="text-blue-400 font-medium">Our Services</span>
+              </div>
+              <h2 className="text-4xl md:text-5xl font-bold text-white mb-6">
+                What We Do
               </h2>
-              <p className="text-lg text-neutral-700 max-w-3xl mx-auto">
+              <p className="text-xl text-blue-100 max-w-4xl mx-auto leading-relaxed">
                 Homobie is a next-gen financial platform built around home loans, loan against property loans, and smart repayment strategies powered by SIP plans. We serve real people with real goals—not just those who fit into boxes.
               </p>
+              <div className="w-32 h-1 bg-gradient-to-r from-blue-400 to-purple-400 mx-auto rounded-full mt-6"></div>
+            </motion.div>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-16">
+              {[
+                {
+                  icon: Home,
+                  title: "Home Loan Advisory",
+                  description: "Personalized guidance to help you find the right lender, the right amount, and the right terms",
+                  gradient: "from-blue-500 to-cyan-500",
+                  delay: 0
+                },
+                {
+                  icon: Building,
+                  title: "Loans Against Property",
+                  description: "Unlock the value of your property for personal or business needs",
+                  gradient: "from-green-500 to-emerald-500",
+                  delay: 0.1
+                },
+                {
+                  icon: TrendingUp,
+                  title: "SIP-Linked Repayment Planning",
+                  description: "An innovative way to repay your loan and build long-term wealth through monthly investments",
+                  gradient: "from-purple-500 to-pink-500",
+                  delay: 0.2
+                },
+                {
+                  icon: Shield,
+                  title: "Zero-Fee Digital Consultation",
+                  description: "No cost, no pressure, no agents—just expert, honest advice",
+                  gradient: "from-orange-500 to-red-500",
+                  delay: 0.3
+                }
+              ].map((service, index) => (
+                <motion.div
+                  key={index}
+                  initial={{ opacity: 0, y: 50 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.6, delay: service.delay }}
+                  viewport={{ once: true }}
+                  whileHover={{ scale: 1.05, y: -10 }}
+                  className="group relative"
+                >
+                  <div className="bg-white/10 backdrop-blur-sm border border-white/20 p-8 rounded-2xl hover:bg-white/15 transition-all duration-500 shadow-2xl">
+                    <div className="relative">
+                      <div className={`w-16 h-16 bg-gradient-to-r ${service.gradient} rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-all duration-300 shadow-lg`}>
+                        <service.icon className="w-8 h-8 text-white" />
+                      </div>
+                      <div className="absolute -top-2 -right-2 w-6 h-6 bg-gradient-to-r from-green-400 to-green-500 rounded-full flex items-center justify-center group-hover:scale-125 transition-all duration-300">
+                        <CheckCircle className="w-4 h-4 text-white" />
+                      </div>
+                    </div>
+                    <h3 className="text-xl font-bold text-white mb-4 group-hover:text-blue-200 transition-colors duration-300">
+                      {service.title}
+                    </h3>
+                    <p className="text-blue-100 leading-relaxed group-hover:text-white transition-colors duration-300">
+                      {service.description}
+                    </p>
+                    <div className={`w-0 h-1 bg-gradient-to-r ${service.gradient} rounded-full mt-4 group-hover:w-full transition-all duration-500`}></div>
+                  </div>
+                </motion.div>
+              ))}
             </div>
             
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-12">
-              <div className="bg-white p-8 rounded-xl shadow-sm border border-neutral-100">
-                <div className="flex items-start space-x-4">
-                  <div className="text-green-600 text-2xl">✅</div>
-                  <div>
-                    <h3 className="text-xl font-semibold text-neutral-800 mb-3">Home Loan Advisory</h3>
-                    <p className="text-neutral-600">Personalized guidance to help you find the right lender, the right amount, and the right terms</p>
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9 }}
+              whileInView={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.8, delay: 0.4 }}
+              viewport={{ once: true }}
+              className="relative"
+            >
+              <div className="bg-gradient-to-r from-[#FFB800] to-[#5f4411] p-10 rounded-3xl text-white shadow-2xl border border-yellow-400/20 relative overflow-hidden">
+                {/* Animated background pattern */}
+                <div className="absolute inset-0 opacity-10">
+                  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white to-transparent transform -skew-x-12 animate-pulse"></div>
+                </div>
+                
+                <div className="relative z-10 text-center">
+                  <motion.div
+                    initial={{ scale: 0 }}
+                    whileInView={{ scale: 1 }}
+                    transition={{ duration: 0.6, delay: 0.6 }}
+                    viewport={{ once: true }}
+                    className="inline-flex items-center space-x-3 mb-6"
+                  >
+                    <div className="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center">
+                      <Star className="w-6 h-6 text-white animate-pulse" />
+                    </div>
+                    <h3 className="text-3xl font-bold">Zero-Fee Consultation</h3>
+                    <div className="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center">
+                      <Award className="w-6 h-6 text-white animate-pulse" />
+                    </div>
+                  </motion.div>
+                  
+                  <div className="flex items-center justify-center space-x-4 mb-6">
+                    <div className="bg-white/20 px-4 py-2 rounded-full">
+                      <span className="text-lg font-semibold">100% unbiased</span>
+                    </div>
+                    <div className="bg-white/20 px-4 py-2 rounded-full">
+                      <span className="text-lg font-semibold">100% online</span>
+                    </div>
                   </div>
+                  
+                  <p className="text-xl text-white/90 max-w-4xl mx-auto leading-relaxed">
+                    We partner directly with India's top banks and NBFCs, cutting out commission-driven agents and helping you find clarity instead of confusion.
+                  </p>
+                  
+                  <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.6, delay: 0.8 }}
+                    viewport={{ once: true }}
+                    className="mt-8"
+                  >
+                    <Link href="/consultation">
+                      <Button className="bg-white text-[#5f4411] hover:bg-gray-100 px-8 py-4 text-lg font-semibold rounded-full shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:scale-105">
+                        Start Free Consultation
+                        <ArrowRight className="w-5 h-5 ml-2" />
+                      </Button>
+                    </Link>
+                  </motion.div>
                 </div>
               </div>
-              
-              <div className="bg-white p-8 rounded-xl shadow-sm border border-neutral-100">
-                <div className="flex items-start space-x-4">
-                  <div className="text-green-600 text-2xl">✅</div>
-                  <div>
-                    <h3 className="text-xl font-semibold text-neutral-800 mb-3">Loans Against Property</h3>
-                    <p className="text-neutral-600">Unlock the value of your property for personal or business needs</p>
-                  </div>
-                </div>
-              </div>
-              
-              <div className="bg-white p-8 rounded-xl shadow-sm border border-neutral-100">
-                <div className="flex items-start space-x-4">
-                  <div className="text-green-600 text-2xl">✅</div>
-                  <div>
-                    <h3 className="text-xl font-semibold text-neutral-800 mb-3">SIP-Linked Repayment Planning</h3>
-                    <p className="text-neutral-600">An innovative way to repay your loan and build long-term wealth through monthly investments</p>
-                  </div>
-                </div>
-              </div>
-              
-              <div className="bg-white p-8 rounded-xl shadow-sm border border-neutral-100">
-                <div className="flex items-start space-x-4">
-                  <div className="text-green-600 text-2xl">✅</div>
-                  <div>
-                    <h3 className="text-xl font-semibold text-neutral-800 mb-3">Zero-Fee Digital Consultation</h3>
-                    <p className="text-neutral-600">No cost, no pressure, no agents—just expert, honest advice</p>
-                  </div>
-                </div>
-              </div>
-            </div>
-            
-            <div className="text-center bg-[#5f4411] text-white p-8 rounded-xl">
-              <h3 className="text-2xl font-bold mb-4">Zero-Fee Consultation – 100% unbiased, 100% online</h3>
-              <p className="text-lg opacity-90">
-                We partner directly with India's top banks and NBFCs, cutting out commission-driven agents and helping you find clarity instead of confusion.
-              </p>
-            </div>
+            </motion.div>
           </div>
         </div>
       </section>
@@ -206,20 +407,20 @@ We believe finance shouldn’t be confusing, biased, or built only for the  priv
         <div className="container mx-auto px-4">
           <div className="max-w-4xl mx-auto text-center">
             <h2 className="text-3xl md:text-4xl font-bold text-neutral-800 mb-8">
-              🔹 Our Mission
+               Our Mission
             </h2>
             
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12">
               <div className="p-6">
-                <div className="text-4xl mb-4">🌉</div>
+                <div className="text-4xl mb-4"></div>
                 <p className="text-neutral-700">Bridge the financial literacy gap in home financing</p>
               </div>
               <div className="p-6">
-                <div className="text-4xl mb-4">🔧</div>
+                <div className="text-4xl mb-4"></div>
                 <p className="text-neutral-700">Eliminate middleman exploitation through technology integration</p>
               </div>
               <div className="p-6">
-                <div className="text-4xl mb-4">💪</div>
+                <div className="text-4xl mb-4"></div>
                 <p className="text-neutral-700">Empower every Indian with a clear, personalized, and strategic loan repayment plan</p>
               </div>
             </div>
@@ -240,7 +441,7 @@ We believe finance shouldn’t be confusing, biased, or built only for the  priv
           <div className="max-w-4xl mx-auto">
             <div className="text-center mb-12">
               <h2 className="text-3xl md:text-4xl font-bold text-neutral-800 mb-6">
-                🔹 Our Vision
+                 Our Vision
               </h2>
               <p className="text-lg text-neutral-700">
                 We see a future where every Indian has equal access to:
@@ -249,15 +450,15 @@ We believe finance shouldn’t be confusing, biased, or built only for the  priv
             
             <div className="space-y-6 mb-12">
               <div className="flex items-start space-x-4 bg-white p-6 rounded-lg">
-                <div className="text-2xl">🔍</div>
+                <div className="text-2xl"></div>
                 <p className="text-neutral-700">Transparent credit options like loan against property and mortgage loans</p>
               </div>
               <div className="flex items-start space-x-4 bg-white p-6 rounded-lg">
-                <div className="text-2xl">🧮</div>
+                <div className="text-2xl"></div>
                 <p className="text-neutral-700">Easy-to-use planning tools like the free EMI calculator online and SIP calculator online</p>
               </div>
               <div className="flex items-start space-x-4 bg-white p-6 rounded-lg">
-                <div className="text-2xl">💡</div>
+                <div className="text-2xl"></div>
                 <p className="text-neutral-700">Clear guidance on responsible borrowing, smart investing, and real-time financial decisions</p>
               </div>
             </div>
@@ -277,7 +478,7 @@ We believe finance shouldn’t be confusing, biased, or built only for the  priv
           <div className="max-w-5xl mx-auto">
             <div className="text-center mb-12">
               <h2 className="text-3xl md:text-4xl font-bold text-neutral-800 mb-6">
-                🔹 Why Choose Homobie?
+                 Why Choose Homobie?
               </h2>
               <p className="text-lg text-neutral-700 max-w-3xl mx-auto">
                 Unlike traditional DSAs or lead-gen portals, Homobie is a human-first platform. No sales pressure. No hidden agendas. Just financial services that put you first.
@@ -326,7 +527,7 @@ We believe finance shouldn’t be confusing, biased, or built only for the  priv
         <div className="container mx-auto px-4">
           <div className="max-w-4xl mx-auto text-center">
             <h2 className="text-3xl md:text-4xl font-bold text-neutral-800 mb-12">
-              🔹 Who We Serve
+               Who We Serve
             </h2>
             
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -364,24 +565,24 @@ We believe finance shouldn’t be confusing, biased, or built only for the  priv
         <div className="container mx-auto px-4">
           <div className="max-w-4xl mx-auto text-center">
             <h2 className="text-3xl md:text-4xl font-bold text-neutral-800 mb-12">
-              🔹 Our Promise
+               Our Promise
             </h2>
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
               <div className="flex items-start space-x-4">
-                <div className="text-green-600 text-2xl">✅</div>
+                <div className="text-green-600 text-2xl"></div>
                 <p className="text-neutral-700 text-left">Transparent rates and real offers</p>
               </div>
               <div className="flex items-start space-x-4">
-                <div className="text-green-600 text-2xl">✅</div>
+                <div className="text-green-600 text-2xl"></div>
                 <p className="text-neutral-700 text-left">Data security and RBI-compliant partners</p>
               </div>
               <div className="flex items-start space-x-4">
-                <div className="text-green-600 text-2xl">✅</div>
+                <div className="text-green-600 text-2xl"></div>
                 <p className="text-neutral-700 text-left">Advisory you can trust, in your language</p>
               </div>
               <div className="flex items-start space-x-4">
-                <div className="text-green-600 text-2xl">✅</div>
+                <div className="text-green-600 text-2xl"></div>
                 <p className="text-neutral-700 text-left">Tools like EMI calculators and SIP plan calculators you can actually understand</p>
               </div>
             </div>
@@ -394,7 +595,7 @@ We believe finance shouldn’t be confusing, biased, or built only for the  priv
         <div className="container mx-auto px-4">
           <div className="max-w-4xl mx-auto text-center">
             <h2 className="text-3xl md:text-4xl font-bold mb-8">
-              🔹 Join Us
+               Join Us
             </h2>
             
             <div className="space-y-6 mb-12">
@@ -424,7 +625,7 @@ We believe finance shouldn’t be confusing, biased, or built only for the  priv
       </section>
 
       {/* Loan Products Section */}
-      <section className="py-16 bg-neutral-50">
+      {/* <section className="py-16 bg-neutral-50">
         <div className="container mx-auto px-4">
           <div className="text-center mb-16">
             <h2 className="text-3xl font-bold text-neutral-800 mb-4">
@@ -480,10 +681,10 @@ We believe finance shouldn’t be confusing, biased, or built only for the  priv
             />
           </div>
         </div>
-      </section>
+      </section> */}
 
       {/* SIP Section */}
-      <section className="py-16 bg-white">
+      {/* <section className="py-16 bg-white">
         <div className="container mx-auto px-4">
           <div className="flex flex-col md:flex-row items-center">
             <div className="md:w-1/2 md:pr-12 mb-8 md:mb-0">
@@ -560,7 +761,7 @@ We believe finance shouldn’t be confusing, biased, or built only for the  priv
       </section>
 
       {/* Consultation Section */}
-      <section className="py-16 bg-primary/5">
+      {/* <section className="py-16 bg-primary/5">
         <div className="container mx-auto px-4">
           <div className="flex flex-col md:flex-row items-center">
             <div className="md:w-1/2 mb-8 md:mb-0">
@@ -588,7 +789,7 @@ We believe finance shouldn’t be confusing, biased, or built only for the  priv
             </div>
           </div>
         </div>
-      </section>
+      </section> */}
 
         {/* Testimonials Section  */}
       {/* <section className="py-16 bg-white">
@@ -627,7 +828,7 @@ We believe finance shouldn’t be confusing, biased, or built only for the  priv
       </section>  */}
 
       {/* CTA Section */}
-      <section className="py-16 bg-gradient-to-r from-primary to-[#004080] text-white">
+      {/* <section className="py-16 bg-gradient-to-r from-primary to-[#004080] text-white">
         <div className="container mx-auto px-4 text-center">
           <h2 className="text-3xl font-bold mb-6">
             Ready to Start Your Financial Journey?
@@ -654,7 +855,7 @@ We believe finance shouldn’t be confusing, biased, or built only for the  priv
             </Link>
           </div>
         </div>
-      </section>
+      </section> */}
 
       <ChatbotButton />
     </div>
