@@ -156,7 +156,7 @@ export default function ConsultationPage() {
       
       // Set the consultation ID and show the payment gateway
       setConsultationId(data.id);
-      setShowPayment(true);
+      setShowPayment(false);
     },
     onError: (error) => {
       console.error("Error creating consultation:", error);
@@ -167,7 +167,7 @@ export default function ConsultationPage() {
   // Handle payment success
   const handlePaymentSuccess = (paymentData: any) => {
     console.log("Payment successful:", paymentData);
-    setShowPayment(false);
+    setShowPayment(true);
     setIsSuccess(true);
     
     // Navigate to dashboard after a delay
@@ -230,14 +230,14 @@ export default function ConsultationPage() {
                   <CardContent>
                     <p className="mb-6">
                       Your consultation has been reserved. To confirm your booking, please complete the payment. 
-                      The consultation fee is ₹999 and includes personalized financial advice from our expert advisors.
+                      The consultation fee is ₹0 and includes personalized financial advice from our expert advisors.
                     </p>
                     <PaymentGateway
                       paymentType="consultation"
                       itemId={consultationId}
                       onSuccess={handlePaymentSuccess}
                       onFailure={handlePaymentFailure}
-                      buttonText="Pay ₹999 to Confirm Booking"
+                      buttonText="Pay ₹0 to Confirm Booking"
                       description="Secure payment via Razorpay"
                     />
                   </CardContent>
@@ -251,7 +251,7 @@ export default function ConsultationPage() {
                   </h1>
                   <p className="text-neutral-600 max-w-3xl mx-auto">
                     Our financial experts will help you understand your options and create a personalized plan to achieve your financial goals.
-                    <span className="block mt-2 text-sm font-semibold">Consultation fee: ₹999</span>
+                    <span className="block mt-2 text-sm font-semibold">Consultation fee: ₹0</span>
                   </p>
                 </div>
 

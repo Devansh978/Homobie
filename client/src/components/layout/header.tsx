@@ -23,7 +23,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { companyInfo } from "@/lib/company-info";
-import homobieLogo from "@/assets/wmremove-transformed - Edited.jpg";
+import homobieLogo from "/public/assets/wmremove-transformed - Edited.jpg";
 
 export function Header() {
   const [location] = useLocation();

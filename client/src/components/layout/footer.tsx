@@ -11,7 +11,7 @@ import {
   ArrowRight
 } from "lucide-react";
 import { companyInfo } from "@/lib/company-info";
-import homobieLogo from "@/assets/homobie-logo.png";
+import homobieLogo from "/assets/homobie-logo.png";
 
 export function Footer() {
   const currentYear = new Date().getFullYear();
