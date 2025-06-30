@@ -35,7 +35,8 @@ import {
   Globe,
   Handshake,
   FileText,
-  CheckSquare
+  CheckSquare,
+  IndianRupee
 } from "lucide-react";
 
 export default function HomePage() {
@@ -143,7 +144,7 @@ We believe finance shouldn’t be confusing, biased, or built only for the  priv
               className="text-center mb-16"
             >
               <div className="inline-flex items-center justify-center p-2 bg-gradient-to-r from-[#5f4411] to-[#FFB800] rounded-full mb-6">
-                <Heart className="w-8 h-8 text-white animate-pulse" />
+                <Home className="w-8 h-8 text-white animate-pulse" />
               </div>
               <h2 className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-[#5f4411] to-[#34445f] bg-clip-text text-transparent mb-6">
                 Built for People, Not Just Paperwork
@@ -246,7 +247,7 @@ We believe finance shouldn’t be confusing, biased, or built only for the  priv
                   >
                     <div className="inline-flex items-center space-x-2 bg-gradient-to-r from-[#FFB800] to-[#5f4411] text-white px-6 py-3 rounded-full shadow-lg">
                       <Users className="w-5 h-5" />
-                      <span className="font-semibold">Human-First Approach</span>
+                      <span className="font-semibold"></span>
                     </div>
                   </motion.div>
                 </div>
@@ -795,7 +796,7 @@ We believe finance shouldn’t be confusing, biased, or built only for the  priv
                   delay: 0.3
                 },
                 {
-                  icon: DollarSign,
+                  icon: IndianRupee,
                   title: "People interested in cash transfer, balance transfer credit card options",
                   gradient: "from-teal-500 to-cyan-500",
                   delay: 0.4
@@ -874,7 +875,7 @@ We believe finance shouldn’t be confusing, biased, or built only for the  priv
                   delay: 0.1
                 },
                 {
-                  icon: Heart,
+                  icon: Home,
                   title: "Advisory you can trust, in your language",
                   gradient: "from-purple-500 to-pink-500",
                   delay: 0.2
