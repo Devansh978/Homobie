@@ -1055,7 +1055,13 @@
 import React, { useState, useRef, useEffect } from "react";
 import { Link } from "wouter";
 import { motion, AnimatePresence, useScroll, useTransform } from "framer-motion";
-import { Button } from "@/components/ui/button";
+import  Button  from "@/components/ui/button";
+import * as THREE from "three";
+import  Canvas, useFrame, extend from '@react-three/fiber';
+import  OrbitControls, Text3D, useTexture, PerspectiveCamera, Environment from "@react-three/drei";
+import EffectComposer, Bloom, Glitch from "@react-three/postprocessing";
+import FontLoader from 'three/examples/jsm/loaders/FontLoader';
+import { TextGeometry } from 'three/examples/jsm/geometries/TextGeometry';
 import {
   ArrowRight,
   Calculator,
@@ -1074,107 +1080,198 @@ import {
   MoveRight,
 } from "lucide-react";
 
-// Removed 3D component - using regular animations instead
+extend({ TextGeometry });
 
-// Animated Floating Card Component
-const AnimatedCard = ({ children, delay = 0 }) => {
+// 3D Animated House Model
+const HouseModel = () => {
+  const meshRef = useRef();
+  const [hovered, setHover] = useState(false);
+
+  useFrame((state) => {
+    const time = state.clock.getElapsedTime();
+    meshRef.current.rotation.y = time * 0.2;
+    meshRef.current.position.y = Math.sin(time * 0.5) * 0.1;
+  });
+
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 50, rotate: -5 }}
-      whileInView={{ opacity: 1, y: 0, rotate: 0 }}
-      whileHover={{ y: -10, rotate: 1 }}
-      transition={{ duration: 0.6, delay }}
-      viewport={{ once: true }}
-      className="backdrop-blur-xl bg-black/5 rounded-2xl p-8 h-full relative overflow-hidden border border-black/10 shadow-lg"
+    <group ref={meshRef} onPointerOver={() => setHover(true)} onPointerOut={() => setHover(false)}>
+      <mesh castShadow receiveShadow>
+        <boxGeometry args={[1, 1, 1]} />
+        <meshStandardMaterial color={hovered ? "#ffffff" : "#aaaaaa"} />
+      </mesh>
+      <mesh position={[0, 0.8, 0]} castShadow receiveShadow>
+        <coneGeometry args={[0.8, 0.5, 4]} />
+        <meshStandardMaterial color={hovered ? "#ffffff" : "#aaaaaa"} />
+      </mesh>
+    </group>
+  );
+};
+
+// 3D Animated Text Component
+const AnimatedText3D = ({ text, position = [0, 0, 0], size = 0.5 }) => {
+  const meshRef = useRef();
+
+  useFrame(({ clock }) => {
+    meshRef.current.rotation.x = Math.sin(clock.getElapsedTime() * 0.3) * 0.2;
+    meshRef.current.rotation.y = Math.sin(clock.getElapsedTime() * 0.2) * 0.2;
+  });
+
+  return (
+    <Text3D
+      ref={meshRef}
+      font="/fonts/helvetiker_regular.typeface.json"
+      size={size}
+      height={0.1}
+      curveSegments={12}
+      bevelEnabled
+      bevelThickness={0.02}
+      bevelSize={0.02}
+      bevelOffset={0}
+      bevelSegments={5}
+      position={position}
     >
-      {children}
-    </motion.div>
+      {text}
+      <meshStandardMaterial color="white" emissive="white" emissiveIntensity={0.2} />
+    </Text3D>
   );
 };
 
-// Animated Underline Component
-const AnimatedUnderline = () => {
+// Floating Particles Background
+const FloatingParticles = ({ count = 100 }) => {
+  const particles = useRef();
+  const positions = useMemo(() => {
+    const pos = [];
+    for (let i = 0; i < count; i++) {
+      pos.push(
+        Math.random() * 10 - 5,
+        Math.random() * 10 - 5,
+        Math.random() * 10 - 5
+      );
+    }
+    return new Float32Array(pos);
+  }, [count]);
+
+  useFrame((state) => {
+    const time = state.clock.getElapsedTime();
+    particles.current.rotation.x = time * 0.1;
+    particles.current.rotation.y = time * 0.05;
+  });
+
   return (
-    <motion.div
-      initial={{ scaleX: 0 }}
-      whileInView={{ scaleX: 1 }}
-      transition={{ duration: 0.8 }}
-      className="w-32 h-1 bg-gradient-to-r from-black to-gray-500 mx-auto rounded-full"
-    />
+    <points ref={particles}>
+      <bufferGeometry attach="geometry">
+        <bufferAttribute
+          attach="attributes-position"
+          count={positions.length / 3}
+          array={positions}
+          itemSize={3}
+        />
+      </bufferGeometry>
+      <pointsMaterial
+        attach="material"
+        size={0.05}
+        sizeAttenuation
+        color="white"
+        transparent
+        opacity={0.8}
+      />
+    </points>
   );
 };
 
-// Floating Bubbles Background
-const BubbleBackground = () => {
+// Hero Scene with 3D Elements
+const HeroScene = () => {
   return (
-    <div className="fixed inset-0 overflow-hidden pointer-events-none">
-      {[...Array(30)].map((_, i) => {
-        const size = Math.random() * 200 + 50;
-        const x = Math.random() * 100;
-        const y = Math.random() * 100;
-        const delay = Math.random() * 5;
-        return (
-          <motion.div
-            key={i}
-            className="absolute rounded-full bg-black/10"
-            initial={{ opacity: 0, scale: 0 }}
-            animate={{ opacity: [0, 0.3, 0], scale: [0, 1, 1.5] }}
-            transition={{
-              duration: Math.random() * 10 + 10,
-              repeat: Infinity,
-              repeatType: "reverse",
-              delay,
-            }}
-            style={{
-              width: `${size}px`,
-              height: `${size}px`,
-              left: `${x}%`,
-              top: `${y}%`,
-            }}
-          />
-        );
-      })}
+    <div className="absolute inset-0 w-full h-full pointer-events-none">
+      <Canvas>
+        <PerspectiveCamera makeDefault position={[0, 0, 5]} fov={60} />
+        <ambientLight intensity={0.5} />
+        <pointLight position={[10, 10, 10]} intensity={1} />
+        <spotLight
+          position={[0, 10, 0]}
+          angle={0.15}
+          penumbra={1}
+          intensity={1}
+          castShadow
+        />
+        <Environment preset="city" />
+
+        <group position={[2, -1, 0]}>
+          <HouseModel />
+          <AnimatedText3D text="Home" position={[0, -1.5, 0]} size={0.3} />
+        </group>
+
+        <FloatingParticles count={200} />
+
+        <EffectComposer>
+          <Bloom luminanceThreshold={0} luminanceSmoothing={0.9} height={300} />
+          <Glitch delay={[1, 10]} duration={[0.1, 0.3]} strength={[0.01, 0.03]} />
+        </EffectComposer>
+      </Canvas>
     </div>
   );
 };
 
-// Scroll Progress Indicator
-const ScrollProgress = () => {
-  const { scrollYProgress } = useScroll();
-  const scaleX = useTransform(scrollYProgress, [0, 1], [0, 1]);
-
+// Animated Card with Hover Effects
+const FeatureCard = ({ icon: Icon, title, description, delay = 0 }) => {
   return (
     <motion.div
-      className="fixed top-0 left-0 right-0 h-1 bg-black z-50 origin-left"
-      style={{ scaleX }}
-    />
+      initial={{ opacity: 0, y: 50 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      whileHover={{ y: -10 }}
+      transition={{ duration: 0.6, delay }}
+      viewport={{ once: true }}
+      className="relative group"
+    >
+      <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-white/5 to-white/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+
+      <div className="relative backdrop-blur-xl bg-white/5 rounded-2xl p-8 h-full overflow-hidden border border-white/10 shadow-lg">
+        <motion.div
+          className="w-12 h-12 bg-white/10 rounded-full flex items-center justify-center mb-6"
+          whileHover={{ rotate: 15, scale: 1.1 }}
+        >
+          <Icon className="w-6 h-6 text-white" />
+        </motion.div>
+        <h3 className="text-xl font-bold mb-3 text-white">{title}</h3>
+        <p className="text-white/70">{description}</p>
+
+        <motion.div
+          className="absolute inset-0 border-2 border-white/20 rounded-2xl pointer-events-none"
+          initial={{ opacity: 0, scale: 0.9 }}
+          whileHover={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.3 }}
+        />
+      </div>
+    </motion.div>
   );
 };
 
 export default function HomePage() {
-  const [hoveredCard, setHoveredCard] = useState(null);
-  const constraintsRef = useRef(null);
+  const { scrollYProgress } = useScroll();
+  const scaleX = useTransform(scrollYProgress, [0, 1], [0, 1]);
+  const [isHovered, setIsHovered] = useState(false);
 
-  // Animated gradient border for sections
-  const GradientBorder = () => {
-    return (
-      <motion.div
-        initial={{ x: "-100%" }}
-        whileInView={{ x: "100%" }}
-        transition={{ duration: 6, repeat: Infinity, ease: "linear" }}
-        viewport={{ once: true }}
-        className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-black/50 to-transparent"
-      />
-    );
+  // Animated gradient for text
+  const gradientVariants = {
+    initial: { backgroundPosition: "0% 50%" },
+    animate: {
+      backgroundPosition: ["0% 50%", "100% 50%", "0% 50%"],
+      transition: { duration: 8, repeat: Infinity, ease: "linear" },
+    },
   };
 
   return (
-    <div className="bg-white text-black overflow-hidden relative">
-      <ScrollProgress />
-      <BubbleBackground />
+    <div className="bg-black text-white overflow-hidden relative">
+      {/* Scroll Progress Indicator */}
+      <motion.div
+        className="fixed top-0 left-0 right-0 h-1 bg-gradient-to-r from-white to-gray-400 z-50 origin-left"
+        style={{ scaleX }}
+      />
 
       {/* Hero Section */}
       <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
+        <HeroScene />
+
         <div className="container mx-auto px-4 z-10 relative">
           <motion.div
             initial={{ opacity: 0, y: 50 }}
@@ -1182,6 +1279,7 @@ export default function HomePage() {
             transition={{ duration: 0.8, delay: 0.2 }}
             className="max-w-4xl mx-auto text-center"
           >
+            {/* Hook with animated gradient */}
             <motion.div
               className="mb-12"
               initial={{ opacity: 0 }}
@@ -1196,31 +1294,50 @@ export default function HomePage() {
               >
                 The Home Loans Experience,
               </motion.p>
+
               <motion.p
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.6, delay: 0.2 }}
-                className="text-5xl md:text-8xl font-bold mb-8 bg-clip-text text-transparent bg-gradient-to-r from-black to-gray-700"
+                className="text-5xl md:text-8xl font-bold mb-8"
               >
-                REIMAGINED.
+                <motion.span
+                  className="bg-clip-text text-transparent bg-gradient-to-r from-white via-gray-300 to-white bg-[length:200%_auto]"
+                  variants={gradientVariants}
+                  initial="initial"
+                  animate="animate"
+                >
+                  REIMAGINED.
+                </motion.span>
               </motion.p>
             </motion.div>
 
+            {/* Floating CTA Card */}
             <motion.div
               initial={{ opacity: 0, y: 50 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, delay: 0.4 }}
-              className="backdrop-blur-2xl bg-black/5 rounded-3xl p-8 md:p-12 shadow-2xl mb-12 border border-black/10"
+              className="backdrop-blur-2xl bg-white/5 rounded-3xl p-8 md:p-12 shadow-2xl mb-12 border border-white/10"
               whileHover={{ y: -5 }}
-              drag
-              dragConstraints={constraintsRef}
-              dragElastic={0.1}
+              onHoverStart={() => setIsHovered(true)}
+              onHoverEnd={() => setIsHovered(false)}
             >
+              <AnimatePresence>
+                {isHovered && (
+                  <motion.div
+                    className="absolute inset-0 bg-gradient-to-r from-white/5 to-white/10 opacity-0"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                  />
+                )}
+              </AnimatePresence>
+
               <motion.h1
                 initial={{ opacity: 0.8 }}
                 animate={{ opacity: 1 }}
                 transition={{ delay: 0.6 }}
-                className="text-1.5xl md:text-1.5xl font-medium mb-6"
+                className="text-1.5xl md:text-1.5xl font-medium mb-6 text-white"
               >
                 Home loans, Mortgage loans, SIP plans? —{" "}
                 <span className="font-bold">We speak fluent finance,</span> So
@@ -1234,7 +1351,7 @@ export default function HomePage() {
                 className="flex flex-wrap justify-center gap-4"
               >
                 <Link href="/loan-application?type=home-loan">
-                  <Button className="px-8 py-4 bg-black hover:bg-black/90 text-white text-lg font-medium rounded-xl backdrop-blur-md border border-black/20 shadow-lg hover:shadow-black/30 transition-all duration-300 group">
+                  <Button className="px-8 py-4 bg-white hover:bg-white/90 text-black text-lg font-medium rounded-xl backdrop-blur-md border border-white/20 shadow-lg hover:shadow-white/30 transition-all duration-300 group">
                     Smarter loans start here
                     <MoveRight className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" />
                   </Button>
@@ -1242,7 +1359,7 @@ export default function HomePage() {
                 <Link href="/consultation">
                   <Button
                     variant="outline"
-                    className="px-8 py-4 bg-transparent text-black border border-black/90 hover:bg-black/10 text-lg font-medium rounded-xl backdrop-blur-md shadow-lg hover:shadow-black/30 transition-all duration-300 group"
+                    className="px-8 py-4 bg-transparent text-white border border-white/90 hover:bg-white/10 text-lg font-medium rounded-xl backdrop-blur-md shadow-lg hover:shadow-white/30 transition-all duration-300 group"
                   >
                     Book Free Consultation
                     <MoveRight className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" />
@@ -1252,16 +1369,17 @@ export default function HomePage() {
             </motion.div>
           </motion.div>
         </div>
-
-        {/* 3D Floating Icons in background */}
-        <div className="absolute inset-0 w-full h-full pointer-events-none opacity-20">
-          <FloatingIcons />
-        </div>
       </section>
 
       {/* Value Proposition Section */}
       <section className="py-24 relative">
-        <div className="container mx-auto px-4">
+        <div className="absolute inset-0 overflow-hidden pointer-events-none">
+          <Canvas>
+            <FloatingParticles count={100} />
+          </Canvas>
+        </div>
+
+        <div className="container mx-auto px-4 relative">
           <motion.div
             initial={{ opacity: 0, y: 50 }}
             whileInView={{ opacity: 1, y: 0 }}
@@ -1273,273 +1391,148 @@ export default function HomePage() {
               initial={{ opacity: 0 }}
               whileInView={{ opacity: 1 }}
               transition={{ delay: 0.2 }}
-              className="text-4xl md:text-5xl font-bold mb-6"
+              className="text-4xl md:text-5xl font-bold mb-6 text-white"
             >
               We don't push products.
               <br />
-              <span>We match you to the right one.</span>
+              <motion.span
+                className="bg-clip-text text-transparent bg-gradient-to-r from-white to-gray-300"
+                initial={{ opacity: 0 }}
+                whileInView={{ opacity: 1 }}
+                transition={{ delay: 0.3 }}
+              >
+                We match you to the right one.
+              </motion.span>
             </motion.h2>
-            <AnimatedUnderline />
+            <motion.div
+              initial={{ scaleX: 0 }}
+              whileInView={{ scaleX: 1 }}
+              transition={{ duration: 0.8 }}
+              className="w-32 h-1 bg-gradient-to-r from-white to-gray-300 mx-auto rounded-full"
+            />
           </motion.div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {[
-              {
-                icon: BookOpen,
-                title: "We read your profile",
-                description:
-                  "Then connect you to the Home loan that fits it best",
-                delay: 0.1,
-              },
-              {
-                icon: Users,
-                title: "For People Who Expect More",
-                description:
-                  "And settle for less. Less paperwork. Less waiting. Less interest.",
-                delay: 0.2,
-              },
-              {
-                icon: Shield,
-                title: "Transparent Matching",
-                description:
-                  "No hidden agendas, just the best financial products for your needs",
-                delay: 0.3,
-              },
-            ].map((item, index) => (
-              <AnimatedCard key={index} delay={item.delay}>
-                <div className="w-12 h-12 bg-black/10 rounded-full flex items-center justify-center mb-6">
-                  <item.icon className="w-6 h-6 text-black" />
-                </div>
-                <h3 className="text-xl font-bold mb-3">{item.title}</h3>
-                <p className="text-gray-600">{item.description}</p>
-              </AnimatedCard>
-            ))}
+            <FeatureCard
+              icon={BookOpen}
+              title="We read your profile"
+              description="Then connect you to the Home loan that fits it best"
+              delay={0.1}
+            />
+            <FeatureCard
+              icon={Users}
+              title="For People Who Expect More"
+              description="And settle for less. Less paperwork. Less waiting. Less interest."
+              delay={0.2}
+            />
+            <FeatureCard
+              icon={Shield}
+              title="Transparent Matching"
+              description="No hidden agendas, just the best financial products for your needs"
+              delay={0.3}
+            />
           </div>
         </div>
       </section>
 
-      {/* What We Offer Section */}
-      <section className="py-24 relative">
-        <div className="container mx-auto px-4">
-          <motion.div
-            initial={{ opacity: 0, y: 50 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8 }}
-            viewport={{ once: true, margin: "-100px" }}
-            className="max-w-4xl mx-auto text-center mb-16"
-          >
-            <motion.h2
-              initial={{ opacity: 0 }}
-              whileInView={{ opacity: 1 }}
-              transition={{ delay: 0.2 }}
-              className="text-4xl md:text-5xl font-bold mb-6"
-            >
-              What We Offer
-            </motion.h2>
-            <AnimatedUnderline />
-          </motion.div>
+      {/* 3D Visualization Section */}
+      <section className="py-24 relative h-screen">
+        <div className="absolute inset-0">
+          <Canvas>
+            <PerspectiveCamera makeDefault position={[0, 0, 10]} />
+            <ambientLight intensity={0.5} />
+            <spotLight position={[10, 10, 10]} angle={0.15} penumbra={1} />
+            <pointLight position={[-10, -10, -10]} />
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {[
-              {
-                icon: Home,
-                title: "Home Loans Made Simple",
-                description:
-                  "Move in faster. Stress less. Borrow smarter. Let us handle the paperwork — you focus on the housewarming.",
-                cta: "See how",
-                path: "/loan-application?type=home-loan",
-                delay: 0.1,
-              },
-              {
-                icon: Building,
-                title: "Loan Against Property",
-                description:
-                  "Turn your property into potential. You've built assets — now let them work for you.",
-                cta: "See how",
-                path: "/loan-application?type=lap",
-                delay: 0.2,
-              },
-              {
-                icon: TrendingUp,
-                title: "Balance Transfer That Makes Sense",
-                description:
-                  "Stop overpaying for being loyal. Lower your EMIs, transfer your loan balance, or top it up.",
-                cta: "See how",
-                path: "/loan-application?type=bt-topup",
-                delay: 0.3,
-              },
-            ].map((item, index) => (
-              <AnimatedCard key={index} delay={item.delay}>
-                <motion.div
-                  className="w-16 h-16 bg-black/10 rounded-full flex items-center justify-center mb-6 mx-auto"
-                  whileHover={{ rotate: 10, scale: 1.1 }}
-                >
-                  <item.icon className="w-8 h-8 text-black" />
-                </motion.div>
+            <AnimatedText3D 
+              text="Your Dream Home" 
+              position={[-3, 2, 0]} 
+              size={0.8} 
+            />
 
-                <h3 className="text-xl font-bold mb-4 text-center">
-                  {item.title}
-                </h3>
-                <p className="text-gray-600 mb-6 text-center">
-                  {item.description}
-                </p>
+            <group position={[3, -1, 0]}>
+              <HouseModel />
+              <AnimatedText3D 
+                text="Our Expertise" 
+                position={[0, -2, 0]} 
+                size={0.5} 
+              />
+            </group>
 
-                <div className="text-center">
-                  <Link href={item.path}>
-                    <Button
-                      variant="ghost"
-                      className="text-black hover:bg-black/10 backdrop-blur-sm group"
-                    >
-                      {item.cta}
-                      <MoveRight className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" />
-                    </Button>
-                  </Link>
-                </div>
-              </AnimatedCard>
-            ))}
-          </div>
+            <EffectComposer>
+              <Bloom luminanceThreshold={0} luminanceSmoothing={0.9} height={300} />
+            </EffectComposer>
+          </Canvas>
         </div>
-      </section>
 
-      {/* SIP Feature Section */}
-      <section className="py-24 relative">
-        <div className="container mx-auto px-4">
+        <div className="container mx-auto px-4 h-full flex items-center relative z-10">
           <motion.div
-            initial={{ opacity: 0, y: 50 }}
-            whileInView={{ opacity: 1, y: 0 }}
+            initial={{ opacity: 0, x: -100 }}
+            whileInView={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.8 }}
-            viewport={{ once: true, margin: "-100px" }}
-            className="max-w-6xl mx-auto backdrop-blur-2xl bg-black/5 rounded-3xl p-8 md:p-12 shadow-2xl overflow-hidden border border-black/10"
+            viewport={{ once: true }}
+            className="backdrop-blur-xl bg-black/50 rounded-2xl p-8 max-w-md border border-white/10"
           >
-            <GradientBorder />
-
-            <div className="flex flex-col md:flex-row items-center gap-12">
-              <motion.div
-                initial={{ opacity: 0, x: -50 }}
-                whileInView={{ opacity: 1, x: 0 }}
-                transition={{ duration: 0.8 }}
-                viewport={{ once: true }}
-                className="md:w-1/2"
-              >
-                <motion.h2
-                  initial={{ opacity: 0 }}
-                  whileInView={{ opacity: 1 }}
-                  transition={{ delay: 0.2 }}
-                  className="text-3xl md:text-4xl font-bold mb-6"
-                >
-                  Make your SIPs work for your home loan
-                </motion.h2>
-
-                <motion.p
-                  initial={{ opacity: 0 }}
-                  whileInView={{ opacity: 1 }}
-                  transition={{ delay: 0.3 }}
-                  className="text-lg text-gray-600 mb-6"
-                >
-                  Your SIPs aren't just growing wealth — they could be quietly
-                  paying off your home loan too.
-                </motion.p>
-
-                <motion.p
-                  initial={{ opacity: 0 }}
-                  whileInView={{ opacity: 1 }}
-                  transition={{ delay: 0.4 }}
-                  className="text-lg text-black font-medium mb-8"
-                >
-                  With Homobie, reinvest your SIPs strategically to reduce your
-                  interest, shorten your tenure, and own your home faster.
-                </motion.p>
-
-                <motion.div
-                  initial={{ opacity: 0 }}
-                  whileInView={{ opacity: 1 }}
-                  transition={{ delay: 0.5 }}
-                >
-                  <Link href="/sip">
-                    <Button className="bg-black hover:bg-black/90 text-white text-lg font-medium rounded-xl backdrop-blur-md border border-black/20 shadow-lg hover:shadow-black/30 transition-all duration-300 group">
-                      Learn about SIP-linked loans
-                      <MoveRight className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" />
-                    </Button>
-                  </Link>
-                </motion.div>
-              </motion.div>
-
-              <motion.div
-                initial={{ opacity: 0, x: 50 }}
-                whileInView={{ opacity: 1, x: 0 }}
-                transition={{ duration: 0.8 }}
-                viewport={{ once: true }}
-                className="md:w-1/2"
-              >
-                <div className="backdrop-blur-xl bg-black/10 border border-black/20 p-8 rounded-2xl shadow-lg">
-                  <h3 className="text-xl font-bold mb-6 flex items-center">
-                    <Zap className="w-5 h-5 text-black mr-2" />
-                    How it works:
-                  </h3>
-                  <ul className="space-y-4">
-                    {[
-                      "Link your existing SIPs or start new ones",
-                      "We optimize your investments to align with loan repayment",
-                      "Watch your home loan reduce faster while building wealth",
-                      "Complete transparency with no hidden fees",
-                    ].map((item, index) => (
-                      <motion.li
-                        key={index}
-                        initial={{ opacity: 0, x: 20 }}
-                        whileInView={{ opacity: 1, x: 0 }}
-                        transition={{ delay: index * 0.1 + 0.3 }}
-                        className="flex items-start"
-                      >
-                        <CheckCircle className="w-5 h-5 text-black mr-3 mt-0.5 flex-shrink-0" />
-                        <span className="text-gray-600">{item}</span>
-                      </motion.li>
-                    ))}
-                  </ul>
-                </div>
-              </motion.div>
-            </div>
+            <h2 className="text-3xl font-bold mb-4 text-white">Visualize Your Future</h2>
+            <p className="text-white/80 mb-6">
+              See how your dream home comes to life with our interactive 3D visualization tools.
+            </p>
+            <Button className="bg-white text-black hover:bg-white/90">
+              Explore 3D Planner
+            </Button>
           </motion.div>
         </div>
       </section>
 
-      {/* Final CTA */}
+      {/* Final CTA with Particle Background */}
       <section className="py-24 relative">
-        <div className="container mx-auto px-4">
+        <div className="absolute inset-0 overflow-hidden pointer-events-none">
+          <Canvas>
+            <FloatingParticles count={300} />
+          </Canvas>
+        </div>
+
+        <div className="container mx-auto px-4 relative">
           <motion.div
             initial={{ opacity: 0, scale: 0.9 }}
             whileInView={{ opacity: 1, scale: 1 }}
             transition={{ duration: 0.8 }}
             viewport={{ once: true }}
-            className="max-w-4xl mx-auto text-center backdrop-blur-2xl bg-black/5 rounded-3xl p-12 shadow-2xl overflow-hidden border border-black/10"
+            className="max-w-4xl mx-auto text-center backdrop-blur-2xl bg-white/5 rounded-3xl p-12 shadow-2xl overflow-hidden border border-white/10"
           >
             <motion.h2
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5 }}
-              className="text-3xl md:text-4xl font-bold mb-6"
+              className="text-3xl md:text-4xl font-bold mb-6 text-white"
             >
-              Ready to borrow better?
+              Ready to reimagine your home loan experience?
             </motion.h2>
 
             <motion.p
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: 0.1 }}
-              className="text-xl text-gray-600 mb-8 max-w-2xl mx-auto"
+              className="text-xl text-white/80 mb-8 max-w-2xl mx-auto"
             >
-              Because Smarter lending starts with smarter matching. Let's make
-              your next financial move your smartest one yet.
+              Join thousands who've found smarter financing with our platform.
             </motion.p>
 
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: 0.2 }}
+              className="flex flex-wrap justify-center gap-4"
             >
               <Link href="/loan-application">
-                <Button className="px-8 py-4 bg-black hover:bg-black/90 text-white text-lg font-medium rounded-xl backdrop-blur-md border border-black/20 shadow-lg hover:shadow-black/30 transition-all duration-300 group">
-                  Apply Now
-                  <Sparkles className="w-5 h-5 ml-2 text-white group-hover:rotate-12 transition-transform" />
+                <Button className="px-8 py-4 bg-white hover:bg-white/90 text-black text-lg font-medium rounded-xl backdrop-blur-md border border-white/20 shadow-lg hover:shadow-white/30 transition-all duration-300 group">
+                  Get Started Now
+                  <Sparkles className="w-5 h-5 ml-2 text-black group-hover:rotate-12 transition-transform" />
+                </Button>
+              </Link>
+              <Link href="/demo">
+                <Button variant="outline" className="text-white border-white hover:bg-white/10">
+                  Watch Demo
                 </Button>
               </Link>
             </motion.div>
