@@ -17,11 +17,13 @@ import {
 import { motion } from "framer-motion";
 import { companyInfo } from "@/lib/company-info";
 import homobieLogo from "/assets/homobie-logo.png";
+// import  Calculator  from "@/components/ui/calculator";
+
 const toolItems = [
   {
     name: "EMI Calculator",
     icon: Calculator,
-    path: "/tools/emi-calculator",
+    path: "tools/emi-calculator",
     ariaLabel: "Navigate to EMI Calculator tool",
   },
   {
