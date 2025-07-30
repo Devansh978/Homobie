@@ -171,10 +171,10 @@
 //   );
 // }
 
-import React, { useState, useMemo } from "react";
+import React, { useState, useEffect } from "react";
 import { Link, useLocation } from "wouter";
-import { useAuth } from "@/hooks/use-auth";
-import { Button } from "@/components/ui/button";
+import { useAuth } from "@/hooks/use-auth"; // Assuming you have this hook
+import { motion, AnimatePresence } from "framer-motion";
 import {
   Menu,
   X,
@@ -183,7 +183,12 @@ import {
   LayoutDashboard,
   Settings,
   Shield,
+  Search,
+  Globe,
+  ChevronRight,
+  ChevronLeft,
 } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -192,143 +197,355 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 
-export function Header() {
-  const [location] = useLocation();
-  const { user, logoutMutation } = useAuth();
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+// Make sure this CSS file exists and has the correct content
+import "./header.css";
 
-  const navLinks = useMemo(
-    () => [
+// --- Your navigation data  ---
+const navData = [
+  {
+    label: "Apply for Loan",
+    children: [
       { label: "Home Loans", path: "/loan-application?type=home-loan" },
-      { label: "LAP", path: "/loan-application?type=lap" },
-      { label: "BT Top-Up", path: "/loan-application?type=bt-topup" },
-      { label: "SIP", path: "/sip" },
-      { label: "Consultation", path: "/consultation" },
-      { label: "Our Teams", path: "/teams" },
+      { label: "Loan Against Property", path: "/loan-application?type=lap" },
+      { label: "Balance Transfer", path: "/loan-application?type=bt-topup" },
+    ],
+  },
+  {
+    label: "Investment",
+    children: [{ label: "SIP", path: "/sip" }],
+  },
+  {
+    label: "Services",
+    children: [{ label: "Consultation", path: "/consultation" }],
+  },
+  {
+    label: "About Us",
+    children: [
+      // { label: "Our Teams", path: "/ourteam" },
       { label: "Blog", path: "/blog" },
     ],
-    [],
-  );
+  },
+];
 
-  const isActive = (path: string) => location === path;
+// --- Reusable Animation Variants ---
+const flyoutVariants = {
+  hidden: { opacity: 0, scale: 0.95, y: -10 },
+  visible: {
+    opacity: 1,
+    scale: 1,
+    y: 0,
+    transition: { duration: 0.2, ease: "easeOut" },
+  },
+  exit: {
+    opacity: 0,
+    scale: 0.95,
+    y: -10,
+    transition: { duration: 0.15, ease: "easeIn" },
+  },
+};
 
-  const toggleMobileMenu = () => setMobileMenuOpen((prev) => !prev);
-  const closeMobileMenu = () => setMobileMenuOpen(false);
-  const handleLogout = () => logoutMutation.mutate();
+const mobileNavVariants = {
+  hidden: { x: "-100%" },
+  visible: { x: "0%", transition: { duration: 0.3, ease: "easeInOut" } },
+  exit: { x: "-100%", transition: { duration: 0.25, ease: "easeInOut" } },
+};
+
+// --- Desktop Navigation Item Component (FIXED) ---
+const DesktopNavItem = ({ item }) => {
+  const [isHovered, setIsHovered] = useState(false);
+  const [location] = useLocation();
+  const isActive = (path) => path && location === path;
+  const hasChildren = item.children && item.children.length > 0;
 
   return (
-    <header className="sticky top-0 z-50 backdrop-blur-lg bg-white/30 shadow-sm border-b border-white/20">
-      <div className="container mx-auto px-4 py-3 flex justify-between items-center">
-        <Link href="/" className="flex items-center space-x-2">
-          <img
-            src="/assets/wmremove-transformed - Edited.jpg"
-            alt="Homobie Logo"
-            className="h-8 rounded-full border border-white/20"
-            onError={(e) => {
-              (e.target as HTMLImageElement).src = "/fallback-logo.png";
-            }}
-          />
-          <span className="font-bold text-xl bg-clip-text text-transparent bg-gradient-to-r from-primary to-blue-600"></span>
-        </Link>
-
-        {/* Desktop Navigation */}
-        <nav className="hidden md:flex space-x-6">
-          {navLinks.map((link) => (
-            <Link
-              key={link.path}
-              href={link.path}
-              aria-current={isActive(link.path) ? "page" : undefined}
-              className={`px-3 py-1.5 rounded-lg transition-all ${
-                isActive(link.path)
-                  ? "bg-white/20 text-primary font-medium shadow-sm"
-                  : "text-neutral-700 hover:bg-white/20 hover:text-primary"
-              }`}
+    <li
+      className="h-full flex items-center"
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+    >
+      <div className="relative h-full flex items-center">
+        <span className="flex h-full items-center px-4 text-white font-medium border-b-2 border-transparent hover:border-white transition-colors duration-300 cursor-default">
+          {item.label}
+        </span>
+        <AnimatePresence>
+          {hasChildren && isHovered && (
+            <motion.div
+              variants={flyoutVariants}
+              initial="hidden"
+              animate="visible"
+              exit="exit"
+              className="absolute top-full left-0 z-50 min-w-[250px] origin-top rounded-lg bg-white p-2 text-nexi-blackgray shadow-lg"
             >
-              {link.label}
-            </Link>
-          ))}
-        </nav>
-
-        {/* Auth/Actions Section */}
-        <div className="flex items-center space-x-3">
-          {user ? (
-            <UserDropdown
-              user={user}
-              onLogout={handleLogout}
-              isLoggingOut={logoutMutation.isPending}
-            />
-          ) : (
-            <>
-              <Link
-                href="/auth"
-                className="hidden md:block px-4 py-2 text-primary border border-primary/30 rounded-lg hover:bg-white/20 hover:border-primary/50 transition-colors"
-              >
-                Log In
-              </Link>
-              <Link
-                href="/auth"
-                className="px-4 py-2 bg-gradient-to-r from-primary to-blue-600 text-white rounded-lg hover:opacity-90 transition-opacity shadow-md"
-              >
-                Apply Now
-              </Link>
-            </>
+              <ul className="space-y-1">
+                {item.children.map((child) => (
+                  <li key={child.label}>
+                    <Link
+                      href={child.path}
+                      onClick={() => setIsHovered(false)}
+                      className={`block w-full p-3 text-sm font-medium rounded-md ${
+                        isActive(child.path)
+                          ? "text-nexi-blue bg-nexi-pagebg"
+                          : "text-nexi-darkgray hover:bg-nexi-pagebg hover:text-nexi-blue"
+                      }`}
+                    >
+                      {child.label}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </motion.div>
           )}
-
-          <button
-            className="md:hidden p-2 rounded-lg bg-white/20 text-neutral-700 hover:bg-white/30 transition-colors"
-            onClick={toggleMobileMenu}
-            aria-label={mobileMenuOpen ? "Close menu" : "Open menu"}
-            aria-expanded={mobileMenuOpen}
-          >
-            {mobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
-          </button>
-        </div>
+        </AnimatePresence>
       </div>
+    </li>
+  );
+};
 
-      {/* Mobile Navigation */}
-      <MobileMenu
+// --- Mobile Navigation Component (IMPROVED) ---
+const MobileNav = ({ isOpen, onClose }) => {
+  const [menuStack, setMenuStack] = useState([
+    { items: navData, label: "Menu" },
+  ]);
+  const [_, navigate] = useLocation();
+  const { user, logoutMutation } = useAuth();
+
+  useEffect(() => {
+    if (isOpen) setMenuStack([{ items: navData, label: "Menu" }]);
+  }, [isOpen]);
+
+  const handleForward = (children, label) =>
+    setMenuStack((prev) => [...prev, { items: children, label }]);
+  const handleBack = () => setMenuStack((prev) => prev.slice(0, -1));
+  const handleNavigate = (path) => {
+    if (path) navigate(path);
+    onClose();
+  };
+
+  const currentLevel = menuStack[menuStack.length - 1];
+
+  return (
+    <AnimatePresence>
+      {isOpen && (
+        <div className="fixed inset-0 z-[60] lg:hidden" aria-modal="true">
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black/40 backdrop-blur-sm"
+            onClick={onClose}
+          />
+          <motion.div
+            variants={mobileNavVariants}
+            initial="hidden"
+            animate="visible"
+            exit="exit"
+            className="absolute left-0 top-0 h-full w-full max-w-md bg-white text-nexi-blackgray shadow-xl flex flex-col"
+          >
+            <div className="flex h-header items-center justify-between border-b px-4">
+              {menuStack.length > 1 ? (
+                <button
+                  onClick={handleBack}
+                  className="flex items-center gap-2 p-2 -ml-2 text-lg font-semibold text-nexi-darkblue"
+                >
+                  <ChevronLeft size={24} />
+                  <span>{menuStack[menuStack.length - 2].label}</span>
+                </button>
+              ) : (
+                <Link
+                  href="/"
+                  onClick={onClose}
+                  className="flex items-center gap-3"
+                >
+                  <img
+                    src="/assets/homobie-logo.png"
+                    alt="Logo"
+                    className="h-8 rounded-full"
+                  />
+                  <span className="font-bold text-xl text-nexi-darkblue">
+                    
+                  </span>
+                </Link>
+              )}
+              <button onClick={onClose} className="p-2 text-nexi-darkgray">
+                <X size={28} />
+              </button>
+            </div>
+            <div className="flex-grow overflow-y-auto p-4">
+              <h2 className="px-3 pb-4 text-2xl font-bold text-nexi-darkblue">
+                {currentLevel.label}
+              </h2>
+              <ul className="space-y-2">
+                {currentLevel.items.map((item) => (
+                  <li key={item.label}>
+                    <button
+                      onClick={() =>
+                        item.children
+                          ? handleForward(item.children, item.label)
+                          : handleNavigate(item.path)
+                      }
+                      className="w-full flex justify-between items-center text-left p-4 text-lg text-nexi-darkgray rounded-lg hover:bg-nexi-pagebg"
+                    >
+                      <span>{item.label}</span>
+                      {item.children && <ChevronRight size={20} />}
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            </div>
+            <div className="border-t p-4">
+              {user ? (
+                <UserDropdown
+                  user={user}
+                  onLogout={() => logoutMutation.mutate()}
+                  isLoggingOut={logoutMutation.isPending}
+                  isMobile={true}
+                />
+              ) : (
+                <div className="flex items-center gap-2">
+                  <Link
+                    href="/auth"
+                    className="flex-1 text-center px-4 py-3 font-semibold text-nexi-blue border border-nexi-blue/30 rounded-full hover:bg-nexi-pagebg"
+                    onClick={onClose}
+                  >
+                    Log In
+                  </Link>
+                  <Link
+                    href="/auth"
+                    className="flex-1 text-center px-4 py-3 font-semibold bg-nexi-blue text-white rounded-full hover:bg-nexi-darkblue"
+                    onClick={onClose}
+                  >
+                    Apply Now
+                  </Link>
+                </div>
+              )}
+            </div>
+          </motion.div>
+        </div>
+      )}
+    </AnimatePresence>
+  );
+};
+
+// --- Main Header Component ---
+export function Header() {
+  const { user, logoutMutation } = useAuth();
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
+
+  useEffect(() => {
+    const handleScroll = () => setScrolled(window.scrollY > 10);
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
+  const [location] = useLocation();
+  useEffect(() => {
+    setMobileMenuOpen(false);
+  }, [location]);
+
+  const headerClasses = `fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
+    scrolled || mobileMenuOpen
+      ? "bg-nexi-blue/80 backdrop-blur-lg shadow-lg"
+      : "bg-transparent"
+  }`;
+
+  return (
+    <>
+      <header className={headerClasses}>
+        <div className="container mx-auto flex h-header items-center justify-between px-4">
+          <Link href="/" className="flex flex-shrink-0 items-center space-x-3">
+            <img
+              src="/assets/wmremove-transformed - Edited.jpg"
+              alt="Homobie Logo"
+              className="h-8 rounded-full"
+            />
+            <span className="font-bold text-xl text-white"></span>
+          </Link>
+
+          <nav className="hidden lg:flex h-full">
+            <ul className="flex h-full items-center">
+              {navData.map((item) => (
+                <DesktopNavItem key={item.label} item={item} />
+              ))}
+            </ul>
+          </nav>
+
+          <div className="flex items-center gap-6 text-white">
+            <div className="hidden lg:flex items-center gap-6">
+              {user ? (
+                <UserDropdown
+                  user={user}
+                  onLogout={() => logoutMutation.mutate()}
+                  isLoggingOut={logoutMutation.isPending}
+                />
+              ) : (
+                <Button
+                  asChild
+                  className="bg-transparent border border-white hover:bg-white/10 rounded-full"
+                >
+                  <Link href="/auth">Log In</Link>
+                </Button>
+              )}
+            </div>
+            <button
+              onClick={() => setMobileMenuOpen(true)}
+              className="p-2 text-white lg:hidden"
+              aria-label="Open menu"
+            >
+              <Menu size={28} />
+            </button>
+          </div>
+        </div>
+      </header>
+      <MobileNav
         isOpen={mobileMenuOpen}
-        links={navLinks}
-        isActive={isActive}
-        onClose={closeMobileMenu}
-        isAuthenticated={!!user}
+        onClose={() => setMobileMenuOpen(false)}
       />
-    </header>
+    </>
   );
 }
 
-// Extracted UserDropdown component with glassmorphism style
-function UserDropdown({
-  user,
-  onLogout,
-  isLoggingOut,
-}: {
-  user: any;
-  onLogout: () => void;
-  isLoggingOut: boolean;
-}) {
+// --- User Dropdown Component (FIXED) ---
+function UserDropdown({ user, onLogout, isLoggingOut, isMobile = false }) {
+  if (isMobile) {
+    return (
+      <div className="space-y-4">
+        <div className="text-center">
+          <p className="font-bold text-lg text-nexi-darkblue">
+            {user.username || "User"}
+          </p>
+        </div>
+        <Button
+          onClick={onLogout}
+          disabled={isLoggingOut}
+          className="w-full bg-nexi-blue hover:bg-nexi-darkblue rounded-full py-3 text-base"
+        >
+          <LogOut className="mr-2 h-5 w-5" />
+          <span>{isLoggingOut ? "Logging out..." : "Logout"}</span>
+        </Button>
+      </div>
+    );
+  }
+
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Button
           variant="ghost"
-          className="flex items-center space-x-2 bg-white/10 hover:bg-white/20 border border-white/20"
+          className="p-0 text-white hover:bg-transparent hover:text-white focus-visible:ring-0"
         >
-          <User size={18} />
-          <span className="hidden md:inline">{user.username}</span>
+          <User className="mr-2 h-5 w-5" />
+          <span className="font-medium">{user.username || "Account"}</span>
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent
         align="end"
-        className="w-56 backdrop-blur-lg bg-white/30 border border-white/20 shadow-lg"
+        className="w-56 mt-2 bg-white text-nexi-darkgray"
       >
-        <DropdownMenuItem
-          asChild
-          className="hover:bg-white/20 focus:bg-white/20"
-        >
+        <DropdownMenuItem asChild>
           <Link
             href="/dashboard"
-            className="flex w-full cursor-pointer items-center"
+            className="flex w-full cursor-pointer items-center p-2 rounded-md hover:bg-nexi-pagebg"
           >
             <LayoutDashboard className="mr-2 h-4 w-4" />
             <span>Dashboard</span>
@@ -336,13 +553,10 @@ function UserDropdown({
         </DropdownMenuItem>
 
         {(user.role === "admin" || user.role === "superadmin") && (
-          <DropdownMenuItem
-            asChild
-            className="hover:bg-white/20 focus:bg-white/20"
-          >
+          <DropdownMenuItem asChild>
             <Link
               href="/admin"
-              className="flex w-full cursor-pointer items-center"
+              className="flex w-full cursor-pointer items-center p-2 rounded-md hover:bg-nexi-pagebg"
             >
               <Settings className="mr-2 h-4 w-4" />
               <span>Admin Panel</span>
@@ -351,13 +565,10 @@ function UserDropdown({
         )}
 
         {user.role === "superadmin" && (
-          <DropdownMenuItem
-            asChild
-            className="hover:bg-white/20 focus:bg-white/20"
-          >
+          <DropdownMenuItem asChild>
             <Link
               href="/super-admin"
-              className="flex w-full cursor-pointer items-center"
+              className="flex w-full cursor-pointer items-center p-2 rounded-md hover:bg-nexi-pagebg"
             >
               <Shield className="mr-2 h-4 w-4" />
               <span>Super Admin</span>
@@ -365,66 +576,16 @@ function UserDropdown({
           </DropdownMenuItem>
         )}
 
-        <DropdownMenuSeparator className="bg-white/20" />
-
+        <DropdownMenuSeparator />
         <DropdownMenuItem
           onClick={onLogout}
           disabled={isLoggingOut}
-          className="hover:bg-white/20 focus:bg-white/20"
+          className="p-2 rounded-md hover:bg-nexi-pagebg focus:bg-red-50 focus:text-red-600"
         >
           <LogOut className="mr-2 h-4 w-4" />
           <span>{isLoggingOut ? "Logging out..." : "Logout"}</span>
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
-  );
-}
-
-// Extracted MobileMenu component with glassmorphism
-function MobileMenu({
-  isOpen,
-  links,
-  isActive,
-  onClose,
-  isAuthenticated,
-}: {
-  isOpen: boolean;
-  links: Array<{ label: string; path: string }>;
-  isActive: (path: string) => boolean;
-  onClose: () => void;
-  isAuthenticated: boolean;
-}) {
-  if (!isOpen) return null;
-
-  return (
-    <div className="md:hidden backdrop-blur-lg bg-white/30 border-t border-white/20 animate-in fade-in">
-      <div className="container mx-auto px-4 py-3 space-y-2">
-        {links.map((link) => (
-          <Link
-            key={link.path}
-            href={link.path}
-            className={`block px-3 py-2 rounded-lg transition-colors ${
-              isActive(link.path)
-                ? "bg-white/20 text-primary font-medium"
-                : "text-neutral-700 hover:bg-white/20"
-            }`}
-            onClick={onClose}
-            aria-current={isActive(link.path) ? "page" : undefined}
-          >
-            {link.label}
-          </Link>
-        ))}
-
-        {!isAuthenticated && (
-          <Link
-            href="/auth"
-            className="block px-3 py-2 rounded-lg text-neutral-700 hover:bg-white/20 font-medium"
-            onClick={onClose}
-          >
-            Log In
-          </Link>
-        )}
-      </div>
-    </div>
   );
 }

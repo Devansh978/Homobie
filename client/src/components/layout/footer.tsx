@@ -1,124 +1,263 @@
 import React from "react";
 import { Link } from "wouter";
-import { 
-  Phone, 
-  Mail, 
-  MapPin, 
-  Clock, 
-  Facebook, 
-  Twitter, 
-  Instagram, 
-  ArrowRight
+import {
+  Phone,
+  Mail,
+  MapPin,
+  Clock,
+  Facebook,
+  Twitter,
+  Instagram,
+  ArrowRight,
+  Calculator,
+  Coins,
+  PieChart,
+  CalendarDays,
 } from "lucide-react";
+import { motion } from "framer-motion";
 import { companyInfo } from "@/lib/company-info";
 import homobieLogo from "/assets/homobie-logo.png";
+const toolItems = [
+  {
+    name: "EMI Calculator",
+    icon: Calculator,
+    path: "/tools/emi-calculator",
+    ariaLabel: "Navigate to EMI Calculator tool",
+  },
+  {
+    name: "SIP & Loan Calculator",
+    icon: Coins,
+    path: "/tools/sip-loan-calculator",
+    ariaLabel: "Navigate to SIP and Loan Calculator tool",
+  },
+  {
+    name: "Budget Planning Tool",
+    icon: PieChart,
+    path: "/tools/budget-planner",
+    ariaLabel: "Navigate to Budget Planning tool",
+  },
+  {
+    name: "Retirement Planner",
+    icon: CalendarDays,
+    path: "/tools/retirement-planner",
+    ariaLabel: "Navigate to Retirement Planner tool",
+  },
+];
+
+
 
 export function Footer() {
   const currentYear = new Date().getFullYear();
-  
+
   return (
     <footer className="bg-neutral-800 text-neutral-300">
-      {/* Main Footer */}
       <div className="container mx-auto px-4 pt-16 pb-8">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-8">
           {/* Company Info */}
-          <div>
-            <div className="flex items-center space-x-2 mb-6">
-              <img src={homobieLogo} alt="Homobie Logo" className="h-10" />
-              <span className="font-bold text-2xl text-white">{}</span>
+          <div className="space-y-6">
+            <div className="flex items-center space-x-3">
+              <img
+                src={homobieLogo}
+                alt="Homobie Logo"
+                className="h-10 w-auto"
+                width={40}
+                height={40}
+              />
+              <span className="sr-only">Homobie</span>
             </div>
-            <p className="text-neutral-400 mb-6">
-              Providing innovative financial solutions to help you achieve your dreams.
+            <p className="text-neutral-400">
+              Providing innovative financial solutions to help you achieve your
+              dreams.
             </p>
             <div className="flex space-x-4">
-              <a href={companyInfo.social.facebook} className="text-neutral-400 hover:text-white transition-colors">
-                <Facebook size={20} />
-              </a>
-              <a href={companyInfo.social.twitter} className="text-neutral-400 hover:text-white transition-colors">
-                <Twitter size={20} />
-              </a>
-              <a href={companyInfo.social.instagram} className="text-neutral-400 hover:text-white transition-colors">
-                <Instagram size={20} />
-              </a>
+              {[
+                {
+                  icon: Facebook,
+                  url: companyInfo.social.facebook,
+                  label: "Facebook",
+                },
+                {
+                  icon: Twitter,
+                  url: companyInfo.social.twitter,
+                  label: "Twitter",
+                },
+                {
+                  icon: Instagram,
+                  url: companyInfo.social.instagram,
+                  label: "Instagram",
+                },
+              ].map((social) => (
+                <a
+                  key={social.label}
+                  href={social.url}
+                  className="text-neutral-400 hover:text-white transition-colors duration-200"
+                  aria-label={`Visit our ${social.label}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  <social.icon size={20} />
+                </a>
+              ))}
             </div>
           </div>
 
           {/* Quick Links */}
           <div>
-            <h3 className="text-white text-lg font-semibold mb-6">Quick Links</h3>
+            <h3 className="text-white text-lg font-semibold mb-6">
+              Quick Links
+            </h3>
             <ul className="space-y-3">
-              <li>
-                <Link href="/" className="text-neutral-400 hover:text-white transition-colors flex items-center">
-                  <ArrowRight size={16} className="mr-2" />
-                  Home
-                </Link>
-              </li>
-              <li>
-                <Link href="/loan-application?type=home-loan" className="text-neutral-400 hover:text-white transition-colors flex items-center">
-                  <ArrowRight size={16} className="mr-2" />
-                  Home Loans
-                </Link>
-              </li>
-              <li>
-                <Link href="/sip" className="text-neutral-400 hover:text-white transition-colors flex items-center">
-                  <ArrowRight size={16} className="mr-2" />
-                  SIP Investments
-                </Link>
-              </li>
-              <li>
-                <Link href="/consultation" className="text-neutral-400 hover:text-white transition-colors flex items-center">
-                  <ArrowRight size={16} className="mr-2" />
-                  Consultation
-                </Link>
-              </li>
+              {[
+                {
+                  name: "Home Loans",
+                  path: "/loan-application?type=home-loan",
+                },
+                {
+                  name: "Loan Against Property",
+                  path: "/loan-application?type=lap",
+                },
+                {
+                  name: "Balance Transfer",
+                  path: "/loan-application?type=bt-topup",
+                },
+                { name: "SIP Investments", path: "/sip" },
+                { name: "Consultation", path: "/consultation" },
+                { name: "Blog", path: "/blog" },
+      
+              ].map((link) => (
+                <li key={link.name}>
+                  <Link
+                    href={link.path}
+                    className="text-neutral-400 hover:text-white transition-colors duration-200 flex items-center group"
+                    aria-label={`Navigate to ${link.name}`}
+                  >
+                    <ArrowRight
+                      size={16}
+                      className="mr-2 text-primary opacity-0 group-hover:opacity-100 transition-opacity duration-200"
+                    />
+                    {link.name}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          {/* Tools & Resources */}
+          <div>
+            <h3 className="text-white text-lg font-semibold mb-6">
+              Tools & Resources
+            </h3>
+            <ul className="space-y-3">
+              {toolItems.map((item) => (
+                <motion.li
+                  key={item.name}
+                  whileHover={{ x: 4 }}
+                  transition={{ type: "spring", stiffness: 400 }}
+                >
+                  <motion.div
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                  >
+                    <Link
+                      href={item.path}
+                      className="text-neutral-400 hover:text-white transition-colors flex items-center"
+                      aria-label={item.ariaLabel}
+                    >
+                      <item.icon
+                        size={18}
+                        className="mr-3 text-primary flex-shrink-0"
+                      />
+                      <span>{item.name}</span>
+                    </Link>
+                  </motion.div>
+                </motion.li>
+              ))}
             </ul>
           </div>
 
           {/* Business Hours */}
           <div>
-            <h3 className="text-white text-lg font-semibold mb-6">Business Hours</h3>
-            <ul className="space-y-3">
-              <li className="flex items-start">
-                <Clock size={18} className="mr-3 mt-1 text-primary" />
-                <div>
-                  <p className="font-medium">Monday - Saturday</p>
-                  <p className="text-neutral-400">{companyInfo.businessHours.monday}</p>
-                </div>
-              </li>
-              <li className="flex items-start">
-                <Clock size={18} className="mr-3 mt-1 text-primary" />
-                <div>
-                  <p className="font-medium">Sunday</p>
-                  <p className="text-neutral-400">{companyInfo.businessHours.sunday}</p>
-                </div>
-              </li>
+            <h3 className="text-white text-lg font-semibold mb-6">
+              Business Hours
+            </h3>
+            <ul className="space-y-4">
+              {[
+                {
+                  label: "Monday - Saturday",
+                  time: companyInfo.businessHours.monday,
+                },
+                {
+                  label: "Sunday",
+                  time: companyInfo.businessHours.sunday,
+                },
+              ].map((item) => (
+                <li key={item.label} className="flex items-start">
+                  <Clock
+                    size={18}
+                    className="mr-3 mt-1 text-primary flex-shrink-0"
+                    aria-hidden="true"
+                  />
+                  <div>
+                    <p className="font-medium">{item.label}</p>
+                    <p className="text-neutral-400">{item.time}</p>
+                  </div>
+                </li>
+              ))}
             </ul>
           </div>
 
           {/* Contact Info */}
           <div>
-            <h3 className="text-white text-lg font-semibold mb-6">Contact Us</h3>
-            <ul className="space-y-3">
+            <h3 className="text-white text-lg font-semibold mb-6">
+              Contact Us
+            </h3>
+            <ul className="space-y-4">
               <li className="flex items-start">
-                <Phone size={18} className="mr-3 mt-1 text-primary" />
+                <Phone
+                  size={18}
+                  className="mr-3 mt-1 text-primary flex-shrink-0"
+                  aria-hidden="true"
+                />
                 <div>
                   <p className="font-medium">Phone</p>
-                  <p className="text-neutral-400">{companyInfo.contact.phones[0]}</p>
-                  <p className="text-neutral-400">{companyInfo.contact.phones[1]}</p>
+                  {companyInfo.contact.phones.map((phone) => (
+                    <a
+                      key={phone}
+                      href={`tel:${phone.replace(/\s+/g, "")}`}
+                      className="block text-neutral-400 hover:text-white transition-colors duration-200"
+                    >
+                      {phone}
+                    </a>
+                  ))}
                 </div>
               </li>
               <li className="flex items-start">
-                <Mail size={18} className="mr-3 mt-1 text-primary" />
+                <Mail
+                  size={18}
+                  className="mr-3 mt-1 text-primary flex-shrink-0"
+                  aria-hidden="true"
+                />
                 <div>
                   <p className="font-medium">Email</p>
-                  <p className="text-neutral-400">{companyInfo.contact.email}</p>
+                  <a
+                    href={`mailto:${companyInfo.contact.email}`}
+                    className="block text-neutral-400 hover:text-white transition-colors duration-200"
+                  >
+                    {companyInfo.contact.email}
+                  </a>
                 </div>
               </li>
               <li className="flex items-start">
-                <MapPin size={18} className="mr-3 mt-1 text-primary" />
+                <MapPin
+                  size={18}
+                  className="mr-3 mt-1 text-primary flex-shrink-0"
+                  aria-hidden="true"
+                />
                 <div>
                   <p className="font-medium">Address</p>
-                  <p className="text-neutral-400">{companyInfo.contact.address}</p>
+                  <p className="text-neutral-400">
+                    {companyInfo.contact.address}
+                  </p>
                 </div>
               </li>
             </ul>
@@ -129,7 +268,9 @@ export function Footer() {
       {/* Copyright */}
       <div className="border-t border-neutral-700 py-6">
         <div className="container mx-auto px-4 text-center">
-          <p>&copy; {currentYear} {companyInfo.name}. All rights reserved.</p>
+          <p className="text-neutral-400">
+            &copy; {currentYear} {companyInfo.name}. All rights reserved.
+          </p>
         </div>
       </div>
     </footer>

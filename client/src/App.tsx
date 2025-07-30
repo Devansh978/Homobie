@@ -17,7 +17,9 @@ import { ThemeProvider } from "next-themes";
 import { AuthProvider } from "@/hooks/use-auth";
 import { Header } from "@/components/layout/header";
 import { Footer } from "@/components/layout/footer";
-
+import BlogPage from "@/pages/blog-page";
+import OurTeamPage from "@/pages/ourteam-page";
+import { Calculator } from "lucide-react";
 function Router() {
   return (
     <Switch>
@@ -31,6 +33,15 @@ function Router() {
       </Route>
       <Route path="/sip">
         <SipPage />
+      </Route>
+      <Route path="/blog">
+        <BlogPage />
+      </Route>
+      <Route path="/ourteam">
+        <OurTeamPage />
+      </Route>
+      <Route path="@/components/ui/calculator">
+        <Calculator />
       </Route>
       <ProtectedRoute path="/dashboard" component={DashboardPage} />
       <ProtectedRoute path="/admin" component={AdminPage} />

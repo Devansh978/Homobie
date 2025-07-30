@@ -1,0 +1,14 @@
+/* In src/components/header.css */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* These simple rules ensure that nested dropdowns (flyouts)
+  appear correctly when you hover over their parent item.
+  All other styling is now handled by Tailwind classes in your JSX.
+*/
+.group:hover > .flyout-menu {
+  opacity: 1;
+  transform: scale(1);
+  visibility: visible;
+}
