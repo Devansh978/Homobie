@@ -483,22 +483,25 @@ export function Header() {
           </nav>
 
           <div className="flex items-center gap-6 text-white">
-            <div className="hidden lg:flex items-center gap-6">
-              {user ? (
+            {/* Show user dropdown on all screen sizes */}
+            {user ? (
+              <div className="relative lg:block">
                 <UserDropdown
                   user={user}
                   onLogout={() => logoutMutation.mutate()}
                   isLoggingOut={logoutMutation.isPending}
                 />
-              ) : (
-                <Button
-                  asChild
-                  className="bg-transparent border border-white hover:bg-white/10 rounded-full"
-                >
-                  <Link href="/auth">Log In</Link>
-                </Button>
-              )}
-            </div>
+                {/* Debug info */}
+                <span className="sr-only">User: {user.username}, Role: {user.role}</span>
+              </div>
+            ) : (
+              <Button
+                asChild
+                className="hidden lg:block bg-transparent border border-white hover:bg-white/10 rounded-full"
+              >
+                <Link href="/auth">Log In</Link>
+              </Button>
+            )}
             <button
               onClick={() => setMobileMenuOpen(true)}
               className="p-2 text-white lg:hidden"
@@ -588,7 +591,7 @@ function UserDropdown({
       <DropdownMenuTrigger asChild>
         <Button
           variant="ghost"
-          className="p-0 text-white hover:bg-transparent hover:text-white focus-visible:ring-0"
+          className="px-3 py-2 text-white hover:bg-white/20 focus-visible:ring-2 focus-visible:ring-white/50 rounded-lg transition-all duration-200"
         >
           <User className="mr-2 h-5 w-5" />
           <span className="font-medium">{user.username || "Account"}</span>
@@ -596,14 +599,14 @@ function UserDropdown({
       </DropdownMenuTrigger>
       <DropdownMenuContent
         align="end"
-        className="w-56 mt-2 bg-white text-nexi-darkgray"
+        className="w-56 mt-2 bg-white text-gray-800 shadow-xl border border-gray-200 z-[60]"
       >
         <DropdownMenuItem asChild>
           <Link
             href="/dashboard"
-            className="flex w-full cursor-pointer items-center p-2 rounded-md hover:bg-nexi-pagebg"
+            className="flex w-full cursor-pointer items-center p-3 rounded-md hover:bg-blue-50 hover:text-blue-700 transition-colors"
           >
-            <LayoutDashboard className="mr-2 h-4 w-4" />
+            <LayoutDashboard className="mr-3 h-4 w-4" />
             <span>Dashboard</span>
           </Link>
         </DropdownMenuItem>
@@ -612,9 +615,9 @@ function UserDropdown({
           <DropdownMenuItem asChild>
             <Link
               href="/admin"
-              className="flex w-full cursor-pointer items-center p-2 rounded-md hover:bg-nexi-pagebg"
+              className="flex w-full cursor-pointer items-center p-3 rounded-md hover:bg-green-50 hover:text-green-700 transition-colors"
             >
-              <Settings className="mr-2 h-4 w-4" />
+              <Settings className="mr-3 h-4 w-4" />
               <span>Admin Panel</span>
             </Link>
           </DropdownMenuItem>
@@ -624,9 +627,9 @@ function UserDropdown({
           <DropdownMenuItem asChild>
             <Link
               href="/super-admin"
-              className="flex w-full cursor-pointer items-center p-2 rounded-md hover:bg-nexi-pagebg"
+              className="flex w-full cursor-pointer items-center p-3 rounded-md hover:bg-purple-50 hover:text-purple-700 transition-colors"
             >
-              <Shield className="mr-2 h-4 w-4" />
+              <Shield className="mr-3 h-4 w-4" />
               <span>Super Admin</span>
             </Link>
           </DropdownMenuItem>
@@ -636,9 +639,9 @@ function UserDropdown({
         <DropdownMenuItem
           onClick={onLogout}
           disabled={isLoggingOut}
-          className="p-2 rounded-md hover:bg-nexi-pagebg focus:bg-red-50 focus:text-red-600"
+          className="p-3 rounded-md hover:bg-red-50 hover:text-red-600 focus:bg-red-50 focus:text-red-600 transition-colors"
         >
-          <LogOut className="mr-2 h-4 w-4" />
+          <LogOut className="mr-3 h-4 w-4" />
           <span>{isLoggingOut ? "Logging out..." : "Logout"}</span>
         </DropdownMenuItem>
       </DropdownMenuContent>
