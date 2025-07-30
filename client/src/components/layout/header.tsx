@@ -200,8 +200,20 @@ import {
 // Make sure this CSS file exists and has the correct content
 import "./header.css";
 
+// --- Navigation Types ---
+type NavChild = {
+  label: string;
+  path: string;
+};
+
+type NavItem = {
+  label: string;
+  children?: NavChild[];
+  path?: string;
+};
+
 // --- Your navigation data  ---
-const navData = [
+const navData: NavItem[] = [
   {
     label: "Apply for Loan",
     children: [
@@ -251,10 +263,10 @@ const mobileNavVariants = {
 };
 
 // --- Desktop Navigation Item Component (FIXED) ---
-const DesktopNavItem = ({ item }) => {
+const DesktopNavItem = ({ item }: { item: NavItem }) => {
   const [isHovered, setIsHovered] = useState(false);
   const [location] = useLocation();
-  const isActive = (path) => path && location === path;
+  const isActive = (path: string) => path && location === path;
   const hasChildren = item.children && item.children.length > 0;
 
   return (
@@ -277,7 +289,7 @@ const DesktopNavItem = ({ item }) => {
               className="absolute top-full left-0 z-50 min-w-[250px] origin-top rounded-lg bg-white p-2 text-nexi-blackgray shadow-lg"
             >
               <ul className="space-y-1">
-                {item.children.map((child) => (
+                {item.children?.map((child) => (
                   <li key={child.label}>
                     <Link
                       href={child.path}
@@ -302,8 +314,8 @@ const DesktopNavItem = ({ item }) => {
 };
 
 // --- Mobile Navigation Component (IMPROVED) ---
-const MobileNav = ({ isOpen, onClose }) => {
-  const [menuStack, setMenuStack] = useState([
+const MobileNav = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) => {
+  const [menuStack, setMenuStack] = useState<{ items: (NavItem | NavChild)[]; label: string }[]>([
     { items: navData, label: "Menu" },
   ]);
   const [_, navigate] = useLocation();
@@ -313,10 +325,10 @@ const MobileNav = ({ isOpen, onClose }) => {
     if (isOpen) setMenuStack([{ items: navData, label: "Menu" }]);
   }, [isOpen]);
 
-  const handleForward = (children, label) =>
+  const handleForward = (children: NavChild[], label: string) =>
     setMenuStack((prev) => [...prev, { items: children, label }]);
   const handleBack = () => setMenuStack((prev) => prev.slice(0, -1));
-  const handleNavigate = (path) => {
+  const handleNavigate = (path?: string) => {
     if (path) navigate(path);
     onClose();
   };
@@ -379,14 +391,14 @@ const MobileNav = ({ isOpen, onClose }) => {
                   <li key={item.label}>
                     <button
                       onClick={() =>
-                        item.children
+                        'children' in item && item.children
                           ? handleForward(item.children, item.label)
-                          : handleNavigate(item.path)
+                          : handleNavigate('path' in item ? item.path : undefined)
                       }
                       className="w-full flex justify-between items-center text-left p-4 text-lg text-nexi-darkgray rounded-lg hover:bg-nexi-pagebg"
                     >
                       <span>{item.label}</span>
-                      {item.children && <ChevronRight size={20} />}
+                      {'children' in item && item.children && <ChevronRight size={20} />}
                     </button>
                   </li>
                 ))}
@@ -506,7 +518,17 @@ export function Header() {
 }
 
 // --- User Dropdown Component (FIXED) ---
-function UserDropdown({ user, onLogout, isLoggingOut, isMobile = false }) {
+function UserDropdown({ 
+  user, 
+  onLogout, 
+  isLoggingOut, 
+  isMobile = false 
+}: {
+  user: { username: string; role: string };
+  onLogout: () => void;
+  isLoggingOut: boolean;
+  isMobile?: boolean;
+}): React.JSX.Element {
   if (isMobile) {
     return (
       <div className="space-y-3">
