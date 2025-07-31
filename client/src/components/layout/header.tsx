@@ -251,10 +251,10 @@ const mobileNavVariants = {
 };
 
 // --- Desktop Navigation Item Component (FIXED) ---
-const DesktopNavItem = ({ item }) => {
+const DesktopNavItem = ({ item }: { item: any }) => {
   const [isHovered, setIsHovered] = useState(false);
   const [location] = useLocation();
-  const isActive = (path) => path && location === path;
+  const isActive = (path: string) => path && location === path;
   const hasChildren = item.children && item.children.length > 0;
 
   return (
@@ -277,7 +277,7 @@ const DesktopNavItem = ({ item }) => {
               className="absolute top-full left-0 z-50 min-w-[250px] origin-top rounded-lg bg-white p-2 text-nexi-blackgray shadow-lg"
             >
               <ul className="space-y-1">
-                {item.children.map((child) => (
+                {item.children.map((child: any) => (
                   <li key={child.label}>
                     <Link
                       href={child.path}
@@ -302,7 +302,7 @@ const DesktopNavItem = ({ item }) => {
 };
 
 // --- Mobile Navigation Component (IMPROVED) ---
-const MobileNav = ({ isOpen, onClose }) => {
+const MobileNav = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) => {
   const [menuStack, setMenuStack] = useState([
     { items: navData, label: "Menu" },
   ]);
@@ -313,10 +313,10 @@ const MobileNav = ({ isOpen, onClose }) => {
     if (isOpen) setMenuStack([{ items: navData, label: "Menu" }]);
   }, [isOpen]);
 
-  const handleForward = (children, label) =>
+  const handleForward = (children: any, label: string) =>
     setMenuStack((prev) => [...prev, { items: children, label }]);
   const handleBack = () => setMenuStack((prev) => prev.slice(0, -1));
-  const handleNavigate = (path) => {
+  const handleNavigate = (path: string) => {
     if (path) navigate(path);
     onClose();
   };
@@ -381,7 +381,7 @@ const MobileNav = ({ isOpen, onClose }) => {
                       onClick={() =>
                         item.children
                           ? handleForward(item.children, item.label)
-                          : handleNavigate(item.path)
+                          : handleNavigate((item as any).path || '/')
                       }
                       className="w-full flex justify-between items-center text-left p-4 text-lg text-nexi-darkgray rounded-lg hover:bg-nexi-pagebg"
                     >
@@ -506,7 +506,7 @@ export function Header() {
 }
 
 // --- User Dropdown Component (FIXED) ---
-function UserDropdown({ user, onLogout, isLoggingOut, isMobile = false }) {
+function UserDropdown({ user, onLogout, isLoggingOut, isMobile = false }: { user: any; onLogout: () => void; isLoggingOut: boolean; isMobile?: boolean }) {
   if (isMobile) {
     return (
       <div className="space-y-4">

@@ -49,7 +49,7 @@ function App() {
         <AuthProvider>
           <div className="flex flex-col min-h-screen">
             <Header />
-            <main className="flex-grow">
+            <main className="flex-grow header-spacing">
               <Router />
             </main>
             
