@@ -19,30 +19,18 @@ import { Header } from "@/components/layout/header";
 import { Footer } from "@/components/layout/footer";
 import BlogPage from "@/pages/blog-page";
 import OurTeamPage from "@/pages/ourteam-page";
-// import Calculator from '@/components/ui/calculator';
-import { Calculator } from "lucide-react";
+
 
 function Router() {
   return (
     <Switch>
       <Route path="/" component={HomePage} />
       <Route path="/auth" component={AuthPage} />
-      <Route path="/loan-application"/>
-        <LoanApplicationPage />
-        {/* <Route path="/tools/emi-calculator" component={Calculator} />
-      </Calculator> */}
-      <Route path="/consultation">
-        <ConsultationPage />
-      </Route>
-      <Route path="/sip">
-        <SipPage />
-      </Route>
-      <Route path="/blog">
-        <BlogPage />
-      </Route>
-      <Route path="/ourteam">
-        <OurTeamPage />
-      </Route>
+      <Route path="/loan-application" component={LoanApplicationPage} />
+      <Route path="/consultation" component={ConsultationPage} />
+      <Route path="/sip" component={SipPage} />
+      <Route path="/blog" component={BlogPage} />
+      <Route path="/ourteam" component={OurTeamPage} />
       
       <ProtectedRoute path="/dashboard" component={DashboardPage} />
       <ProtectedRoute path="/admin" component={AdminPage} />

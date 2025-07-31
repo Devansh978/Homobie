@@ -1,7 +1,6 @@
 import { useAuth } from "@/hooks/use-auth";
 import { Loader2 } from "lucide-react";
 import { Redirect, Route } from "wouter";
-import { AuthProvider } from "@/hooks/use-auth";
 
 // A wrapper component for all routes
 export function RouteComponent({

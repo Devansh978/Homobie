@@ -200,20 +200,8 @@ import {
 // Make sure this CSS file exists and has the correct content
 import "./header.css";
 
-// --- Navigation Types ---
-type NavChild = {
-  label: string;
-  path: string;
-};
-
-type NavItem = {
-  label: string;
-  children?: NavChild[];
-  path?: string;
-};
-
 // --- Your navigation data  ---
-const navData: NavItem[] = [
+const navData = [
   {
     label: "Apply for Loan",
     children: [
@@ -263,10 +251,10 @@ const mobileNavVariants = {
 };
 
 // --- Desktop Navigation Item Component (FIXED) ---
-const DesktopNavItem = ({ item }: { item: NavItem }) => {
+const DesktopNavItem = ({ item }) => {
   const [isHovered, setIsHovered] = useState(false);
   const [location] = useLocation();
-  const isActive = (path: string) => path && location === path;
+  const isActive = (path) => path && location === path;
   const hasChildren = item.children && item.children.length > 0;
 
   return (
@@ -289,7 +277,7 @@ const DesktopNavItem = ({ item }: { item: NavItem }) => {
               className="absolute top-full left-0 z-50 min-w-[250px] origin-top rounded-lg bg-white p-2 text-nexi-blackgray shadow-lg"
             >
               <ul className="space-y-1">
-                {item.children?.map((child) => (
+                {item.children.map((child) => (
                   <li key={child.label}>
                     <Link
                       href={child.path}
@@ -314,8 +302,8 @@ const DesktopNavItem = ({ item }: { item: NavItem }) => {
 };
 
 // --- Mobile Navigation Component (IMPROVED) ---
-const MobileNav = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) => {
-  const [menuStack, setMenuStack] = useState<{ items: (NavItem | NavChild)[]; label: string }[]>([
+const MobileNav = ({ isOpen, onClose }) => {
+  const [menuStack, setMenuStack] = useState([
     { items: navData, label: "Menu" },
   ]);
   const [_, navigate] = useLocation();
@@ -325,10 +313,10 @@ const MobileNav = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }
     if (isOpen) setMenuStack([{ items: navData, label: "Menu" }]);
   }, [isOpen]);
 
-  const handleForward = (children: NavChild[], label: string) =>
+  const handleForward = (children, label) =>
     setMenuStack((prev) => [...prev, { items: children, label }]);
   const handleBack = () => setMenuStack((prev) => prev.slice(0, -1));
-  const handleNavigate = (path?: string) => {
+  const handleNavigate = (path) => {
     if (path) navigate(path);
     onClose();
   };
@@ -391,14 +379,14 @@ const MobileNav = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }
                   <li key={item.label}>
                     <button
                       onClick={() =>
-                        'children' in item && item.children
+                        item.children
                           ? handleForward(item.children, item.label)
-                          : handleNavigate('path' in item ? item.path : undefined)
+                          : handleNavigate(item.path)
                       }
                       className="w-full flex justify-between items-center text-left p-4 text-lg text-nexi-darkgray rounded-lg hover:bg-nexi-pagebg"
                     >
                       <span>{item.label}</span>
-                      {'children' in item && item.children && <ChevronRight size={20} />}
+                      {item.children && <ChevronRight size={20} />}
                     </button>
                   </li>
                 ))}
@@ -483,25 +471,22 @@ export function Header() {
           </nav>
 
           <div className="flex items-center gap-6 text-white">
-            {/* Show user dropdown on all screen sizes */}
-            {user ? (
-              <div className="relative lg:block">
+            <div className="hidden lg:flex items-center gap-6">
+              {user ? (
                 <UserDropdown
                   user={user}
                   onLogout={() => logoutMutation.mutate()}
                   isLoggingOut={logoutMutation.isPending}
                 />
-                {/* Debug info */}
-                <span className="sr-only">User: {user.username}, Role: {user.role}</span>
-              </div>
-            ) : (
-              <Button
-                asChild
-                className="hidden lg:block bg-transparent border border-white hover:bg-white/10 rounded-full"
-              >
-                <Link href="/auth">Log In</Link>
-              </Button>
-            )}
+              ) : (
+                <Button
+                  asChild
+                  className="bg-transparent border border-white hover:bg-white/10 rounded-full"
+                >
+                  <Link href="/auth">Log In</Link>
+                </Button>
+              )}
+            </div>
             <button
               onClick={() => setMobileMenuOpen(true)}
               className="p-2 text-white lg:hidden"
@@ -521,59 +506,15 @@ export function Header() {
 }
 
 // --- User Dropdown Component (FIXED) ---
-function UserDropdown({ 
-  user, 
-  onLogout, 
-  isLoggingOut, 
-  isMobile = false 
-}: {
-  user: { username: string; role: string };
-  onLogout: () => void;
-  isLoggingOut: boolean;
-  isMobile?: boolean;
-}): React.JSX.Element {
+function UserDropdown({ user, onLogout, isLoggingOut, isMobile = false }) {
   if (isMobile) {
     return (
-      <div className="space-y-3">
+      <div className="space-y-4">
         <div className="text-center">
           <p className="font-bold text-lg text-nexi-darkblue">
             {user.username || "User"}
           </p>
-          <p className="text-sm text-nexi-darkgray capitalize">
-            {user.role || "user"}
-          </p>
         </div>
-        
-        <div className="space-y-2">
-          <Link
-            href="/dashboard"
-            className="flex w-full items-center p-3 text-nexi-darkgray bg-nexi-pagebg rounded-lg hover:bg-nexi-blue hover:text-white transition-colors"
-          >
-            <LayoutDashboard className="mr-3 h-5 w-5" />
-            <span>Dashboard</span>
-          </Link>
-
-          {(user.role === "admin" || user.role === "superadmin") && (
-            <Link
-              href="/admin"
-              className="flex w-full items-center p-3 text-nexi-darkgray bg-nexi-pagebg rounded-lg hover:bg-nexi-blue hover:text-white transition-colors"
-            >
-              <Settings className="mr-3 h-5 w-5" />
-              <span>Admin Panel</span>
-            </Link>
-          )}
-
-          {user.role === "superadmin" && (
-            <Link
-              href="/super-admin"
-              className="flex w-full items-center p-3 text-nexi-darkgray bg-nexi-pagebg rounded-lg hover:bg-nexi-blue hover:text-white transition-colors"
-            >
-              <Shield className="mr-3 h-5 w-5" />
-              <span>Super Admin</span>
-            </Link>
-          )}
-        </div>
-
         <Button
           onClick={onLogout}
           disabled={isLoggingOut}
@@ -591,7 +532,7 @@ function UserDropdown({
       <DropdownMenuTrigger asChild>
         <Button
           variant="ghost"
-          className="px-3 py-2 text-white hover:bg-white/20 focus-visible:ring-2 focus-visible:ring-white/50 rounded-lg transition-all duration-200"
+          className="p-0 text-white hover:bg-transparent hover:text-white focus-visible:ring-0"
         >
           <User className="mr-2 h-5 w-5" />
           <span className="font-medium">{user.username || "Account"}</span>
@@ -599,14 +540,14 @@ function UserDropdown({
       </DropdownMenuTrigger>
       <DropdownMenuContent
         align="end"
-        className="w-56 mt-2 bg-white text-gray-800 shadow-xl border border-gray-200 z-[60]"
+        className="w-56 mt-2 bg-white text-nexi-darkgray"
       >
         <DropdownMenuItem asChild>
           <Link
             href="/dashboard"
-            className="flex w-full cursor-pointer items-center p-3 rounded-md hover:bg-blue-50 hover:text-blue-700 transition-colors"
+            className="flex w-full cursor-pointer items-center p-2 rounded-md hover:bg-nexi-pagebg"
           >
-            <LayoutDashboard className="mr-3 h-4 w-4" />
+            <LayoutDashboard className="mr-2 h-4 w-4" />
             <span>Dashboard</span>
           </Link>
         </DropdownMenuItem>
@@ -615,9 +556,9 @@ function UserDropdown({
           <DropdownMenuItem asChild>
             <Link
               href="/admin"
-              className="flex w-full cursor-pointer items-center p-3 rounded-md hover:bg-green-50 hover:text-green-700 transition-colors"
+              className="flex w-full cursor-pointer items-center p-2 rounded-md hover:bg-nexi-pagebg"
             >
-              <Settings className="mr-3 h-4 w-4" />
+              <Settings className="mr-2 h-4 w-4" />
               <span>Admin Panel</span>
             </Link>
           </DropdownMenuItem>
@@ -627,9 +568,9 @@ function UserDropdown({
           <DropdownMenuItem asChild>
             <Link
               href="/super-admin"
-              className="flex w-full cursor-pointer items-center p-3 rounded-md hover:bg-purple-50 hover:text-purple-700 transition-colors"
+              className="flex w-full cursor-pointer items-center p-2 rounded-md hover:bg-nexi-pagebg"
             >
-              <Shield className="mr-3 h-4 w-4" />
+              <Shield className="mr-2 h-4 w-4" />
               <span>Super Admin</span>
             </Link>
           </DropdownMenuItem>
@@ -639,9 +580,9 @@ function UserDropdown({
         <DropdownMenuItem
           onClick={onLogout}
           disabled={isLoggingOut}
-          className="p-3 rounded-md hover:bg-red-50 hover:text-red-600 focus:bg-red-50 focus:text-red-600 transition-colors"
+          className="p-2 rounded-md hover:bg-nexi-pagebg focus:bg-red-50 focus:text-red-600"
         >
-          <LogOut className="mr-3 h-4 w-4" />
+          <LogOut className="mr-2 h-4 w-4" />
           <span>{isLoggingOut ? "Logging out..." : "Logout"}</span>
         </DropdownMenuItem>
       </DropdownMenuContent>

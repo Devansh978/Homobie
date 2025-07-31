@@ -18,6 +18,15 @@ import {
 } from "lucide-react";
 import { LoanApplication, User as UserType, Consultation, KycDocument } from "@shared/schema";
 import { formatCurrency, formatDate, getStatusColor } from "@/lib/utils";
+
+// Type for analytics data
+type AnalyticsData = {
+  totalUsers: number;
+  loanStats: { total: number; pending: number; approved: number; rejected: number };
+  consultations: { total: number; scheduled: number; completed: number };
+  sipInvestments: { total: number; active: number };
+  auditLogs: { total: number };
+};
 import {
   Dialog,
   DialogContent,
@@ -89,7 +98,7 @@ export default function AdminPage() {
       auditLogs: { total: 0 },
     }, 
     isLoading: isLoadingAnalytics 
-  } = useQuery({
+  } = useQuery<AnalyticsData>({
     queryKey: ["/api/admin/analytics"],
   });
 

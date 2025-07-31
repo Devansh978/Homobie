@@ -163,6 +163,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       const updatedApplication = await storage.updateLoanApplicationStatus(id, status);
       
+      if (!updatedApplication) {
+        return res.status(500).json({ message: "Failed to update loan application" });
+      }
+      
       // Log the status change in audit logs
       await createAuditLog(
         req, 
@@ -183,6 +187,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Consultations
   app.post("/api/consultations", isAuthenticated, async (req, res, next) => {
     try {
+      if (!req.user) {
+        return res.status(401).json({ message: "User not found" });
+      }
+      
       const validatedData = insertConsultationSchema.parse({
         ...req.body,
         userId: req.user.id,
@@ -197,6 +205,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get("/api/consultations", isAuthenticated, async (req, res, next) => {
     try {
+      if (!req.user) {
+        return res.status(401).json({ message: "User not found" });
+      }
+      
       const consultations = await storage.getConsultationsByUserId(req.user.id);
       res.json(consultations);
     } catch (error) {
@@ -252,6 +264,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // SIP Investments
   app.post("/api/sip-investments", isAuthenticated, async (req, res, next) => {
     try {
+      if (!req.user) {
+        return res.status(401).json({ message: "User not found" });
+      }
+      
       const validatedData = insertSipInvestmentSchema.parse({
         ...req.body,
         userId: req.user.id,
@@ -266,6 +282,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get("/api/sip-investments", isAuthenticated, async (req, res, next) => {
     try {
+      if (!req.user) {
+        return res.status(401).json({ message: "User not found" });
+      }
+      
       const sipInvestments = await storage.getSipInvestmentsByUserId(req.user.id);
       res.json(sipInvestments);
     } catch (error) {
@@ -276,6 +296,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // KYC Documents
   app.post("/api/kyc-documents", isAuthenticated, async (req, res, next) => {
     try {
+      if (!req.user) {
+        return res.status(401).json({ message: "User not found" });
+      }
+      
       const validatedData = insertKycDocumentSchema.parse({
         ...req.body,
         userId: req.user.id,
@@ -290,6 +314,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get("/api/kyc-documents", isAuthenticated, async (req, res, next) => {
     try {
+      if (!req.user) {
+        return res.status(401).json({ message: "User not found" });
+      }
+      
       const kycDocuments = await storage.getKycDocumentsByUserId(req.user.id);
       res.json(kycDocuments);
     } catch (error) {
@@ -326,6 +354,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       const updatedUser = await storage.updateUserRole(id, role);
       
+      if (!updatedUser) {
+        return res.status(500).json({ message: "Failed to update user role" });
+      }
+      
       // Log the role change in audit logs
       await createAuditLog(
         req, 
@@ -346,6 +378,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Transactions
   app.get("/api/transactions", isAuthenticated, async (req, res, next) => {
     try {
+      if (!req.user) {
+        return res.status(401).json({ message: "User not found" });
+      }
+      
       const transactions = await storage.getTransactionsByUserId(req.user.id);
       res.json(transactions);
     } catch (error) {
