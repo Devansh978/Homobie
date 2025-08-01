@@ -1,179 +1,7 @@
-// import React, { useState } from "react";
-// import { Link, useLocation } from "wouter";
-// import { useAuth } from "@/hooks/use-auth";
-// import { Button } from "@/components/ui/button";
-// import {
-//   Menu,
-//   X,
-//   User,
-//   LogOut,
-//   LayoutDashboard,
-//   Settings,
-//   Clock,
-//   Phone,
-//   Mail,
-//   MapPin,
-//   Shield
-// } from "lucide-react";
-// import {
-//   DropdownMenu,
-//   DropdownMenuContent,
-//   DropdownMenuItem,
-//   DropdownMenuSeparator,
-//   DropdownMenuTrigger,
-// } from "@/components/ui/dropdown-menu";
-// import { companyInfo } from "@/lib/company-info";
-// import homobieLogo from "/public/assets/wmremove-transformed - Edited.jpg";
-
-// export function Header() {
-//   const [location] = useLocation();
-//   const { user, logoutMutation } = useAuth();
-//   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-
-//   const toggleMobileMenu = () => {
-//     setMobileMenuOpen(!mobileMenuOpen);
-//   };
-
-//   const handleLogout = () => {
-//     logoutMutation.mutate();
-//   };
-
-//   const isActive = (path: string) => {
-//     return location === path;
-//   };
-
-//   const navLinks = [
-//     { label: "Home Loans", path: "/loan-application?type=home-loan" },
-//     { label: "LAP", path: "/loan-application?type=lap" },
-//     { label: "BT Top-Up", path: "/loan-application?type=bt-topup" },
-//     { label: "SIP", path: "/sip" },
-//     { label: "Consultation", path: "/consultation" },
-//   ];
-
-//   return (
-//     <header className="bg-white shadow-sm sticky top-0 z-50">
-//       <div className="container mx-auto px-4 py-3 flex justify-between items-center">
-//         <Link href="/" className="flex items-center space-x-2">
-//           <img src={homobieLogo} alt="Homobie Logo" className=" h-8" />
-//           <span className="font-bold text-xl text-primary">{}</span>
-//         </Link>
-
-//         <nav className="hidden md:flex space-x-8">
-//           {navLinks.map((link) => (
-//             <Link key={link.path} href={link.path}
-//               className={`${
-//                 isActive(link.path)
-//                   ? "text-primary font-medium"
-//                   : "text-neutral-600 hover:text-primary"
-//               } transition-colors`}
-//             >
-//               {link.label}
-//             </Link>
-//           ))}
-//         </nav>
-
-//         <div className="flex items-center space-x-4">
-//           {user ? (
-//             <DropdownMenu>
-//               <DropdownMenuTrigger asChild>
-//                 <Button variant="outline" className="flex items-center space-x-2">
-//                   <User size={18} />
-//                   <span className="hidden md:inline">{user.username}</span>
-//                 </Button>
-//               </DropdownMenuTrigger>
-//               <DropdownMenuContent align="end" className="w-56">
-//                 <DropdownMenuItem asChild>
-//                   <Link href="/dashboard" className="flex w-full cursor-pointer items-center">
-//                     <LayoutDashboard className="mr-2 h-4 w-4" />
-//                     <span>Dashboard</span>
-//                   </Link>
-//                 </DropdownMenuItem>
-
-//                 {(user.role === "admin" || user.role === "superadmin") && (
-//                   <DropdownMenuItem asChild>
-//                     <Link href="/admin" className="flex w-full cursor-pointer items-center">
-//                       <Settings className="mr-2 h-4 w-4" />
-//                       <span>Admin Panel</span>
-//                     </Link>
-//                   </DropdownMenuItem>
-//                 )}
-
-//                 {user.role === "superadmin" && (
-//                   <DropdownMenuItem asChild>
-//                     <Link href="/super-admin" className="flex w-full cursor-pointer items-center">
-//                       <Shield className="mr-2 h-4 w-4" />
-//                       <span>Super Admin</span>
-//                     </Link>
-//                   </DropdownMenuItem>
-//                 )}
-
-//                 <DropdownMenuSeparator />
-
-//                 <DropdownMenuItem onClick={handleLogout} disabled={logoutMutation.isPending}>
-//                   <LogOut className="mr-2 h-4 w-4" />
-//                   <span>{logoutMutation.isPending ? "Logging out..." : "Logout"}</span>
-//                 </DropdownMenuItem>
-//               </DropdownMenuContent>
-//             </DropdownMenu>
-//           ) : (
-//             <>
-//               <Link href="/auth" className="hidden md:block px-4 py-2 text-primary border border-primary rounded-lg hover:bg-primary hover:text-white transition-colors">
-//                 Log In
-//               </Link>
-//               <Link href="/auth" className="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors">
-//                 Apply Now
-//               </Link>
-//             </>
-//           )}
-
-//           <button
-//             className="md:hidden text-neutral-600"
-//             onClick={toggleMobileMenu}
-//             aria-label={mobileMenuOpen ? "Close menu" : "Open menu"}
-//           >
-//             {mobileMenuOpen ? <X className="text-xl" /> : <Menu className="text-xl" />}
-//           </button>
-//         </div>
-//       </div>
-
-//       {/* Mobile menu */}
-//       {mobileMenuOpen && (
-//         <div className="md:hidden bg-white border-t">
-//           <div className="container mx-auto px-4 py-2 space-y-2">
-//             {navLinks.map((link) => (
-//               <Link
-//                 key={link.path}
-//                 href={link.path}
-//                 className={`block py-2 ${
-//                   isActive(link.path)
-//                     ? "text-primary font-medium"
-//                     : "text-neutral-600 hover:text-primary"
-//                 }`}
-//                 onClick={() => setMobileMenuOpen(false)}
-//               >
-//                 {link.label}
-//               </Link>
-//             ))}
-
-//             {!user && (
-//               <Link
-//                 href="/auth"
-//                 className="block py-2 text-neutral-600 hover:text-primary font-medium"
-//                 onClick={() => setMobileMenuOpen(false)}
-//               >
-//                 Log In
-//               </Link>
-//             )}
-//           </div>
-//         </div>
-//       )}
-//     </header>
-//   );
-// }
-
 import React, { useState, useEffect } from "react";
+// Link is for internal navigation, <a> is for external.
 import { Link, useLocation } from "wouter";
-import { useAuth } from "@/hooks/use-auth"; // Assuming you have this hook
+import { useAuth } from "@/hooks/use-auth";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Menu,
@@ -183,8 +11,6 @@ import {
   LayoutDashboard,
   Settings,
   Shield,
-  Search,
-  Globe,
   ChevronRight,
   ChevronLeft,
 } from "lucide-react";
@@ -200,7 +26,7 @@ import {
 // Make sure this CSS file exists and has the correct content
 import "./header.css";
 
-// --- Your navigation data  ---
+// --- Your navigation data ---
 const navData = [
   {
     label: "Apply for Loan",
@@ -220,10 +46,7 @@ const navData = [
   },
   {
     label: "About Us",
-    children: [
-      // { label: "Our Teams", path: "/ourteam" },
-      { label: "Blog", path: "/blog" },
-    ],
+    children: [{ label: "Blog", path: "/blog" }],
   },
 ];
 
@@ -250,7 +73,7 @@ const mobileNavVariants = {
   exit: { x: "-100%", transition: { duration: 0.25, ease: "easeInOut" } },
 };
 
-// --- Desktop Navigation Item Component (FIXED) ---
+// --- Desktop Navigation Item Component ---
 const DesktopNavItem = ({ item }: { item: any }) => {
   const [isHovered, setIsHovered] = useState(false);
   const [location] = useLocation();
@@ -301,8 +124,14 @@ const DesktopNavItem = ({ item }: { item: any }) => {
   );
 };
 
-// --- Mobile Navigation Component (IMPROVED) ---
-const MobileNav = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) => {
+// --- Mobile Navigation Component ---
+const MobileNav = ({
+  isOpen,
+  onClose,
+}: {
+  isOpen: boolean;
+  onClose: () => void;
+}) => {
   const [menuStack, setMenuStack] = useState([
     { items: navData, label: "Menu" },
   ]);
@@ -326,7 +155,7 @@ const MobileNav = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }
   return (
     <AnimatePresence>
       {isOpen && (
-        <div className="fixed inset-0 z-[60] lg:hidden" aria-modal="true">
+        <div className="fixed inset-0 z-[60] lg:hidden" role="dialog" aria-modal="true">
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -344,6 +173,7 @@ const MobileNav = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }
             <div className="flex h-header items-center justify-between border-b px-4">
               {menuStack.length > 1 ? (
                 <button
+                  type="button"
                   onClick={handleBack}
                   className="flex items-center gap-2 p-2 -ml-2 text-lg font-semibold text-nexi-darkblue"
                 >
@@ -361,12 +191,16 @@ const MobileNav = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }
                     alt="Logo"
                     className="h-8 rounded-full"
                   />
-                  <span className="font-bold text-xl text-nexi-darkblue">
-                    
-                  </span>
+                  <span className="font-bold text-xl text-nexi-darkblue"></span>
                 </Link>
               )}
-              <button onClick={onClose} className="p-2 text-nexi-darkgray">
+              <button
+                type="button"
+                onClick={onClose}
+                className="p-2 text-nexi-darkgray"
+                aria-label="Close menu"
+                title="Close menu"
+              >
                 <X size={28} />
               </button>
             </div>
@@ -378,10 +212,11 @@ const MobileNav = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }
                 {currentLevel.items.map((item) => (
                   <li key={item.label}>
                     <button
+                      type="button"
                       onClick={() =>
                         item.children
                           ? handleForward(item.children, item.label)
-                          : handleNavigate((item as any).path || '/')
+                          : handleNavigate((item as any).path || "/")
                       }
                       className="w-full flex justify-between items-center text-left p-4 text-lg text-nexi-darkgray rounded-lg hover:bg-nexi-pagebg"
                     >
@@ -402,20 +237,22 @@ const MobileNav = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }
                 />
               ) : (
                 <div className="flex items-center gap-2">
-                  <Link
-                    href="/auth"
+                  {/* CORRECTED: Use a standard <a> tag for external links to prevent errors. */}
+                  <a
+                    href="https://homobie-frontend-portal-bco8.vercel.app"
                     className="flex-1 text-center px-4 py-3 font-semibold text-nexi-blue border border-nexi-blue/30 rounded-full hover:bg-nexi-pagebg"
                     onClick={onClose}
                   >
                     Log In
-                  </Link>
-                  <Link
-                    href="/auth"
+                  </a>
+                  {/* CORRECTED: Use a standard <a> tag for external links. */}
+                  <a
+                    href="https://homobie-frontend-portal-bco8.vercel.app"
                     className="flex-1 text-center px-4 py-3 font-semibold bg-nexi-blue text-white rounded-full hover:bg-nexi-darkblue"
                     onClick={onClose}
                   >
                     Apply Now
-                  </Link>
+                  </a>
                 </div>
               )}
             </div>
@@ -479,18 +316,23 @@ export function Header() {
                   isLoggingOut={logoutMutation.isPending}
                 />
               ) : (
-                <Button
-                  asChild
-                  className="bg-transparent border border-white hover:bg-white/10 rounded-full"
-                >
-                  <Link href="/auth">Log In</Link>
-                </Button>
+                  // CORRECTED: Use a standard <a> tag for the external login link.
+                  // The <Button asChild> pattern is incorrect for this.
+                  <a
+                    href="https://homobie-frontend-portal-bco8.vercel.app"
+            
+                    className="bg-transparent border border-white hover:bg-white/10 rounded-full px-4 py-2 text-white"
+                  >
+                    Log In
+                  </a>
               )}
             </div>
             <button
+              type="button"
               onClick={() => setMobileMenuOpen(true)}
               className="p-2 text-white lg:hidden"
               aria-label="Open menu"
+              title="Open menu"
             >
               <Menu size={28} />
             </button>
@@ -505,8 +347,18 @@ export function Header() {
   );
 }
 
-// --- User Dropdown Component (FIXED) ---
-function UserDropdown({ user, onLogout, isLoggingOut, isMobile = false }: { user: any; onLogout: () => void; isLoggingOut: boolean; isMobile?: boolean }) {
+// --- User Dropdown Component ---
+function UserDropdown({
+  user,
+  onLogout,
+  isLoggingOut,
+  isMobile = false,
+}: {
+  user: any;
+  onLogout: () => void;
+  isLoggingOut: boolean;
+  isMobile?: boolean;
+}) {
   if (isMobile) {
     return (
       <div className="space-y-4">

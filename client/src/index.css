@@ -1,13 +1,11 @@
-/* Import Tailwind directives */
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-/* Define global styles and CSS variables in the base layer.
-This ensures they are applied consistently across your application.
-*/
+/* Define custom CSS variables and base styles */
 @layer base {
-:root {
+  :root {
 /* Light Mode / Default Theme */
 --background: 220 14.3% 95.9%;
 --foreground: 240 10% 3.9%;
@@ -31,8 +29,7 @@ This ensures they are applied consistently across your application.
 --radius: 0.5rem;
 }
 
-/* ✅ Completed Dark Mode Theme */
-.dark {
+  .dark {
 --background: 240 10% 3.9%;
 --foreground: 0 0% 98%;
 --card: 240 10% 3.9%;
@@ -53,23 +50,22 @@ This ensures they are applied consistently across your application.
 --input: 240 3.7% 15.9%;
 --ring: 238 58.8% 41.2%;
 }
+
+
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+    font-family: 'Inter', sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
 }
 
-@layer base {
-* {
-@apply border-border;
-}
-body {
-@apply bg-background text-foreground;
-font-family: 'Inter', sans-serif;
--webkit-font-smoothing: antialiased;
--moz-osx-font-smoothing: grayscale;
-}
-}
-
-/* Custom utility for header spacing */
 @layer utilities {
-.header-spacing {
-@apply pt-16 md:pt-20;
-}
+  .header-spacing {
+    @apply pt-16 md:pt-20;
+  }
 }

@@ -8,7 +8,7 @@ import { useAuth } from "@/hooks/use-auth";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { PaymentGateway } from "@/components/ui/payment-gateway";
-import { insertLoanApplicationSchema } from "@shared/schema";
+// import { insertLoanApplicationSchema } from "@shared/schema";
 
 import { ChatbotButton } from "@/components/layout/chatbot-button";
 import { LoanCalculator } from "@/components/ui/calculator";
@@ -66,24 +66,43 @@ import {
 import { getQueryParam, getLoanTypeLabel, calculateEMI } from "@/lib/utils";
 
 // Application form schema
-const loanFormSchema = insertLoanApplicationSchema.extend({
+// const loanFormSchema = insertLoanApplicationSchema.extend({
   // Adding client-side validation
-  amount: z.coerce.number().min(100000, "Loan amount must be at least ₹1,00,000").max(10000000, "Loan amount cannot exceed ₹1,00,00,000"),
-  tenure: z.coerce.number().min(12, "Tenure must be at least 12 months").max(360, "Tenure cannot exceed 360 months"),
-  interestRate: z.coerce.number().min(5, "Interest rate must be at least 5%").max(20, "Interest rate cannot exceed 20%"),
-  monthlyIncome: z.coerce.number().min(10000, "Monthly income must be at least ₹10,000"),
-  propertyValue: z.coerce.number().optional(),
-  propertyAddress: z.string().optional(),
-  purpose: z.string().min(5, "Please provide a brief purpose for the loan").max(500, "Purpose cannot exceed 500 characters"),
-  employmentType: z.enum(["salaried", "self-employed"], {
-    required_error: "Please select your employment type",
-  }),
-  existingLoanDetails: z.any().optional(),
+  // amount: z.coerce.number().min(100000, "Loan amount must be at least ₹1,00,000").max(10000000, "Loan amount cannot exceed ₹1,00,00,000"),
+  // tenure: z.coerce.number().min(12, "Tenure must be at least 12 months").max(360, "Tenure cannot exceed 360 months"),
+  // interestRate: z.coerce.number().min(5, "Interest rate must be at least 5%").max(20, "Interest rate cannot exceed 20%"),
+  // monthlyIncome: z.coerce.number().min(10000, "Monthly income must be at least ₹10,000"),
+  // propertyValue: z.coerce.number().optional(),
+  // propertyAddress: z.string().optional(),
+  // purpose: z.string().min(5, "Please provide a brief purpose for the loan").max(500, "Purpose cannot exceed 500 characters"),
+  // employmentType: z.enum(["salaried", "self-employed"], {
+  //   required_error: "Please select your employment type",
+  // }),
+  // existingLoanDetails: z.any().optional(),
   // Fields that will come from user context
-  userId: z.number().optional(),
-}).omit({ userId: true });
+//   userId: z.number().optional(),
+// }).omit({ userId: true });
 
-type LoanFormValues = z.infer<typeof loanFormSchema>;
+// type LoanFormValues = z.infer<typeof LoanFormValues>;
+
+// Define the LoanFormValues type for useForm
+type LoanFormValues = {
+  loanType: "HomeLoan" | "LAP" | "BTTopUp";
+  amount: number;
+  tenure: number;
+  interestRate: number;
+  propertyValue?: number;
+  propertyAddress?: string;
+  purpose: string;
+  monthlyIncome: number;
+  employmentType: "salaried" | "self-employed";
+  existingLoanDetails?: {
+    lenderName?: string;
+    accountNumber?: string;
+    outstandingAmount?: number;
+    currentRate?: number;
+  };
+};
 
 export default function LoanApplicationPage() {
   const { user } = useAuth();
@@ -97,7 +116,7 @@ export default function LoanApplicationPage() {
   
   // Initialize form with default values
   const form = useForm<LoanFormValues>({
-    resolver: zodResolver(loanFormSchema),
+    // resolver: zodResolver(loanFormSchema),
     defaultValues: {
       loanType: getLoanTypeFromParam(loanTypeParam),
       amount: Number(getQueryParam("amount")) || 2500000,
@@ -113,7 +132,7 @@ export default function LoanApplicationPage() {
   });
 
   // Function to get loan type string based on URL param
-  function getLoanTypeFromParam(param: string): string {
+  function getLoanTypeFromParam(param: string): "HomeLoan" | "LAP" | "BTTopUp" {
     switch (param) {
       case "home-loan": return "HomeLoan";
       case "lap": return "LAP";

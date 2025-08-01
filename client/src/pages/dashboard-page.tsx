@@ -23,7 +23,7 @@ import {
   XCircle, 
   Upload
 } from "lucide-react";
-import { LoanApplication, Consultation, SipInvestment, KycDocument, Transaction } from "@shared/schema";
+// import { LoanApplication, Consultation, SipInvestment, KycDocument, Transaction } from "@shared/schema";
 import { formatCurrency, formatDate, getStatusColor } from "@/lib/utils";
 
 export default function DashboardPage() {
@@ -38,28 +38,28 @@ export default function DashboardPage() {
   });
 
   // Fetch consultations
-  const { 
-    data: consultations = [], 
-    isLoading: isLoadingConsultations 
-  } = useQuery<Consultation[]>({
-    queryKey: ["/api/consultations"],
-  });
+  // const { 
+  //   data: consultations = [], 
+  //   isLoading: isLoadingConsultations 
+  // } = useQuery<Consultation[]>({
+  //   queryKey: ["/api/consultations"],
+  // });
 
   // Fetch SIP investments
-  const { 
-    data: sipInvestments = [], 
-    isLoading: isLoadingSips 
-  } = useQuery<SipInvestment[]>({
-    queryKey: ["/api/sip-investments"],
-  });
+  // const { 
+  //   data: sipInvestments = [], 
+  //   isLoading: isLoadingSips 
+  // } = useQuery<SipInvestment[]>({
+  //   queryKey: ["/api/sip-investments"],
+  // });
 
   // Fetch KYC documents
-  const { 
-    data: kycDocuments = [], 
-    isLoading: isLoadingKyc 
-  } = useQuery<KycDocument[]>({
-    queryKey: ["/api/kyc-documents"],
-  });
+  // const { 
+  //   data: kycDocuments = [], 
+  //   isLoading: isLoadingKyc 
+  // } = useQuery<KycDocument[]>({
+  //   queryKey: ["/api/kyc-documents"],
+  // });
 
   // Fetch transactions
   const { 

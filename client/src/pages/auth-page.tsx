@@ -4,7 +4,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useAuth } from "@/hooks/use-auth";
-import { insertUserSchema } from "@shared/schema";
+// import { insertUserSchema } from "@shared/schema";
 
 import { ChatbotButton } from "@/components/layout/chatbot-button";
 import { Shield } from "lucide-react";
@@ -35,13 +35,13 @@ const loginSchema = z.object({
 });
 
 // Register form schema
-const registerSchema = insertUserSchema.extend({
-  password: z.string().min(6, "Password must be at least 6 characters"),
-  confirmPassword: z.string(),
-}).refine((data) => data.password === data.confirmPassword, {
-  message: "Passwords do not match",
-  path: ["confirmPassword"],
-});
+// const registerSchema = insertUserSchema.extend({
+//   password: z.string().min(6, "Password must be at least 6 characters"),
+//   confirmPassword: z.string(),
+// }).refine((data) => data.password === data.confirmPassword, {
+//   message: "Passwords do not match",
+//   path: ["confirmPassword"],
+// });
 
 type LoginFormData = z.infer<typeof loginSchema>;
 type RegisterFormData = z.infer<typeof registerSchema>;

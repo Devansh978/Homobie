@@ -10,7 +10,7 @@ import { Badge } from "@/components/ui/badge";
 import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from "@/components/ui/pagination";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/use-auth";
-import { AuditLog } from "@shared/schema";
+// import { AuditLog } from "@shared/schema";
 
 export default function AuditLogsPage() {
   const { user } = useAuth();

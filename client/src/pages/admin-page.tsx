@@ -16,7 +16,7 @@ import {
   Users, BarChart3, PieChart, ArrowUpRight, ArrowDownRight, Search,
   InfoIcon, CheckIcon, XIcon
 } from "lucide-react";
-import { LoanApplication, User as UserType, Consultation, KycDocument } from "@shared/schema";
+// import { LoanApplication, User as UserType, Consultation, KycDocument } from "@shared/schema";
 import { formatCurrency, formatDate, getStatusColor } from "@/lib/utils";
 
 // Type for analytics data

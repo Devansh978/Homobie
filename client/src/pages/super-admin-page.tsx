@@ -17,7 +17,7 @@ import {
   Search, User, FileText, CheckCircle, XCircle, Edit, Key, AlertCircle, Info,
   ArrowRight
 } from "lucide-react";
-import { User as UserType } from "@shared/schema";
+// import { User as UserType } from "@shared/schema";
 import { formatDate } from "@/lib/utils";
 import {
   Dialog,

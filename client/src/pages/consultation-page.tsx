@@ -6,7 +6,6 @@ import { z } from "zod";
 import { useMutation } from "@tanstack/react-query";
 import { useAuth } from "@/hooks/use-auth";
 import { apiRequest, queryClient } from "@/lib/queryClient";
-import { insertConsultationSchema } from "@shared/schema";
 
 import { ChatbotButton } from "@/components/layout/chatbot-button";
 import { PaymentGateway } from "@/components/ui/payment-gateway";
@@ -56,8 +55,7 @@ import { cn } from "@/lib/utils";
 import { Calendar } from "@/components/ui/calendar";
 import { format } from "date-fns";
 
-// Extend the consultation schema for client-side validation
-const consultationFormSchema = insertConsultationSchema.extend({
+const consultationFormSchema = z.object({
   preferredDate: z.union([
     z.date({
       required_error: "Please select a date",
@@ -85,8 +83,7 @@ const consultationFormSchema = insertConsultationSchema.extend({
     required_error: "Please select a preferred time",
   }),
   notes: z.string().optional(),
-  userId: z.number().optional(),
-}).omit({ userId: true });
+});
 
 type ConsultationFormValues = z.infer<typeof consultationFormSchema>;
 

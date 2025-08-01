@@ -8,26 +8,25 @@ import { useAuth } from "@/hooks/use-auth";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { PaymentGateway } from "@/components/ui/payment-gateway";
-import { insertSipInvestmentSchema } from "@shared/schema";
 
 import { ChatbotButton } from "@/components/layout/chatbot-button";
 import { SipCalculator } from "@/components/ui/sip-calculator";
-import { 
-  Form, 
-  FormControl, 
-  FormDescription, 
-  FormField, 
-  FormItem, 
-  FormLabel, 
-  FormMessage 
+import {
+  Form,
+  FormControl,
+  FormDescription,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
 } from "@/components/ui/form";
-import { 
-  Card, 
-  CardContent, 
-  CardDescription, 
-  CardHeader, 
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
   CardTitle,
-  CardFooter
+  CardFooter,
 } from "@/components/ui/card";
 import {
   Accordion,
@@ -35,24 +34,19 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
-import { 
-  Select, 
-  SelectContent, 
-  SelectItem, 
-  SelectTrigger, 
-  SelectValue 
-} from "@/components/ui/select";
 import {
-  Tabs,
-  TabsContent,
-  TabsList,
-  TabsTrigger
-} from "@/components/ui/tabs";
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { Progress } from "@/components/ui/progress";
-import { 
+import {
   Check,
   ChartLine,
   Calendar,
@@ -65,56 +59,64 @@ import {
   Clock,
   BarChart3,
   Target,
-  Landmark
+  Landmark,
 } from "lucide-react";
-import { formatCurrency, getQueryParam, calculateSIPReturns } from "@/lib/utils";
+import {
+  formatCurrency,
+  getQueryParam,
+  calculateSIPReturns,
+} from "@/lib/utils";
 
 // SIP Plans
 const SIP_PLANS = [
   {
     id: "equity-growth",
     name: "Equity Growth Plan",
-    description: "High growth potential with higher risk. Suitable for long-term investors.",
+    description:
+      "High growth potential with higher risk. Suitable for long-term investors.",
     minAmount: 1000,
     expectedReturns: 12,
     riskLevel: "High",
     recommendedDuration: 60, // months
-    assetAllocation: { equity: 80, debt: 15, others: 5 }
+    assetAllocation: { equity: 80, debt: 15, others: 5 },
   },
   {
     id: "balanced-hybrid",
     name: "Balanced Hybrid Plan",
-    description: "Moderate growth with balanced risk. Good for medium-term goals.",
+    description:
+      "Moderate growth with balanced risk. Good for medium-term goals.",
     minAmount: 500,
     expectedReturns: 10,
     riskLevel: "Medium",
     recommendedDuration: 36, // months
-    assetAllocation: { equity: 50, debt: 45, others: 5 }
+    assetAllocation: { equity: 50, debt: 45, others: 5 },
   },
   {
     id: "debt-stability",
     name: "Debt Stability Plan",
-    description: "Stable returns with lower risk. Ideal for conservative investors.",
+    description:
+      "Stable returns with lower risk. Ideal for conservative investors.",
     minAmount: 1000,
     expectedReturns: 8,
     riskLevel: "Low",
     recommendedDuration: 24, // months
-    assetAllocation: { equity: 20, debt: 75, others: 5 }
+    assetAllocation: { equity: 20, debt: 75, others: 5 },
   },
   {
     id: "tax-saver",
     name: "Tax-Saver ELSS Plan",
-    description: "Tax benefits under Section 80C with equity exposure for growth.",
+    description:
+      "Tax benefits under Section 80C with equity exposure for growth.",
     minAmount: 500,
     expectedReturns: 11,
     riskLevel: "Medium-High",
     recommendedDuration: 36, // months
-    assetAllocation: { equity: 75, debt: 20, others: 5 }
-  }
+    assetAllocation: { equity: 75, debt: 20, others: 5 },
+  },
 ];
 
 // Extend the SIP schema for client-side validation
-const sipFormSchema = insertSipInvestmentSchema.extend({
+const sipFormSchema = z.object({
   planName: z.string({
     required_error: "Please select a SIP plan",
   }),
@@ -142,8 +144,7 @@ const sipFormSchema = insertSipInvestmentSchema.extend({
   autoDebit: z.boolean().optional(),
   bankAccountNumber: z.string().optional(),
   bankName: z.string().optional(),
-  userId: z.number().optional(),
-}).omit({ userId: true });
+});
 
 type SipFormValues = z.infer<typeof sipFormSchema>;
 
@@ -153,24 +154,31 @@ export default function SipPage() {
   const [selectedPlan, setSelectedPlan] = useState<string>("equity-growth");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
-  
+
   // Get query parameters if any
   const amountParam = getQueryParam("amount");
   const periodParam = getQueryParam("period");
   const rateParam = getQueryParam("rate");
 
   // Find selected plan details
-  const selectedPlanDetails = SIP_PLANS.find(plan => plan.id === selectedPlan) || SIP_PLANS[0];
+  const selectedPlanDetails =
+    SIP_PLANS.find((plan) => plan.id === selectedPlan) || SIP_PLANS[0];
 
   // Initialize form with default values or from query parameters
   const form = useForm<SipFormValues>({
     resolver: zodResolver(sipFormSchema),
     defaultValues: {
       planName: selectedPlanDetails.name,
-      monthlyAmount: amountParam ? Number(amountParam) : selectedPlanDetails.minAmount,
+      monthlyAmount: amountParam
+        ? Number(amountParam)
+        : selectedPlanDetails.minAmount,
       startDate: new Date(new Date().setDate(new Date().getDate() + 7)), // Default to next week
-      durationMonths: periodParam ? Number(periodParam) * 12 : selectedPlanDetails.recommendedDuration, // Convert years to months if from query
-      expectedReturns: rateParam ? Number(rateParam) : selectedPlanDetails.expectedReturns,
+      durationMonths: periodParam
+        ? Number(periodParam) * 12
+        : selectedPlanDetails.recommendedDuration, // Convert years to months if from query
+      expectedReturns: rateParam
+        ? Number(rateParam)
+        : selectedPlanDetails.expectedReturns,
       autoDebit: true,
     },
   });
@@ -180,24 +188,27 @@ export default function SipPage() {
     if (selectedPlanDetails) {
       form.setValue("planName", selectedPlanDetails.name);
       form.setValue("expectedReturns", selectedPlanDetails.expectedReturns);
-      
+
       // Only set minimum amount and duration if not already set from query params
       if (!amountParam) {
         form.setValue("monthlyAmount", selectedPlanDetails.minAmount);
       }
-      
+
       if (!periodParam) {
-        form.setValue("durationMonths", selectedPlanDetails.recommendedDuration);
+        form.setValue(
+          "durationMonths",
+          selectedPlanDetails.recommendedDuration
+        );
       }
     }
   }, [selectedPlan, selectedPlanDetails, form, amountParam, periodParam]);
 
   // Initialize toast
   const { toast } = useToast();
-  
+
   // Track submitted data for payment
   const [submittedData, setSubmittedData] = useState<any>(null);
-  
+
   // Create SIP investment mutation
   const createSipMutation = useMutation({
     mutationFn: async (data: SipFormValues) => {
@@ -217,9 +228,9 @@ export default function SipPage() {
       toast({
         title: "Error",
         description: "Failed to create SIP investment. Please try again.",
-        variant: "destructive"
+        variant: "destructive",
       });
-    }
+    },
   });
 
   // Handle form submission
@@ -228,7 +239,7 @@ export default function SipPage() {
       navigate("/auth");
       return;
     }
-    
+
     setIsSubmitting(true);
     createSipMutation.mutate(data);
   };
@@ -237,9 +248,13 @@ export default function SipPage() {
   const monthlyAmount = form.watch("monthlyAmount") || 0;
   const durationMonths = form.watch("durationMonths") || 0;
   const expectedReturns = form.watch("expectedReturns") || 0;
-  
+
   // Calculate SIP returns
-  const sipReturns = calculateSIPReturns(monthlyAmount, expectedReturns, durationMonths / 12);
+  const sipReturns = calculateSIPReturns(
+    monthlyAmount,
+    expectedReturns,
+    durationMonths / 12
+  );
 
   return (
     <div>
@@ -252,48 +267,58 @@ export default function SipPage() {
                   <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
                     <Check className="h-8 w-8 text-green-600" />
                   </div>
-                  <h2 className="text-2xl font-bold text-gray-900 mb-2">SIP Plan Created Successfully!</h2>
+                  <h2 className="text-2xl font-bold text-gray-900 mb-2">
+                    SIP Plan Created Successfully!
+                  </h2>
                   <p className="text-gray-600 mb-2">
-                    Your SIP investment plan has been set up. Plan ID: <span className="font-medium">{submittedData?.id}</span>
+                    Your SIP investment plan has been set up. Plan ID:{" "}
+                    <span className="font-medium">{submittedData?.id}</span>
                   </p>
                   <p className="text-gray-600 mb-6">
-                    To activate your SIP, please complete your first contribution payment below.
+                    To activate your SIP, please complete your first
+                    contribution payment below.
                   </p>
                 </CardContent>
               </Card>
-              
+
               <Card>
                 <CardHeader>
                   <CardTitle>First SIP Contribution</CardTitle>
                   <CardDescription>
-                    Make your first contribution to activate your SIP plan. Subsequent payments will be automatically processed 
-                    on the same date each month.
+                    Make your first contribution to activate your SIP plan.
+                    Subsequent payments will be automatically processed on the
+                    same date each month.
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
                   {user ? (
-                    <PaymentGateway 
-                      paymentType="sip-investment" 
-                      itemId={submittedData?.id} 
+                    <PaymentGateway
+                      paymentType="sip-investment"
+                      itemId={submittedData?.id}
                       buttonText="Make First Contribution"
                       description="Pay your first monthly contribution to activate your SIP"
                       onSuccess={(data) => {
                         toast({
                           title: "Payment Successful",
-                          description: "Your SIP has been activated successfully. Next payment will be on the scheduled date.",
+                          description:
+                            "Your SIP has been activated successfully. Next payment will be on the scheduled date.",
                         });
                       }}
                       onFailure={(error) => {
                         toast({
                           title: "Payment Failed",
-                          description: error?.message || "There was an error processing your payment.",
-                          variant: "destructive"
+                          description:
+                            error?.message ||
+                            "There was an error processing your payment.",
+                          variant: "destructive",
                         });
                       }}
                     />
                   ) : (
                     <div className="bg-yellow-50 border border-yellow-200 rounded-md p-4">
-                      <p className="text-yellow-700 mb-2">Please login to make a payment</p>
+                      <p className="text-yellow-700 mb-2">
+                        Please login to make a payment
+                      </p>
                       <Button asChild>
                         <Link href="/auth">Login or Register</Link>
                       </Button>
@@ -301,8 +326,12 @@ export default function SipPage() {
                   )}
                 </CardContent>
                 <CardFooter className="flex justify-between">
-                  <Button variant="outline" onClick={() => navigate("/")}>Back to Home</Button>
-                  <Button onClick={() => navigate("/dashboard")}>Go to Dashboard</Button>
+                  <Button variant="outline" onClick={() => navigate("/")}>
+                    Back to Home
+                  </Button>
+                  <Button onClick={() => navigate("/dashboard")}>
+                    Go to Dashboard
+                  </Button>
                 </CardFooter>
               </Card>
             </div>
@@ -313,37 +342,54 @@ export default function SipPage() {
                   Start Your Wealth Creation Journey with SIP
                 </h1>
                 <p className="text-neutral-600 mb-8 max-w-3xl mx-auto">
-                  Systematic Investment Plans (SIPs) allow you to invest small amounts regularly in mutual funds, helping you build wealth over time through the power of compounding.
+                  Systematic Investment Plans (SIPs) allow you to invest small
+                  amounts regularly in mutual funds, helping you build wealth
+                  over time through the power of compounding.
                 </p>
-                
+
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6 text-left mt-12">
                   <div className="flex items-start">
                     <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center mt-1 mr-4">
                       <ChartLine className="text-primary" />
                     </div>
                     <div>
-                      <h3 className="font-semibold text-lg mb-1">Power of Compounding</h3>
-                      <p className="text-neutral-600">Start early and let your investments grow exponentially over time.</p>
+                      <h3 className="font-semibold text-lg mb-1">
+                        Power of Compounding
+                      </h3>
+                      <p className="text-neutral-600">
+                        Start early and let your investments grow exponentially
+                        over time.
+                      </p>
                     </div>
                   </div>
-                  
+
                   <div className="flex items-start">
                     <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center mt-1 mr-4">
                       <Calendar className="text-primary" />
                     </div>
                     <div>
-                      <h3 className="font-semibold text-lg mb-1">Disciplined Investing</h3>
-                      <p className="text-neutral-600">Regular investments help you develop a saving habit and financial discipline.</p>
+                      <h3 className="font-semibold text-lg mb-1">
+                        Disciplined Investing
+                      </h3>
+                      <p className="text-neutral-600">
+                        Regular investments help you develop a saving habit and
+                        financial discipline.
+                      </p>
                     </div>
                   </div>
-                  
+
                   <div className="flex items-start">
                     <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center mt-1 mr-4">
                       <DollarSign className="text-primary" />
                     </div>
                     <div>
-                      <h3 className="font-semibold text-lg mb-1">Start with Just ₹500</h3>
-                      <p className="text-neutral-600">Begin your investment journey with as little as ₹500 per month.</p>
+                      <h3 className="font-semibold text-lg mb-1">
+                        Start with Just ₹500
+                      </h3>
+                      <p className="text-neutral-600">
+                        Begin your investment journey with as little as ₹500 per
+                        month.
+                      </p>
                     </div>
                   </div>
                 </div>
@@ -352,31 +398,47 @@ export default function SipPage() {
               <div className="max-w-6xl mx-auto">
                 <Tabs defaultValue="plans" className="space-y-8">
                   <TabsList className="w-full max-w-md mx-auto">
-                    <TabsTrigger value="plans" className="flex-1">SIP Plans</TabsTrigger>
-                    <TabsTrigger value="calculator" className="flex-1">SIP Calculator</TabsTrigger>
-                    <TabsTrigger value="invest" className="flex-1">Start SIP</TabsTrigger>
+                    <TabsTrigger value="plans" className="flex-1">
+                      SIP Plans
+                    </TabsTrigger>
+                    <TabsTrigger value="calculator" className="flex-1">
+                      SIP Calculator
+                    </TabsTrigger>
+                    <TabsTrigger value="invest" className="flex-1">
+                      Start SIP
+                    </TabsTrigger>
                   </TabsList>
-                  
+
                   <TabsContent value="plans">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
                       {SIP_PLANS.map((plan) => (
-                        <Card 
-                          key={plan.id} 
+                        <Card
+                          key={plan.id}
                           className={`cursor-pointer transition-all hover:shadow-md overflow-hidden ${
-                            selectedPlan === plan.id ? 'border-primary ring-2 ring-primary/20' : ''
+                            selectedPlan === plan.id
+                              ? "border-primary ring-2 ring-primary/20"
+                              : ""
                           }`}
                           onClick={() => setSelectedPlan(plan.id)}
                         >
-                          <div className={`h-2 ${
-                            plan.riskLevel === 'High' ? 'bg-red-500' :
-                            plan.riskLevel === 'Medium-High' ? 'bg-orange-500' :
-                            plan.riskLevel === 'Medium' ? 'bg-yellow-500' : 'bg-green-500'
-                          }`}></div>
+                          <div
+                            className={`h-2 ${
+                              plan.riskLevel === "High"
+                                ? "bg-red-500"
+                                : plan.riskLevel === "Medium-High"
+                                ? "bg-orange-500"
+                                : plan.riskLevel === "Medium"
+                                ? "bg-yellow-500"
+                                : "bg-green-500"
+                            }`}
+                          ></div>
                           <CardHeader className="pb-2">
                             <div className="flex justify-between items-start">
                               <div>
                                 <CardTitle>{plan.name}</CardTitle>
-                                <CardDescription>{plan.description}</CardDescription>
+                                <CardDescription>
+                                  {plan.description}
+                                </CardDescription>
                               </div>
                               {selectedPlan === plan.id && (
                                 <div className="w-6 h-6 bg-primary rounded-full flex items-center justify-center">
@@ -388,40 +450,63 @@ export default function SipPage() {
                           <CardContent>
                             <div className="grid grid-cols-2 gap-4 mb-4">
                               <div>
-                                <p className="text-sm text-neutral-500 mb-1">Expected Returns</p>
+                                <p className="text-sm text-neutral-500 mb-1">
+                                  Expected Returns
+                                </p>
                                 <p className="text-lg font-semibold text-primary flex items-center">
-                                  {plan.expectedReturns}% <ArrowUpRight className="h-4 w-4 ml-1" />
+                                  {plan.expectedReturns}%{" "}
+                                  <ArrowUpRight className="h-4 w-4 ml-1" />
                                 </p>
                               </div>
                               <div>
-                                <p className="text-sm text-neutral-500 mb-1">Risk Level</p>
-                                <p className={`text-sm font-medium px-2 py-1 rounded-full inline-flex items-center ${
-                                  plan.riskLevel === 'High' ? 'bg-red-100 text-red-800' :
-                                  plan.riskLevel === 'Medium-High' ? 'bg-orange-100 text-orange-800' :
-                                  plan.riskLevel === 'Medium' ? 'bg-yellow-100 text-yellow-800' : 'bg-green-100 text-green-800'
-                                }`}>
+                                <p className="text-sm text-neutral-500 mb-1">
+                                  Risk Level
+                                </p>
+                                <p
+                                  className={`text-sm font-medium px-2 py-1 rounded-full inline-flex items-center ${
+                                    plan.riskLevel === "High"
+                                      ? "bg-red-100 text-red-800"
+                                      : plan.riskLevel === "Medium-High"
+                                      ? "bg-orange-100 text-orange-800"
+                                      : plan.riskLevel === "Medium"
+                                      ? "bg-yellow-100 text-yellow-800"
+                                      : "bg-green-100 text-green-800"
+                                  }`}
+                                >
                                   {plan.riskLevel}
                                 </p>
                               </div>
                               <div>
-                                <p className="text-sm text-neutral-500 mb-1">Minimum Investment</p>
-                                <p className="font-medium">₹{plan.minAmount}/month</p>
+                                <p className="text-sm text-neutral-500 mb-1">
+                                  Minimum Investment
+                                </p>
+                                <p className="font-medium">
+                                  ₹{plan.minAmount}/month
+                                </p>
                               </div>
                               <div>
-                                <p className="text-sm text-neutral-500 mb-1">Recommended Duration</p>
-                                <p className="font-medium">{plan.recommendedDuration / 12} years</p>
+                                <p className="text-sm text-neutral-500 mb-1">
+                                  Recommended Duration
+                                </p>
+                                <p className="font-medium">
+                                  {plan.recommendedDuration / 12} years
+                                </p>
                               </div>
                             </div>
-                            
+
                             <div className="mt-4">
-                              <p className="text-sm font-medium mb-2">Asset Allocation</p>
+                              <p className="text-sm font-medium mb-2">
+                                Asset Allocation
+                              </p>
                               <div className="space-y-2">
                                 <div>
                                   <div className="flex justify-between text-xs mb-1">
                                     <span>Equity</span>
                                     <span>{plan.assetAllocation.equity}%</span>
                                   </div>
-                                  <Progress value={plan.assetAllocation.equity} />
+                                  <Progress
+                                    value={plan.assetAllocation.equity}
+                                  />
                                 </div>
                                 <div>
                                   <div className="flex justify-between text-xs mb-1">
@@ -435,18 +520,22 @@ export default function SipPage() {
                                     <span>Others</span>
                                     <span>{plan.assetAllocation.others}%</span>
                                   </div>
-                                  <Progress value={plan.assetAllocation.others} />
+                                  <Progress
+                                    value={plan.assetAllocation.others}
+                                  />
                                 </div>
                               </div>
                             </div>
                           </CardContent>
                           <CardFooter className="pt-0">
-                            <Button 
-                              variant="outline" 
+                            <Button
+                              variant="outline"
                               className="w-full border-primary text-primary hover:bg-primary hover:text-white"
                               onClick={() => {
                                 setSelectedPlan(plan.id);
-                                const element = document.querySelector('[data-value="invest"]') as HTMLElement;
+                                const element = document.querySelector(
+                                  '[data-value="invest"]'
+                                ) as HTMLElement;
                                 if (element) element.click();
                               }}
                             >
@@ -456,46 +545,82 @@ export default function SipPage() {
                         </Card>
                       ))}
                     </div>
-                    
+
                     <div className="max-w-3xl mx-auto mt-12">
                       <Card>
                         <CardHeader>
                           <CardTitle>Frequently Asked Questions</CardTitle>
                         </CardHeader>
                         <CardContent>
-                          <Accordion type="single" collapsible className="w-full">
+                          <Accordion
+                            type="single"
+                            collapsible
+                            className="w-full"
+                          >
                             <AccordionItem value="item-1">
-                              <AccordionTrigger>What is a Systematic Investment Plan (SIP)?</AccordionTrigger>
+                              <AccordionTrigger>
+                                What is a Systematic Investment Plan (SIP)?
+                              </AccordionTrigger>
                               <AccordionContent>
-                                A Systematic Investment Plan (SIP) is an investment method offered by mutual funds where you can invest a fixed amount at regular intervals (weekly, monthly, quarterly) instead of making a lump-sum investment. This helps in rupee-cost averaging and disciplined investing.
+                                A Systematic Investment Plan (SIP) is an
+                                investment method offered by mutual funds where
+                                you can invest a fixed amount at regular
+                                intervals (weekly, monthly, quarterly) instead
+                                of making a lump-sum investment. This helps in
+                                rupee-cost averaging and disciplined investing.
                               </AccordionContent>
                             </AccordionItem>
-                            
+
                             <AccordionItem value="item-2">
-                              <AccordionTrigger>How do SIPs work?</AccordionTrigger>
+                              <AccordionTrigger>
+                                How do SIPs work?
+                              </AccordionTrigger>
                               <AccordionContent>
-                                SIPs work by investing a fixed amount at regular intervals, regardless of market conditions. When markets are high, your money buys fewer units, and when markets are low, your money buys more units. This results in a lower average cost per unit over time, known as rupee-cost averaging.
+                                SIPs work by investing a fixed amount at regular
+                                intervals, regardless of market conditions. When
+                                markets are high, your money buys fewer units,
+                                and when markets are low, your money buys more
+                                units. This results in a lower average cost per
+                                unit over time, known as rupee-cost averaging.
                               </AccordionContent>
                             </AccordionItem>
-                            
+
                             <AccordionItem value="item-3">
-                              <AccordionTrigger>What is the minimum amount to start a SIP?</AccordionTrigger>
+                              <AccordionTrigger>
+                                What is the minimum amount to start a SIP?
+                              </AccordionTrigger>
                               <AccordionContent>
-                                You can start a SIP with as little as ₹500 per month. Some plans may have a higher minimum amount based on the fund's policy.
+                                You can start a SIP with as little as ₹500 per
+                                month. Some plans may have a higher minimum
+                                amount based on the fund's policy.
                               </AccordionContent>
                             </AccordionItem>
-                            
+
                             <AccordionItem value="item-4">
-                              <AccordionTrigger>Can I change or stop my SIP?</AccordionTrigger>
+                              <AccordionTrigger>
+                                Can I change or stop my SIP?
+                              </AccordionTrigger>
                               <AccordionContent>
-                                Yes, you have the flexibility to increase, decrease, pause, or stop your SIP at any time. However, it's advisable to continue your SIP for the long term to benefit from compounding and rupee-cost averaging.
+                                Yes, you have the flexibility to increase,
+                                decrease, pause, or stop your SIP at any time.
+                                However, it's advisable to continue your SIP for
+                                the long term to benefit from compounding and
+                                rupee-cost averaging.
                               </AccordionContent>
                             </AccordionItem>
-                            
+
                             <AccordionItem value="item-5">
-                              <AccordionTrigger>Is SIP suitable for long-term or short-term goals?</AccordionTrigger>
+                              <AccordionTrigger>
+                                Is SIP suitable for long-term or short-term
+                                goals?
+                              </AccordionTrigger>
                               <AccordionContent>
-                                SIPs are ideal for long-term goals (5+ years) as they help in wealth creation through the power of compounding. However, different SIP plans can be chosen based on your time horizon - equity-based for long-term, debt-based for short to medium-term goals.
+                                SIPs are ideal for long-term goals (5+ years) as
+                                they help in wealth creation through the power
+                                of compounding. However, different SIP plans can
+                                be chosen based on your time horizon -
+                                equity-based for long-term, debt-based for short
+                                to medium-term goals.
                               </AccordionContent>
                             </AccordionItem>
                           </Accordion>
@@ -503,7 +628,7 @@ export default function SipPage() {
                       </Card>
                     </div>
                   </TabsContent>
-                  
+
                   <TabsContent value="calculator">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                       <div>
@@ -511,21 +636,35 @@ export default function SipPage() {
                           <CardHeader>
                             <CardTitle>SIP Calculator</CardTitle>
                             <CardDescription>
-                              Estimate your potential returns with regular SIP investments
+                              Estimate your potential returns with regular SIP
+                              investments
                             </CardDescription>
                           </CardHeader>
                           <CardContent>
-                            <SipCalculator onStart={(sipDetails) => {
-                              form.setValue("monthlyAmount", sipDetails.monthlyAmount);
-                              form.setValue("durationMonths", sipDetails.investmentPeriod * 12); // Convert years to months
-                              form.setValue("expectedReturns", sipDetails.expectedReturnRate);
-                              const element = document.querySelector('[data-value="invest"]') as HTMLElement;
-                              if (element) element.click();
-                            }} />
+                            <SipCalculator
+                              onStart={(sipDetails) => {
+                                form.setValue(
+                                  "monthlyAmount",
+                                  sipDetails.monthlyAmount
+                                );
+                                form.setValue(
+                                  "durationMonths",
+                                  sipDetails.investmentPeriod * 12
+                                ); // Convert years to months
+                                form.setValue(
+                                  "expectedReturns",
+                                  sipDetails.expectedReturnRate
+                                );
+                                const element = document.querySelector(
+                                  '[data-value="invest"]'
+                                ) as HTMLElement;
+                                if (element) element.click();
+                              }}
+                            />
                           </CardContent>
                         </Card>
                       </div>
-                      
+
                       <div className="space-y-6">
                         <Card className="bg-primary text-white">
                           <CardHeader className="pb-2">
@@ -533,51 +672,68 @@ export default function SipPage() {
                           </CardHeader>
                           <CardContent>
                             <p className="mb-4">
-                              Witness how your small monthly investments grow over time through the power of compounding.
+                              Witness how your small monthly investments grow
+                              over time through the power of compounding.
                             </p>
-                            
+
                             <div className="grid grid-cols-3 gap-4 mb-6">
                               <div className="text-center">
                                 <div className="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-2">
                                   <TrendingUp className="h-6 w-6" />
                                 </div>
-                                <p className="text-xs text-white/80">Start Early</p>
+                                <p className="text-xs text-white/80">
+                                  Start Early
+                                </p>
                               </div>
                               <div className="text-center">
                                 <div className="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-2">
                                   <Clock className="h-6 w-6" />
                                 </div>
-                                <p className="text-xs text-white/80">Stay Invested</p>
+                                <p className="text-xs text-white/80">
+                                  Stay Invested
+                                </p>
                               </div>
                               <div className="text-center">
                                 <div className="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-2">
                                   <BarChart className="h-6 w-6" />
                                 </div>
-                                <p className="text-xs text-white/80">Grow Wealth</p>
+                                <p className="text-xs text-white/80">
+                                  Grow Wealth
+                                </p>
                               </div>
                             </div>
-                            
+
                             <div className="bg-white/10 rounded-lg p-4">
-                              <p className="text-sm mb-3">Example: Monthly investment of ₹5,000</p>
+                              <p className="text-sm mb-3">
+                                Example: Monthly investment of ₹5,000
+                              </p>
                               <div className="grid grid-cols-3 gap-2 text-center">
                                 <div className="bg-white/5 p-2 rounded">
-                                  <p className="text-xs text-white/70">5 Years</p>
+                                  <p className="text-xs text-white/70">
+                                    5 Years
+                                  </p>
                                   <p className="font-semibold">₹3.8L</p>
                                 </div>
                                 <div className="bg-white/5 p-2 rounded">
-                                  <p className="text-xs text-white/70">10 Years</p>
+                                  <p className="text-xs text-white/70">
+                                    10 Years
+                                  </p>
                                   <p className="font-semibold">₹9.5L</p>
                                 </div>
                                 <div className="bg-white/5 p-2 rounded">
-                                  <p className="text-xs text-white/70">20 Years</p>
+                                  <p className="text-xs text-white/70">
+                                    20 Years
+                                  </p>
                                   <p className="font-semibold">₹29.6L</p>
                                 </div>
                               </div>
-                              <p className="text-xs mt-3 text-white/70">*Assuming 12% annual returns</p>
+                              <p className="text-xs mt-3 text-white/70">
+                                *Assuming 12% annual returns
+                              </p>
                             </div>
                           </CardContent>
                         </Card>
-                        
+
                         <Card>
                           <CardHeader className="pb-2">
                             <CardTitle>Benefits of SIP Investment</CardTitle>
@@ -588,25 +744,31 @@ export default function SipPage() {
                                 <BarChart3 className="h-5 w-5 text-primary" />
                               </div>
                               <div>
-                                <h3 className="font-medium">Rupee Cost Averaging</h3>
+                                <h3 className="font-medium">
+                                  Rupee Cost Averaging
+                                </h3>
                                 <p className="text-sm text-neutral-600">
-                                  Buy more units when prices are low and fewer when prices are high, reducing overall cost.
+                                  Buy more units when prices are low and fewer
+                                  when prices are high, reducing overall cost.
                                 </p>
                               </div>
                             </div>
-                            
+
                             <div className="flex items-start">
                               <div className="mr-3 bg-primary/10 p-2 rounded-full">
                                 <Target className="h-5 w-5 text-primary" />
                               </div>
                               <div>
-                                <h3 className="font-medium">Goal-Based Investing</h3>
+                                <h3 className="font-medium">
+                                  Goal-Based Investing
+                                </h3>
                                 <p className="text-sm text-neutral-600">
-                                  Align your investments with specific financial goals like education, retirement, etc.
+                                  Align your investments with specific financial
+                                  goals like education, retirement, etc.
                                 </p>
                               </div>
                             </div>
-                            
+
                             <div className="flex items-start">
                               <div className="mr-3 bg-primary/10 p-2 rounded-full">
                                 <ShieldCheck className="h-5 w-5 text-primary" />
@@ -614,7 +776,8 @@ export default function SipPage() {
                               <div>
                                 <h3 className="font-medium">Risk Mitigation</h3>
                                 <p className="text-sm text-neutral-600">
-                                  Reduce impact of market volatility through systematic investing.
+                                  Reduce impact of market volatility through
+                                  systematic investing.
                                 </p>
                               </div>
                             </div>
@@ -623,7 +786,7 @@ export default function SipPage() {
                       </div>
                     </div>
                   </TabsContent>
-                  
+
                   <TabsContent value="invest">
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
                       <div className="md:col-span-2">
@@ -636,15 +799,18 @@ export default function SipPage() {
                           </CardHeader>
                           <CardContent>
                             <Form {...form}>
-                              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+                              <form
+                                onSubmit={form.handleSubmit(onSubmit)}
+                                className="space-y-6"
+                              >
                                 <FormField
                                   control={form.control}
                                   name="planName"
                                   render={({ field }) => (
                                     <FormItem>
                                       <FormLabel>SIP Plan</FormLabel>
-                                      <Select 
-                                        value={field.value} 
+                                      <Select
+                                        value={field.value}
                                         onValueChange={field.onChange}
                                       >
                                         <FormControl>
@@ -653,9 +819,13 @@ export default function SipPage() {
                                           </SelectTrigger>
                                         </FormControl>
                                         <SelectContent>
-                                          {SIP_PLANS.map(plan => (
-                                            <SelectItem key={plan.id} value={plan.name}>
-                                              {plan.name} - {plan.riskLevel} Risk
+                                          {SIP_PLANS.map((plan) => (
+                                            <SelectItem
+                                              key={plan.id}
+                                              value={plan.name}
+                                            >
+                                              {plan.name} - {plan.riskLevel}{" "}
+                                              Risk
                                             </SelectItem>
                                           ))}
                                         </SelectContent>
@@ -664,14 +834,16 @@ export default function SipPage() {
                                     </FormItem>
                                   )}
                                 />
-                                
+
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                   <FormField
                                     control={form.control}
                                     name="monthlyAmount"
                                     render={({ field }) => (
                                       <FormItem>
-                                        <FormLabel>Monthly Investment Amount (₹)</FormLabel>
+                                        <FormLabel>
+                                          Monthly Investment Amount (₹)
+                                        </FormLabel>
                                         <FormControl>
                                           <Input
                                             type="number"
@@ -680,19 +852,23 @@ export default function SipPage() {
                                           />
                                         </FormControl>
                                         <FormDescription>
-                                          Minimum ₹{selectedPlanDetails.minAmount} per month
+                                          Minimum ₹
+                                          {selectedPlanDetails.minAmount} per
+                                          month
                                         </FormDescription>
                                         <FormMessage />
                                       </FormItem>
                                     )}
                                   />
-                                  
+
                                   <FormField
                                     control={form.control}
                                     name="durationMonths"
                                     render={({ field }) => (
                                       <FormItem>
-                                        <FormLabel>Investment Duration (Months)</FormLabel>
+                                        <FormLabel>
+                                          Investment Duration (Months)
+                                        </FormLabel>
                                         <FormControl>
                                           <Input
                                             type="number"
@@ -701,14 +877,18 @@ export default function SipPage() {
                                           />
                                         </FormControl>
                                         <FormDescription>
-                                          Recommended minimum {selectedPlanDetails.recommendedDuration} months
+                                          Recommended minimum{" "}
+                                          {
+                                            selectedPlanDetails.recommendedDuration
+                                          }{" "}
+                                          months
                                         </FormDescription>
                                         <FormMessage />
                                       </FormItem>
                                     )}
                                   />
                                 </div>
-                                
+
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                   <FormField
                                     control={form.control}
@@ -719,25 +899,38 @@ export default function SipPage() {
                                         <FormControl>
                                           <Input
                                             type="date"
-                                            min={new Date().toISOString().split('T')[0]}
+                                            min={
+                                              new Date()
+                                                .toISOString()
+                                                .split("T")[0]
+                                            }
                                             {...field}
-                                            value={field.value instanceof Date ? field.value.toISOString().split('T')[0] : field.value}
+                                            value={
+                                              field.value instanceof Date
+                                                ? field.value
+                                                    .toISOString()
+                                                    .split("T")[0]
+                                                : field.value
+                                            }
                                           />
                                         </FormControl>
                                         <FormDescription>
-                                          First installment will be debited on this date
+                                          First installment will be debited on
+                                          this date
                                         </FormDescription>
                                         <FormMessage />
                                       </FormItem>
                                     )}
                                   />
-                                  
+
                                   <FormField
                                     control={form.control}
                                     name="expectedReturns"
                                     render={({ field }) => (
                                       <FormItem>
-                                        <FormLabel>Expected Returns (%)</FormLabel>
+                                        <FormLabel>
+                                          Expected Returns (%)
+                                        </FormLabel>
                                         <FormControl>
                                           <Input
                                             type="number"
@@ -747,28 +940,34 @@ export default function SipPage() {
                                           />
                                         </FormControl>
                                         <FormDescription>
-                                          Based on historical performance of selected plan
+                                          Based on historical performance of
+                                          selected plan
                                         </FormDescription>
                                         <FormMessage />
                                       </FormItem>
                                     )}
                                   />
                                 </div>
-                                
+
                                 <Separator />
-                                
+
                                 <div className="space-y-4">
-                                  <h3 className="text-lg font-medium">Payment Details</h3>
-                                  
+                                  <h3 className="text-lg font-medium">
+                                    Payment Details
+                                  </h3>
+
                                   <FormField
                                     control={form.control}
                                     name="autoDebit"
                                     render={({ field }) => (
                                       <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
                                         <div className="space-y-0.5">
-                                          <FormLabel className="text-base">Auto Debit Authorization</FormLabel>
+                                          <FormLabel className="text-base">
+                                            Auto Debit Authorization
+                                          </FormLabel>
                                           <FormDescription>
-                                            Allow automatic debit from your bank account for SIP installments
+                                            Allow automatic debit from your bank
+                                            account for SIP installments
                                           </FormDescription>
                                         </div>
                                         <FormControl>
@@ -777,91 +976,162 @@ export default function SipPage() {
                                             checked={field.value}
                                             onChange={field.onChange}
                                             className="w-5 h-5 text-primary focus:ring-primary"
+                                            aria-label="Auto Debit Authorization"
                                           />
                                         </FormControl>
                                       </FormItem>
                                     )}
                                   />
-                                  
+
                                   {form.watch("autoDebit") && (
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                      <div className="space-y-2">
-                                        <FormLabel>Bank Name</FormLabel>
-                                        <Input placeholder="Enter your bank name" />
-                                      </div>
-                                      
-                                      <div className="space-y-2">
-                                        <FormLabel>Account Number</FormLabel>
-                                        <Input placeholder="Enter your account number" />
-                                      </div>
+                                      <FormField
+                                        control={form.control}
+                                        name="bankName"
+                                        render={({ field }) => (
+                                          <FormItem>
+                                            <FormLabel>Bank Name</FormLabel>
+                                            <FormControl>
+                                              <Input
+                                                placeholder="Enter your bank name"
+                                                {...field}
+                                              />
+                                            </FormControl>
+                                            <FormMessage />
+                                          </FormItem>
+                                        )}
+                                      />
+                                      <FormField
+                                        control={form.control}
+                                        name="bankAccountNumber"
+                                        render={({ field }) => (
+                                          <FormItem>
+                                            <FormLabel>Account Number</FormLabel>
+                                            <FormControl>
+                                              <Input
+                                                placeholder="Enter your account number"
+                                                {...field}
+                                              />
+                                            </FormControl>
+                                            <FormMessage />
+                                          </FormItem>
+                                        )}
+                                      />
                                     </div>
                                   )}
                                 </div>
-                                
-                                <Button 
+
+                                <Button
                                   type="submit"
                                   className="w-full"
                                   disabled={isSubmitting}
                                 >
-                                  {isSubmitting ? "Processing..." : "Start SIP Investment"}
+                                  {isSubmitting
+                                    ? "Processing..."
+                                    : "Start SIP Investment"}
                                 </Button>
                               </form>
                             </Form>
                           </CardContent>
                         </Card>
                       </div>
-                      
+
                       <div className="space-y-6">
                         <Card className="bg-[#F8FAFC] border-primary/20">
                           <CardHeader className="pb-2">
-                            <CardTitle className="text-lg">Your SIP Summary</CardTitle>
+                            <CardTitle className="text-lg">
+                              Your SIP Summary
+                            </CardTitle>
                           </CardHeader>
                           <CardContent>
                             <div className="space-y-3">
                               <div className="flex justify-between">
-                                <span className="text-sm text-neutral-600">SIP Plan</span>
-                                <span className="font-medium">{form.watch("planName")}</span>
+                                <span className="text-sm text-neutral-600">
+                                  SIP Plan
+                                </span>
+                                <span className="font-medium">
+                                  {form.watch("planName")}
+                                </span>
                               </div>
                               <div className="flex justify-between">
-                                <span className="text-sm text-neutral-600">Monthly Investment</span>
-                                <span className="font-medium">{formatCurrency(monthlyAmount)}</span>
+                                <span className="text-sm text-neutral-600">
+                                  Monthly Investment
+                                </span>
+                                <span className="font-medium">
+                                  {formatCurrency(monthlyAmount)}
+                                </span>
                               </div>
                               <div className="flex justify-between">
-                                <span className="text-sm text-neutral-600">Investment Period</span>
-                                <span className="font-medium">{Math.round(durationMonths / 12)} years ({durationMonths} months)</span>
+                                <span className="text-sm text-neutral-600">
+                                  Investment Period
+                                </span>
+                                <span className="font-medium">
+                                  {Math.round(durationMonths / 12)} years (
+                                  {durationMonths} months)
+                                </span>
                               </div>
                               <div className="flex justify-between">
-                                <span className="text-sm text-neutral-600">Expected Returns</span>
-                                <span className="font-medium">{expectedReturns}% p.a.</span>
+                                <span className="text-sm text-neutral-600">
+                                  Expected Returns
+                                </span>
+                                <span className="font-medium">
+                                  {expectedReturns}% p.a.
+                                </span>
                               </div>
                               <Separator />
                               <div className="flex justify-between">
-                                <span className="text-sm text-neutral-600">Total Investment</span>
-                                <span className="font-medium">{formatCurrency(sipReturns.totalInvestment)}</span>
+                                <span className="text-sm text-neutral-600">
+                                  Total Investment
+                                </span>
+                                <span className="font-medium">
+                                  {formatCurrency(sipReturns.totalInvestment)}
+                                </span>
                               </div>
                               <div className="flex justify-between">
-                                <span className="text-sm text-neutral-600">Estimated Returns</span>
-                                <span className="font-medium">{formatCurrency(sipReturns.estimatedReturns)}</span>
+                                <span className="text-sm text-neutral-600">
+                                  Estimated Returns
+                                </span>
+                                <span className="font-medium">
+                                  {formatCurrency(sipReturns.estimatedReturns)}
+                                </span>
                               </div>
                               <div className="flex justify-between">
-                                <span className="text-sm text-neutral-600">Total Value</span>
-                                <span className="font-semibold text-primary">{formatCurrency(sipReturns.totalValue)}</span>
+                                <span className="text-sm text-neutral-600">
+                                  Total Value
+                                </span>
+                                <span className="font-semibold text-primary">
+                                  {formatCurrency(sipReturns.totalValue)}
+                                </span>
                               </div>
                             </div>
-                            
+
                             <div className="mt-6 pb-2">
                               <div className="flex justify-between items-center mb-2">
-                                <span className="text-sm font-medium">Investment vs. Returns</span>
+                                <span className="text-sm font-medium">
+                                  Investment vs. Returns
+                                </span>
                               </div>
                               <div className="w-full h-4 rounded-full overflow-hidden bg-neutral-100">
                                 <div className="flex h-full">
-                                  <div 
-                                    className="bg-primary h-full" 
-                                    style={{ width: `${(sipReturns.totalInvestment / sipReturns.totalValue) * 100}%` }}
+                                  <div
+                                    className="bg-primary h-full"
+                                    style={{
+                                      width: `${
+                                        (sipReturns.totalInvestment /
+                                          sipReturns.totalValue) *
+                                        100
+                                      }%`,
+                                    }}
                                   ></div>
-                                  <div 
-                                    className="bg-[#FFB800] h-full" 
-                                    style={{ width: `${(sipReturns.estimatedReturns / sipReturns.totalValue) * 100}%` }}
+                                  <div
+                                    className="bg-[#FFB800] h-full"
+                                    style={{
+                                      width: `${
+                                        (sipReturns.estimatedReturns /
+                                          sipReturns.totalValue) *
+                                        100
+                                      }%`,
+                                    }}
                                   ></div>
                                 </div>
                               </div>
@@ -878,51 +1148,78 @@ export default function SipPage() {
                             </div>
                           </CardContent>
                         </Card>
-                        
+
                         <Card>
                           <CardHeader className="pb-2">
-                            <CardTitle className="text-lg">Risk Assessment</CardTitle>
+                            <CardTitle className="text-lg">
+                              Risk Assessment
+                            </CardTitle>
                           </CardHeader>
                           <CardContent>
                             <div className="space-y-4">
                               <p className="text-sm text-neutral-600">
                                 The selected plan has a{" "}
-                                <span className={`font-medium ${
-                                  selectedPlanDetails.riskLevel === 'High' ? 'text-red-600' :
-                                  selectedPlanDetails.riskLevel === 'Medium-High' ? 'text-orange-600' :
-                                  selectedPlanDetails.riskLevel === 'Medium' ? 'text-yellow-600' : 'text-green-600'
-                                }`}>
+                                <span
+                                  className={`font-medium ${
+                                    selectedPlanDetails.riskLevel === "High"
+                                      ? "text-red-600"
+                                      : selectedPlanDetails.riskLevel ===
+                                        "Medium-High"
+                                      ? "text-orange-600"
+                                      : selectedPlanDetails.riskLevel ===
+                                        "Medium"
+                                      ? "text-yellow-600"
+                                      : "text-green-600"
+                                  }`}
+                                >
                                   {selectedPlanDetails.riskLevel}
-                                </span> risk level.
+                                </span>{" "}
+                                risk level.
                               </p>
-                              
+
                               <div className="flex items-center justify-between mb-2">
-                                <span className="text-xs text-green-600">Low Risk</span>
-                                <span className="text-xs text-amber-600">Medium Risk</span>
-                                <span className="text-xs text-red-600">High Risk</span>
+                                <span className="text-xs text-green-600">
+                                  Low Risk
+                                </span>
+                                <span className="text-xs text-amber-600">
+                                  Medium Risk
+                                </span>
+                                <span className="text-xs text-red-600">
+                                  High Risk
+                                </span>
                               </div>
-                              
+
                               <div className="h-2 relative bg-gradient-to-r from-green-500 via-amber-500 to-red-500 rounded-full">
-                                <div 
+                                <div
                                   className="absolute top-0 h-4 w-4 bg-white border-2 border-primary rounded-full -mt-1 transform -translate-x-1/2"
-                                  style={{ 
-                                    left: selectedPlanDetails.riskLevel === 'High' ? '90%' : 
-                                           selectedPlanDetails.riskLevel === 'Medium-High' ? '70%' :
-                                           selectedPlanDetails.riskLevel === 'Medium' ? '50%' : '20%'
+                                  style={{
+                                    left:
+                                      selectedPlanDetails.riskLevel === "High"
+                                        ? "90%"
+                                        : selectedPlanDetails.riskLevel ===
+                                          "Medium-High"
+                                        ? "70%"
+                                        : selectedPlanDetails.riskLevel ===
+                                          "Medium"
+                                        ? "50%"
+                                        : "20%",
                                   }}
                                 ></div>
                               </div>
-                              
+
                               <div className="text-xs text-neutral-500 mt-4">
-                                Investments are subject to market risks. Past performance is not indicative of future returns.
+                                Investments are subject to market risks. Past
+                                performance is not indicative of future returns.
                               </div>
                             </div>
                           </CardContent>
                         </Card>
-                        
+
                         <div className="flex items-center justify-center p-4 bg-primary/10 rounded-lg">
                           <Landmark className="h-5 w-5 text-primary mr-2" />
-                          <p className="text-sm text-primary">Regulated by SEBI. 100% secure investments.</p>
+                          <p className="text-sm text-primary">
+                            Regulated by SEBI. 100% secure investments.
+                          </p>
                         </div>
                       </div>
                     </div>
