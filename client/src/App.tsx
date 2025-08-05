@@ -15,7 +15,7 @@ import SipPage from "@/pages/sip-page";
 import { ProtectedRoute } from "./lib/protected-route";
 import { ThemeProvider } from "next-themes";
 import { AuthProvider } from "@/hooks/use-auth";
-import { Header } from "@/components/layout/header";
+import  {Header } from "@/components/layout/header";
 import { Footer } from "@/components/layout/footer";
 import BlogPage from "@/pages/blog-page";
 import OurTeamPage from "@/pages/ourteam-page";
@@ -27,6 +27,9 @@ function Router() {
       <Route path="/" component={HomePage} />
       <Route path="/auth" component={AuthPage} />
       <Route path="/loan-application" component={LoanApplicationPage} />
+      <Route path="/loan-application?type=home-loan" component={LoanApplicationPage} /> 
+      <Route path="/loan-application?type=lap" component={LoanApplicationPage} /> 
+      <Route path="/loan-application?type=bt-topup" component={LoanApplicationPage} />       
       <Route path="/consultation" component={ConsultationPage} />
       <Route path="/sip" component={SipPage} />
       <Route path="/blog" component={BlogPage} />

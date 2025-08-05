@@ -1,5 +1,4 @@
-import React, { useState, useEffect } from "react";
-// Link is for internal navigation, <a> is for external.
+import React, { useState, useEffect, useRef } from "react";
 import { Link, useLocation } from "wouter";
 import { useAuth } from "@/hooks/use-auth";
 import { motion, AnimatePresence } from "framer-motion";
@@ -13,6 +12,8 @@ import {
   Shield,
   ChevronRight,
   ChevronLeft,
+  ChevronDown,
+  Users,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -21,19 +22,20 @@ import {
   DropdownMenuItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
+  DropdownMenuSub,
+  DropdownMenuSubContent,
+  DropdownMenuSubTrigger,
 } from "@/components/ui/dropdown-menu";
-
-// Make sure this CSS file exists and has the correct content
 import "./header.css";
 
-// --- Your navigation data ---
+// --- Data definitions ---
 const navData = [
   {
-    label: "Apply for Loan",
+    label: "Loans",
     children: [
       { label: "Home Loans", path: "/loan-application?type=home-loan" },
-      { label: "Loan Against Property", path: "/loan-application?type=lap" },
-      { label: "Balance Transfer", path: "/loan-application?type=bt-topup" },
+      { label: "LAP", path: "/loan-application?type=lap" },
+      { label: "BT Top-Up", path: "/loan-application?type=bt-topup" },
     ],
   },
   {
@@ -44,87 +46,73 @@ const navData = [
     label: "Services",
     children: [{ label: "Consultation", path: "/consultation" }],
   },
-  {
-    label: "About Us",
-    children: [{ label: "Blog", path: "/blog" }],
-  },
 ];
 
-// --- Reusable Animation Variants ---
-const flyoutVariants = {
-  hidden: { opacity: 0, scale: 0.95, y: -10 },
-  visible: {
-    opacity: 1,
-    scale: 1,
-    y: 0,
-    transition: { duration: 0.2, ease: "easeOut" },
-  },
-  exit: {
-    opacity: 0,
-    scale: 0.95,
-    y: -10,
-    transition: { duration: 0.15, ease: "easeIn" },
-  },
-};
+const partnerLoginUrl = "https://homobie-frontend-portal-bco8.vercel.app/"; // Base URL is here
+const partnerRoles = ["Builder", "Broker", "User", "Telecaller"];
 
+// MODIFICATION START: All roles now point to the same URL.
+const partnerRolesMenu = {
+  label: "Partner Login",
+  children: partnerRoles.map((role) => ({
+    label: role,
+    path: partnerLoginUrl, // Always use the base URL
+    external: true,
+  })),
+};
+// MODIFICATION END
+
+// --- Animation variants ---
 const mobileNavVariants = {
   hidden: { x: "-100%" },
   visible: { x: "0%", transition: { duration: 0.3, ease: "easeInOut" } },
   exit: { x: "-100%", transition: { duration: 0.25, ease: "easeInOut" } },
 };
 
-// --- Desktop Navigation Item Component ---
-const DesktopNavItem = ({ item }: { item: any }) => {
-  const [isHovered, setIsHovered] = useState(false);
-  const [location] = useLocation();
-  const isActive = (path: string) => path && location === path;
+// Simplified DesktopNavDropdown component
+const DesktopNavDropdown = ({ item }: { item: any }) => {
   const hasChildren = item.children && item.children.length > 0;
 
-  return (
-    <li
-      className="h-full flex items-center"
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
-    >
-      <div className="relative h-full flex items-center">
-        <span className="flex h-full items-center px-4 text-white font-medium border-b-2 border-transparent hover:border-white transition-colors duration-300 cursor-default">
+  if (!hasChildren) {
+    return (
+      <li className="base-header__nav-item">
+        <Link href={item.path || "/"} className="base-header__nav-button">
           {item.label}
-        </span>
-        <AnimatePresence>
-          {hasChildren && isHovered && (
-            <motion.div
-              variants={flyoutVariants}
-              initial="hidden"
-              animate="visible"
-              exit="exit"
-              className="absolute top-full left-0 z-50 min-w-[250px] origin-top rounded-lg bg-white p-2 text-nexi-blackgray shadow-lg"
-            >
-              <ul className="space-y-1">
-                {item.children.map((child: any) => (
-                  <li key={child.label}>
-                    <Link
-                      href={child.path}
-                      onClick={() => setIsHovered(false)}
-                      className={`block w-full p-3 text-sm font-medium rounded-md ${
-                        isActive(child.path)
-                          ? "text-nexi-blue bg-nexi-pagebg"
-                          : "text-nexi-darkgray hover:bg-nexi-pagebg hover:text-nexi-blue"
-                      }`}
-                    >
-                      {child.label}
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-            </motion.div>
-          )}
-        </AnimatePresence>
-      </div>
+        </Link>
+      </li>
+    );
+  }
+
+  return (
+    <li className="base-header__nav-item">
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <button className="base-header__nav-button flex items-center">
+            <span>{item.label}</span>
+            <ChevronDown
+              size={16}
+              className="ml-1 transition-transform duration-200 group-data-[state=open]:rotate-180"
+            />
+          </button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent
+          align="start"
+          className="user-dropdown glasmorphism"
+        >
+          {item.children.map((child: any) => (
+            <DropdownMenuItem key={child.label} asChild>
+              <Link href={child.path} className="user-dropdown__link">
+                {child.label}
+              </Link>
+            </DropdownMenuItem>
+          ))}
+        </DropdownMenuContent>
+      </DropdownMenu>
     </li>
   );
 };
 
-// --- Mobile Navigation Component ---
+// MobileNav component
 const MobileNav = ({
   isOpen,
   onClose,
@@ -145,22 +133,29 @@ const MobileNav = ({
   const handleForward = (children: any, label: string) =>
     setMenuStack((prev) => [...prev, { items: children, label }]);
   const handleBack = () => setMenuStack((prev) => prev.slice(0, -1));
-  const handleNavigate = (path: string) => {
-    if (path) navigate(path);
+
+  const handleNavigate = (path: string, external: boolean = false) => {
+    if (external) {
+      window.open(path, "_blank", "noopener,noreferrer");
+    } else if (path) {
+      navigate(path);
+    }
     onClose();
   };
 
   const currentLevel = menuStack[menuStack.length - 1];
+  const previousLevelLabel =
+    menuStack.length > 1 ? menuStack[menuStack.length - 2].label : "";
 
   return (
     <AnimatePresence>
       {isOpen && (
-        <div className="fixed inset-0 z-[60] lg:hidden" role="dialog" aria-modal="true">
+        <div className="fixed inset-0 z-[100] lg:hidden" aria-modal="true">
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black/40 backdrop-blur-sm"
+            className="fixed inset-0 bg-black/50"
             onClick={onClose}
           />
           <motion.div
@@ -168,57 +163,43 @@ const MobileNav = ({
             initial="hidden"
             animate="visible"
             exit="exit"
-            className="absolute left-0 top-0 h-full w-full max-w-md bg-white text-nexi-blackgray shadow-xl flex flex-col"
+            className="mobile-nav glasmorphism"
           >
-            <div className="flex h-header items-center justify-between border-b px-4">
+            <div className="mobile-nav__header">
               {menuStack.length > 1 ? (
-                <button
-                  type="button"
-                  onClick={handleBack}
-                  className="flex items-center gap-2 p-2 -ml-2 text-lg font-semibold text-nexi-darkblue"
-                >
-                  <ChevronLeft size={24} />
-                  <span>{menuStack[menuStack.length - 2].label}</span>
+                <button onClick={handleBack} className="mobile-nav__back-btn">
+                  <ChevronLeft size={22} />
+                  <span>{previousLevelLabel}</span>
                 </button>
               ) : (
-                <Link
-                  href="/"
-                  onClick={onClose}
-                  className="flex items-center gap-3"
-                >
+                <Link href="/" onClick={onClose} className="mobile-nav__logo">
                   <img
                     src="/assets/wmremove-transformed - Edited.jpg"
                     alt="Logo"
-                    className="h-8 rounded-full"
+                    className="mobile-nav__logo-img"
                   />
-                  <span className="font-bold text-xl text-nexi-darkblue"></span>
                 </Link>
               )}
               <button
-                type="button"
                 onClick={onClose}
-                className="p-2 text-nexi-darkgray"
-                aria-label="Close menu"
                 title="Close menu"
+                className="mobile-nav__close-btn"
               >
-                <X size={28} />
+                <X size={24} />
               </button>
             </div>
-            <div className="flex-grow overflow-y-auto p-4">
-              <h2 className="px-3 pb-4 text-2xl font-bold text-nexi-darkblue">
-                {currentLevel.label}
-              </h2>
-              <ul className="space-y-2">
-                {currentLevel.items.map((item) => (
+            <div className="mobile-nav__content">
+              <h2 className="mobile-nav__title">{currentLevel.label}</h2>
+              <ul className="mobile-nav__items">
+                {currentLevel.items.map((item: any) => (
                   <li key={item.label}>
                     <button
-                      type="button"
                       onClick={() =>
                         item.children
                           ? handleForward(item.children, item.label)
-                          : handleNavigate((item as any).path || "/")
+                          : handleNavigate(item.path, item.external)
                       }
-                      className="w-full flex justify-between items-center text-left p-4 text-lg text-nexi-darkgray rounded-lg hover:bg-nexi-pagebg"
+                      className="mobile-nav__item-btn"
                     >
                       <span>{item.label}</span>
                       {item.children && <ChevronRight size={20} />}
@@ -227,7 +208,7 @@ const MobileNav = ({
                 ))}
               </ul>
             </div>
-            <div className="border-t p-4">
+            <div className="mobile-nav__footer">
               {user ? (
                 <UserDropdown
                   user={user}
@@ -236,23 +217,28 @@ const MobileNav = ({
                   isMobile={true}
                 />
               ) : (
-                <div className="flex items-center gap-2">
-                  {/* CORRECTED: Use a standard <a> tag for external links to prevent errors. */}
-                  <a
-                    href="https://homobie-frontend-portal-bco8.vercel.app"
-                    className="flex-1 text-center px-4 py-3 font-semibold text-nexi-blue border border-nexi-blue/30 rounded-full hover:bg-nexi-pagebg"
-                    onClick={onClose}
+                <div className="w-full space-y-3">
+                  <button
+                    onClick={() => handleNavigate("/auth")}
+                    className="mobile-nav_auth-btn mobile-nav_auth-btn--secondary w-full"
                   >
-                    Log In
-                  </a>
-                  {/* CORRECTED: Use a standard <a> tag for external links. */}
-                  <a
-                    href="https://homobie-frontend-portal-bco8.vercel.app"
-                    className="flex-1 text-center px-4 py-3 font-semibold bg-nexi-blue text-white rounded-full hover:bg-nexi-darkblue"
-                    onClick={onClose}
+                    <User className="mr-2 h-4 w-4" /> User Login
+                  </button>
+                  <button
+                    onClick={() =>
+                      handleForward(
+                        partnerRolesMenu.children,
+                        partnerRolesMenu.label
+                      )
+                    }
+                    className="mobile-nav_auth-btn mobile-nav_auth-btn--primary w-full justify-between"
                   >
-                    Apply Now
-                  </a>
+                    <span>
+                      <Users className="mr-2 h-4 w-4 inline-block" /> Partner
+                      Login
+                    </span>
+                    <ChevronRight size={20} />
+                  </button>
                 </div>
               )}
             </div>
@@ -263,14 +249,14 @@ const MobileNav = ({
   );
 };
 
-// --- Main Header Component ---
+// Main Header Component
 export function Header() {
   const { user, logoutMutation } = useAuth();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
 
   useEffect(() => {
-    const handleScroll = () => setScrolled(window.scrollY > 10);
+    const handleScroll = () => setScrolled(window.scrollY > 20);
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
@@ -280,35 +266,24 @@ export function Header() {
     setMobileMenuOpen(false);
   }, [location]);
 
-  const headerClasses = `fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
-    scrolled || mobileMenuOpen
-      ? "bg-nexi-blue/80 backdrop-blur-lg shadow-lg"
-      : "bg-transparent"
-  }`;
-
   return (
     <>
-      <header className={headerClasses}>
-        <div className="container mx-auto flex h-header items-center justify-between px-4">
-          <Link href="/" className="flex flex-shrink-0 items-center space-x-3">
-            <img
-              src="/assets/wmremove-transformed - Edited.jpg"
-              alt="Homobie Logo"
-              className="h-8 rounded-full"
-            />
-            <span className="font-bold text-xl text-white"></span>
+      <header
+        className={`base-header ${scrolled ? "glasmorphism" : "transparent"}`}
+      >
+        <div className="base-header__container">
+          <Link href="/" title="Go to Homepage" className="base-header__logo">
+            <img src="/assets/wmremove-transformed - Edited.jpg" alt="Logo" />
           </Link>
-
-          <nav className="hidden lg:flex h-full">
-            <ul className="flex h-full items-center">
+          <nav className="base-header__nav">
+            <ul className="base-header__nav-items">
               {navData.map((item) => (
-                <DesktopNavItem key={item.label} item={item} />
+                <DesktopNavDropdown key={item.label} item={item} />
               ))}
             </ul>
           </nav>
-
-          <div className="flex items-center gap-6 text-white">
-            <div className="hidden lg:flex items-center gap-6">
+          <div className="base-header__tools">
+            <div className="hidden lg:flex items-center gap-4">
               {user ? (
                 <UserDropdown
                   user={user}
@@ -316,29 +291,60 @@ export function Header() {
                   isLoggingOut={logoutMutation.isPending}
                 />
               ) : (
-                  // CORRECTED: Use a standard <a> tag for the external login link.
-                  // The <Button asChild> pattern is incorrect for this.
-                  <a
-                    href="https://homobie-frontend-portal-bco8.vercel.app"
-            
-                    className="bg-transparent border border-white hover:bg-white/10 rounded-full px-4 py-2 text-white"
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button className="base-header_auth-btn base-header_auth-btn--primary">
+                      Login <ChevronDown className="ml-2 h-4 w-4" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent
+                    align="end"
+                    className="user-dropdown glasmorphism"
                   >
-                    Log In
-                  </a>
+                    <DropdownMenuItem asChild>
+                      <Link href="/auth" className="user-dropdown__link">
+                        <User className="mr-2 h-4 w-4" />
+                        <span>User Login</span>
+                      </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator className="bg-white/20" />
+                    <DropdownMenuSub>
+                      <DropdownMenuSubTrigger className="user-dropdown__link">
+                        <Users className="mr-2 h-4 w-4" />
+                        <span>Partner Login</span>
+                      </DropdownMenuSubTrigger>
+                      <DropdownMenuSubContent className="user-dropdown glasmorphism">
+                        {/* MODIFICATION START: All roles now point to the same URL. */}
+                        {partnerRoles.map((role) => (
+                          <DropdownMenuItem key={role} asChild>
+                            <a
+                              href={partnerLoginUrl}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="user-dropdown__link"
+                            >
+                              {role}
+                            </a>
+                          </DropdownMenuItem>
+                        ))}
+                        {/* MODIFICATION END */}
+                      </DropdownMenuSubContent>
+                    </DropdownMenuSub>
+                  </DropdownMenuContent>
+                </DropdownMenu>
               )}
             </div>
             <button
-              type="button"
-              onClick={() => setMobileMenuOpen(true)}
-              className="p-2 text-white lg:hidden"
-              aria-label="Open menu"
+              className="base-header__menu-btn"
               title="Open menu"
+              onClick={() => setMobileMenuOpen(true)}
             >
               <Menu size={28} />
             </button>
           </div>
         </div>
       </header>
+      <div style={{ height: "var(--header-height)" }} />
       <MobileNav
         isOpen={mobileMenuOpen}
         onClose={() => setMobileMenuOpen(false)}
@@ -347,7 +353,7 @@ export function Header() {
   );
 }
 
-// --- User Dropdown Component ---
+// UserDropdown component
 function UserDropdown({
   user,
   onLogout,
@@ -361,78 +367,57 @@ function UserDropdown({
 }) {
   if (isMobile) {
     return (
-      <div className="space-y-4">
-        <div className="text-center">
-          <p className="font-bold text-lg text-nexi-darkblue">
-            {user.username || "User"}
-          </p>
-        </div>
+      <div className="w-full">
+        <p className="text-center text-lg font-semibold mb-4">
+          {user.username || "User Account"}
+        </p>
         <Button
           onClick={onLogout}
           disabled={isLoggingOut}
-          className="w-full bg-nexi-blue hover:bg-nexi-darkblue rounded-full py-3 text-base"
+          className="w-full mobile-nav__auth-btn--primary"
         >
-          <LogOut className="mr-2 h-5 w-5" />
+          <LogOut className="mr-2 h-4 w-4" />
           <span>{isLoggingOut ? "Logging out..." : "Logout"}</span>
         </Button>
       </div>
     );
   }
-
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button
-          variant="ghost"
-          className="p-0 text-white hover:bg-transparent hover:text-white focus-visible:ring-0"
-        >
+        <Button variant="ghost" className="base-header__user-btn">
           <User className="mr-2 h-5 w-5" />
           <span className="font-medium">{user.username || "Account"}</span>
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent
-        align="end"
-        className="w-56 mt-2 bg-white text-nexi-darkgray"
-      >
+      <DropdownMenuContent align="end" className="user-dropdown glasmorphism">
         <DropdownMenuItem asChild>
-          <Link
-            href="/dashboard"
-            className="flex w-full cursor-pointer items-center p-2 rounded-md hover:bg-nexi-pagebg"
-          >
+          <Link href="/dashboard" className="user-dropdown__link">
             <LayoutDashboard className="mr-2 h-4 w-4" />
             <span>Dashboard</span>
           </Link>
         </DropdownMenuItem>
-
         {(user.role === "admin" || user.role === "superadmin") && (
           <DropdownMenuItem asChild>
-            <Link
-              href="/admin"
-              className="flex w-full cursor-pointer items-center p-2 rounded-md hover:bg-nexi-pagebg"
-            >
+            <Link href="/admin" className="user-dropdown__link">
               <Settings className="mr-2 h-4 w-4" />
               <span>Admin Panel</span>
             </Link>
           </DropdownMenuItem>
         )}
-
         {user.role === "superadmin" && (
           <DropdownMenuItem asChild>
-            <Link
-              href="/super-admin"
-              className="flex w-full cursor-pointer items-center p-2 rounded-md hover:bg-nexi-pagebg"
-            >
+            <Link href="/super-admin" className="user-dropdown__link">
               <Shield className="mr-2 h-4 w-4" />
               <span>Super Admin</span>
             </Link>
           </DropdownMenuItem>
         )}
-
-        <DropdownMenuSeparator />
+        <DropdownMenuSeparator className="bg-white/20" />
         <DropdownMenuItem
           onClick={onLogout}
           disabled={isLoggingOut}
-          className="p-2 rounded-md hover:bg-nexi-pagebg focus:bg-red-50 focus:text-red-600"
+          className="user-dropdown_link user-dropdown_link--logout"
         >
           <LogOut className="mr-2 h-4 w-4" />
           <span>{isLoggingOut ? "Logging out..." : "Logout"}</span>

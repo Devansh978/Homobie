@@ -1204,11 +1204,11 @@ export default function HomePage() {
                 initial={{ opacity: 0.8 }}
                 animate={{ opacity: 1 }}
                 transition={{ delay: 0.6 }}
-                className="text-xl md:text-0xl font-medium mb-3 leading-relaxed"
+                className="text-xl md:text-0xl font-medium mb-3 leading-relaxed p-1 text-center tracking-tight"
               >
                 Home loans, mortgage loans, SIP plans? —{" "}
                 <span className="font-bold">we speak fluent finance,</span> so
-                you don't have to.
+                you don't have to
               </motion.h1>
 
               <motion.div

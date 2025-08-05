@@ -4,14 +4,13 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useQuery, useMutation } from "@tanstack/react-query";
-import { useAuth } from "@/hooks/use-auth";
-import { apiRequest, queryClient } from "@/lib/queryClient";
-import { useToast } from "@/hooks/use-toast";
-import { PaymentGateway } from "@/components/ui/payment-gateway";
-// import { insertLoanApplicationSchema } from "@shared/schema";
+import { useAuth } from "../hooks/use-auth";
+import { apiRequest, queryClient } from "../lib/queryClient";
+import { useToast } from "../hooks/use-toast";
+import { PaymentGateway } from "../components/ui/payment-gateway";
 
-import { ChatbotButton } from "@/components/layout/chatbot-button";
-import { LoanCalculator } from "@/components/ui/calculator";
+import { ChatbotButton } from "../components/layout/chatbot-button";
+import { LoanCalculator } from "../components/ui/calculator";
 import { 
   Form, 
   FormControl, 
@@ -20,7 +19,7 @@ import {
   FormItem, 
   FormLabel, 
   FormMessage 
-} from "@/components/ui/form";
+} from "../components/ui/form";
 import { 
   Card, 
   CardContent, 
@@ -28,31 +27,31 @@ import {
   CardFooter, 
   CardHeader, 
   CardTitle 
-} from "@/components/ui/card";
+} from "../components/ui/card";
 import { 
   Tabs, 
   TabsContent, 
   TabsList, 
   TabsTrigger 
-} from "@/components/ui/tabs";
+} from "../components/ui/tabs";
 import { 
   Select, 
   SelectContent, 
   SelectItem, 
   SelectTrigger, 
   SelectValue 
-} from "@/components/ui/select";
+} from "../components/ui/select";
 import { 
   Accordion,
   AccordionContent,
   AccordionItem,
   AccordionTrigger,
-} from "@/components/ui/accordion";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { Separator } from "@/components/ui/separator";
-import { Textarea } from "@/components/ui/textarea";
+} from "../components/ui/accordion";
+import { Alert, AlertDescription, AlertTitle } from "../components/ui/alert";
+import { Input } from "../components/ui/input";
+import { Button } from "../components/ui/button";
+import { Separator } from "../components/ui/separator";
+import { Textarea } from "../components/ui/textarea";
 import { 
   Home, 
   Building, 
@@ -63,50 +62,44 @@ import {
   Upload,
   DollarSign
 } from "lucide-react";
-import { getQueryParam, getLoanTypeLabel, calculateEMI } from "@/lib/utils";
+import { getQueryParam, getLoanTypeLabel, calculateEMI } from "../lib/utils";
 
-// Application form schema
-// const loanFormSchema = insertLoanApplicationSchema.extend({
-  // Adding client-side validation
-  // amount: z.coerce.number().min(100000, "Loan amount must be at least ₹1,00,000").max(10000000, "Loan amount cannot exceed ₹1,00,00,000"),
-  // tenure: z.coerce.number().min(12, "Tenure must be at least 12 months").max(360, "Tenure cannot exceed 360 months"),
-  // interestRate: z.coerce.number().min(5, "Interest rate must be at least 5%").max(20, "Interest rate cannot exceed 20%"),
-  // monthlyIncome: z.coerce.number().min(10000, "Monthly income must be at least ₹10,000"),
-  // propertyValue: z.coerce.number().optional(),
-  // propertyAddress: z.string().optional(),
-  // purpose: z.string().min(5, "Please provide a brief purpose for the loan").max(500, "Purpose cannot exceed 500 characters"),
-  // employmentType: z.enum(["salaried", "self-employed"], {
-  //   required_error: "Please select your employment type",
-  // }),
-  // existingLoanDetails: z.any().optional(),
-  // Fields that will come from user context
-//   userId: z.number().optional(),
-// }).omit({ userId: true });
-
-// type LoanFormValues = z.infer<typeof LoanFormValues>;
-
-// Define the LoanFormValues type for useForm
-type LoanFormValues = {
-  loanType: "HomeLoan" | "LAP" | "BTTopUp";
+type LoanFormSchema = {
   amount: number;
   tenure: number;
   interestRate: number;
+  monthlyIncome: number;
+  purpose: string;
+  employmentType: "salaried" | "self-employed";
   propertyValue?: number;
   propertyAddress?: string;
-  purpose: string;
-  monthlyIncome: number;
-  employmentType: "salaried" | "self-employed";
-  existingLoanDetails?: {
-    lenderName?: string;
-    accountNumber?: string;
-    outstandingAmount?: number;
-    currentRate?: number;
-  };
+  existingLoanDetails?: any;
 };
+
+// Application form schema
+const loanFormSchema = z.object({
+  loanType: z.string(),
+  // Adding client-side validation
+  amount: z.coerce.number().min(100000, "Loan amount must be at least ₹1,00,000").max(10000000, "Loan amount cannot exceed ₹1,00,00,000"),
+  tenure: z.coerce.number().min(12, "Tenure must be at least 12 months").max(360, "Tenure cannot exceed 360 months"),
+  interestRate: z.coerce.number().min(5, "Interest rate must be at least 5%").max(20, "Interest rate cannot exceed 20%"),
+  monthlyIncome: z.coerce.number().min(10000, "Monthly income must be at least ₹10,000"),
+  propertyValue: z.coerce.number().optional(),
+  propertyAddress: z.string().optional(),
+  purpose: z.string().min(5, "Please provide a brief purpose for the loan").max(500, "Purpose cannot exceed 500 characters"),
+  employmentType: z.enum(["salaried", "self-employed"], {
+    required_error: "Please select your employment type",
+  }),
+  existingLoanDetails: z.any().optional(),
+  // Fields that will come from user context
+  userId: z.number().optional(),
+}).omit({ userId: true });
+
+type LoanFormValues = z.infer<typeof loanFormSchema>;
 
 export default function LoanApplicationPage() {
   const { user } = useAuth();
-  const [location, navigate] = useLocation();
+  const [, navigate] = useLocation();
   const [activeTab, setActiveTab] = useState("loan-details");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
@@ -116,7 +109,7 @@ export default function LoanApplicationPage() {
   
   // Initialize form with default values
   const form = useForm<LoanFormValues>({
-    // resolver: zodResolver(loanFormSchema),
+    resolver: zodResolver(loanFormSchema),
     defaultValues: {
       loanType: getLoanTypeFromParam(loanTypeParam),
       amount: Number(getQueryParam("amount")) || 2500000,
@@ -132,7 +125,7 @@ export default function LoanApplicationPage() {
   });
 
   // Function to get loan type string based on URL param
-  function getLoanTypeFromParam(param: string): "HomeLoan" | "LAP" | "BTTopUp" {
+  function getLoanTypeFromParam(param: string): string {
     switch (param) {
       case "home-loan": return "HomeLoan";
       case "lap": return "LAP";
@@ -449,8 +442,8 @@ export default function LoanApplicationPage() {
                     Complete the form below to apply for your {getLoanTypeLabel(loanTypeParam.toLowerCase())}
                   </p>
                 </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-8">
+        
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-8  bg-white/80 dark:bg-neutral-900/80 backdrop-blur-sm">
                   <Card className="md:col-span-2">
                     <CardHeader>
                       <CardTitle>Loan Application Form</CardTitle>

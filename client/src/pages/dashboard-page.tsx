@@ -62,12 +62,12 @@ export default function DashboardPage() {
   // });
 
   // Fetch transactions
-  const { 
-    data: transactions = [], 
-    isLoading: isLoadingTransactions 
-  } = useQuery<Transaction[]>({
-    queryKey: ["/api/transactions"],
-  });
+  // const { 
+  //   data: transactions = [], 
+  //   isLoading: isLoadingTransactions 
+  // } = useQuery<Transaction[]>({
+  //   queryKey: ["/api/transactions"],
+  // });
 
   // Check if KYC is complete
   const isKycComplete = kycDocuments.some(doc => doc.verificationStatus === "verified");
