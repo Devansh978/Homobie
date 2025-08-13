@@ -1,99 +1,114 @@
-import React, { useState, useEffect } from "react";
-import { useLocation, Link } from "wouter";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
-import { useQuery, useMutation } from "@tanstack/react-query";
-import { useAuth } from "../hooks/use-auth";
-import { apiRequest, queryClient } from "../lib/queryClient";
-import { useToast } from "../hooks/use-toast";
-import { PaymentGateway } from "../components/ui/payment-gateway";
+import React, { useState } from "react"; 
+import { useLocation, Link } from "wouter"; 
+import { useForm } from "react-hook-form"; 
+import { zodResolver } from "@hookform/resolvers/zod"; 
+import { z } from "zod"; 
+import { useMutation } from "@tanstack/react-query"; 
+import { useAuth } from "../hooks/use-auth"; 
+import { useToast } from "../hooks/use-toast"; 
+import { PaymentGateway } from "../components/ui/payment-gateway"; 
+import { ChatbotButton } from "../components/layout/chatbot-button"; 
+import { LoanCalculator } from "../components/ui/calculator"; 
+import {  
+  Form,  
+  FormControl,  
+  FormDescription,  
+  FormField,  
+  FormItem,  
+  FormLabel,  
+  FormMessage  
+} from "../components/ui/form"; 
+import {  
+  Card,  
+  CardContent,  
+  CardDescription,  
+  CardFooter,  
+  CardHeader,  
+  CardTitle  
+} from "../components/ui/card"; 
+import {  
+  Tabs,  
+  TabsContent,  
+  TabsList,  
+  TabsTrigger  
+} from "../components/ui/tabs"; 
+import {  
+  Select,  
+  SelectContent,  
+  SelectItem,  
+  SelectTrigger,  
+  SelectValue  
+} from "../components/ui/select"; 
+import {  
+  Accordion, 
+  AccordionContent, 
+  AccordionItem, 
+  AccordionTrigger, 
+} from "../components/ui/accordion"; 
+import { Alert, AlertDescription, AlertTitle } from "../components/ui/alert"; 
+import { Input } from "../components/ui/input"; 
+import { Button } from "../components/ui/button"; 
+import { Separator } from "../components/ui/separator"; 
+import { Textarea } from "../components/ui/textarea"; 
+import {  
+  Home,  
+  Building,  
+  ArrowRightLeft,  
+  AlertCircle,  
+  Check,  
+  FileText,  
+  Upload, 
+  DollarSign 
+} from "lucide-react"; 
+import { getQueryParam, getLoanTypeLabel, calculateEMI } from "../lib/utils"; 
 
-import { ChatbotButton } from "../components/layout/chatbot-button";
-import { LoanCalculator } from "../components/ui/calculator";
-import { 
-  Form, 
-  FormControl, 
-  FormDescription, 
-  FormField, 
-  FormItem, 
-  FormLabel, 
-  FormMessage 
-} from "../components/ui/form";
-import { 
-  Card, 
-  CardContent, 
-  CardDescription, 
-  CardFooter, 
-  CardHeader, 
-  CardTitle 
-} from "../components/ui/card";
-import { 
-  Tabs, 
-  TabsContent, 
-  TabsList, 
-  TabsTrigger 
-} from "../components/ui/tabs";
-import { 
-  Select, 
-  SelectContent, 
-  SelectItem, 
-  SelectTrigger, 
-  SelectValue 
-} from "../components/ui/select";
-import { 
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from "../components/ui/accordion";
-import { Alert, AlertDescription, AlertTitle } from "../components/ui/alert";
-import { Input } from "../components/ui/input";
-import { Button } from "../components/ui/button";
-import { Separator } from "../components/ui/separator";
-import { Textarea } from "../components/ui/textarea";
-import { 
-  Home, 
-  Building, 
-  ArrowRightLeft, 
-  AlertCircle, 
-  Check, 
-  FileText, 
-  Upload,
-  DollarSign
-} from "lucide-react";
-import { getQueryParam, getLoanTypeLabel, calculateEMI } from "../lib/utils";
+const BASE_URL = "https://homobiebackend-railway-production.up.railway.app";
 
-type LoanFormSchema = {
-  amount: number;
-  tenure: number;
-  interestRate: number;
-  monthlyIncome: number;
-  purpose: string;
-  employmentType: "salaried" | "self-employed";
-  propertyValue?: number;
-  propertyAddress?: string;
-  existingLoanDetails?: any;
+// Helper functions for auth
+const getAuthUser = () => {
+  try {
+    const authUser = localStorage.getItem("auth_user");
+    if (!authUser) return null;
+    return JSON.parse(authUser);
+  } catch (error) {
+    console.error("Error parsing auth_user from localStorage:", error);
+    return null;
+  }
 };
 
-// Application form schema
+const getUserId = () => {
+  const authUser = getAuthUser();
+  return authUser?.userId || null;
+};
+
+const getToken = () => {
+  const token = localStorage.getItem("auth_token") || localStorage.getItem("token") || "";
+  return token;
+};
+
+// Form Schema
 const loanFormSchema = z.object({
   loanType: z.string(),
-  // Adding client-side validation
   amount: z.coerce.number().min(100000, "Loan amount must be at least ₹1,00,000").max(10000000, "Loan amount cannot exceed ₹1,00,00,000"),
   tenure: z.coerce.number().min(12, "Tenure must be at least 12 months").max(360, "Tenure cannot exceed 360 months"),
   interestRate: z.coerce.number().min(5, "Interest rate must be at least 5%").max(20, "Interest rate cannot exceed 20%"),
   monthlyIncome: z.coerce.number().min(10000, "Monthly income must be at least ₹10,000"),
+  cibilScore: z.coerce.number().min(300, "CIBIL score must be at least 300").max(900, "CIBIL score cannot exceed 900"),
+  age: z.coerce.number().min(21, "Age must be at least 21 years").max(65, "Age cannot exceed 65 years"),
   propertyValue: z.coerce.number().optional(),
-  propertyAddress: z.string().optional(),
+  propertyAddressLine1: z.string().optional(),
+  propertyAddressLine2: z.string().optional(),
+  propertyLandmark: z.string().optional(),
+  propertyCity: z.string().optional(),
+  propertyState: z.string().optional(),
+  propertyPincode: z.string().optional(),
+  propertyCountry: z.string().optional(),
   purpose: z.string().min(5, "Please provide a brief purpose for the loan").max(500, "Purpose cannot exceed 500 characters"),
   employmentType: z.enum(["salaried", "self-employed"], {
     required_error: "Please select your employment type",
   }),
   existingLoanDetails: z.any().optional(),
-  // Fields that will come from user context
-  userId: z.number().optional(),
-}).omit({ userId: true });
+});
 
 type LoanFormValues = z.infer<typeof loanFormSchema>;
 
@@ -103,38 +118,44 @@ export default function LoanApplicationPage() {
   const [activeTab, setActiveTab] = useState("loan-details");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
+  const [documentUploadVisible, setDocumentUploadVisible] = useState(false);
+  const [apiError, setApiError] = useState<string | null>(null);
   
-  // Get loan type from URL query parameter
   const loanTypeParam = getQueryParam("type") || "home-loan";
   
-  // Initialize form with default values
   const form = useForm<LoanFormValues>({
     resolver: zodResolver(loanFormSchema),
     defaultValues: {
       loanType: getLoanTypeFromParam(loanTypeParam),
       amount: Number(getQueryParam("amount")) || 2500000,
-      tenure: Number(getQueryParam("tenure")) || 240, // 20 years in months
+      tenure: Number(getQueryParam("tenure")) || 240,
       interestRate: Number(getQueryParam("interestRate")) || getLoanTypeDefaultRate(loanTypeParam),
       propertyValue: undefined,
-      propertyAddress: "",
+      propertyAddressLine1: "",
+      propertyAddressLine2: "",
+      propertyLandmark: "",
+      propertyCity: "",
+      propertyState: "",
+      propertyPincode: "",
+      propertyCountry: "India",
       purpose: "",
       monthlyIncome: 0,
+      cibilScore: 750,
+      age: 30,
       employmentType: "salaried",
       existingLoanDetails: loanTypeParam === "bt-topup" ? {} : undefined,
     },
   });
 
-  // Function to get loan type string based on URL param
   function getLoanTypeFromParam(param: string): string {
     switch (param) {
-      case "home-loan": return "HomeLoan";
+      case "home-loan": return "HOME_LOAN";
       case "lap": return "LAP";
-      case "bt-topup": return "BTTopUp";
-      default: return "HomeLoan";
+      case "bt-topup": return "BT_TOPUP";
+      default: return "HOME_LOAN";
     }
   }
 
-  // Function to get default interest rate based on loan type
   function getLoanTypeDefaultRate(param: string): number {
     switch (param) {
       case "home-loan": return 8.5;
@@ -144,228 +165,144 @@ export default function LoanApplicationPage() {
     }
   }
 
-  // Initialize toast
   const { toast } = useToast();
-  
-  // Track submitted data for payment
   const [submittedData, setSubmittedData] = useState<any>(null);
   
-  // Create loan application mutation
-  const createLoanMutation = useMutation({
-    mutationFn: async (data: LoanFormValues) => {
-      const res = await apiRequest("POST", "/api/loan-applications", data);
-      return await res.json();
-    },
+  const submitLoanApplication = async (data: LoanFormValues) => {
+    setApiError(null);
+    const startTime = performance.now();
+    
+    try {
+      const userId = getUserId();
+      const token = getToken();
+
+      if (!userId || !token) {
+        throw new Error("Authentication required. Please login again.");
+      }
+
+      const payload = {
+        userId: userId,
+        loanType: data.loanType,
+        amount: data.amount,
+        tenure: data.tenure,
+        interestRate: data.interestRate,
+        purpose: data.purpose,
+        collateral: (data.loanType === "HOME_LOAN" || data.loanType === "LAP") ? {
+          propertyValue: data.propertyValue,
+          propertyAddress: {
+            addressLine1: data.propertyAddressLine1 || "",
+            addressLine2: data.propertyAddressLine2 || "",
+            landmark: data.propertyLandmark || "",
+            city: data.propertyCity || "",
+            state: data.propertyState || "",
+            pincode: data.propertyPincode || "",
+            country: data.propertyCountry || "India"
+          }
+        } : undefined,
+        applicantProfile: {
+          monthlyIncome: data.monthlyIncome,
+          cibilScore: data.cibilScore,
+          age: data.age,
+          employmentType: data.employmentType.toUpperCase(),
+          existingLoanDetails: data.existingLoanDetails || "None"
+        }
+      };
+
+      console.log("Submitting payload:", payload);
+
+      const response = await fetch(`${BASE_URL}/loan/add`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`
+        },
+        body: JSON.stringify(payload)
+      });
+
+      const endTime = performance.now();
+      console.log(`API call took ${endTime - startTime}ms`);
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        console.error("API Error Response:", errorData);
+        throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
+      }
+
+      return await response.json();
+    } catch (error) {
+      console.error("API Error:", error);
+      if (error instanceof Error) {
+        setApiError(error.message);
+        if (error.message.includes("Authentication required")) {
+          navigate("/auth");
+        }
+      }
+      throw error;
+    }
+  };
+
+  const { mutateAsync: createLoan } = useMutation({
+    mutationFn: submitLoanApplication,
     onSuccess: (data) => {
-      queryClient.invalidateQueries({ queryKey: ["/api/loan-applications"] });
       setSubmittedData(data);
       setIsSuccess(true);
-      setIsSubmitting(false);
-      // Remove the automatic navigation to allow payment
+      setDocumentUploadVisible(true);
+      toast({
+        title: "Success",
+        description: "Loan application submitted successfully!",
+      });
     },
     onError: (error) => {
-      console.error("Error creating loan application:", error);
-      setIsSubmitting(false);
+      console.error("Submission error:", error);
       toast({
         title: "Error",
-        description: "Failed to submit loan application. Please try again.",
+        description: error instanceof Error ? error.message : "Failed to submit application",
         variant: "destructive"
       });
+    },
+    onSettled: () => {
+      setIsSubmitting(false);
     }
   });
-  
-  // Get loan amount, tenure, and interest rate from the form
+
+  const onSubmit = async (data: LoanFormValues) => {
+    console.log("Form data being submitted:", data);
+    
+    const userId = getUserId();
+    const token = getToken();
+    
+    if (!userId || !token) {
+      toast({
+        title: "Authentication Error",
+        description: "Please login to submit a loan application",
+        variant: "destructive"
+      });
+      navigate("/auth");
+      return;
+    }
+
+    try {
+      setIsSubmitting(true);
+      await createLoan(data);
+    } catch (error) {
+      console.error("Form submission error:", error);
+    }
+  };
+
+  function handleDocumentUpload(files: FileList) {
+    console.log("Files uploaded:", files);
+    // Implement document upload logic here
+  }
+
   const watchAmount = form.watch("amount");
   const watchTenure = form.watch("tenure");
   const watchInterestRate = form.watch("interestRate");
   
-  // Calculate EMI based on current form values
   const emiAmount = calculateEMI(
     Number(watchAmount),
     Number(watchInterestRate),
-    Number(watchTenure) / 12 // Convert months to years
+    Number(watchTenure) / 12
   );
-
-  // Handle form submission
-  // const onSubmit = async (data: LoanFormValues) => {
-  //   if (!user) {
-  //     navigate("/auth");
-  //     return;
-  //   }
-
-  //   setIsSubmitting(true);
-
-  //   try {
-  //     // 1. First submit to your backend API
-  //     const apiResponse = await createLoanMutation.mutateAsync({
-  //       ...data,
-  //       userId: user.id // Ensure user ID is included
-  //     });
-
-  //     // 2. Then submit to Google Sheets (as secondary storage)
-  //     try {
-  //       const formData = new URLSearchParams();
-
-  //       // Prepare data for Google Sheets
-  //       const sheetsData = {
-  //         ...data,
-  //         applicationId: apiResponse.id,
-  //         submissionDate: new Date().toISOString(),
-  //         userId: user.id,
-  //         userEmail: user.email,
-  //         // userName: user.name,
-  //         userPhone: user.phoneNumber
-  //       };
-
-  //       // Convert all values to strings
-  //       Object.entries(sheetsData).forEach(([key, value]) => {
-  //         formData.append(key, String(value !== undefined ? value : ''));
-  //       });
-
-  //       // Submit to Google Sheets
-  //       const sheetsResponse = await fetch(
-  //         "https://script.google.com/macros/s/AKfycbyO0YWyiac2VrIHOXOHVWAwAGhwX6DeRC41-71O1Ip3yC6yUxZcUBLUVtpQy1NWDGhZ/exec",
-  //         {
-  //           method: "POST",
-  //           headers: {
-  //             "Content-Type": "application/x-www-form-urlencoded",
-  //           },
-  //           body: formData.toString(),
-  //           mode: "no-cors",
-  //         }
-  //       );
-
-  //       // Log successful submission (even though we can't read response in no-cors mode)
-  //       console.log("Submitted to Google Sheets");
-  //     } catch (sheetsError) {
-  //       console.warn("Google Sheets submission failed (non-critical):", sheetsError);
-  //       // This is non-critical, so we don't show error to user
-  //     }
-
-  //     // Success handling
-  //     setSubmittedData(apiResponse);
-  //     setIsSuccess(true);
-
-  //     toast({
-  //       title: "Success",
-  //       description: "Loan application submitted successfully!",
-  //     });
-
-  //   } catch (error) {
-  //     console.error("Submission failed:", error);
-
-  //     let errorMessage = "Failed to submit application";
-  //     if (error instanceof Error) {
-  //       errorMessage = error.message.includes("502") 
-  //         ? "Backend service unavailable. Please try again later."
-  //         : error.message;
-  //     }
-
-  //     toast({
-  //       title: "Error",
-  //       description: errorMessage,
-  //       variant: "destructive",
-  //     });
-  //   } finally {
-  //     setIsSubmitting(false);
-  //   }
-  // };
-  function onSubmit(data: LoanFormValues) {
-    // Set loading state
-    setIsSubmitting(true);
-
-    // First, submit to our backend API
-    fetch("/api/loan-applications", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        ...data,
-        userId: user?.id, // Include user info if available
-        // userName: user?.name,
-        userEmail: user?.email
-      }),
-    })
-      .then((response) => {
-        if (!response.ok) {
-          throw new Error("Failed to submit loan application to server");
-        }
-        return response.json();
-      })
-      .then((apiResponse) => {
-        console.log("Successfully submitted to database:", apiResponse);
-
-        // Prepare the row data for Google Sheets
-        const rowData = [
-          new Date().toISOString(),
-          apiResponse.id || '',
-          data.loanType || '',
-          data.amount || '',
-          data.tenure || '',
-          data.interestRate || '',
-          data.monthlyIncome || '',
-          data.propertyValue || '',
-          data.propertyAddress || '',
-          data.purpose || '',
-          data.employmentType || '',
-          data.existingLoanDetails?.lenderName || '',
-          data.existingLoanDetails?.accountNumber || '',
-          data.existingLoanDetails?.outstandingAmount || '',
-          data.existingLoanDetails?.currentRate || '',
-          user?.id || '',
-          user?.name || '',
-          user?.email || ''
-        ];
-
-        // Create form data for Google Script
-        const formData = new URLSearchParams();
-        rowData.forEach((value, index) => {
-          formData.append(`col${index + 1}`, value.toString());
-        });
-
-        // Send to Google Sheets script as secondary storage
-        return fetch(
-          "https://script.google.com/macros/s/AKfycbyO0YWyiac2VrIHOXOHVWAwAGhwX6DeRC41-71O1Ip3yC6yUxZcUBLUVtpQy1NWDGhZ/exec",
-          {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/x-www-form-urlencoded",
-            },
-            body: formData.toString(),
-            mode: "no-cors",
-          }
-        ).catch((err) => {
-          console.warn("Google Sheets submission had an issue:", err);
-          return Promise.resolve();
-        });
-      })
-      .then(() => {
-        // Show success message
-        toast({
-          title: "Application Submitted",
-          description: "Your loan application has been received successfully!",
-        });
-        setIsSuccess(true);
-        setSubmittedData(data);
-      })
-      .catch((error) => {
-        console.error("Form submission error:", error);
-        toast({
-          title: "Submission Failed",
-          description: error.message || "There was a problem submitting your application.",
-          variant: "destructive",
-        });
-      })
-      .finally(() => {
-        setIsSubmitting(false);
-      });
-  }
-  // Track if user is authenticated - we'll only enforce auth on submission
-  useEffect(() => {
-    // No redirect here, allow users to view the page without authentication
-    // They'll be prompted to log in when they try to submit
-  }, []);
 
   return (
     <div>
@@ -389,6 +326,37 @@ export default function LoanApplicationPage() {
                   </CardContent>
                 </Card>
                 
+                {documentUploadVisible && (
+                  <Card>
+                    <CardHeader>
+                      <CardTitle>Upload Required Documents</CardTitle>
+                      <CardDescription>
+                        Please upload all required documents to complete your application
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="flex flex-col items-center justify-center p-8 border-2 border-dashed border-gray-300 rounded-lg">
+                        <Upload className="h-10 w-10 text-primary mb-4" />
+                        <p className="text-sm text-gray-500 mb-4">
+                          Drag and drop your documents here, or click to browse
+                        </p>
+                        <input
+                          type="file"
+                          id="document-upload"
+                          multiple
+                          onChange={(e) => e.target.files && handleDocumentUpload(e.target.files)}
+                          className="hidden"
+                        />
+                        <Button asChild>
+                          <label htmlFor="document-upload" className="cursor-pointer">
+                            Select Files
+                          </label>
+                        </Button>
+                      </div>
+                    </CardContent>
+                  </Card>
+                )}
+
                 <Card>
                   <CardHeader>
                     <CardTitle>Processing Fee Payment</CardTitle>
@@ -398,9 +366,9 @@ export default function LoanApplicationPage() {
                   </CardHeader>
                   <CardContent>
                     {user ? (
-                      <PaymentGateway 
-                        paymentType="loan-processing-fee" 
-                        itemId={submittedData?.id} 
+                      <PaymentGateway  
+                        paymentType="loan-processing-fee"  
+                        itemId={submittedData?.id}  
                         buttonText="Pay Processing Fee"
                         description="Pay processing fee to continue with your loan application"
                         onSuccess={(data) => {
@@ -443,7 +411,7 @@ export default function LoanApplicationPage() {
                   </p>
                 </div>
         
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-8  bg-white/80 dark:bg-neutral-900/80 backdrop-blur-sm">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-8 bg-white/80 dark:bg-neutral-900/80 backdrop-blur-sm">
                   <Card className="md:col-span-2">
                     <CardHeader>
                       <CardTitle>Loan Application Form</CardTitle>
@@ -459,7 +427,7 @@ export default function LoanApplicationPage() {
                         </TabsList>
                         
                         <Form {...form}>
-                          <form onSubmit={form.handleSubmit(onSubmit)}>
+                          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
                             <TabsContent value="loan-details" className="mt-6 space-y-6">
                               <FormField
                                 control={form.control}
@@ -477,9 +445,9 @@ export default function LoanApplicationPage() {
                                         </SelectTrigger>
                                       </FormControl>
                                       <SelectContent>
-                                        <SelectItem value="HomeLoan">Home Loan</SelectItem>
+                                        <SelectItem value="HOME_LOAN">Home Loan</SelectItem>
                                         <SelectItem value="LAP">Loan Against Property</SelectItem>
-                                        <SelectItem value="BTTopUp">Balance Transfer Top-Up</SelectItem>
+                                        <SelectItem value="BT_TOPUP">Balance Transfer Top-Up</SelectItem>
                                       </SelectContent>
                                     </Select>
                                     <FormDescription>
@@ -567,7 +535,7 @@ export default function LoanApplicationPage() {
                                 )}
                               />
                               
-                              {(form.watch("loanType") === "HomeLoan" || form.watch("loanType") === "LAP") && (
+                              {(form.watch("loanType") === "HOME_LOAN" || form.watch("loanType") === "LAP") && (
                                 <>
                                   <Separator />
                                   <h3 className="text-lg font-medium">Property Details</h3>
@@ -593,26 +561,113 @@ export default function LoanApplicationPage() {
                                     />
                                   </div>
                                   
-                                  <FormField
-                                    control={form.control}
-                                    name="propertyAddress"
-                                    render={({ field }) => (
-                                      <FormItem>
-                                        <FormLabel>Property Address</FormLabel>
-                                        <FormControl>
-                                          <Textarea
-                                            placeholder="Enter complete property address"
-                                            {...field}
-                                          />
-                                        </FormControl>
-                                        <FormMessage />
-                                      </FormItem>
-                                    )}
-                                  />
+                                  <div className="grid grid-cols-1 gap-4">
+                                    <FormField
+                                      control={form.control}
+                                      name="propertyAddressLine1"
+                                      render={({ field }) => (
+                                        <FormItem>
+                                          <FormLabel>Address Line 1</FormLabel>
+                                          <FormControl>
+                                            <Input placeholder="Street address, P.O. box" {...field} />
+                                          </FormControl>
+                                          <FormMessage />
+                                        </FormItem>
+                                      )}
+                                    />
+                                    
+                                    <FormField
+                                      control={form.control}
+                                      name="propertyAddressLine2"
+                                      render={({ field }) => (
+                                        <FormItem>
+                                          <FormLabel>Address Line 2</FormLabel>
+                                          <FormControl>
+                                            <Input placeholder="Apartment, suite, unit, building" {...field} />
+                                          </FormControl>
+                                          <FormMessage />
+                                        </FormItem>
+                                      )}
+                                    />
+                                    
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                      <FormField
+                                        control={form.control}
+                                        name="propertyLandmark"
+                                        render={({ field }) => (
+                                          <FormItem>
+                                            <FormLabel>Landmark</FormLabel>
+                                            <FormControl>
+                                              <Input placeholder="Nearby prominent location" {...field} />
+                                            </FormControl>
+                                            <FormMessage />
+                                          </FormItem>
+                                        )}
+                                      />
+                                      
+                                      <FormField
+                                        control={form.control}
+                                        name="propertyCity"
+                                        render={({ field }) => (
+                                          <FormItem>
+                                            <FormLabel>City</FormLabel>
+                                            <FormControl>
+                                              <Input placeholder="City" {...field} />
+                                            </FormControl>
+                                            <FormMessage />
+                                          </FormItem>
+                                        )}
+                                      />
+                                    </div>
+                                    
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                      <FormField
+                                        control={form.control}
+                                        name="propertyState"
+                                        render={({ field }) => (
+                                          <FormItem>
+                                            <FormLabel>State</FormLabel>
+                                            <FormControl>
+                                              <Input placeholder="State" {...field} />
+                                            </FormControl>
+                                            <FormMessage />
+                                          </FormItem>
+                                        )}
+                                      />
+                                      
+                                      <FormField
+                                        control={form.control}
+                                        name="propertyPincode"
+                                        render={({ field }) => (
+                                          <FormItem>
+                                            <FormLabel>Pincode</FormLabel>
+                                            <FormControl>
+                                              <Input placeholder="Postal code" {...field} />
+                                            </FormControl>
+                                            <FormMessage />
+                                          </FormItem>
+                                        )}
+                                      />
+                                    </div>
+                                    
+                                    <FormField
+                                      control={form.control}
+                                      name="propertyCountry"
+                                      render={({ field }) => (
+                                        <FormItem>
+                                          <FormLabel>Country</FormLabel>
+                                          <FormControl>
+                                            <Input placeholder="Country" {...field} value={field.value || "India"} />
+                                          </FormControl>
+                                          <FormMessage />
+                                        </FormItem>
+                                      )}
+                                    />
+                                  </div>
                                 </>
                               )}
                               
-                              {form.watch("loanType") === "BTTopUp" && (
+                              {form.watch("loanType") === "BT_TOPUP" && (
                                 <>
                                   <Separator />
                                   <h3 className="text-lg font-medium">Existing Loan Details</h3>
@@ -704,6 +759,47 @@ export default function LoanApplicationPage() {
                                   )}
                                 />
                               </div>
+
+                              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <FormField
+                                  control={form.control}
+                                  name="cibilScore"
+                                  render={({ field }) => (
+                                    <FormItem>
+                                      <FormLabel>CIBIL Score</FormLabel>
+                                      <FormControl>
+                                        <Input
+                                          type="number"
+                                          placeholder="Enter your CIBIL score (300-900)"
+                                          {...field}
+                                        />
+                                      </FormControl>
+                                      <FormDescription>
+                                        Your credit score affects your loan eligibility
+                                      </FormDescription>
+                                      <FormMessage />
+                                    </FormItem>
+                                  )}
+                                />
+                                
+                                <FormField
+                                  control={form.control}
+                                  name="age"
+                                  render={({ field }) => (
+                                    <FormItem>
+                                      <FormLabel>Age</FormLabel>
+                                      <FormControl>
+                                        <Input
+                                          type="number"
+                                          placeholder="Enter your age"
+                                          {...field}
+                                        />
+                                      </FormControl>
+                                      <FormMessage />
+                                    </FormItem>
+                                  )}
+                                />
+                              </div>
                               
                               <Separator />
                               
@@ -748,7 +844,7 @@ export default function LoanApplicationPage() {
                                 </div>
                               </div>
                               
-                              <div className="flex justify-between">
+                              <div className="flex justify-between items-center">
                                 <Button
                                   type="button"
                                   variant="outline"
@@ -756,12 +852,33 @@ export default function LoanApplicationPage() {
                                 >
                                   Back to Loan Details
                                 </Button>
-                                <Button 
-                                  type="submit"
-                                  disabled={isSubmitting}
-                                >
-                                  {isSubmitting ? "Submitting..." : "Submit Application"}
-                                </Button>
+                                
+                                <div className="flex items-center gap-4">
+                                  <input
+                                    type="file"
+                                    id="document-upload"
+                                    multiple
+                                    onChange={(e) => e.target.files && handleDocumentUpload(e.target.files)}
+                                    className="hidden"
+                                  />
+                                  <Button 
+                                    type="button"
+                                    variant="outline"
+                                    asChild
+                                  >
+                                    <label htmlFor="document-upload" className="cursor-pointer">
+                                      <Upload className="h-4 w-4 mr-2" />
+                                      Upload Documents
+                                    </label>
+                                  </Button>
+                                  
+                                  <Button 
+                                    type="submit"
+                                    disabled={isSubmitting}
+                                  >
+                                    {isSubmitting ? "Submitting..." : "Submit Application"}
+                                  </Button>
+                                </div>
                               </div>
                             </TabsContent>
                           </form>
@@ -856,7 +973,7 @@ export default function LoanApplicationPage() {
                       form.setValue("loanType", getLoanTypeFromParam(loanDetails.loanType));
                       form.setValue("amount", loanDetails.amount);
                       form.setValue("interestRate", loanDetails.interestRate);
-                      form.setValue("tenure", loanDetails.tenure * 12); // Convert years to months
+                      form.setValue("tenure", loanDetails.tenure * 12);
                     }} />
                   </CardContent>
                 </Card>

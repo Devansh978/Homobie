@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect } from "react";
 import { Link, useLocation } from "wouter";
 import { useAuth } from "@/hooks/use-auth";
 import { motion, AnimatePresence } from "framer-motion";
@@ -10,10 +10,9 @@ import {
   LayoutDashboard,
   Settings,
   Shield,
-  ChevronRight,
-  ChevronLeft,
   ChevronDown,
   Users,
+  ArrowRight,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -26,13 +25,14 @@ import {
   DropdownMenuSubContent,
   DropdownMenuSubTrigger,
 } from "@/components/ui/dropdown-menu";
+import { cn } from "@/lib/utils";
 import "./header.css";
 
-// --- Data definitions ---
-const navData = [
+// --- Constants ---
+const NAV_ITEMS = [
   {
     label: "Loans",
-    children: [
+    subItems: [
       { label: "Home Loans", path: "/loan-application?type=home-loan" },
       { label: "LAP", path: "/loan-application?type=lap" },
       { label: "BT Top-Up", path: "/loan-application?type=bt-topup" },
@@ -40,207 +40,176 @@ const navData = [
   },
   {
     label: "Investment",
-    children: [{ label: "SIP", path: "/sip" }],
+    subItems: [{ label: "SIP", path: "/sip" }],
   },
   {
     label: "Services",
-    children: [{ label: "Consultation", path: "/consultation" }],
+    subItems: [{ label: "Consultation", path: "/consultation" }],
+  },
+  {
+    label: "About",
+    path: "/about",
+  },
+  {
+    label: "Blog",
+    path: "/blog",
   },
 ];
 
-const partnerLoginUrl = "https://homobie-frontend-portal-bco8.vercel.app/"; // Base URL is here
-const partnerRoles = ["Builder", "Broker", "User", "Telecaller"];
+const PARTNER_LOGIN_URL = "https://homobie-frontend-portal-bco8.vercel.app/";
+const PARTNER_ROLES = ["Builder", "Broker", "User", "Telecaller"];
 
-// MODIFICATION START: All roles now point to the same URL.
-const partnerRolesMenu = {
-  label: "Partner Login",
-  children: partnerRoles.map((role) => ({
-    label: role,
-    path: partnerLoginUrl, // Always use the base URL
-    external: true,
-  })),
-};
-// MODIFICATION END
-
-// --- Animation variants ---
-const mobileNavVariants = {
-  hidden: { x: "-100%" },
-  visible: { x: "0%", transition: { duration: 0.3, ease: "easeInOut" } },
-  exit: { x: "-100%", transition: { duration: 0.25, ease: "easeInOut" } },
-};
-
-// Simplified DesktopNavDropdown component
-const DesktopNavDropdown = ({ item }: { item: any }) => {
-  const hasChildren = item.children && item.children.length > 0;
-
-  if (!hasChildren) {
-    return (
-      <li className="base-header__nav-item">
-        <Link href={item.path || "/"} className="base-header__nav-button">
-          {item.label}
-        </Link>
-      </li>
-    );
-  }
-
-  return (
-    <li className="base-header__nav-item">
-      <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <button className="base-header__nav-button flex items-center">
-            <span>{item.label}</span>
-            <ChevronDown
-              size={16}
-              className="ml-1 transition-transform duration-200 group-data-[state=open]:rotate-180"
-            />
-          </button>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent
-          align="start"
-          className="user-dropdown glasmorphism"
-        >
-          {item.children.map((child: any) => (
-            <DropdownMenuItem key={child.label} asChild>
-              <Link href={child.path} className="user-dropdown__link">
-                {child.label}
-              </Link>
-            </DropdownMenuItem>
-          ))}
-        </DropdownMenuContent>
-      </DropdownMenu>
-    </li>
-  );
-};
-
-// MobileNav component
-const MobileNav = ({
-  isOpen,
-  onClose,
-}: {
-  isOpen: boolean;
-  onClose: () => void;
-}) => {
-  const [menuStack, setMenuStack] = useState([
-    { items: navData, label: "Menu" },
-  ]);
+// --- Mobile Navigation ---
+const MobileNav = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) => {
+  const [activeSubmenu, setActiveSubmenu] = useState<string | null>(null);
   const [_, navigate] = useLocation();
   const { user, logoutMutation } = useAuth();
 
-  useEffect(() => {
-    if (isOpen) setMenuStack([{ items: navData, label: "Menu" }]);
-  }, [isOpen]);
-
-  const handleForward = (children: any, label: string) =>
-    setMenuStack((prev) => [...prev, { items: children, label }]);
-  const handleBack = () => setMenuStack((prev) => prev.slice(0, -1));
-
-  const handleNavigate = (path: string, external: boolean = false) => {
-    if (external) {
-      window.open(path, "_blank", "noopener,noreferrer");
-    } else if (path) {
-      navigate(path);
-    }
+  const handleNavigate = (path: string) => {
+    navigate(path);
     onClose();
   };
-
-  const currentLevel = menuStack[menuStack.length - 1];
-  const previousLevelLabel =
-    menuStack.length > 1 ? menuStack[menuStack.length - 2].label : "";
 
   return (
     <AnimatePresence>
       {isOpen && (
-        <div className="fixed inset-0 z-[100] lg:hidden" aria-modal="true">
+        <div className="fixed inset-0 z-50 lg:hidden">
+          {/* Backdrop */}
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black/50"
+            className="fixed inset-0 bg-black/50 backdrop-blur-sm"
             onClick={onClose}
           />
+          
+          {/* Navigation Panel */}
           <motion.div
-            variants={mobileNavVariants}
-            initial="hidden"
-            animate="visible"
-            exit="exit"
-            className="mobile-nav glasmorphism"
+            initial={{ x: "-100%" }}
+            animate={{ x: 0 }}
+            exit={{ x: "-100%" }}
+            transition={{ type: "tween", ease: "easeInOut", duration: 0.3 }}
+            className="fixed inset-y-0 left-0 w-4/5 max-w-sm bg-white shadow-xl"
           >
-            <div className="mobile-nav__header">
-              {menuStack.length > 1 ? (
-                <button onClick={handleBack} className="mobile-nav__back-btn">
-                  <ChevronLeft size={22} />
-                  <span>{previousLevelLabel}</span>
-                </button>
-              ) : (
-                <Link href="/" onClick={onClose} className="mobile-nav__logo">
-                  <img
-                    src="/assets/wmremove-transformed - Edited.jpg"
-                    alt="Logo"
-                    className="mobile-nav__logo-img"
+            <div className="flex flex-col h-full">
+              {/* Header */}
+              <div className="flex items-center justify-between p-4 border-b">
+                <Link href="/" className="text-xl font-bold text-primary">
+                  <img 
+                    src="/assets/wmremove-transformed - Edited.jpg" 
+                    alt="Logo" 
+                    className="h-8"
                   />
                 </Link>
-              )}
-              <button
-                onClick={onClose}
-                title="Close menu"
-                className="mobile-nav__close-btn"
-              >
-                <X size={24} />
-              </button>
-            </div>
-            <div className="mobile-nav__content">
-              <h2 className="mobile-nav__title">{currentLevel.label}</h2>
-              <ul className="mobile-nav__items">
-                {currentLevel.items.map((item: any) => (
-                  <li key={item.label}>
-                    <button
-                      onClick={() =>
-                        item.children
-                          ? handleForward(item.children, item.label)
-                          : handleNavigate(item.path, item.external)
-                      }
-                      className="mobile-nav__item-btn"
-                    >
-                      <span>{item.label}</span>
-                      {item.children && <ChevronRight size={20} />}
-                    </button>
-                  </li>
-                ))}
-              </ul>
-            </div>
-            <div className="mobile-nav__footer">
-              {user ? (
-                <UserDropdown
-                  user={user}
-                  onLogout={() => logoutMutation.mutate()}
-                  isLoggingOut={logoutMutation.isPending}
-                  isMobile={true}
-                />
-              ) : (
-                <div className="w-full space-y-3">
-                  <button
-                    onClick={() => handleNavigate("/auth")}
-                    className="mobile-nav_auth-btn mobile-nav_auth-btn--secondary w-full"
-                  >
-                    <User className="mr-2 h-4 w-4" /> User Login
-                  </button>
-                  <button
-                    onClick={() =>
-                      handleForward(
-                        partnerRolesMenu.children,
-                        partnerRolesMenu.label
-                      )
-                    }
-                    className="mobile-nav_auth-btn mobile-nav_auth-btn--primary w-full justify-between"
-                  >
-                    <span>
-                      <Users className="mr-2 h-4 w-4 inline-block" /> Partner
-                      Login
-                    </span>
-                    <ChevronRight size={20} />
-                  </button>
+                <button onClick={onClose} className="p-1 rounded-full hover:bg-gray-100">
+                  <X className="w-6 h-6" />
+                </button>
+              </div>
+
+              {/* Content */}
+              <div className="flex-1 overflow-y-auto">
+                <nav className="flex flex-col p-4 space-y-2">
+                  {NAV_ITEMS.map((item) => (
+                    <div key={item.label} className="group">
+                      {item.subItems ? (
+                        <>
+                          <button
+                            onClick={() => setActiveSubmenu(activeSubmenu === item.label ? null : item.label)}
+                            className="flex items-center justify-between w-full p-3 text-left rounded-lg hover:bg-gray-50"
+                          >
+                            <span className="font-medium">{item.label}</span>
+                            <ChevronDown className={`w-5 h-5 transition-transform ${activeSubmenu === item.label ? "rotate-180" : ""}`} />
+                          </button>
+                          {activeSubmenu === item.label && (
+                            <motion.div
+                              initial={{ opacity: 0, height: 0 }}
+                              animate={{ opacity: 1, height: "auto" }}
+                              exit={{ opacity: 0, height: 0 }}
+                              className="pl-4 space-y-2"
+                            >
+                              {item.subItems.map((subItem) => (
+                                <button
+                                  key={subItem.label}
+                                  onClick={() => handleNavigate(subItem.path)}
+                                  className="block w-full p-2 text-left rounded-lg hover:bg-gray-50"
+                                >
+                                  {subItem.label}
+                                </button>
+                              ))}
+                            </motion.div>
+                          )}
+                        </>
+                      ) : (
+                        <button
+                          onClick={() => handleNavigate(item.path!)}
+                          className="block w-full p-3 text-left rounded-lg hover:bg-gray-50"
+                        >
+                          <span className="font-medium">{item.label}</span>
+                        </button>
+                      )}
+                    </div>
+                  ))}
+                </nav>
+
+                {/* Auth Section */}
+                <div className="p-4 mt-auto border-t">
+                  {user ? (
+                    <div className="space-y-3">
+                      <Link
+                        href="/dashboard"
+                        className="flex items-center p-3 rounded-lg hover:bg-gray-50"
+                      >
+                        <LayoutDashboard className="w-5 h-5 mr-3" />
+                        <span>Dashboard</span>
+                      </Link>
+                      {user.role === "admin" || user.role === "superadmin" ? (
+                        <Link
+                          href="/admin"
+                          className="flex items-center p-3 rounded-lg hover:bg-gray-50"
+                        >
+                          <Settings className="w-5 h-5 mr-3" />
+                          <span>Admin Panel</span>
+                        </Link>
+                      ) : null}
+                      <button
+                        onClick={() => logoutMutation.mutate()}
+                        disabled={logoutMutation.isPending}
+                        className="flex items-center w-full p-3 rounded-lg hover:bg-gray-50 text-red-600"
+                      >
+                        <LogOut className="w-5 h-5 mr-3" />
+                        <span>{logoutMutation.isPending ? "Signing out..." : "Sign Out"}</span>
+                      </button>
+                    </div>
+                  ) : (
+                    <div className="space-y-3">
+                      <Link
+                        href="/auth"
+                        className="flex items-center justify-between p-3 rounded-lg hover:bg-gray-50"
+                      >
+                        <div className="flex items-center">
+                          <User className="w-5 h-5 mr-3" />
+                          <span>User Login</span>
+                        </div>
+                        <ArrowRight className="w-5 h-5" />
+                      </Link>
+                      <div className="pl-8 space-y-2">
+                        <p className="text-sm font-medium text-gray-500">Partner Login</p>
+                        {PARTNER_ROLES.map((role) => (
+                          <a
+                            key={role}
+                            href={PARTNER_LOGIN_URL}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="block p-2 rounded-lg hover:bg-gray-50"
+                          >
+                            {role}
+                          </a>
+                        ))}
+                      </div>
+                    </div>
+                  )}
                 </div>
-              )}
+              </div>
             </div>
           </motion.div>
         </div>
@@ -249,19 +218,142 @@ const MobileNav = ({
   );
 };
 
-// Main Header Component
+// --- Desktop Navigation Item ---
+const NavItem = ({ item }: { item: typeof NAV_ITEMS[0] }) => {
+  const [isOpen, setIsOpen] = useState(false);
+
+  if (item.path) {
+    return (
+      <Link
+        href={item.path}
+        className="px-4 py-2 text-sm font-medium transition-colors hover:text-primary"
+      >
+        {item.label}
+      </Link>
+    );
+  }
+
+  return (
+    <DropdownMenu onOpenChange={setIsOpen}>
+      <DropdownMenuTrigger asChild>
+        <button
+          className={cn(
+            "flex items-center px-4 py-2 text-sm font-medium transition-colors hover:text-primary",
+            isOpen ? "text-primary" : ""
+          )}
+        >
+          {item.label}
+          <ChevronDown
+            className={cn(
+              "ml-1 h-4 w-4 transition-transform",
+              isOpen ? "rotate-180" : ""
+            )}
+          />
+        </button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent
+        align="start"
+        className="w-48 p-2 rounded-lg shadow-lg"
+      >
+        {item.subItems?.map((subItem) => (
+          <DropdownMenuItem key={subItem.label} asChild>
+            <Link
+              href={subItem.path}
+              className="w-full px-3 py-2 text-sm rounded-md hover:bg-gray-50"
+            >
+              {subItem.label}
+            </Link>
+          </DropdownMenuItem>
+        ))}
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
+};
+
+// --- User Dropdown ---
+const UserDropdown = ({
+  user,
+  onLogout,
+  isLoggingOut,
+}: {
+  user: any;
+  onLogout: () => void;
+  isLoggingOut: boolean;
+}) => {
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button
+          variant="ghost"
+          className="flex items-center space-x-2 hover:bg-gray-50"
+        >
+          <div className="flex items-center justify-center w-8 h-8 rounded-full bg-primary/10 text-primary">
+            <User className="w-4 h-4" />
+          </div>
+          <span className="hidden md:inline font-medium">
+            {user.username || "Account"}
+          </span>
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end" className="w-56 p-2 rounded-lg shadow-lg">
+        <DropdownMenuItem asChild>
+          <Link
+            href="/dashboard"
+            className="flex items-center w-full px-3 py-2 text-sm rounded-md hover:bg-gray-50"
+          >
+            <LayoutDashboard className="w-4 h-4 mr-2" />
+            <span>Dashboard</span>
+          </Link>
+        </DropdownMenuItem>
+        {(user.role === "admin" || user.role === "superadmin") && (
+          <DropdownMenuItem asChild>
+            <Link
+              href="/admin"
+              className="flex items-center w-full px-3 py-2 text-sm rounded-md hover:bg-gray-50"
+            >
+              <Settings className="w-4 h-4 mr-2" />
+              <span>Admin Panel</span>
+            </Link>
+          </DropdownMenuItem>
+        )}
+        {user.role === "superadmin" && (
+          <DropdownMenuItem asChild>
+            <Link
+              href="/super-admin"
+              className="flex items-center w-full px-3 py-2 text-sm rounded-md hover:bg-gray-50"
+            >
+              <Shield className="w-4 h-4 mr-2" />
+              <span>Super Admin</span>
+            </Link>
+          </DropdownMenuItem>
+        )}
+        <DropdownMenuSeparator />
+        <DropdownMenuItem
+          onClick={onLogout}
+          disabled={isLoggingOut}
+          className="flex items-center w-full px-3 py-2 text-sm rounded-md hover:bg-red-50 text-red-600"
+        >
+          <LogOut className="w-4 h-4 mr-2" />
+          <span>{isLoggingOut ? "Signing out..." : "Sign Out"}</span>
+        </DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
+};
+
+// --- Main Header Component ---
 export function Header() {
   const { user, logoutMutation } = useAuth();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const [location] = useLocation();
 
   useEffect(() => {
-    const handleScroll = () => setScrolled(window.scrollY > 20);
+    const handleScroll = () => setScrolled(window.scrollY > 10);
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  const [location] = useLocation();
   useEffect(() => {
     setMobileMenuOpen(false);
   }, [location]);
@@ -269,160 +361,96 @@ export function Header() {
   return (
     <>
       <header
-        className={`base-header ${scrolled ? "glasmorphism" : "transparent"}`}
+        className={cn(
+          "fixed top-0 left-0 right-0 z-40 transition-all duration-300 border-b",
+          scrolled ? "bg-white/95 backdrop-blur-sm shadow-sm" : "bg-white/90",
+          "border-gray-100"
+        )}
       >
-        <div className="base-header__container">
-          <Link href="/" title="Go to Homepage" className="base-header__logo">
-            <img src="/assets/wmremove-transformed - Edited.jpg" alt="Logo" />
+        <div className="container flex items-center justify-between h-16 px-4 mx-auto">
+          {/* Logo */}
+          <Link href="/" className="flex items-center">
+            <img
+              src="/assets/wmremove-transformed - Edited.jpg"
+              alt="Logo"
+              className="h-8"
+            />
           </Link>
-          <nav className="base-header__nav">
-            <ul className="base-header__nav-items">
-              {navData.map((item) => (
-                <DesktopNavDropdown key={item.label} item={item} />
-              ))}
-            </ul>
+
+          {/* Desktop Navigation */}
+          <nav className="hidden lg:flex items-center space-x-2">
+            {NAV_ITEMS.map((item) => (
+              <NavItem key={item.label} item={item} />
+            ))}
           </nav>
-          <div className="base-header__tools">
-            <div className="hidden lg:flex items-center gap-4">
-              {user ? (
-                <UserDropdown
-                  user={user}
-                  onLogout={() => logoutMutation.mutate()}
-                  isLoggingOut={logoutMutation.isPending}
-                />
-              ) : (
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button className="base-header_auth-btn base-header_auth-btn--primary">
-                      Login <ChevronDown className="ml-2 h-4 w-4" />
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent
-                    align="end"
-                    className="user-dropdown glasmorphism"
-                  >
-                    <DropdownMenuItem asChild>
-                      <Link href="/auth" className="user-dropdown__link">
-                        <User className="mr-2 h-4 w-4" />
-                        <span>User Login</span>
-                      </Link>
-                    </DropdownMenuItem>
-                    <DropdownMenuSeparator className="bg-white/20" />
-                    <DropdownMenuSub>
-                      <DropdownMenuSubTrigger className="user-dropdown__link">
-                        <Users className="mr-2 h-4 w-4" />
-                        <span>Partner Login</span>
-                      </DropdownMenuSubTrigger>
-                      <DropdownMenuSubContent className="user-dropdown glasmorphism">
-                        {/* MODIFICATION START: All roles now point to the same URL. */}
-                        {partnerRoles.map((role) => (
-                          <DropdownMenuItem key={role} asChild>
-                            <a
-                              href={partnerLoginUrl}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="user-dropdown__link"
-                            >
-                              {role}
-                            </a>
-                          </DropdownMenuItem>
-                        ))}
-                        {/* MODIFICATION END */}
-                      </DropdownMenuSubContent>
-                    </DropdownMenuSub>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              )}
-            </div>
+
+          {/* Right Side */}
+          <div className="flex items-center space-x-4">
+            {user ? (
+              <UserDropdown
+                user={user}
+                onLogout={() => logoutMutation.mutate()}
+                isLoggingOut={logoutMutation.isPending}
+              />
+            ) : (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button className="px-4 py-2 text-sm font-medium transition-colors bg-primary hover:bg-primary/90">
+                    <span className="hidden md:inline">Login</span>
+                    <ChevronDown className="w-4 h-4 ml-2" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-48 p-2 rounded-lg shadow-lg">
+                  <DropdownMenuItem asChild>
+                    <Link
+                      href="/auth"
+                      className="flex items-center w-full px-3 py-2 text-sm rounded-md hover:bg-gray-50"
+                    >
+                      <User className="w-4 h-4 mr-2" />
+                      <span>User Login</span>
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuSub>
+                    <DropdownMenuSubTrigger className="flex items-center w-full px-3 py-2 text-sm rounded-md hover:bg-gray-50">
+                      <Users className="w-4 h-4 mr-2" />
+                      <span>Partner Login</span>
+                    </DropdownMenuSubTrigger>
+                    <DropdownMenuSubContent className="w-48 p-2 rounded-lg shadow-lg">
+                      {PARTNER_ROLES.map((role) => (
+                        <DropdownMenuItem key={role} asChild>
+                          <a
+                            href={PARTNER_LOGIN_URL}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="block w-full px-3 py-2 text-sm rounded-md hover:bg-gray-50"
+                          >
+                            {role}
+                          </a>
+                        </DropdownMenuItem>
+                      ))}
+                    </DropdownMenuSubContent>
+                  </DropdownMenuSub>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            )}
+
+            {/* Mobile Menu Button */}
             <button
-              className="base-header__menu-btn"
-              title="Open menu"
               onClick={() => setMobileMenuOpen(true)}
+              className="p-2 lg:hidden text-gray-500 hover:text-gray-700"
             >
-              <Menu size={28} />
+              <Menu className="w-6 h-6" />
             </button>
           </div>
         </div>
       </header>
-      <div style={{ height: "var(--header-height)" }} />
-      <MobileNav
-        isOpen={mobileMenuOpen}
-        onClose={() => setMobileMenuOpen(false)}
-      />
-    </>
-  );
-}
 
-// UserDropdown component
-function UserDropdown({
-  user,
-  onLogout,
-  isLoggingOut,
-  isMobile = false,
-}: {
-  user: any;
-  onLogout: () => void;
-  isLoggingOut: boolean;
-  isMobile?: boolean;
-}) {
-  if (isMobile) {
-    return (
-      <div className="w-full">
-        <p className="text-center text-lg font-semibold mb-4">
-          {user.username || "User Account"}
-        </p>
-        <Button
-          onClick={onLogout}
-          disabled={isLoggingOut}
-          className="w-full mobile-nav__auth-btn--primary"
-        >
-          <LogOut className="mr-2 h-4 w-4" />
-          <span>{isLoggingOut ? "Logging out..." : "Logout"}</span>
-        </Button>
-      </div>
-    );
-  }
-  return (
-    <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <Button variant="ghost" className="base-header__user-btn">
-          <User className="mr-2 h-5 w-5" />
-          <span className="font-medium">{user.username || "Account"}</span>
-        </Button>
-      </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="user-dropdown glasmorphism">
-        <DropdownMenuItem asChild>
-          <Link href="/dashboard" className="user-dropdown__link">
-            <LayoutDashboard className="mr-2 h-4 w-4" />
-            <span>Dashboard</span>
-          </Link>
-        </DropdownMenuItem>
-        {(user.role === "admin" || user.role === "superadmin") && (
-          <DropdownMenuItem asChild>
-            <Link href="/admin" className="user-dropdown__link">
-              <Settings className="mr-2 h-4 w-4" />
-              <span>Admin Panel</span>
-            </Link>
-          </DropdownMenuItem>
-        )}
-        {user.role === "superadmin" && (
-          <DropdownMenuItem asChild>
-            <Link href="/super-admin" className="user-dropdown__link">
-              <Shield className="mr-2 h-4 w-4" />
-              <span>Super Admin</span>
-            </Link>
-          </DropdownMenuItem>
-        )}
-        <DropdownMenuSeparator className="bg-white/20" />
-        <DropdownMenuItem
-          onClick={onLogout}
-          disabled={isLoggingOut}
-          className="user-dropdown_link user-dropdown_link--logout"
-        >
-          <LogOut className="mr-2 h-4 w-4" />
-          <span>{isLoggingOut ? "Logging out..." : "Logout"}</span>
-        </DropdownMenuItem>
-      </DropdownMenuContent>
-    </DropdownMenu>
+      {/* Spacer for header height */}
+      <div className="h-16" />
+
+      {/* Mobile Navigation */}
+      <MobileNav isOpen={mobileMenuOpen} onClose={() => setMobileMenuOpen(false)} />
+    </>
   );
 }

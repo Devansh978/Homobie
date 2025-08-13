@@ -216,3 +216,4 @@ export function LoanCalculator({ onApply }: LoanCalculatorProps) {
     </Card>
   );
 }
+export default LoanCalculator;
