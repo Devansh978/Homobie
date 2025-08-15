@@ -14,8 +14,8 @@ import ListViewCard from "./ListViewCard";
 import PropertyFilters from "./PropertyFilters";
 import FormProperties from "./FormProperties";
 
-// const proxyUrl = "https://cors-anywhere.herokuapp.com/";
-const baseUrl = "https://homobiebackend-railway-production.up.railway.app";
+const proxyUrl = "https://cors-anywhere.herokuapp.com/"; //temporary
+const baseUrl = proxyUrl + "https://homobiebackend-railway-production.up.railway.app";
 
 const Properties = () => {
   const [currentView, setCurrentView] = useState("featured");
@@ -38,6 +38,7 @@ const Properties = () => {
 
   const cardWidth = 374;
 
+<<<<<<< HEAD
   const getAuthHeaders = () => {
     const token = localStorage.getItem("auth_token") || localStorage.getItem("token") || "";
     return {
@@ -122,6 +123,23 @@ const Properties = () => {
       const res = await axios.get(
         `${baseUrl}/properties/getIndividualProperty?propertyId=${propertyId}`
       );
+=======
+  // 1. GET all
+  const fetchAllProperties = async () => {
+    try {
+      const res = await axios.get(`${baseUrl}/properties/allProperties`);
+      setAllProperties(res.data);
+      setFeaturedProperties(res.data.filter((p) => p.isFeatured));
+    } catch (err) {
+      console.error("Error fetching properties:", err);
+    }
+  };
+
+  // 2. GET a
+  const fetchPropertyById = async (propertyId) => {
+    try {
+      const res = await axios.get(`${baseUrl}/properties/getIndividualProperty?propertyId=${propertyId}`);
+>>>>>>> 67c74150bc430593ce17afe789113a8a0af1fd6f
       return res.data;
     } catch (err) {
       console.error("Error fetching property:", err);
@@ -129,9 +147,41 @@ const Properties = () => {
     }
   };
 
+<<<<<<< HEAD
   // 3. POST add
   
 
+=======
+  // 3. POST add a property
+  const addProperty = async (newProperty) => {
+    try {
+      const formData = new FormData();
+
+      formData.append(
+        "property",
+        new Blob([JSON.stringify(newProperty.property)], { type: "application/json" })
+      );
+
+      // Append all files (if any)
+      if (Array.isArray(newProperty.files)) {
+        newProperty.files.forEach((file) => {
+          formData.append("files", file);
+        });
+      }
+
+      const res = await axios.post(`${baseUrl}/properties/add`, formData);
+
+      // Refresh property list after adding
+      fetchAllProperties();
+      return res.data;
+    } catch (err) {
+      console.error("Error adding property:", err);
+      return null;
+    }
+  };
+
+  // Pass this to your FormProperties component
+>>>>>>> 67c74150bc430593ce17afe789113a8a0af1fd6f
   const handleAddProperty = async (propertyData) => {
     await addProperty(propertyData);
   };
@@ -174,6 +224,7 @@ const Properties = () => {
           const typeMatch =
             typeFilter === "" || item.property.type === typeFilter;
           const priceMatch =
+<<<<<<< HEAD
             (!minPrice ||
               item.property.price >= parseFloat(minPrice) * 10000000) &&
             (!maxPrice ||
@@ -182,6 +233,12 @@ const Properties = () => {
           return (
             (titleMatch || cityMatch) && bedroomMatch && typeMatch && priceMatch
           );
+=======
+            (!minPrice || item.property.price >= parseFloat(minPrice) * 10000000) &&
+            (!maxPrice || item.property.price <= parseFloat(maxPrice) * 10000000);
+
+          return (titleMatch || cityMatch) && bedroomMatch && typeMatch && priceMatch;
+>>>>>>> 67c74150bc430593ce17afe789113a8a0af1fd6f
         });
 
   useEffect(() => {
@@ -305,9 +362,13 @@ const Properties = () => {
         {currentView === "featured" ? (
           <div>
             <div className="flex items-center justify-between mb-8">
+<<<<<<< HEAD
               <h2 className="text-2xl font-bold text-white">
                 Premium Properties
               </h2>
+=======
+              <h2 className="text-2xl font-bold text-white">Premium Properties</h2>
+>>>>>>> 67c74150bc430593ce17afe789113a8a0af1fd6f
               <div className="flex gap-3">
                 <button
                   onClick={() => scrollToCard("left")}

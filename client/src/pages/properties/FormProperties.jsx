@@ -1,14 +1,7 @@
 import React, { useState } from 'react';
 import { X, Plus, Upload, MapPin, Home, DollarSign, Bed, Bath, Square } from 'lucide-react';
-import {
-  Select,
-  SelectTrigger,
-  SelectValue,
-  SelectContent,
-  SelectItem,
-} from "@radix-ui/react-select"; 
 
-const FormProperties = ({ onAddProperty }) => { 
+const FormProperties = ({ onAddProperty }) => { // <-- accept the prop
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [formData, setFormData] = useState({
     files: [],
@@ -211,48 +204,48 @@ const FormProperties = ({ onAddProperty }) => {
                       required
                     />
                   </div>
-                  
+                  <div>
+                    <label className="block text-sm font-medium text-white mb-1">Owner ID</label>
+                    <input
+                      type="text"
+                      name="ownerId"
+                      value={formData.property.ownerId}
+                      onChange={handleInputChange}
+                      className="w-full px-3 py-2 border border-white bg-black text-white rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      required
+                    />
+                  </div>
                   <div>
                     <label className="block text-sm font-medium text-white mb-1">Category</label>
-                    <Select
+                    <select
+                      name="category"
                       value={formData.property.category}
-                      onValueChange={(value) =>
-                        setFormData((prev) => ({
-                          ...prev,
-                          property: { ...prev.property, category: value },
-                        }))
-                      }
+                      onChange={handleInputChange}
+                      className="w-full px-3 py-2 border border-white bg-black text-white rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      required
                     >
-                      <SelectTrigger className="w-full px-3 py-2 border border-white bg-black text-white rounded-lg">
-                        <SelectValue placeholder="Select category" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="SELL">For Sale</SelectItem>
-                        <SelectItem value="RENT">For Rent</SelectItem>
-                      </SelectContent>
-                    </Select>
+                      <option value="">Select Category</option>
+                      <option value="residential">Residential</option>
+                      <option value="commercial">Commercial</option>
+                      <option value="industrial">Industrial</option>
+                    </select>
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-white mb-1">Property Type</label>
-                    <Select
+                    <select
+                      name="type"
                       value={formData.property.type}
-                      onValueChange={(value) =>
-                        setFormData((prev) => ({
-                          ...prev,
-                          property: { ...prev.property, type: value },
-                        }))
-                      }
+                      onChange={handleInputChange}
+                      className="w-full px-3 py-2 border border-white bg-black text-white rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      required
                     >
-                      <SelectTrigger className="w-full px-3 py-2 border border-white bg-black text-white rounded-lg">
-                        <SelectValue placeholder="Select property type" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="RESIDENTIAL">Residential</SelectItem>
-                        <SelectItem value="COMMERCIAL">Commercial</SelectItem>
-                        <SelectItem value="PLOT">Plot</SelectItem>
-                        <SelectItem value="VILLA">Villa</SelectItem>
-                      </SelectContent>
-                    </Select>
+                      <option value="">Select Type</option>
+                      <option value="apartment">Apartment</option>
+                      <option value="house">House</option>
+                      <option value="villa">Villa</option>
+                      <option value="office">Office</option>
+                      <option value="shop">Shop</option>
+                    </select>
                   </div>
                 </div>
                 <div>
@@ -319,44 +312,33 @@ const FormProperties = ({ onAddProperty }) => {
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-white mb-1">Construction Status</label>
-                    <Select
+                    <select
+                      name="constructionStatus"
                       value={formData.property.constructionStatus}
-                      onValueChange={(value) =>
-                        setFormData((prev) => ({
-                          ...prev,
-                          property: { ...prev.property, constructionStatus: value },
-                        }))
-                      }
+                      onChange={handleInputChange}
+                      className="w-full px-3 py-2 border border-white bg-black text-white rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      required
                     >
-                      <SelectTrigger className="w-full px-3 py-2 border border-white bg-black text-white rounded-lg">
-                        <SelectValue placeholder="Select construction status" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="UNDER_CONSTRUCTION">Under Construction</SelectItem>
-                        <SelectItem value="READY_TO_MOVE">Ready to Move</SelectItem>
-                      </SelectContent>
-                    </Select>
+                      <option value="">Select Status</option>
+                      <option value="under-construction">Under Construction</option>
+                      <option value="ready-to-move">Ready to Move</option>
+                      <option value="new-launch">New Launch</option>
+                    </select>
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-white mb-1">Furnishing</label>
-                    <Select
+                    <select
+                      name="furnishing"
                       value={formData.property.furnishing}
-                      onValueChange={(value) =>
-                        setFormData((prev) => ({
-                          ...prev,
-                          property: { ...prev.property, furnishing: value },
-                        }))
-                      }
+                      onChange={handleInputChange}
+                      className="w-full px-3 py-2 border border-white bg-black text-white rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      required
                     >
-                      <SelectTrigger className="w-full px-3 py-2 border border-white bg-black text-white rounded-lg">
-                        <SelectValue placeholder="Select furnishing type" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="FURNISHED">Furnished</SelectItem>
-                        <SelectItem value="SEMI_FURNISHED">Semi-Furnished</SelectItem>
-                        <SelectItem value="UNFURNISHED">Unfurnished</SelectItem>
-                      </SelectContent>
-                    </Select>
+                      <option value="">Select Furnishing</option>
+                      <option value="furnished">Furnished</option>
+                      <option value="semi-furnished">Semi-Furnished</option>
+                      <option value="unfurnished">Unfurnished</option>
+                    </select>
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-white mb-1">Status</label>

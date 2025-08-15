@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { Link } from "wouter";
 import {
   Phone,
@@ -13,30 +13,37 @@ import {
   Coins,
   PieChart,
   CalendarDays,
+  X,
 } from "lucide-react";
 import { motion } from "framer-motion";
 import { companyInfo } from "@/lib/company-info";
 import homobieLogo from "/assets/homobie-logo.png";
-// import  Calculator  from "@/components/ui/calculator";
+import CalculatorComponent from "@/components/ui/calculator";
+import SiploancalculatorComponent from "@/components/ui/sip&loan-calculator"
+import BudgetplanningToolComponent from "@/components/ui/bugetplanning-tool"
 
 const toolItems = [
   {
     name: "EMI Calculator",
     icon: Calculator,
     path: "tools/emi-calculator",
-    ariaLabel: "Navigate to EMI Calculator tool",
+    ariaLabel: "Open EMI Calculator",
+    component: <CalculatorComponent />,
+    isModal: true,
   },
   {
     name: "SIP & Loan Calculator",
     icon: Coins,
     path: "/tools/sip-loan-calculator",
-    ariaLabel: "Navigate to SIP and Loan Calculator tool",
+    component: <SiploancalculatorComponent />,
+      isModal: true,
   },
   {
     name: "Budget Planning Tool",
     icon: PieChart,
     path: "/tools/budget-planner",
-    ariaLabel: "Navigate to Budget Planning tool",
+    component: <BudgetplanningToolComponent />,
+      isModal: true,
   },
   {
     name: "Retirement Planner",
@@ -46,13 +53,22 @@ const toolItems = [
   },
 ];
 
-
-
 export function Footer() {
   const currentYear = new Date().getFullYear();
+  const [activeTool, setActiveTool] = useState(null);
+
+  const handleToolClick = (tool) => {
+    if (tool.isModal) {
+      setActiveTool(tool);
+    }
+  };
+
+  const closeModal = () => {
+    setActiveTool(null);
+  };
 
   return (
-    <footer className="bg-neutral-800 text-neutral-300">
+    <footer className="bg-neutral-800 text-neutral-300 relative">
       <div className="container mx-auto px-4 pt-16 pb-8">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-8">
           {/* Company Info */}
@@ -125,7 +141,6 @@ export function Footer() {
                 { name: "SIP Investments", path: "/sip" },
                 { name: "Consultation", path: "/consultation" },
                 { name: "Blog", path: "/blog" },
-      
               ].map((link) => (
                 <li key={link.name}>
                   <Link
@@ -160,17 +175,31 @@ export function Footer() {
                     whileHover={{ scale: 1.02 }}
                     whileTap={{ scale: 0.98 }}
                   >
-                    <Link
-                      href={item.path}
-                      className="text-neutral-400 hover:text-white transition-colors flex items-center"
-                      aria-label={item.ariaLabel}
-                    >
-                      <item.icon
-                        size={18}
-                        className="mr-3 text-primary flex-shrink-0"
-                      />
-                      <span>{item.name}</span>
-                    </Link>
+                    {item.isModal ? (
+                      <button
+                        onClick={() => handleToolClick(item)}
+                        className="text-neutral-400 hover:text-white transition-colors flex items-center w-full text-left"
+                        aria-label={item.ariaLabel}
+                      >
+                        <item.icon
+                          size={18}
+                          className="mr-3 text-primary flex-shrink-0"
+                        />
+                        <span>{item.name}</span>
+                      </button>
+                    ) : (
+                      <Link
+                        href={item.path}
+                        className="text-neutral-400 hover:text-white transition-colors flex items-center"
+                        aria-label={item.ariaLabel}
+                      >
+                        <item.icon
+                          size={18}
+                          className="mr-3 text-primary flex-shrink-0"
+                        />
+                        <span>{item.name}</span>
+                      </Link>
+                    )}
                   </motion.div>
                 </motion.li>
               ))}
@@ -266,6 +295,35 @@ export function Footer() {
           </div>
         </div>
       </div>
+
+      {/* Calculator Modal */}
+      {activeTool && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <motion.div 
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.9 }}
+            transition={{ duration: 0.2 }}
+            className="bg-white rounded-lg p-6 w-full max-w-md max-h-[90vh] overflow-y-auto"
+          >
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="text-xl font-bold text-gray-800">
+                {activeTool.name}
+              </h3>
+              <button
+                onClick={closeModal}
+                className="text-gray-500 hover:text-gray-700 p-1"
+                aria-label="Close calculator"
+              >
+                <X size={24} />
+              </button>
+            </div>
+            <div className="p-2">
+              {activeTool.component}
+            </div>
+          </motion.div>
+        </div>
+      )}
 
       {/* Copyright */}
       <div className="border-t border-neutral-700 py-6">

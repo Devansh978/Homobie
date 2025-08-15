@@ -3,73 +3,142 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Define global styles and CSS variables in the base layer.
-This ensures they are applied consistently across your application.
-*/
+/* Define global styles and CSS variables */
 @layer base {
-:root {
-/* Light Mode / Default Theme */
---background: 220 14.3% 95.9%;
---foreground: 240 10% 3.9%;
---card: 0 0% 100%;
---card-foreground: 240 10% 3.9%;
---popover: 0 0% 100%;
---popover-foreground: 240 10% 3.9%;
---primary: 238 58.8% 41.2%;
---primary-foreground: 0 0% 100%;
---secondary: 220 14.3% 95.9%;
---secondary-foreground: 238 58.8% 41.2%;
---muted: 220 14.3% 95.9%;
---muted-foreground: 240 3.8% 46.1%;
---accent: 220 14.3% 95.9%;
---accent-foreground: 238 58.8% 41.2%;
---destructive: 0 84.2% 60.2%;
---destructive-foreground: 0 0% 100%;
---border: 220 13% 91%;
---input: 220 13% 91%;
---ring: 238 58.8% 41.2%;
---radius: 0.5rem;
+  :root {
+    /* Light Mode / Default Theme */
+    --background: 220 14.3% 95.9%;
+    --foreground: 240 10% 3.9%;
+    --card: 0 0% 100%;
+    --card-foreground: 240 10% 3.9%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 240 10% 3.9%;
+    --primary: 238 58.8% 41.2%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 220 14.3% 95.9%;
+    --secondary-foreground: 238 58.8% 41.2%;
+    --muted: 220 14.3% 95.9%;
+    --muted-foreground: 240 3.8% 46.1%;
+    --accent: 220 14.3% 95.9%;
+    --accent-foreground: 238 58.8% 41.2%;
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 220 13% 91%;
+    --input: 220 13% 91%;
+    --ring: 238 58.8% 41.2%;
+    --radius: 0.5rem;
+
+    /* Header Specific Variables */
+    --header-height: 64px;
+    --header-bg: rgba(255, 255, 255, 0.95);
+    --header-border: rgba(0, 0, 0, 0.08);
+    --header-scrolled-bg: rgba(255, 255, 255, 0.85);
+    --header-text: var(--foreground);
+  }
+
+  /* Dark Mode Theme */
+  .dark {
+    --background: 240 10% 3.9%;
+    --foreground: 0 0% 98%;
+    --card: 240 10% 3.9%;
+    --card-foreground: 0 0% 98%;
+    --popover: 240 10% 3.9%;
+    --popover-foreground: 0 0% 98%;
+    --primary: 238 58.8% 41.2%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 240 3.7% 15.9%;
+    --secondary-foreground: 0 0% 98%;
+    --muted: 240 3.7% 15.9%;
+    --muted-foreground: 240 5% 64.9%;
+    --accent: 240 3.7% 15.9%;
+    --accent-foreground: 0 0% 98%;
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 240 3.7% 15.9%;
+    --input: 240 3.7% 15.9%;
+    --ring: 238 58.8% 41.2%;
+
+    /* Dark Mode Header Variables */
+    --header-bg: rgba(10, 10, 10, 0.9);
+    --header-border: rgba(255, 255, 255, 0.08);
+    --header-scrolled-bg: rgba(10, 10, 10, 0.85);
+    --header-text: var(--foreground);
+  }
+
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+    font-family: 'Inter', sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
 }
 
-/* ✅ Completed Dark Mode Theme */
-.dark {
---background: 240 10% 3.9%;
---foreground: 0 0% 98%;
---card: 240 10% 3.9%;
---card-foreground: 0 0% 98%;
---popover: 240 10% 3.9%;
---popover-foreground: 0 0% 98%;
---primary: 238 58.8% 41.2%; /* Nexi Blue still works well as a primary */
---primary-foreground: 0 0% 100%;
---secondary: 240 3.7% 15.9%;
---secondary-foreground: 0 0% 98%;
---muted: 240 3.7% 15.9%;
---muted-foreground: 240 5% 64.9%;
---accent: 240 3.7% 15.9%;
---accent-foreground: 0 0% 98%;
---destructive: 0 62.8% 30.6%;
---destructive-foreground: 0 0% 98%;
---border: 240 3.7% 15.9%;
---input: 240 3.7% 15.9%;
---ring: 238 58.8% 41.2%;
-}
-}
-
-@layer base {
-* {
-@apply border-border;
-}
-body {
-@apply bg-background text-foreground;
-font-family: 'Inter', sans-serif;
--webkit-font-smoothing: antialiased;
--moz-osx-font-smoothing: grayscale;
-}
-}
-
-/* Custom utility for header spacing */
+/* Custom utilities */
 @layer utilities {
-.header-spacing {
-@apply pt-16 md:pt-20;
+  /* Header spacing to account for fixed header */
+  .header-spacing {
+    @apply pt-[var(--header-height)];
+  }
+
+  /* Glass morphism effect */
+  .glass {
+    background: var(--header-bg);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+  }
+
+  /* Smooth transitions for header */
+  .header-transition {
+    transition: background-color 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+                box-shadow 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+                border-color 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  /* Better focus states for accessibility */
+  .focus-ring {
+    @apply focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2;
+  }
+
+  /* Scrollbar styling */
+  .scrollbar {
+    scrollbar-width: thin;
+    scrollbar-color: hsl(var(--muted-foreground)) transparent;
+  }
+
+  .scrollbar::-webkit-scrollbar {
+    @apply w-2 h-2;
+  }
+
+  .scrollbar::-webkit-scrollbar-track {
+    @apply bg-transparent;
+  }
+
+  .scrollbar::-webkit-scrollbar-thumb {
+    @apply rounded-full bg-muted-foreground/30 hover:bg-muted-foreground/50;
+  }
 }
+
+/* Animation keyframes */
+@layer utilities {
+  @keyframes slide-down {
+    from { opacity: 0; transform: translateY(-10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  @keyframes slide-up {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .animate-slide-down {
+    animation: slide-down 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .animate-slide-up {
+    animation: slide-up 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  }
 }
