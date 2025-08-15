@@ -54,6 +54,10 @@ const NAV_ITEMS = [
     label: "Blog",
     path: "/blog",
   },
+  {
+    label: "Properties",
+    path: "/properties",
+  },
 ];
 
 const PARTNER_LOGIN_URL = "https://homobie-frontend-portal-bco8.vercel.app/";

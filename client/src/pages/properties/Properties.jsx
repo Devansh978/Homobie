@@ -38,92 +38,6 @@ const Properties = () => {
 
   const cardWidth = 374;
 
-<<<<<<< HEAD
-  const getAuthHeaders = () => {
-    const token = localStorage.getItem("auth_token") || localStorage.getItem("token") || "";
-    return {
-      headers: {
-        'Authorization': `Bearer ${token}`
-      }
-    };
-  };
-
-  const getOwnerId = () => {
-    const ownerId = localStorage.getItem("userId");
-    console.log("Current Owner ID (from userId):", ownerId);
-    return ownerId;
-  };
-
-  // Add property with ownerId in DTO
-  const addProperty = async (newProperty) => {
-    try {
-      const ownerId = getOwnerId();
-      console.log("Preparing to add property with ownerId:", ownerId);
-
-      const propertyData = {
-        ...newProperty.property,
-        ownerId: ownerId // Include ownerId in the DTO
-      };
-
-      // Log the DTO being sent
-      console.log("DTO being sent to server:", propertyData);
-
-      const formData = new FormData();
-      formData.append(
-        "property",
-        new Blob([JSON.stringify(propertyData)], { type: "application/json" })
-      );
-
-      // Add files if any
-      if (Array.isArray(newProperty.files)) {
-        newProperty.files.forEach((file) => {
-          formData.append("files", file);
-        });
-      }
-
-      const config = {
-        ...getAuthHeaders(),
-        headers: {
-          ...getAuthHeaders().headers,
-          'Content-Type': 'multipart/form-data'
-        }
-      };
-
-      const response = await axios.post(
-        `${baseUrl}/properties/add`,
-        formData,
-        config
-      );
-      console.log("Owner ID:", ownerId);
-      console.log(auth_token);
-      fetchAllProperties();
-      return response.data;
-    } catch (error) {
-      console.error("Error adding property:", error);
-      console.log("Owner ID at time of error:", getOwnerId());
-      return null;
-    }
-  };
-
-  // Example of other API calls (GET all properties)
-  const fetchAllProperties = async () => {
-    try {
-      const response = await axios.get(`${baseUrl}/properties/allProperties`, getAuthHeaders());
-      setAllProperties(response.data);
-      setFeaturedProperties(response.data.filter((p) => p.isFeatured));
-    } catch (error) {
-      console.error("Error fetching properties:", error);
-    }
-  };
-
-
-  // 2. GET a
-  const fetchPropertyById = async (propertyId) => {
-    try {
-      const res = await axios.get(
-        `${baseUrl}/properties/getIndividualProperty?propertyId=${propertyId}`
-      );
-=======
   // 1. GET all
   const fetchAllProperties = async () => {
     try {
@@ -139,7 +53,6 @@ const Properties = () => {
   const fetchPropertyById = async (propertyId) => {
     try {
       const res = await axios.get(`${baseUrl}/properties/getIndividualProperty?propertyId=${propertyId}`);
->>>>>>> 67c74150bc430593ce17afe789113a8a0af1fd6f
       return res.data;
     } catch (err) {
       console.error("Error fetching property:", err);
@@ -147,11 +60,6 @@ const Properties = () => {
     }
   };
 
-<<<<<<< HEAD
-  // 3. POST add
-  
-
-=======
   // 3. POST add a property
   const addProperty = async (newProperty) => {
     try {
@@ -181,7 +89,6 @@ const Properties = () => {
   };
 
   // Pass this to your FormProperties component
->>>>>>> 67c74150bc430593ce17afe789113a8a0af1fd6f
   const handleAddProperty = async (propertyData) => {
     await addProperty(propertyData);
   };
@@ -224,21 +131,10 @@ const Properties = () => {
           const typeMatch =
             typeFilter === "" || item.property.type === typeFilter;
           const priceMatch =
-<<<<<<< HEAD
-            (!minPrice ||
-              item.property.price >= parseFloat(minPrice) * 10000000) &&
-            (!maxPrice ||
-              item.property.price <= parseFloat(maxPrice) * 10000000);
-
-          return (
-            (titleMatch || cityMatch) && bedroomMatch && typeMatch && priceMatch
-          );
-=======
             (!minPrice || item.property.price >= parseFloat(minPrice) * 10000000) &&
             (!maxPrice || item.property.price <= parseFloat(maxPrice) * 10000000);
 
           return (titleMatch || cityMatch) && bedroomMatch && typeMatch && priceMatch;
->>>>>>> 67c74150bc430593ce17afe789113a8a0af1fd6f
         });
 
   useEffect(() => {
@@ -362,13 +258,7 @@ const Properties = () => {
         {currentView === "featured" ? (
           <div>
             <div className="flex items-center justify-between mb-8">
-<<<<<<< HEAD
-              <h2 className="text-2xl font-bold text-white">
-                Premium Properties
-              </h2>
-=======
               <h2 className="text-2xl font-bold text-white">Premium Properties</h2>
->>>>>>> 67c74150bc430593ce17afe789113a8a0af1fd6f
               <div className="flex gap-3">
                 <button
                   onClick={() => scrollToCard("left")}
