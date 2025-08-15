@@ -64,9 +64,9 @@ const partnerRolesMenu = {
 
 // --- Animation variants ---
 const mobileNavVariants = {
-  hidden: { x: "-100%" },
+  hidden: { x: "100%" },
   visible: { x: "0%", transition: { duration: 0.3, ease: "easeInOut" } },
-  exit: { x: "-100%", transition: { duration: 0.25, ease: "easeInOut" } },
+  exit: { x: "100%", transition: { duration: 0.25, ease: "easeInOut" } },
 };
 
 // Simplified DesktopNavDropdown component
@@ -292,46 +292,53 @@ export function Header() {
                 />
               ) : (
                 <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button className="base-header_auth-btn base-header_auth-btn--primary">
-                      Login <ChevronDown className="ml-2 h-4 w-4" />
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent
-                    align="end"
-                    className="user-dropdown glasmorphism"
-                  >
-                    <DropdownMenuItem asChild>
-                      <Link href="/auth" className="user-dropdown__link">
-                        <User className="mr-2 h-4 w-4" />
-                        <span>User Login</span>
-                      </Link>
-                    </DropdownMenuItem>
-                    <DropdownMenuSeparator className="bg-white/20" />
-                    <DropdownMenuSub>
-                      <DropdownMenuSubTrigger className="user-dropdown__link">
-                        <Users className="mr-2 h-4 w-4" />
-                        <span>Partner Login</span>
-                      </DropdownMenuSubTrigger>
-                      <DropdownMenuSubContent className="user-dropdown glasmorphism">
-                        {/* MODIFICATION START: All roles now point to the same URL. */}
-                        {partnerRoles.map((role) => (
-                          <DropdownMenuItem key={role} asChild>
-                            <a
-                              href={partnerLoginUrl}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="user-dropdown__link"
-                            >
-                              {role}
-                            </a>
-                          </DropdownMenuItem>
-                        ))}
-                        {/* MODIFICATION END */}
-                      </DropdownMenuSubContent>
-                    </DropdownMenuSub>
-                  </DropdownMenuContent>
-                </DropdownMenu>
+  <DropdownMenuTrigger asChild>
+    <Button className="flex items-center gap-2 px-4 py-2 rounded-lg bg-blue-600 text-white font-medium hover:bg-blue-700 transition-all">
+      Login
+      <ChevronDown className="h-4 w-4" />
+    </Button>
+  </DropdownMenuTrigger>
+
+  <DropdownMenuContent
+    align="end"
+    className="user-dropdown glasmorphism rounded-lg border border-white/20 shadow-lg p-1"
+  >
+    <DropdownMenuItem asChild>
+      <Link
+        href="/auth"
+        className="user-dropdown__link flex items-center gap-2 px-3 py-2 rounded-md hover:bg-white/10 transition-all"
+      >
+        <User className="h-4 w-4" />
+        <span>User Login</span>
+      </Link>
+    </DropdownMenuItem>
+
+    <DropdownMenuSeparator className="bg-white/20 my-1" />
+
+    <DropdownMenuSub>
+      <DropdownMenuSubTrigger className="user-dropdown__link flex items-center gap-2 px-3 py-2 rounded-md hover:bg-white/10 transition-all">
+        <Users className="h-4 w-4" />
+        <span>Partner Login</span>
+      </DropdownMenuSubTrigger>
+
+      <DropdownMenuSubContent className="user-dropdown glasmorphism rounded-lg border border-white/20 shadow-lg p-1">
+        {partnerRoles.map((role) => (
+          <DropdownMenuItem key={role} asChild>
+            <a
+              href={partnerLoginUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="user-dropdown__link block px-3 py-2 rounded-md hover:bg-white/10 transition-all"
+            >
+              {role}
+            </a>
+          </DropdownMenuItem>
+        ))}
+      </DropdownMenuSubContent>
+    </DropdownMenuSub>
+  </DropdownMenuContent>
+</DropdownMenu>
+
               )}
             </div>
             <button

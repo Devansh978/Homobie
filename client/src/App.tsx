@@ -19,7 +19,8 @@ import  {Header } from "@/components/layout/header";
 import { Footer } from "@/components/layout/footer";
 import BlogPage from "@/pages/blog-page";
 import OurTeamPage from "@/pages/ourteam-page";
-
+import PropertyDetails from "@/pages/properties/PropertyDetails";
+import Properties from "@/pages/properties/Properties";
 
 function Router() {
   return (
@@ -34,6 +35,10 @@ function Router() {
       <Route path="/sip" component={SipPage} />
       <Route path="/blog" component={BlogPage} />
       <Route path="/ourteam" component={OurTeamPage} />
+      <Route path="/properties" component={Properties} />
+      <Route path="/properties/:id">
+  {params => <PropertyDetails id={params.id} />}
+</Route>
       
       <ProtectedRoute path="/dashboard" component={DashboardPage} />
       <ProtectedRoute path="/admin" component={AdminPage} />
@@ -52,7 +57,7 @@ function App() {
         <AuthProvider>
           <div className="flex flex-col min-h-screen">
             <Header />
-            <main className="flex-grow header-spacing">
+            <main className="">
               <Router />
             </main>
             

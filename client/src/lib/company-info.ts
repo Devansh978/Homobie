@@ -10,7 +10,7 @@ export const companyInfo = {
     sunday: "Closed"
   },
   contact: {
-    phones: ["7415814408", "8889444930"],
+    phones: ["+91 7415814408", "+91 8889444930"],
     email: "support@homobie.com",
     address: "MF 17 Block B, Mansarovar Complex Shivaji Nagar, Bhopal Madhya Pradesh, 462016 India"
   },

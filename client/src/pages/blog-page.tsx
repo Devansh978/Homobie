@@ -1,214 +1,358 @@
-
-import React, { useState } from 'react';
+import React, { useState } from "react";
+import Blog1 from "./blog/Blog1";
+import Blog2 from "./blog/Blog2";
+import Blog3 from "./blog/Blog3";
+import Blog4 from "./blog/Blog4";
+import Blog5 from "./blog/Blog5";
 
 // --- STYLES (CSS-in-JS) ---
-// All CSS is converted into a JavaScript object for use within the component.
 const styles = {
   body: {
-    backgroundColor: '#121212',
-    color: '#e0e0e0',
+    backgroundColor: "#121212",
+    color: "#e0e0e0",
     fontFamily: "'Segoe UI', 'Helvetica Neue', Arial, sans-serif",
     lineHeight: 1.7,
     margin: 0,
     padding: 0,
   },
   mainContainer: {
-    maxWidth: '900px',
-    margin: '40px auto',
-    padding: '20px',
+    maxWidth: "1200px",
+    margin: "40px auto",
+    padding: "20px",
+  },
+  filtersContainer: {
+    display: "flex",
+    gap: "20px",
+    marginBottom: "40px",
+    justifyContent: "center",
+    flexWrap: "wrap",
+  },
+  filterDropdown: {
+    backgroundColor: "#1e1e1e",
+    border: "1px solid #333",
+    borderRadius: "25px",
+    padding: "12px 20px",
+    color: "#e0e0e0",
+    fontSize: "14px",
+    minWidth: "120px",
+    cursor: "pointer",
+    outline: "none",
+  },
+  cardsContainer: {
+    display: "grid",
+    gridTemplateColumns: "repeat(auto-fit, minmax(350px, 1fr))",
+    gap: "30px",
+    marginBottom: "50px",
+  },
+  card: {
+    backgroundColor: "#1e1e1e",
+    border: "1px solid #333",
+    borderRadius: "15px",
+    overflow: "hidden",
+    cursor: "pointer",
+    transition: "all 0.3s ease",
+    position: "relative",
+  },
+  cardHover: {
+    transform: "translateY(-5px)",
+    boxShadow: "0 10px 25px rgba(0, 0, 0, 0.3)",
+    borderColor: "#FF7F50",
+  },
+  cardImage: {
+    width: "100%",
+    height: "200px",
+    objectFit: "cover",
+    borderRadius: "0",
+  },
+  cardContent: {
+    padding: "20px",
+  },
+  cardDate: {
+    color: "#999",
+    fontSize: "12px",
+    textTransform: "uppercase",
+    letterSpacing: "1px",
+    marginBottom: "10px",
+  },
+  cardTitle: {
+    color: "#ffffff",
+    fontSize: "1.4em",
+    fontWeight: "600",
+    marginBottom: "15px",
+    lineHeight: "1.4",
+    display: "-webkit-box",
+    WebkitLineClamp: 3,
+    WebkitBoxOrient: "vertical",
+    overflow: "hidden",
+  },
+  cardMeta: {
+    display: "flex",
+    flexWrap: "wrap",
+    gap: "10px",
+    marginBottom: "15px",
+  },
+  cardTag: {
+    backgroundColor: "#333",
+    color: "#FF7F50",
+    padding: "4px 12px",
+    borderRadius: "15px",
+    fontSize: "12px",
+    fontWeight: "500",
+  },
+  cardReadMore: {
+    color: "#FF7F50",
+    fontSize: "14px",
+    fontWeight: "600",
+    textTransform: "uppercase",
+    letterSpacing: "0.5px",
+    display: "flex",
+    alignItems: "center",
+    gap: "8px",
+    marginTop: "auto",
+  },
+  arrow: {
+    fontSize: "16px",
+    transition: "transform 0.3s ease",
   },
   blogPost: {
-    backgroundColor: '#1e1e1e',
-    border: '1px solid #333',
-    borderRadius: '10px',
-    padding: '25px 40px',
-    marginBottom: '50px',
-    boxShadow: '0 4px 15px rgba(0, 0, 0, 0.2)',
+    backgroundColor: "#1e1e1e",
+    border: "1px solid #333",
+    borderRadius: "10px",
+    padding: "25px 40px",
+    marginBottom: "50px",
+    boxShadow: "0 4px 15px rgba(0, 0, 0, 0.2)",
   },
   h1: {
-    color: '#ffffff',
-    fontSize: '2.2em',
-    textAlign: 'center',
-    marginBottom: '20px',
-    paddingBottom: '15px',
-    borderBottom: '2px solid #FF7F50',
+    color: "#ffffff",
+    fontSize: "2.2em",
+    textAlign: "center",
+    marginBottom: "20px",
+    paddingBottom: "15px",
+    borderBottom: "2px solid #FF7F50",
   },
   h2: {
-    color: '#ffffff',
-    fontSize: '1.8em',
-    borderBottom: '1px solid #444',
-    paddingBottom: '10px',
-    marginTop: '30px',
-    marginBottom: '20px',
+    color: "#ffffff",
+    fontSize: "1.8em",
+    borderBottom: "1px solid #444",
+    paddingBottom: "10px",
+    marginTop: "30px",
+    marginBottom: "20px",
   },
   strong: {
-    color: '#FF7F50',
+    color: "#FF7F50",
     fontWeight: 600,
   },
   a: {
-    color: '#FF7F50',
-    textDecoration: 'none',
+    color: "#FF7F50",
+    textDecoration: "none",
   },
   ctaButton: {
-    display: 'inline-block',
-    backgroundColor: '#FF7F50',
-    color: '#121212',
-    padding: '12px 25px',
-    borderRadius: '50px',
-    fontWeight: 'bold',
-    textAlign: 'center',
-    marginTop: '20px',
-    border: 'none',
-    cursor: 'pointer',
-    transition: 'transform 0.2s ease-in-out, filter 0.2s',
+    display: "inline-block",
+    backgroundColor: "#FF7F50",
+    color: "#121212",
+    padding: "12px 25px",
+    borderRadius: "50px",
+    fontWeight: "bold",
+    textAlign: "center",
+    marginTop: "20px",
+    border: "none",
+    cursor: "pointer",
+    transition: "transform 0.2s ease-in-out, filter 0.2s",
   },
-  ctaButtonHover: {
-    transform: 'translateY(-2px)',
-    filter: 'brightness(1.1)',
+  backButton: {
+    backgroundColor: "#333",
+    color: "#e0e0e0",
+    padding: "10px 20px",
+    borderRadius: "25px",
+    border: "1px solid #555",
+    cursor: "pointer",
+    marginBottom: "20px",
+    fontSize: "14px",
+    display: "inline-flex",
+    alignItems: "center",
+    gap: "8px",
+    transition: "all 0.3s ease",
   },
   tldrSection: {
-    backgroundColor: '#252525',
-    border: '1px solid #444',
-    padding: '20px',
-    borderRadius: '8px',
-    marginTop: '30px',
+    backgroundColor: "#252525",
+    border: "1px solid #444",
+    padding: "20px",
+    borderRadius: "8px",
+    marginTop: "30px",
   },
   tldrHeader: {
-      borderBottom: 'none',
-      marginTop: 0,
-  }
+    borderBottom: "none",
+    marginTop: 0,
+  },
 };
 
-// --- HELPER COMPONENT for Hover Effect ---
-const CtaButton = ({ href, children }) => {
-    const [isHovered, setIsHovered] = useState(false);
-    return (
-        <a 
-            href={href} 
-            style={{ ...styles.ctaButton, ...(isHovered ? styles.ctaButtonHover : null) }}
-            onMouseEnter={() => setIsHovered(true)}
-            onMouseLeave={() => setIsHovered(false)}
-        >
-            {children}
-        </a>
-    );
-};
+// Blog data with metadata
+const blogData = [
+  { 
+    id: 1, 
+    component: Blog1,
+    title: "How to Know If You’re Eligible for a Home Loan – Fast & Easy Checklist",
+    date: "JULY 24TH 2025",
+    tags: ["E-commerce", "Market Data", "Key numbers & facts", "Innovation trends"],
+    image: "/assets/blog-sample.jpg",
+    readTime: "5 min read"
+  },
+  { 
+    id: 2, 
+    component: Blog2,
+    title: "What is the Best CIBIL Score for a Loan Approval? A Complete Guide for 2025",
+    date: "JULY 21ST 2025",
+    tags: ["Corporate News", "Payment acceptance"],
+    image: "/assets/blog-sample.jpg",
+    readTime: "5 min read"
+  },
+  { 
+    id: 3, 
+    component: Blog3,
+    title: " Prepay Your Home Loan or Invest in SIP? A Dilemma Solved",
+    date: "JULY 16TH 2025",
+    tags: ["Innovation trends", "Corporate News"],
+    image: "/assets/blog-sample.jpg",
+    readTime: "7 min read"
+  },
+  { 
+    id: 4, 
+    component: Blog4,
+    title: "Home Loan Takeover Explained: RBI Guidelines Every Borrower Should Know",
+    date: "JULY 12TH 2025",
+    tags: ["Healthcare", "Digital Transformation", "Innovation trends"],
+    image: "/assets/blog-sample.jpg",
+    readTime: "8 min read"
+  },
+  { 
+    id: 5, 
+    component: Blog5,
+    title: "How Does Taking Out a Home Loan Affect Your Income Tax?",
+    date: "JULY 8TH 2025",
+    tags: ["Sustainability", "Technology", "Future trends"],
+    image: "/assets/blog-sample.jpg",
+    readTime: "6 min read"
+  },
+];
 
-
-// --- BLOG CONTENT COMPONENTS ---
-
-const Blog1 = () => (
-  <>
-    <h1 style={styles.h1}>How to Know If You’re Eligible for a Home Loan</h1>
-    <h2 style={styles.h2}>Introduction: Your First Step</h2>
-    <p>Buying a home is a major milestone. Before you start visiting properties, it's essential to determine whether you're eligible for a home loan to save time and avoid rejections.</p>
-    <div style={styles.tldrSection}>
-      <h2 style={{...styles.h2, ...styles.tldrHeader}}>Eligibility Checklist</h2>
-      <ul>
-        <li><strong style={styles.strong}>Stable Income:</strong> ₹25,000+ monthly income.</li>
-        <li><strong style={styles.strong}>Credit Score:</strong> CIBIL score of 750 or higher is ideal.</li>
-        <li><strong style={styles.strong}>Debt Ratio:</strong> Your Debt-to-Income (DTI) ratio should be below 40%.</li>
-      </ul>
+// --- CARD COMPONENT ---
+const BlogCard = ({ blog, onClick, isHovered, onHover, onLeave }) => (
+  <div
+    style={{
+      ...styles.card,
+      ...(isHovered ? styles.cardHover : {})
+    }}
+    onClick={() => onClick(blog.id)}
+    onMouseEnter={onHover}
+    onMouseLeave={onLeave}
+  >
+    <img 
+      src={blog.image} 
+      alt={blog.title}
+      style={styles.cardImage}
+      onError={(e) => {
+        e.target.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAwIiBoZWlnaHQ9IjIwMCIgdmlld0JveD0iMCAwIDQwMCAyMDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSI0MDAiIGhlaWdodD0iMjAwIiBmaWxsPSIjMzMzMzMzIi8+Cjx0ZXh0IHg9IjIwMCIgeT0iMTAwIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmaWxsPSIjNjY2NjY2IiBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iMTQiPkJsb2cgSW1hZ2U8L3RleHQ+Cjwvc3ZnPg==';
+      }}
+    />
+    <div style={styles.cardContent}>
+      <div style={styles.cardDate}>{blog.date}</div>
+      <h3 style={styles.cardTitle}>{blog.title}</h3>
+      <div style={styles.cardMeta}>
+        {blog.tags.slice(0, 3).map((tag, index) => (
+          <span key={index} style={styles.cardTag}>{tag}</span>
+        ))}
+      </div>
+      <div style={styles.cardReadMore}>
+        DISCOVER MORE 
+        <span style={{
+          ...styles.arrow,
+          transform: isHovered ? 'translateX(4px)' : 'translateX(0)'
+        }}>→</span>
+      </div>
     </div>
-    <p style={{ textAlign: 'center', marginTop: '30px' }}>
-      <CtaButton href="loan-application?type=home-loan">Check Eligibility Now &raquo;</CtaButton>
-    </p>
-  </>
-);
-
-const Blog2 = () => (
-    <>
-      <h1 style={styles.h1}>Unlocking the Value of Your Property: A Guide to Loan Against Property</h1>
-      <h2 style={styles.h2}>Introduction: Your Property as a Financial Tool</h2>
-      <p>A <strong style={styles.strong}>Loan Against Property (LAP)</strong> allows you to leverage your property's value for various needs, like business expansion or consolidating debt, at lower interest rates than personal loans.</p>
-      <h2 style={styles.h2}>Key Features</h2>
-      <ul>
-        <li><strong style={styles.strong}>Higher Loan Amount:</strong> Get access to significant funds based on your property's value.</li>
-        <li><strong style={styles.strong}>Lower Interest Rates:</strong> Since it's secured, rates are lower.</li>
-        <li><strong style={styles.strong}>Longer Repayment Tenure:</strong> Enjoy flexible tenures up to 20 years.</li>
-      </ul>
-      <p style={{ textAlign: 'center', marginTop: '30px' }}>
-        <CtaButton href="loan-application?type=lap">Calculate Your LAP Eligibility &raquo;</CtaButton>
-      </p>
-    </>
-  );
-
-const Blog3 = () => (
-  <>
-    <h1 style={styles.h1}>Is Your Home Loan EMI Too High? The Guide to Balance Transfer</h1>
-    <h2 style={styles.h2}>Introduction: Don't Settle</h2>
-    <p>If interest rates have dropped since you took your loan, a <strong style={styles.strong}>Home Loan Balance Transfer</strong> can help you switch to a new lender with a lower rate, saving you a significant amount of money.</p>
-    <h2 style={styles.h2}>When to Consider a Transfer?</h2>
-    <ul>
-      <li><strong style={styles.strong}>Lower Rate:</strong> If another lender offers a rate at least 0.50% lower.</li>
-      <li><strong style={styles.strong}>Early Stage of Loan:</strong> Most beneficial in the initial years.</li>
-      <li><strong style={styles.strong}>Improved Credit:</strong> You may qualify for better rates now.</li>
-    </ul>
-    <p style={{ textAlign: 'center', marginTop: '30px' }}>
-      <CtaButton href="loan-application?type=bt-topup">Find Best Balance Transfer Offers &raquo;</CtaButton>
-    </p>
-  </>
-);
-
-const Blog4 = () => (
-  <>
-    <h1 style={styles.h1}>Investing in Real Estate vs. SIP: Which Path is Right for You?</h1>
-    <h2 style={styles.h2}>Introduction: The Investment Dilemma</h2>
-    <p>Choosing between the tangible ownership of <strong style={styles.strong}>Real Estate</strong> and the market-linked growth of <strong style={styles.strong}>SIPs</strong> depends on your goals, risk appetite, and financial situation.</p>
-    <h2 style={styles.h2}>Quick Comparison</h2>
-    <ul>
-      <li><strong style={styles.strong}>Ticket Size:</strong> Real Estate (High) vs. SIP (Low)</li>
-      <li><strong style={styles.strong}>Liquidity:</strong> Real Estate (Low) vs. SIP (High)</li>
-      <li><strong style={styles.strong}>Risk:</strong> Real Estate (Moderate) vs. SIP (High)</li>
-    </ul>
-    <p style={{ textAlign: 'center', marginTop: '30px' }}>
-      <CtaButton href="sip">Use Our Investment Calculators &raquo;</CtaButton>
-    </p>
-  </>
-);
-
-const Blog5 = () => (
-  <>
-    <h1 style={styles.h1}>Prepay Your Home Loan or Invest in SIP? A Dilemma Solved</h1>
-    <h2 style={styles.h2}>Introduction: A Common Crossroads</h2>
-    <p>With surplus cash, should you <strong style={styles.strong}>prepay your home loan</strong> to become debt-free, or <strong style={styles.strong}>invest in a SIP</strong> to build wealth? The answer lies in a simple comparison.</p>
-    <div style={styles.tldrSection}>
-        <h2 style={{...styles.h2, ...styles.tldrHeader}}>The Golden Rule ⚖️</h2>
-        <p>If the expected return from your investment is higher than your home loan's interest rate, investing makes more financial sense.</p>
-        <p style={{ textAlign: 'center', fontSize: '1.2em' }}>
-            If <strong style={styles.strong}>R<sub>SIP</sub> &gt; R<sub>Loan</sub></strong>, investing is potentially better.
-        </p>
-    </div>
-    <p style={{ textAlign: 'center', marginTop: '30px' }}>
-      <CtaButton href="sip">Make a Smart Decision &raquo;</CtaButton>
-    </p>
-  </>
+  </div>
 );
 
 // --- MAIN APP COMPONENT ---
-
-const blogData = [
-  { id: 1, component: <Blog1 /> },
-  { id: 2, component: <Blog2 /> },
-  { id: 3, component: <Blog3 /> },
-  { id: 4, component: <Blog4 /> },
-  { id: 5, component: <Blog5 /> },
-];
-
 function App() {
-  // Applying body styles directly requires targeting the document body.
-  // This effect hook runs once when the component mounts.
+  const [selectedBlog, setSelectedBlog] = useState(null);
+  const [hoveredCard, setHoveredCard] = useState(null);
+
   React.useEffect(() => {
     Object.assign(document.body.style, styles.body);
   }, []);
 
+  const handleCardClick = (blogId) => {
+    setSelectedBlog(blogId);
+  };
+
+  const handleBackToCards = () => {
+    setSelectedBlog(null);
+  };
+
+  if (selectedBlog) {
+    const blog = blogData.find(b => b.id === selectedBlog);
+    const BlogComponent = blog.component;
+    
+    return (
+      <div style={styles.mainContainer}>
+        <button 
+          style={styles.backButton}
+          onClick={handleBackToCards}
+          onMouseOver={(e) => {
+            e.target.style.backgroundColor = "#444";
+            e.target.style.borderColor = "#666";
+          }}
+          onMouseOut={(e) => {
+            e.target.style.backgroundColor = "#333";
+            e.target.style.borderColor = "#555";
+          }}
+        >
+          ← Back 
+        </button>
+        <div style={styles.blogPost}>
+          <BlogComponent styles={styles} />
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div style={styles.mainContainer}>
-      {blogData.map(post => (
-        <div key={post.id} style={styles.blogPost}>
-          {post.component}
-        </div>
-      ))}
+      {/* Filter Dropdowns */}
+      <div style={styles.filtersContainer}>
+        <select style={styles.filterDropdown}>
+          <option>Years</option>
+          <option>2025</option>
+          <option>2024</option>
+        </select>
+        <select style={styles.filterDropdown}>
+          <option>Months</option>
+          <option>July</option>
+          <option>June</option>
+          <option>May</option>
+        </select>
+        <select style={styles.filterDropdown}>
+          <option>Topics</option>
+          <option>E-commerce</option>
+          <option>Technology</option>
+          <option>Innovation</option>
+        </select>
+      </div>
+
+      {/* Blog Cards */}
+      <div style={styles.cardsContainer}>
+        {blogData.map((blog) => (
+          <BlogCard
+            key={blog.id}
+            blog={blog}
+            onClick={handleCardClick}
+            isHovered={hoveredCard === blog.id}
+            onHover={() => setHoveredCard(blog.id)}
+            onLeave={() => setHoveredCard(null)}
+          />
+        ))}
+      </div>
     </div>
   );
 }
