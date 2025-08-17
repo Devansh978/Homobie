@@ -13,9 +13,7 @@ import PropertyCard from "./PropertyCard";
 import ListViewCard from "./ListViewCard";
 import PropertyFilters from "./PropertyFilters";
 import FormProperties from "./FormProperties";
-
-const proxyUrl = "https://cors-anywhere.herokuapp.com/"; //temporary
-const baseUrl = proxyUrl + "https://homobiebackend-railway-production.up.railway.app";
+const baseUrl = "https://homobiebackend-railway-production.up.railway.app";
 
 const Properties = () => {
   const [currentView, setCurrentView] = useState("featured");
@@ -142,7 +140,7 @@ const Properties = () => {
   }, []);
 
   return (
-    <div className="min-h-screen bg-black text-white">
+    <div className="min-h-screen bg-black text-white pt-20">
       {/* Header */}
       <div className=" border-b border-white/10 bg-black/20 backdrop-blur-xl">
         <div className="max-w-7xl mx-auto px-4 py-8">

@@ -197,7 +197,7 @@ export default function ConsultationPage() {
 
   return (
     <div>
-      <main className="bg-neutral-50 py-12">
+      <main className="bg-black py-12 pt-20">
         <div className="container mx-auto px-4">
           <div className="max-w-6xl mx-auto">
             {isSuccess ? (
@@ -206,8 +206,8 @@ export default function ConsultationPage() {
                   <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
                     <Check className="h-8 w-8 text-green-600" />
                   </div>
-                  <h2 className="text-2xl font-bold text-gray-900 mb-2">Consultation Booked Successfully!</h2>
-                  <p className="text-gray-600 mb-6">
+                  <h2 className="text-2xl font-bold text-white mb-2">Consultation Booked Successfully!</h2>
+                  <p className="text-white mb-6">
                     Your consultation has been scheduled. You will receive a confirmation email shortly.
                   </p>
                   <Button onClick={() => navigate("/dashboard")}>
@@ -243,10 +243,10 @@ export default function ConsultationPage() {
             ) : (
               <>
                 <div className="mb-8 text-center">
-                  <h1 className="text-3xl font-bold text-neutral-800 mb-2">
+                  <h1 className="text-3xl font-bold text-white mb-2">
                     Book Your Financial Consultation
                   </h1>
-                  <p className="text-neutral-600 max-w-3xl mx-auto">
+                  <p className="text-white max-w-3xl mx-auto">
                     Our financial experts will help you understand your options and create a personalized plan to achieve your financial goals.
                     <span className="block mt-2 text-sm font-semibold">Consultation fee: ₹0</span>
                   </p>
@@ -263,214 +263,216 @@ export default function ConsultationPage() {
                       </CardHeader>
                       <CardContent>
                         <Form {...form}>
-                          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-                            <FormField
-                              control={form.control}
-                              name="topic"
-                              render={({ field }) => (
-                                <FormItem>
-                                  <FormLabel>Consultation Topic</FormLabel>
-                                  <Select 
-                                    value={field.value} 
-                                    onValueChange={field.onChange}
-                                  >
-                                    <FormControl>
-                                      <SelectTrigger>
-                                        <SelectValue placeholder="Select a topic" />
-                                      </SelectTrigger>
-                                    </FormControl>
-                                    <SelectContent>
-                                      {consultationTopics.map((topic) => (
-                                        <SelectItem key={topic} value={topic}>
-                                          {topic}
-                                        </SelectItem>
-                                      ))}
-                                    </SelectContent>
-                                  </Select>
-                                  <FormDescription>
-                                    Select the main topic you'd like to discuss
-                                  </FormDescription>
-                                  <FormMessage />
-                                </FormItem>
-                              )}
-                            />
-                            
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                              <FormField
-                                control={form.control}
-                                name="name"
-                                render={({ field }) => (
-                                  <FormItem>
-                                    <FormLabel>Your Name</FormLabel>
-                                    <FormControl>
-                                      <div className="flex">
-                                        <span className="inline-flex items-center px-3 rounded-l-md border border-r-0 border-neutral-300 bg-neutral-50 text-neutral-500">
-                                          <User className="h-4 w-4" />
-                                        </span>
-                                        <Input
-                                          placeholder="Enter your full name"
-                                          className="rounded-l-none"
-                                          {...field}
-                                        />
-                                      </div>
-                                    </FormControl>
-                                    <FormMessage />
-                                  </FormItem>
-                                )}
-                              />
-                              
-                              <FormField
-                                control={form.control}
-                                name="phone"
-                                render={({ field }) => (
-                                  <FormItem>
-                                    <FormLabel>Phone Number</FormLabel>
-                                    <FormControl>
-                                      <div className="flex">
-                                        <span className="inline-flex items-center px-3 rounded-l-md border border-r-0 border-neutral-300 bg-neutral-50 text-neutral-500">
-                                          <Phone className="h-4 w-4" />
-                                        </span>
-                                        <Input
-                                          placeholder="Enter your phone number"
-                                          className="rounded-l-none"
-                                          {...field}
-                                        />
-                                      </div>
-                                    </FormControl>
-                                    <FormMessage />
-                                  </FormItem>
-                                )}
-                              />
-                            </div>
-                            
-                            <FormField
-                              control={form.control}
-                              name="email"
-                              render={({ field }) => (
-                                <FormItem>
-                                  <FormLabel>Email Address</FormLabel>
-                                  <FormControl>
-                                    <Input
-                                      type="email"
-                                      placeholder="Enter your email address"
-                                      {...field}
-                                    />
-                                  </FormControl>
-                                  <FormDescription>
-                                    We'll send confirmation and meeting details to this email
-                                  </FormDescription>
-                                  <FormMessage />
-                                </FormItem>
-                              )}
-                            />
-                            
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                              <FormField
-                                control={form.control}
-                                name="preferredDate"
-                                render={({ field }) => (
-                                  <FormItem className="flex flex-col">
-                                    <FormLabel>Preferred Date</FormLabel>
-                                    <Popover>
-                                      <PopoverTrigger asChild>
-                                        <FormControl>
-                                          <Button
-                                            variant={"outline"}
-                                            className={cn(
-                                              "pl-3 text-left font-normal",
-                                              !field.value && "text-muted-foreground"
-                                            )}
-                                          >
-                                            {field.value ? (
-                                              format(field.value, "PPP")
-                                            ) : (
-                                              <span>Pick a date</span>
-                                            )}
-                                            <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                                          </Button>
-                                        </FormControl>
-                                      </PopoverTrigger>
-                                      <PopoverContent className="w-auto p-0" align="start">
-                                        <Calendar
-                                          mode="single"
-                                          selected={field.value as Date}
-                                          onSelect={field.onChange}
-                                          disabled={(date) => 
-                                            date < new Date() || // Can't select days in the past
-                                            date.getDay() === 0 || // Can't select Sundays
-                                            date.getDay() === 6    // Can't select Saturdays
-                                          }
-                                          initialFocus
-                                        />
-                                      </PopoverContent>
-                                    </Popover>
-                                    <FormDescription>
-                                      Select a weekday (Monday to Friday)
-                                    </FormDescription>
-                                    <FormMessage />
-                                  </FormItem>
-                                )}
-                              />
-                              
-                              <FormField
-                                control={form.control}
-                                name="preferredTime"
-                                render={({ field }) => (
-                                  <FormItem>
-                                    <FormLabel>Preferred Time</FormLabel>
-                                    <Select 
-                                      value={field.value} 
-                                      onValueChange={field.onChange}
-                                    >
-                                      <FormControl>
-                                        <SelectTrigger>
-                                          <SelectValue placeholder="Select a time slot" />
-                                        </SelectTrigger>
-                                      </FormControl>
-                                      <SelectContent>
-                                        {timeSlots.map((slot) => (
-                                          <SelectItem key={slot} value={slot}>
-                                            {slot}
-                                          </SelectItem>
-                                        ))}
-                                      </SelectContent>
-                                    </Select>
-                                    <FormDescription>
-                                      All times are in Indian Standard Time (IST)
-                                    </FormDescription>
-                                    <FormMessage />
-                                  </FormItem>
-                                )}
-                              />
-                            </div>
-                            
-                            <FormField
-                              control={form.control}
-                              name="notes"
-                              render={({ field }) => (
-                                <FormItem>
-                                  <FormLabel>Additional Notes (Optional)</FormLabel>
-                                  <FormControl>
-                                    <Textarea
-                                      placeholder="Please share any specific questions or topics you'd like to discuss"
-                                      className="min-h-[100px]"
-                                      {...field}
-                                    />
-                                  </FormControl>
-                                  <FormMessage />
-                                </FormItem>
-                              )}
-                            />
-                            
-                            <Button 
-                              type="submit"
-                              className="w-full"
-                              disabled={isSubmitting}
-                            >
-                              {isSubmitting ? "Booking Your Consultation..." : "Book My Free Consultation"}
-                            </Button>
-                          </form>
-                        </Form>
+  <form
+    onSubmit={form.handleSubmit(onSubmit)}
+    className="space-y-6 bg-black text-white border border-white p-6 rounded-md"
+  >
+    {/* Topic Selection */}
+    <FormField
+      control={form.control}
+      name="topic"
+      render={({ field }) => (
+        <FormItem>
+          <FormLabel className="text-white">Consultation Topic</FormLabel>
+          <Select value={field.value} onValueChange={field.onChange}>
+            <FormControl>
+              <SelectTrigger className="bg-black text-white border border-white">
+                <SelectValue placeholder="Select a topic" />
+              </SelectTrigger>
+            </FormControl>
+            <SelectContent className="bg-black text-white border border-white">
+              {consultationTopics.map((topic) => (
+                <SelectItem key={topic} value={topic} className="hover:bg-gray-800">
+                  {topic}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <FormDescription className="text-gray-300">
+            Select the main topic you'd like to discuss
+          </FormDescription>
+          <FormMessage className="text-red-400" />
+        </FormItem>
+      )}
+    />
+
+    {/* Name + Phone */}
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <FormField
+        control={form.control}
+        name="name"
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel className="text-white">Your Name</FormLabel>
+            <FormControl>
+              <div className="flex">
+                <span className="inline-flex items-center px-3 rounded-l-md border border-r-0 border-white bg-black text-white">
+                  <User className="h-4 w-4" />
+                </span>
+                <Input
+                  placeholder="Enter your full name"
+                  className="rounded-l-none bg-black text-white border border-white placeholder-gray-400"
+                  {...field}
+                />
+              </div>
+            </FormControl>
+            <FormMessage className="text-red-400" />
+          </FormItem>
+        )}
+      />
+
+      <FormField
+        control={form.control}
+        name="phone"
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel className="text-white">Phone Number</FormLabel>
+            <FormControl>
+              <div className="flex">
+                <span className="inline-flex items-center px-3 rounded-l-md border border-r-0 border-white bg-black text-white">
+                  <Phone className="h-4 w-4" />
+                </span>
+                <Input
+                  placeholder="Enter your phone number"
+                  className="rounded-l-none bg-black text-white border border-white placeholder-gray-400"
+                  {...field}
+                />
+              </div>
+            </FormControl>
+            <FormMessage className="text-red-400" />
+          </FormItem>
+        )}
+      />
+    </div>
+
+    {/* Email */}
+    <FormField
+      control={form.control}
+      name="email"
+      render={({ field }) => (
+        <FormItem>
+          <FormLabel className="text-white">Email Address</FormLabel>
+          <FormControl>
+            <Input
+              type="email"
+              placeholder="Enter your email address"
+              {...field}
+              className="bg-black text-white border border-white placeholder-gray-400"
+            />
+          </FormControl>
+          <FormDescription className="text-gray-300">
+            We'll send confirmation and meeting details to this email
+          </FormDescription>
+          <FormMessage className="text-red-400" />
+        </FormItem>
+      )}
+    />
+
+    {/* Date + Time */}
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <FormField
+        control={form.control}
+        name="preferredDate"
+        render={({ field }) => (
+          <FormItem className="flex flex-col">
+            <FormLabel className="text-white">Preferred Date</FormLabel>
+            <Popover>
+              <PopoverTrigger asChild>
+                <FormControl>
+                  <Button
+                    variant="outline"
+                    className={cn(
+                      "pl-3 text-left font-normal bg-black text-white border border-white",
+                      !field.value && "text-gray-400"
+                    )}
+                  >
+                    {field.value ? format(field.value, "PPP") : <span>Pick a date</span>}
+                    <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                  </Button>
+                </FormControl>
+              </PopoverTrigger>
+              <PopoverContent
+                className="w-auto p-0 bg-black border border-white text-white"
+                align="start"
+              >
+                <Calendar
+                  mode="single"
+                  selected={field.value as Date}
+                  onSelect={field.onChange}
+                  disabled={(date) =>
+                    date < new Date() || date.getDay() === 0 || date.getDay() === 6
+                  }
+                  initialFocus
+                />
+              </PopoverContent>
+            </Popover>
+            <FormDescription className="text-gray-300">
+              Select a weekday (Monday to Friday)
+            </FormDescription>
+            <FormMessage className="text-red-400" />
+          </FormItem>
+        )}
+      />
+
+      <FormField
+        control={form.control}
+        name="preferredTime"
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel className="text-white">Preferred Time</FormLabel>
+            <Select value={field.value} onValueChange={field.onChange}>
+              <FormControl>
+                <SelectTrigger className="bg-black text-white border border-white">
+                  <SelectValue placeholder="Select a time slot" />
+                </SelectTrigger>
+              </FormControl>
+              <SelectContent className="bg-black text-white border border-white">
+                {timeSlots.map((slot) => (
+                  <SelectItem key={slot} value={slot} className="hover:bg-gray-800">
+                    {slot}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <FormDescription className="text-gray-300">
+              All times are in Indian Standard Time (IST)
+            </FormDescription>
+            <FormMessage className="text-red-400" />
+          </FormItem>
+        )}
+      />
+    </div>
+
+    {/* Notes */}
+    <FormField
+      control={form.control}
+      name="notes"
+      render={({ field }) => (
+        <FormItem>
+          <FormLabel className="text-white">Additional Notes (Optional)</FormLabel>
+          <FormControl>
+            <Textarea
+              placeholder="Please share any specific questions or topics you'd like to discuss"
+              className="min-h-[100px] bg-black text-white border border-white placeholder-gray-400"
+              {...field}
+            />
+          </FormControl>
+          <FormMessage className="text-red-400" />
+        </FormItem>
+      )}
+    />
+
+    {/* Submit Button */}
+    <Button
+      type="submit"
+      className="w-full bg-white text-black hover:bg-gray-200"
+      disabled={isSubmitting}
+    >
+      {isSubmitting ? "Booking Your Consultation..." : "Book My Free Consultation"}
+    </Button>
+  </form>
+</Form>
+
                       </CardContent>
                     </Card>
                   </div>
@@ -575,7 +577,7 @@ export default function ConsultationPage() {
                           <CalendarX className="h-10 w-10 text-[#FFB800] mr-4" />
                           <div>
                             <h3 className="font-semibold text-lg mb-1">Need to Reschedule?</h3>
-                            <p className="text-sm text-neutral-600">
+                            <p className="text-sm text-white">
                               If you need to reschedule your consultation, you can do so from your dashboard up to 24 hours before your appointment.
                             </p>
                           </div>
@@ -597,11 +599,11 @@ export default function ConsultationPage() {
                         </p>
                         <div className="flex items-center">
                           <div className="w-10 h-10 rounded-full bg-neutral-200 flex items-center justify-center mr-3">
-                            <User className="h-5 w-5 text-neutral-500" />
+                            <User className="h-5 w-5 text-black0" />
                           </div>
                           <div>
                             <p className="font-semibold">Rahul Sharma</p>
-                            <p className="text-xs text-neutral-500">Home Loan Customer</p>
+                            <p className="text-xs text-black0">Home Loan Customer</p>
                           </div>
                         </div>
                       </CardContent>
@@ -615,11 +617,11 @@ export default function ConsultationPage() {
                         </p>
                         <div className="flex items-center">
                           <div className="w-10 h-10 rounded-full bg-neutral-200 flex items-center justify-center mr-3">
-                            <User className="h-5 w-5 text-neutral-500" />
+                            <User className="h-5 w-5 text-black0" />
                           </div>
                           <div>
                             <p className="font-semibold">Priya Patel</p>
-                            <p className="text-xs text-neutral-500">SIP Investor</p>
+                            <p className="text-xs text-black0">SIP Investor</p>
                           </div>
                         </div>
                       </CardContent>
@@ -633,11 +635,11 @@ export default function ConsultationPage() {
                         </p>
                         <div className="flex items-center">
                           <div className="w-10 h-10 rounded-full bg-neutral-200 flex items-center justify-center mr-3">
-                            <User className="h-5 w-5 text-neutral-500" />
+                            <User className="h-5 w-5 text-black0" />
                           </div>
                           <div>
                             <p className="font-semibold">Arjun Mehta</p>
-                            <p className="text-xs text-neutral-500">BT Top-Up Customer</p>
+                            <p className="text-xs text-black0">BT Top-Up Customer</p>
                           </div>
                         </div>
                       </CardContent>

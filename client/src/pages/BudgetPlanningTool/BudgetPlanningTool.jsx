@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useRef } from 'react';
 import { Chart, PieController, ArcElement, Tooltip, Legend, BarController, BarElement, CategoryScale, LinearScale } from 'chart.js';
 
@@ -104,7 +105,8 @@ const BudgetPlanner = () => {
               '#6366F1', '#8B5CF6', '#EC4899', '#F43F5E', 
               '#F59E0B', '#10B981', '#3B82F6', '#64748B'
             ],
-            borderWidth: 1
+            borderWidth: 2,
+            borderColor: '#ffffff'
           }]
         },
         options: {
@@ -114,7 +116,7 @@ const BudgetPlanner = () => {
             legend: {
               position: legendPosition,
               labels: {
-                color: '#000000' // Black text for legend
+                color: '#ffffff' // White text for legend
               }
             },
             tooltip: {
@@ -124,7 +126,8 @@ const BudgetPlanner = () => {
                   return `${context.label}: ₹${context.raw} (${percentage}%)`;
                 }
               },
-              bodyColor: '#000000' // Black text for tooltips
+              titleColor: '#ffffff', // White text for tooltips
+              bodyColor: '#ffffff'
             }
           }
         }
@@ -154,12 +157,18 @@ const BudgetPlanner = () => {
             y: {
               beginAtZero: true,
               ticks: {
-                color: '#000000' // Black text for y-axis
+                color: '#ffffff' // White text for y-axis
+              },
+              grid: {
+                color: '#374151' // Dark gray grid lines
               }
             },
             x: {
               ticks: {
-                color: '#000000' // Black text for x-axis
+                color: '#ffffff' // White text for x-axis
+              },
+              grid: {
+                color: '#374151' // Dark gray grid lines
               }
             }
           },
@@ -167,7 +176,7 @@ const BudgetPlanner = () => {
             legend: {
               position: legendPosition,
               labels: {
-                color: '#000000' // Black text for legend
+                color: '#ffffff' // White text for legend
               }
             },
             tooltip: {
@@ -176,7 +185,8 @@ const BudgetPlanner = () => {
                   return `${context.dataset.label}: ₹${context.raw}`;
                 }
               },
-              bodyColor: '#000000' // Black text for tooltips
+              titleColor: '#ffffff', // White text for tooltips
+              bodyColor: '#ffffff'
             }
           }
         }
@@ -189,7 +199,7 @@ const BudgetPlanner = () => {
         chartInstance.current.destroy();
       }
     };
-  }, [expenses, totalExpenses, isMobile, activeChart]); // Added activeChart to dependencies
+  }, [expenses, totalExpenses, isMobile, activeChart]);
 
   // Handle income change with proper clearing
   const handleIncomeChange = (value) => {
@@ -246,9 +256,9 @@ const BudgetPlanner = () => {
 
   // Mobile-friendly summary cards
   const SummaryCard = ({ title, value, isPositive = true }) => (
-    <div className={`p-3 rounded-lg ${isPositive ? 'bg-green-50' : 'bg-red-50'} mb-2`}>
-      <h3 className="text-xs sm:text-sm font-medium text-gray-800">{title}</h3>
-      <p className={`text-lg sm:text-xl font-semibold ${isPositive ? 'text-green-600' : 'text-red-600'}`}>
+    <div className={`p-3 rounded-lg ${isPositive ? 'bg-green-900' : 'bg-red-900'} mb-2 border border-gray-700`}>
+      <h3 className="text-xs sm:text-sm font-medium text-gray-200">{title}</h3>
+      <p className={`text-lg sm:text-xl font-semibold ${isPositive ? 'text-green-300' : 'text-red-300'}`}>
         ₹{typeof value === 'number' ? value.toLocaleString() : value}
       </p>
     </div>
@@ -257,17 +267,17 @@ const BudgetPlanner = () => {
   return (
     <div 
       ref={appRef}
-      className={`bg-gray-50 ${isFullScreen ? 'fixed inset-0 overflow-auto' : 'min-h-screen'} py-2 px-2 sm:px-4 md:px-6`}
+      className={`bg-black pt-20 ${isFullScreen ? 'fixed inset-0 overflow-auto' : 'min-h-screen'} py-2 px-2 sm:px-4 md:px-6`}
     >
       <div className={`max-w-6xl mx-auto ${isFullScreen ? 'p-4' : ''}`}>
         {/* Header with fullscreen toggle */}
         <div className="flex justify-between items-center mb-4">
-          <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-900">
+          <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-white">
             Budget Planning Tool
           </h1>
           <button
             onClick={toggleFullScreen}
-            className="p-2 text-gray-600 hover:text-indigo-700 hover:bg-gray-100 rounded-full"
+            className="p-2 text-gray-300 hover:text-white hover:bg-gray-800 rounded-full"
             aria-label={isFullScreen ? 'Exit fullscreen' : 'Enter fullscreen'}
           >
             {isFullScreen ? (
@@ -287,25 +297,25 @@ const BudgetPlanner = () => {
           <div className="flex space-x-2 mb-4 overflow-x-auto pb-2">
             <button
               onClick={() => document.getElementById('income-section').scrollIntoView({ behavior: 'smooth' })}
-              className="flex-shrink-0 px-3 py-1 bg-indigo-100 text-gray-900 rounded-full text-sm"
+              className="flex-shrink-0 px-3 py-1 bg-gray-800 text-white rounded-full text-sm border border-gray-600"
             >
               Income
             </button>
             <button
               onClick={() => document.getElementById('expenses-section').scrollIntoView({ behavior: 'smooth' })}
-              className="flex-shrink-0 px-3 py-1 bg-indigo-100 text-gray-900 rounded-full text-sm"
+              className="flex-shrink-0 px-3 py-1 bg-gray-800 text-white rounded-full text-sm border border-gray-600"
             >
               Expenses
             </button>
             <button
               onClick={() => document.getElementById('charts-section').scrollIntoView({ behavior: 'smooth' })}
-              className="flex-shrink-0 px-3 py-1 bg-indigo-100 text-gray-900 rounded-full text-sm"
+              className="flex-shrink-0 px-3 py-1 bg-gray-800 text-white rounded-full text-sm border border-gray-600"
             >
               Charts
             </button>
             <button
               onClick={() => document.getElementById('summary-section').scrollIntoView({ behavior: 'smooth' })}
-              className="flex-shrink-0 px-3 py-1 bg-indigo-100 text-gray-900 rounded-full text-sm"
+              className="flex-shrink-0 px-3 py-1 bg-gray-800 text-white rounded-full text-sm border border-gray-600"
             >
               Summary
             </button>
@@ -314,18 +324,18 @@ const BudgetPlanner = () => {
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-6">
           {/* Income and Summary Section */}
-          <div id="income-section" className="lg:col-span-1 bg-white p-4 sm:p-6 rounded-lg shadow">
-            <h2 className="text-lg sm:text-xl font-semibold text-gray-900 mb-4">Income & Summary</h2>
+          <div id="income-section" className="lg:col-span-1 bg-gray-900 p-4 sm:p-6 rounded-lg shadow border border-gray-700">
+            <h2 className="text-lg sm:text-xl font-semibold text-white mb-4">Income & Summary</h2>
 
             <div className="mb-4">
-              <label className="block text-sm font-medium text-gray-900 mb-1">
+              <label className="block text-sm font-medium text-white mb-1">
                 {timeframe === 'monthly' ? 'Monthly Income' : 'Quarterly Income'}
               </label>
               <div className="relative rounded-md shadow-sm">
-                <span className="absolute inset-y-0 left-0 pl-3 flex items-center text-gray-900">₹</span>
+                <span className="absolute inset-y-0 left-0 pl-3 flex items-center text-white">₹</span>
                 <input
                   type="number"
-                  className="block w-full pl-8 pr-12 py-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500 text-gray-900"
+                  className="block w-full pl-8 pr-12 py-2 border border-gray-600 rounded-md focus:ring-indigo-500 focus:border-indigo-500 bg-gray-800 text-white placeholder-gray-400"
                   value={income}
                   onChange={(e) => handleIncomeChange(e.target.value)}
                   onFocus={(e) => e.target.select()}
@@ -337,7 +347,7 @@ const BudgetPlanner = () => {
               <button
                 onClick={() => setTimeframe('monthly')}
                 className={`flex-1 py-2 px-2 sm:px-4 text-sm sm:text-base rounded-md ${
-                  timeframe === 'monthly' ? 'bg-indigo-600 text-white' : 'bg-gray-200 text-gray-900'
+                  timeframe === 'monthly' ? 'bg-indigo-600 text-white' : 'bg-gray-700 text-gray-300 border border-gray-600'
                 }`}
               >
                 Monthly
@@ -345,7 +355,7 @@ const BudgetPlanner = () => {
               <button
                 onClick={() => setTimeframe('quarterly')}
                 className={`flex-1 py-2 px-2 sm:px-4 text-sm sm:text-base rounded-md ${
-                  timeframe === 'quarterly' ? 'bg-indigo-600 text-white' : 'bg-gray-200 text-gray-900'
+                  timeframe === 'quarterly' ? 'bg-indigo-600 text-white' : 'bg-gray-700 text-gray-300 border border-gray-600'
                 }`}
               >
                 Quarterly
@@ -365,28 +375,28 @@ const BudgetPlanner = () => {
             {/* Desktop summary */}
             {!isMobile && (
               <div className="space-y-3">
-                <div className="p-3 bg-gray-50 rounded-lg">
-                  <h3 className="text-sm font-medium text-gray-900">Total Income</h3>
-                  <p className="text-xl font-semibold text-gray-900">₹{(typeof income === 'number' ? income : 0).toLocaleString()}</p>
+                <div className="p-3 bg-gray-800 rounded-lg border border-gray-700">
+                  <h3 className="text-sm font-medium text-white">Total Income</h3>
+                  <p className="text-xl font-semibold text-white">₹{(typeof income === 'number' ? income : 0).toLocaleString()}</p>
                 </div>
 
-                <div className="p-3 bg-gray-50 rounded-lg">
-                  <h3 className="text-sm font-medium text-gray-900">Total Expenses</h3>
-                  <p className="text-xl font-semibold text-gray-900">₹{totalExpenses.toLocaleString()}</p>
+                <div className="p-3 bg-gray-800 rounded-lg border border-gray-700">
+                  <h3 className="text-sm font-medium text-white">Total Expenses</h3>
+                  <p className="text-xl font-semibold text-white">₹{totalExpenses.toLocaleString()}</p>
                 </div>
 
-                <div className="p-3 bg-gray-50 rounded-lg">
-                  <h3 className="text-sm font-medium text-gray-900">Savings</h3>
-                  <p className="text-xl font-semibold text-green-600">₹{savings.toLocaleString()}</p>
+                <div className="p-3 bg-gray-800 rounded-lg border border-gray-700">
+                  <h3 className="text-sm font-medium text-white">Savings</h3>
+                  <p className="text-xl font-semibold text-green-400">₹{savings.toLocaleString()}</p>
                 </div>
 
-                <div className={`p-3 rounded-lg ${remainingBudget >= 0 ? 'bg-green-50' : 'bg-red-50'}`}>
-                  <h3 className="text-sm font-medium text-gray-900">Remaining Budget</h3>
-                  <p className={`text-xl font-semibold ${remainingBudget >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                <div className={`p-3 rounded-lg border ${remainingBudget >= 0 ? 'bg-green-900 border-green-700' : 'bg-red-900 border-red-700'}`}>
+                  <h3 className="text-sm font-medium text-white">Remaining Budget</h3>
+                  <p className={`text-xl font-semibold ${remainingBudget >= 0 ? 'text-green-300' : 'text-red-300'}`}>
                     ₹{remainingBudget.toLocaleString()}
                   </p>
                   {remainingBudget < 0 && (
-                    <p className="text-xs text-red-600 mt-1">Warning: You're overspending!</p>
+                    <p className="text-xs text-red-300 mt-1">Warning: You're overspending!</p>
                   )}
                 </div>
               </div>
@@ -396,14 +406,14 @@ const BudgetPlanner = () => {
           {/* Expenses and Charts Section */}
           <div className="lg:col-span-2 space-y-4 md:space-y-6">
             {/* Chart Selection and Display */}
-            <div id="charts-section" className="bg-white p-4 sm:p-6 rounded-lg shadow">
+            <div id="charts-section" className="bg-gray-900 p-4 sm:p-6 rounded-lg shadow border border-gray-700">
               <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-4">
-                <h2 className="text-lg sm:text-xl font-semibold text-gray-900 mb-2 sm:mb-0">Spending Visualization</h2>
+                <h2 className="text-lg sm:text-xl font-semibold text-white mb-2 sm:mb-0">Spending Visualization</h2>
                 <div className="flex space-x-2">
                   <button
                     onClick={() => setActiveChart('pie')}
                     className={`py-1 px-2 sm:px-3 text-sm rounded-md ${
-                      activeChart === 'pie' ? 'bg-indigo-600 text-white' : 'bg-gray-200 text-gray-900'
+                      activeChart === 'pie' ? 'bg-indigo-600 text-white' : 'bg-gray-700 text-gray-300 border border-gray-600'
                     }`}
                   >
                     Pie
@@ -411,7 +421,7 @@ const BudgetPlanner = () => {
                   <button
                     onClick={() => setActiveChart('bar')}
                     className={`py-1 px-2 sm:px-3 text-sm rounded-md ${
-                      activeChart === 'bar' ? 'bg-indigo-600 text-white' : 'bg-gray-200 text-gray-900'
+                      activeChart === 'bar' ? 'bg-indigo-600 text-white' : 'bg-gray-700 text-gray-300 border border-gray-600'
                     }`}
                   >
                     Bar
@@ -419,15 +429,15 @@ const BudgetPlanner = () => {
                 </div>
               </div>
 
-              <div className="h-64 sm:h-80">
+              <div className="h-64 sm:h-80 bg-gray-800 rounded-lg p-2">
                 <canvas ref={chartContainerRef}></canvas>
               </div>
             </div>
 
             {/* Expense Categories */}
-            <div id="expenses-section" className="bg-white p-4 sm:p-6 rounded-lg shadow">
+            <div id="expenses-section" className="bg-gray-900 p-4 sm:p-6 rounded-lg shadow border border-gray-700">
               <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-4">
-                <h2 className="text-lg sm:text-xl font-semibold text-gray-900 mb-2 sm:mb-0">Expense Categories</h2>
+                <h2 className="text-lg sm:text-xl font-semibold text-white mb-2 sm:mb-0">Expense Categories</h2>
                 <button
                   onClick={addNewCategory}
                   className="py-1 px-3 bg-indigo-600 text-white text-sm sm:text-base rounded-md hover:bg-indigo-700"
@@ -437,25 +447,25 @@ const BudgetPlanner = () => {
               </div>
 
               <div className="overflow-x-auto">
-                <table className="min-w-full divide-y divide-gray-200">
-                  <thead className="bg-gray-50">
+                <table className="min-w-full divide-y divide-gray-700">
+                  <thead className="bg-gray-800">
                     <tr>
-                      <th className="px-2 sm:px-4 py-2 text-left text-xs font-medium text-gray-900 uppercase tracking-wider">Category</th>
-                      <th className="px-2 sm:px-4 py-2 text-left text-xs font-medium text-gray-900 uppercase tracking-wider">Amount</th>
+                      <th className="px-2 sm:px-4 py-2 text-left text-xs font-medium text-white uppercase tracking-wider">Category</th>
+                      <th className="px-2 sm:px-4 py-2 text-left text-xs font-medium text-white uppercase tracking-wider">Amount</th>
                       {!isMobile && (
-                        <th className="px-2 sm:px-4 py-2 text-left text-xs font-medium text-gray-900 uppercase tracking-wider">Budget Max</th>
+                        <th className="px-2 sm:px-4 py-2 text-left text-xs font-medium text-white uppercase tracking-wider">Budget Max</th>
                       )}
-                      <th className="px-2 sm:px-4 py-2 text-left text-xs font-medium text-gray-900 uppercase tracking-wider">Status</th>
-                      <th className="px-2 sm:px-4 py-2 text-left text-xs font-medium text-gray-900 uppercase tracking-wider">Actions</th>
+                      <th className="px-2 sm:px-4 py-2 text-left text-xs font-medium text-white uppercase tracking-wider">Status</th>
+                      <th className="px-2 sm:px-4 py-2 text-left text-xs font-medium text-white uppercase tracking-wider">Actions</th>
                     </tr>
                   </thead>
-                  <tbody className="bg-white divide-y divide-gray-200">
+                  <tbody className="bg-gray-900 divide-y divide-gray-700">
                     {expenses.map((expense) => (
-                      <tr key={expense.id} className={(expense.amount || 0) > (expense.max || 0) ? 'bg-red-50' : ''}>
+                      <tr key={expense.id} className={(expense.amount || 0) > (expense.max || 0) ? 'bg-red-900 bg-opacity-20' : ''}>
                         <td className="px-2 sm:px-4 py-2 whitespace-nowrap">
                           <input
                             type="text"
-                            className="block w-full py-1 px-1 sm:px-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500 text-sm sm:text-base text-gray-900"
+                            className="block w-full py-1 px-1 sm:px-2 border border-gray-600 rounded-md focus:ring-indigo-500 focus:border-indigo-500 text-sm sm:text-base bg-gray-800 text-white placeholder-gray-400"
                             value={expense.category}
                             onChange={(e) => handleCategoryNameChange(expense.id, e.target.value)}
                             placeholder="Category"
@@ -463,10 +473,10 @@ const BudgetPlanner = () => {
                         </td>
                         <td className="px-2 sm:px-4 py-2 whitespace-nowrap">
                           <div className="relative rounded-md shadow-sm">
-                            <span className="absolute inset-y-0 left-0 pl-2 flex items-center text-gray-900 text-sm">₹</span>
+                            <span className="absolute inset-y-0 left-0 pl-2 flex items-center text-white text-sm">₹</span>
                             <input
                               type="number"
-                              className="block w-full pl-6 pr-2 py-1 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500 text-sm sm:text-base text-gray-900"
+                              className="block w-full pl-6 pr-2 py-1 border border-gray-600 rounded-md focus:ring-indigo-500 focus:border-indigo-500 text-sm sm:text-base bg-gray-800 text-white placeholder-gray-400"
                               value={expense.amount}
                               onChange={(e) => handleExpenseChange(expense.id, 'amount', e.target.value)}
                               onFocus={(e) => e.target.select()}
@@ -476,10 +486,10 @@ const BudgetPlanner = () => {
                         {!isMobile && (
                           <td className="px-2 sm:px-4 py-2 whitespace-nowrap">
                             <div className="relative rounded-md shadow-sm">
-                              <span className="absolute inset-y-0 left-0 pl-2 flex items-center text-gray-900 text-sm">₹</span>
+                              <span className="absolute inset-y-0 left-0 pl-2 flex items-center text-white text-sm">₹</span>
                               <input
                                 type="number"
-                                className="block w-full pl-6 pr-2 py-1 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500 text-sm sm:text-base text-gray-900"
+                                className="block w-full pl-6 pr-2 py-1 border border-gray-600 rounded-md focus:ring-indigo-500 focus:border-indigo-500 text-sm sm:text-base bg-gray-800 text-white placeholder-gray-400"
                                 value={expense.max}
                                 onChange={(e) => handleExpenseChange(expense.id, 'max', e.target.value)}
                                 onFocus={(e) => e.target.select()}
@@ -489,15 +499,15 @@ const BudgetPlanner = () => {
                         )}
                         <td className="px-2 sm:px-4 py-2 whitespace-nowrap">
                           {(expense.amount || 0) > (expense.max || 0) ? (
-                            <span className="px-1 py-0.5 text-xs font-semibold text-red-800 bg-red-200 rounded-full">Over</span>
+                            <span className="px-1 py-0.5 text-xs font-semibold text-red-300 bg-red-900 rounded-full border border-red-700">Over</span>
                           ) : (
-                            <span className="px-1 py-0.5 text-xs font-semibold text-green-800 bg-green-200 rounded-full">OK</span>
+                            <span className="px-1 py-0.5 text-xs font-semibold text-green-300 bg-green-900 rounded-full border border-green-700">OK</span>
                           )}
                         </td>
                         <td className="px-2 sm:px-4 py-2 whitespace-nowrap">
                           <button
                             onClick={() => removeCategory(expense.id)}
-                            className="text-red-600 hover:text-red-900 text-sm sm:text-base"
+                            className="text-red-400 hover:text-red-300 text-sm sm:text-base"
                           >
                             Remove
                           </button>
@@ -510,49 +520,49 @@ const BudgetPlanner = () => {
             </div>
 
             {/* Summary Table */}
-            <div id="summary-section" className="bg-white p-4 sm:p-6 rounded-lg shadow">
-              <h2 className="text-lg sm:text-xl font-semibold text-gray-900 mb-4">{timeframe === 'monthly' ? 'Monthly' : 'Quarterly'} Summary</h2>
+            <div id="summary-section" className="bg-gray-900 p-4 sm:p-6 rounded-lg shadow border border-gray-700">
+              <h2 className="text-lg sm:text-xl font-semibold text-white mb-4">{timeframe === 'monthly' ? 'Monthly' : 'Quarterly'} Summary</h2>
 
               <div className="overflow-x-auto">
-                <table className="min-w-full divide-y divide-gray-200">
-                  <thead className="bg-gray-50">
+                <table className="min-w-full divide-y divide-gray-700">
+                  <thead className="bg-gray-800">
                     <tr>
-                      <th className="px-2 sm:px-4 py-2 text-left text-xs font-medium text-gray-900 uppercase tracking-wider">Category</th>
-                      <th className="px-2 sm:px-4 py-2 text-left text-xs font-medium text-gray-900 uppercase tracking-wider">Amount</th>
+                      <th className="px-2 sm:px-4 py-2 text-left text-xs font-medium text-white uppercase tracking-wider">Category</th>
+                      <th className="px-2 sm:px-4 py-2 text-left text-xs font-medium text-white uppercase tracking-wider">Amount</th>
                       {!isMobile && (
-                        <th className="px-2 sm:px-4 py-2 text-left text-xs font-medium text-gray-900 uppercase tracking-wider">% of Income</th>
+                        <th className="px-2 sm:px-4 py-2 text-left text-xs font-medium text-white uppercase tracking-wider">% of Income</th>
                       )}
                     </tr>
                   </thead>
-                  <tbody className="bg-white divide-y divide-gray-200">
+                  <tbody className="bg-gray-900 divide-y divide-gray-700">
                     <tr>
-                      <td className="px-2 sm:px-4 py-2 whitespace-nowrap font-medium text-gray-900">Income</td>
-                      <td className="px-2 sm:px-4 py-2 whitespace-nowrap text-gray-900">₹{(typeof income === 'number' ? income : 0).toLocaleString()}</td>
+                      <td className="px-2 sm:px-4 py-2 whitespace-nowrap font-medium text-white">Income</td>
+                      <td className="px-2 sm:px-4 py-2 whitespace-nowrap text-white">₹{(typeof income === 'number' ? income : 0).toLocaleString()}</td>
                       {!isMobile && (
-                        <td className="px-2 sm:px-4 py-2 whitespace-nowrap text-gray-900">100%</td>
+                        <td className="px-2 sm:px-4 py-2 whitespace-nowrap text-white">100%</td>
                       )}
                     </tr>
                     {expenses.map((expense) => (
                       <tr key={expense.id}>
-                        <td className="px-2 sm:px-4 py-2 whitespace-nowrap text-gray-900">{expense.category || 'Unnamed'}</td>
-                        <td className="px-2 sm:px-4 py-2 whitespace-nowrap text-gray-900">₹{(expense.amount || 0).toLocaleString()}</td>
+                        <td className="px-2 sm:px-4 py-2 whitespace-nowrap text-white">{expense.category || 'Unnamed'}</td>
+                        <td className="px-2 sm:px-4 py-2 whitespace-nowrap text-white">₹{(expense.amount || 0).toLocaleString()}</td>
                         {!isMobile && (
-                          <td className="px-2 sm:px-4 py-2 whitespace-nowrap text-gray-900">{Math.round(((expense.amount || 0) / (typeof income === 'number' ? income : 1)) * 100)}%</td>
+                          <td className="px-2 sm:px-4 py-2 whitespace-nowrap text-white">{Math.round(((expense.amount || 0) / (typeof income === 'number' ? income : 1)) * 100)}%</td>
                         )}
                       </tr>
                     ))}
-                    <tr className="bg-gray-50">
-                      <td className="px-2 sm:px-4 py-2 whitespace-nowrap font-medium text-gray-900">Total Expenses</td>
-                      <td className="px-2 sm:px-4 py-2 whitespace-nowrap font-medium text-gray-900">₹{totalExpenses.toLocaleString()}</td>
+                    <tr className="bg-gray-800">
+                      <td className="px-2 sm:px-4 py-2 whitespace-nowrap font-medium text-white">Total Expenses</td>
+                      <td className="px-2 sm:px-4 py-2 whitespace-nowrap font-medium text-white">₹{totalExpenses.toLocaleString()}</td>
                       {!isMobile && (
-                        <td className="px-2 sm:px-4 py-2 whitespace-nowrap font-medium text-gray-900">{Math.round((totalExpenses / (typeof income === 'number' ? income : 1)) * 100)}%</td>
+                        <td className="px-2 sm:px-4 py-2 whitespace-nowrap font-medium text-white">{Math.round((totalExpenses / (typeof income === 'number' ? income : 1)) * 100)}%</td>
                       )}
                     </tr>
-                    <tr className="bg-green-50">
-                      <td className="px-2 sm:px-4 py-2 whitespace-nowrap font-medium text-green-800">Remaining</td>
-                      <td className="px-2 sm:px-4 py-2 whitespace-nowrap font-medium text-green-800">₹{remainingBudget.toLocaleString()}</td>
+                    <tr className="bg-green-900 bg-opacity-20">
+                      <td className="px-2 sm:px-4 py-2 whitespace-nowrap font-medium text-green-300">Remaining</td>
+                      <td className="px-2 sm:px-4 py-2 whitespace-nowrap font-medium text-green-300">₹{remainingBudget.toLocaleString()}</td>
                       {!isMobile && (
-                        <td className="px-2 sm:px-4 py-2 whitespace-nowrap font-medium text-green-800">{Math.round((remainingBudget / (typeof income === 'number' ? income : 1)) * 100)}%</td>
+                        <td className="px-2 sm:px-4 py-2 whitespace-nowrap font-medium text-green-300">{Math.round((remainingBudget / (typeof income === 'number' ? income : 1)) * 100)}%</td>
                       )}
                     </tr>
                   </tbody>

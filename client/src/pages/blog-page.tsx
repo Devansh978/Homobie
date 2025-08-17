@@ -12,7 +12,7 @@ const styles = {
     color: "#e0e0e0",
     fontFamily: "'Segoe UI', 'Helvetica Neue', Arial, sans-serif",
     lineHeight: 1.7,
-    margin: 0,
+    marginTop: "30px",
     padding: 0,
   },
   mainContainer: {
