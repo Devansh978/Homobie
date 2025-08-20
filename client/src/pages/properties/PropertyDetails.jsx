@@ -1,462 +1,553 @@
-import React, { useState } from "react";
-import { useLocation } from "wouter";
-import {
-  ArrowLeft,
-  Heart,
-  Share2,
-  MapPin,
-  Bed,
-  Bath,
-  Square,
-  Car,
-  Wifi,
-  Shield,
-  Zap,
-  TreePine,
-  Dumbbell,
-  Camera,
-  ChevronLeft,
-  ChevronRight,
-  Phone,
-  Mail,
-  Calendar,
-  CheckCircle,
-  Home,
-  Building,
-  Sofa,
-  User,
-} from "lucide-react";
+import React, { useState, useEffect, useMemo } from "react";
+import { ArrowLeft, MapPin, Bed, Bath, Ruler, Car, X, ChevronLeft, ChevronRight, Phone, Mail, Heart, Share2, Calendar, Shield, Eye } from "lucide-react";
 
-import AllPropertiesData from "./AllPropertiesData";
-import FeaturedPropertiesData from "./FeaturedPropertiesData";
+// API Configuration
+const BASE_URL = 'https://homobiebackend-railway-production.up.railway.app';
 
-const PropertyDetails = ({ property, files, onBack, id }) => {
-  const [, setLocation] = useLocation();
-  let propertyData = property;
-  let propertyFiles = files;
+// This function should ONLY return an actual authentication token (JWT).
+const getAuthToken = () => {
+  return localStorage.getItem('auth_token') || sessionStorage.getItem('auth_token');
+};
 
-  if (id) {
-    const all = [...AllPropertiesData, ...FeaturedPropertiesData];
-    const found = all.find(
-      (item) => item.id === id || (item.property && item.property.id === id)
-    );
-    if (found) {
-      propertyData = found.property;
-      propertyFiles = found.files;
-    }
+// Function to get propertyId from localStorage
+const getPropertyIdFromLocalStorage = () => {
+  const propertyId = localStorage.getItem('currentPropertyId');
+  if (propertyId) {
+    return propertyId.replace(/^"|"$/g, '');
+  }
+  return null;
+};
+  
+// API function to fetch individual property
+const fetchIndividualProperty = async (propertyId) => {
+  const token = getAuthToken();
+  
+  if (!token) {
+    throw new Error('Authentication token not found. Please log in again.');
   }
 
-  const [currentImageIndex, setCurrentImageIndex] = useState(0);
-  const [selectedTab, setSelectedTab] = useState("overview");
+  try {
+    const response = await fetch(`${BASE_URL}/properties/getIndividualProperty?propertyId=${propertyId}`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`,
+      },
+    });
 
-  if (!propertyData) {
+    if (!response.ok) {
+      if (response.status === 401) {
+        throw new Error('Authentication failed. Please log in again.');
+      }
+      if (response.status === 404) {
+        throw new Error('Property not found.');
+      }
+      throw new Error(`Failed to fetch property: ${response.status} ${response.statusText}`);
+    }
+
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    if (error instanceof TypeError && error.message.includes('fetch')) {
+      throw new Error('Network error. Please check your internet connection.');
+    }
+    throw error;
+  }
+};
+// ADD THIS NEW FUNCTION
+const normalizeSingleProperty = (data) => {
+  if (!data) return null; // Return null if the API response is empty
+
+  return {
+    // IDs
+    id: data.propertyId || `temp-${Math.random().toString(36).substr(2, 9)}`,
+    propertyId: data.propertyId,
+
+    // Core Details
+    title: data.title || "Untitled Property",
+    description: data.description || "No description available.",
+    actualPrice: data.actualPrice || 0,
+    discountPrice: data.discountPrice || 0,
+    areaSqft: data.areaSqft || 0,
+    bedrooms: data.bedrooms || 0,
+    bathrooms: data.bathrooms || 0,
+
+    // Categorization
+    type: data.type || "N/A",
+    category: data.category || "N/A",
+    status: data.status || "N/A",
+    furnishing: data.furnishing || "N/A",
+    constructionStatus: data.constructionStatus || "N/A",
+
+    // Location (handle nested object safely)
+    location: {
+      address: data.location?.address || "Address not available",
+      city: data.location?.city || "",
+      state: data.location?.state || "",
+      pincode: data.location?.pincode || "",
+    },
+
+    // Arrays (ensures they are always arrays to prevent .map errors)
+    files: data.files || [], // Assumes API returns a 'files' array of URLs
+    amenities: data.amenities || [],
+    propertyFeatures: data.propertyFeatures || [],
+
+    // Owner
+    ownerName: data.ownerName || "Private Owner",
+  };
+};
+const PropertyDetail = () => {
+  const [property, setProperty] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [selectedImageIndex, setSelectedImageIndex] = useState(0);
+  const [showImageModal, setShowImageModal] = useState(false);
+  const [isFavorite, setIsFavorite] = useState(false);
+
+  const goBack = () => {
+  window.history.back();
+};
+
+  useEffect(() => {
+    const fetchPropertyDetail = async () => {
+      const propertyId = getPropertyIdFromLocalStorage();
+      
+      if (!propertyId) {
+        setError("Property ID not found in localStorage. Please select a property to view.");
+        setIsLoading(false);
+        return;
+      }
+
+      try {
+        const propertyData = await fetchIndividualProperty(propertyId);
+        setProperty(propertyData);
+        
+        try {
+          const favorites = JSON.parse(sessionStorage.getItem('favorites') || '[]');
+          setIsFavorite(favorites.includes(propertyId));
+        } catch {
+          sessionStorage.setItem('favorites', '[]');
+        }
+      } catch (err) {
+        console.error('Error fetching property:', err);
+        setError(err.message || "Failed to load property details");
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchPropertyDetail();
+  }, []);
+
+  // --- CORRECTED: Memoized calculations to access the flat data structure ---
+  const discountPercentage = useMemo(() => {
+    if (!property?.discountPrice || !property?.actualPrice) return 0;
+    return Math.round(((property.actualPrice - property.discountPrice) / property.actualPrice) * 100);
+  }, [property]);
+
+  const pricePerSqft = useMemo(() => {
+    if (!property?.discountPrice && !property?.actualPrice) return 0;
+    const price = property.discountPrice || property.actualPrice;
+    if (!property.areaSqft) return 0;
+    return Math.round(price / property.areaSqft);
+  }, [property]);
+
+  const nextImage = () => {
+    if (!property?.files || property.files.length === 0) return;
+    setSelectedImageIndex((prev) => 
+      prev === property.files.length - 1 ? 0 : prev + 1
+    );
+  };
+
+  const prevImage = () => {
+    if (!property?.files || property.files.length === 0) return;
+    setSelectedImageIndex((prev) => 
+      prev === 0 ? property.files.length - 1 : prev - 1
+    );
+  };
+
+  const toggleFavorite = () => {
+    const propertyId = getPropertyIdFromLocalStorage();
+    if (!propertyId) return;
+
+    try {
+      const favorites = JSON.parse(sessionStorage.getItem('favorites') || '[]');
+      if (isFavorite) {
+        const updatedFavorites = favorites.filter(id => id !== propertyId);
+        sessionStorage.setItem('favorites', JSON.stringify(updatedFavorites));
+      } else {
+        favorites.push(propertyId);
+        sessionStorage.setItem('favorites', JSON.stringify(favorites));
+      }
+      setIsFavorite(!isFavorite);
+    } catch {
+      sessionStorage.setItem('favorites', JSON.stringify([propertyId]));
+      setIsFavorite(true);
+    }
+  };
+
+  const shareProperty = async () => {
+    const shareData = {
+      title: property.title,
+      text: `Check out this amazing property: ${property.title}`,
+      url: window.location.href
+    };
+
+    try {
+      if (navigator.share) {
+        await navigator.share(shareData);
+      } else {
+        await navigator.clipboard.writeText(window.location.href);
+        alert('Property link copied to clipboard!');
+      }
+    } catch (err) {
+      console.log('Error sharing:', err);
+    }
+  };
+
+  if (isLoading) {
     return (
       <div className="min-h-screen bg-black text-white flex items-center justify-center">
         <div className="text-center">
-          <Home className="w-16 h-16 mx-auto mb-4 text-white/60" />
-          <p className="text-xl">Property not found</p>
+          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-white mx-auto mb-4"></div>
+          <p className="text-lg">Loading property details...</p>
         </div>
       </div>
     );
   }
 
-  const images = propertyFiles || [];
-  const locationString = `${propertyData.location.addressLine1}, ${
-    propertyData.location.addressLine2 ? propertyData.location.addressLine2 + ", " : ""
-  }${propertyData.location.city}, ${propertyData.location.state} ${
-    propertyData.location.pincode
-  }`;
-
-  const nextImage = () => {
-    setCurrentImageIndex((prev) => (prev + 1) % images.length);
-  };
-
-  const prevImage = () => {
-    setCurrentImageIndex((prev) => (prev - 1 + images.length) % images.length);
-  };
-
-
-  const tabs = [
-    { id: "overview", label: "Overview" },
-    { id: "amenities", label: "Amenities" },
-    { id: "location", label: "Location" },
-    { id: "contact", label: "Contact" },
-  ];
-
-  return (
-    <div className="bottom-20 min-h-screen bg-black text-white relative overflow-hidden">
-      {/* Background Effects */}
-      <div className="fixed inset-0 pointer-events-none">
-        <div className="absolute top-20 left-20 w-96 h-96 bg-white/3 rounded-full blur-3xl animate-pulse"></div>
-        <div
-          className="absolute bottom-20 right-20 w-96 h-96 bg-white/2 rounded-full blur-3xl animate-pulse"
-          style={{ animationDelay: "1s" }}
-        ></div>
-        <div
-          className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-white/1 rounded-full blur-3xl animate-pulse"
-          style={{ animationDelay: "2s" }}
-        ></div>
+  if (error) {
+    return (
+      <div className="min-h-screen bg-black text-white flex items-center justify-center p-4">
+        <div className="text-center max-w-md bg-white/5 border border-white/10 rounded-lg p-8">
+          <div className="text-red-400 text-6xl mb-4">⚠️</div>
+          <h2 className="text-2xl font-bold mb-4">Oops! Something went wrong</h2>
+          <p className="text-red-200 mb-6">{error}</p>
+          <button
+            onClick={goBack}
+            className="px-6 py-3 bg-white/10 hover:bg-white/20 rounded-lg transition-all duration-300"
+          >
+            Go Back
+          </button>
+        </div>
       </div>
+    );
+  }
 
+  if (!property?.title) {
+    return (
+      <div className="min-h-screen bg-black text-white flex items-center justify-center p-4">
+        <div className="text-center">
+          <div className="text-6xl mb-4">🏠</div>
+          <h2 className="text-2xl font-bold mb-4">Property Not Found</h2>
+          <p className="text-white/60 mb-6">The property you're looking for doesn't exist or has been removed.</p>
+          <button
+            onClick={goBack}
+            className="px-6 py-3 bg-white/10 hover:bg-white/20 rounded-lg transition-all"
+          >
+            Back to Properties
+          </button>
+        </div>
+      </div>
+    );
+  }
+  
+  return (
+    <div className="min-h-screen bg-black text-white">
       {/* Header */}
-      <div className="relative border-b border-white/10 bg-black/20 backdrop-blur-xl">
-        <div className="max-w-7xl mx-auto px-4 py-6">
-            <div className="flex items-center justify-end gap-3">
-              <button className="bg-white/10 backdrop-blur-md hover:bg-white/20 p-3 rounded-xl text-white transition-all duration-300 border border-white/10 hover:border-white/30 transform hover:scale-110">
-                <Heart className="w-5 h-5" />
+      <div className="border-b border-white/10 bg-black/20 backdrop-blur-xl sticky top-0 z-40">
+        <div className="max-w-7xl mx-auto px-4 py-4">
+          <div className="flex items-center justify-between">
+            <button
+              onClick={goBack}
+              className="flex items-center gap-2 text-white/60 hover:text-white transition-colors group"
+            >
+              <ArrowLeft className="w-5 h-5 group-hover:-translate-x-1 transition-transform" />
+              Back to Properties
+            </button>
+            <div className="flex items-center gap-3">
+              <button
+                onClick={toggleFavorite}
+                aria-label={isFavorite ? "Remove from favorites" : "Add to favorites"}
+                className={`p-2 rounded-lg transition-all duration-300 ${
+                  isFavorite ? 'bg-red-500/20 text-red-400' : 'bg-white/10 text-white/60 hover:text-white'
+                }`}
+              >
+                <Heart className={`w-5 h-5 ${isFavorite ? 'fill-current' : ''}`} />
               </button>
-              <button className="bg-white/10 backdrop-blur-md hover:bg-white/20 p-3 rounded-xl text-white transition-all duration-300 border border-white/10 hover:border-white/30 transform hover:scale-110">
+              <button
+                onClick={shareProperty}
+                aria-label="Share property"
+                className="p-2 bg-white/10 hover:bg-white/20 rounded-lg transition-colors text-white/60 hover:text-white"
+              >
                 <Share2 className="w-5 h-5" />
               </button>
-           
+            </div>
           </div>
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 py-8">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
-          {/* Image Gallery */}
-          <div className="space-y-6">
-            <div className="relative bg-white/5 backdrop-blur-lg rounded-2xl overflow-hidden border border-white/10">
-              <div className="relative h-96 overflow-hidden">
-                {images.length > 0 ? (
-                  <img
-                    src={images[currentImageIndex]}
-                    alt={`${propertyData.title} - Image ${currentImageIndex + 1}`}
-                    className="w-full h-full object-cover"
-                  />
-                ) : (
-                  <div className="w-full h-full bg-white/10 flex items-center justify-center">
-                    <Camera className="w-16 h-16 text-white/40" />
+       {/* Property Content */}
+       <div className="max-w-7xl mx-auto px-4 py-8">
+        {/* Image Gallery */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+          {property.files && property.files.length > 0 ? (
+            <>
+              <div className="relative group">
+                <img
+                  src={property.files[0]}
+                  alt={property.title}
+                  className="w-full h-96 object-cover rounded-xl cursor-pointer"
+                  onClick={() => {
+                    setSelectedImageIndex(0);
+                    setShowImageModal(true);
+                  }}
+                  loading="lazy"
+                />
+                <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity rounded-xl flex items-center justify-center">
+                  <div className="bg-black/50 px-3 py-1 rounded-lg text-sm">
+                    <Eye className="w-4 h-4 inline mr-1" />
+                    View Gallery
                   </div>
-                )}
-
-                {images.length > 1 && (
-                  <>
-                    <button
-                      onClick={prevImage}
-                      className="absolute left-4 top-1/2 transform -translate-y-1/2 bg-black/50 backdrop-blur-md hover:bg-black/70 p-2 rounded-full text-white transition-all duration-300 border border-white/20"
-                    >
-                      <ChevronLeft className="w-5 h-5" />
-                    </button>
-                    <button
-                      onClick={nextImage}
-                      className="absolute right-4 top-1/2 transform -translate-y-1/2 bg-black/50 backdrop-blur-md hover:bg-black/70 p-2 rounded-full text-white transition-all duration-300 border border-white/20"
-                    >
-                      <ChevronRight className="w-5 h-5" />
-                    </button>
-                  </>
-                )}
-
-                <div className="absolute top-4 left-4 bg-black/50 backdrop-blur-md text-white px-3 py-1 rounded-full text-sm border border-white/20">
-                  {currentImageIndex + 1} / {images.length || 1}
                 </div>
+              </div>
+              <div className="hidden lg:grid grid-cols-2 gap-4">
+                {property.files.slice(1, 5).map((file, index) => (
+                  <div key={index} className="relative group">
+                    <img
+                      src={file}
+                      alt={`${property.title} ${index + 2}`}
+                      className="w-full h-44 object-cover rounded-xl cursor-pointer"
+                      onClick={() => {
+                        setSelectedImageIndex(index + 1);
+                        setShowImageModal(true);
+                      }}
+                      loading="lazy"
+                    />
+                    {index === 3 && property.files.length > 5 && (
+                      <div className="absolute inset-0 bg-black/60 rounded-xl flex items-center justify-center cursor-pointer" onClick={() => { setSelectedImageIndex(4); setShowImageModal(true); }}>
+                        <span className="text-white font-semibold">+{property.files.length - 5} more</span>
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </>
+          ) : (
+            <div className="lg:col-span-2 h-96 bg-white/5 rounded-xl flex items-center justify-center text-white/40">
+              No images available
+            </div>
+          )}
+        </div>
 
-                <div className="absolute bottom-4 right-4">
-                  <span
-                    className={`px-4 py-2 rounded-full text-sm font-medium backdrop-blur-md border ${
-                      propertyData.constructionStatus === "Ready to Move"
-                        ? "bg-green-500/80 text-white border-green-400/30"
-                        : "bg-yellow-500/80 text-black border-yellow-400/30"
-                    }`}
-                  >
-                    {propertyData.constructionStatus}
-                  </span>
+        {/* Property Details Grid */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          {/* Main Content */}
+          <div className="lg:col-span-2">
+            {/* --- CORRECTED: All JSX now accesses the flat data structure --- */}
+            <div className="flex items-start justify-between mb-4">
+              <h1 className="text-4xl font-bold flex-1">{property.title}</h1>
+              {discountPercentage > 0 && (
+                <div className="bg-green-500/20 text-green-400 px-3 py-1 rounded-full text-sm font-semibold">
+                  {discountPercentage}% OFF
                 </div>
+              )}
+            </div>
+            
+            <div className="flex items-center gap-4 mb-6 text-white/60">
+              <MapPin className="w-5 h-5 flex-shrink-0" />
+              <span>
+                {property.location?.address}, {property.location?.city}, {property.location?.state} - {property.location?.pincode}
+              </span>
+            </div>
+
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+              <div className="bg-gradient-to-br from-white/10 to-white/5 p-4 rounded-xl text-center border border-white/10">
+                <Bed className="w-6 h-6 mx-auto mb-2 text-blue-400" />
+                <p className="text-sm font-medium">{property.bedrooms} Bedrooms</p>
+              </div>
+              <div className="bg-gradient-to-br from-white/10 to-white/5 p-4 rounded-xl text-center border border-white/10">
+                <Bath className="w-6 h-6 mx-auto mb-2 text-green-400" />
+                <p className="text-sm font-medium">{property.bathrooms} Bathrooms</p>
+              </div>
+              <div className="bg-gradient-to-br from-white/10 to-white/5 p-4 rounded-xl text-center border border-white/10">
+                <Ruler className="w-6 h-6 mx-auto mb-2 text-purple-400" />
+                <p className="text-sm font-medium">{property.areaSqft} sq.ft.</p>
+              </div>
+              <div className="bg-gradient-to-br from-white/10 to-white/5 p-4 rounded-xl text-center border border-white/10">
+                <Car className="w-6 h-6 mx-auto mb-2 text-orange-400" />
+                <p className="text-sm font-medium">Parking</p>
               </div>
             </div>
 
-            {/* Thumbnail Gallery */}
-            {images.length > 1 && (
-              <div className="flex gap-3 overflow-x-auto pb-2">
-                {images.map((image, index) => (
-                  <button
-                    key={index}
-                    onClick={() => setCurrentImageIndex(index)}
-                    className={`relative flex-shrink-0 w-20 h-20 rounded-lg overflow-hidden border-2 transition-all duration-300 ${
-                      currentImageIndex === index
-                        ? "border-white/60 scale-105"
-                        : "border-white/20 hover:border-white/40"
-                    }`}
-                  >
-                    <img
-                      src={image}
-                      alt={`Thumbnail ${index + 1}`}
-                      className="w-full h-full object-cover"
-                    />
-                  </button>
-                ))}
+            <div className="mb-8">
+              <h2 className="text-2xl font-bold mb-4 flex items-center gap-2">
+                Description
+                <div className="h-0.5 bg-gradient-to-r from-white/20 to-transparent flex-1"></div>
+              </h2>
+              <p className="text-white/80 leading-relaxed text-lg">{property.description}</p>
+            </div>
+
+            {property.propertyFeatures && property.propertyFeatures.length > 0 && (
+              <div className="mb-8">
+                <h2 className="text-2xl font-bold mb-4 flex items-center gap-2">
+                  Property Features
+                  <div className="h-0.5 bg-gradient-to-r from-white/20 to-transparent flex-1"></div>
+                </h2>
+                <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+                  {property.propertyFeatures.map((feature, index) => (
+                    <div key={index} className="bg-gradient-to-r from-white/10 to-white/5 px-4 py-3 rounded-lg border border-white/10 hover:border-white/20 transition-colors">
+                      <span className="text-green-400 mr-2">✓</span>
+                      {feature}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {property.amenities && property.amenities.length > 0 && (
+              <div className="mb-8">
+                <h2 className="text-2xl font-bold mb-4 flex items-center gap-2">
+                  Amenities
+                  <div className="h-0.5 bg-gradient-to-r from-white/20 to-transparent flex-1"></div>
+                </h2>
+                <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+                  {property.amenities.map((amenity, index) => (
+                    <div key={index} className="bg-gradient-to-r from-white/10 to-white/5 px-4 py-3 rounded-lg border border-white/10 hover:border-white/20 transition-colors">
+                      <span className="text-blue-400 mr-2">★</span>
+                      {amenity}
+                    </div>
+                  ))}
+                </div>
               </div>
             )}
           </div>
 
-          {/* Property Information */}
-          <div className="space-y-8">
-            {/* Basic Info */}
-            <div className="bg-white/5 backdrop-blur-lg rounded-2xl p-6 border border-white/10">
-              <h1 className="text-4xl font-bold text-white mb-2">
-                {propertyData.title}
-              </h1>
-              <div className="flex items-center gap-2 text-white/70 mb-6">
-                <MapPin className="w-5 h-5" />
-                <span className="text-lg">{locationString}</span>
-              </div>
-              <div className="flex items-center justify-between mb-6">
-                <div>
-                  <div className="text-4xl font-bold text-white">
-                    ₹{propertyData.actualPrice} Cr
-                  </div>
-                  {propertyData.discountPrice && propertyData.discountPrice > 0 && (
-                    <div className="text-white/60">
-                      <span className="line-through">
-                        ₹
-                        {(
-                          propertyData.actualPrice + propertyData.discountPrice
-                        ).toFixed(2)}{" "}
-                        Cr
-                      </span>
-                      <span className="text-green-400 ml-2">
-                        Save ₹{propertyData.discountPrice} Cr
-                      </span>
-                    </div>
-                  )}
-                  <div className="text-white/60 text-sm mt-1">
-                    ₹
-                    {(
-                      (propertyData.actualPrice * 10000000) /
-                      propertyData.areaSqft
-                    ).toFixed(2)}{" "}
-                    per sqft
-                  </div>
-                </div>
-              </div>
-              {/* Key Features */}
-              <div className="grid grid-cols-2 gap-4 mb-6">
-                <div className="flex items-center gap-3 bg-white/5 backdrop-blur-md p-3 rounded-xl border border-white/10">
-                  <Bed className="w-5 h-5 text-white/80" />
+          {/* Sidebar */}
+          <div className="lg:col-span-1">
+            <div className="bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-xl border border-white/20 rounded-2xl p-6 sticky top-24">
+              <div className="mb-6 text-center">
+                <h3 className="text-lg font-medium mb-3 text-white/80">Price</h3>
+                {property.discountPrice ? (
                   <div>
-                    <div className="text-white font-medium">
-                      {propertyData.bedrooms} BHK
-                    </div>
-                    <div className="text-white/60 text-sm">Bedrooms</div>
-                  </div>
-                </div>
-                <div className="flex items-center gap-3 bg-white/5 backdrop-blur-md p-3 rounded-xl border border-white/10">
-                  <Bath className="w-5 h-5 text-white/80" />
-                  <div>
-                    <div className="text-white font-medium">
-                      {propertyData.bathrooms}
-                    </div>
-                    <div className="text-white/60 text-sm">Bathrooms</div>
-                  </div>
-                </div>
-                <div className="flex items-center gap-3 bg-white/5 backdrop-blur-md p-3 rounded-xl border border-white/10">
-                  <Square className="w-5 h-5 text-white/80" />
-                  <div>
-                    <div className="text-white font-medium">
-                      {propertyData.areaSqft}
-                    </div>
-                    <div className="text-white/60 text-sm">Sq Ft</div>
-                  </div>
-                </div>
-                <div className="flex items-center gap-3 bg-white/5 backdrop-blur-md p-3 rounded-xl border border-white/10">
-                  <Building className="w-5 h-5 text-white/80" />
-                  <div>
-                    <div className="text-white font-medium">
-                      {propertyData.type}
-                    </div>
-                    <div className="text-white/60 text-sm">Property Type</div>
-                  </div>
-                </div>
-              </div>
-              {/* Additional Info */}
-              <div className="grid grid-cols-2 gap-4">
-                <div className="flex items-center gap-3">
-                  <Sofa className="w-4 h-4 text-white/60" />
-                  <span className="text-white/80 text-sm">
-                    {propertyData.furnishing}
-                  </span>
-                </div>
-                <div className="flex items-center gap-3">
-                  <CheckCircle className="w-4 h-4 text-green-400" />
-                  <span className="text-white/80 text-sm">
-                    {propertyData.status}
-                  </span>
-                </div>
-              </div>
-            </div>
-
-            {/* Tabs */}
-            <div className="bg-white/5 backdrop-blur-lg rounded-2xl border border-white/10">
-              <div className="flex border-b border-white/10">
-                {tabs.map((tab) => (
-                  <button
-                    key={tab.id}
-                    onClick={() => setSelectedTab(tab.id)}
-                    className={`flex-1 py-4 px-6 text-sm font-medium transition-all duration-300 ${
-                      selectedTab === tab.id
-                        ? "text-white border-b-2 border-white bg-white/10"
-                        : "text-white/60 hover:text-white hover:bg-white/5"
-                    }`}
-                  >
-                    {tab.label}
-                  </button>
-                ))}
-              </div>
-
-              <div className="p-6">
-                {selectedTab === "overview" && (
-                  <div className="space-y-4">
-                    <h3 className="text-xl font-bold text-white mb-4">
-                      Property Overview
-                    </h3>
-                    <p className="text-white/80 leading-relaxed">
-                      {propertyData.description}
+                    <p className="text-4xl font-bold text-green-400 mb-1">
+                      ₹{property.discountPrice.toLocaleString()}
                     </p>
-                    <div className="grid grid-cols-2 gap-4 mt-6">
-                      <div>
-                        <h4 className="text-white font-medium mb-2">
-                          Category
-                        </h4>
-                        <p className="text-white/70">{propertyData.category}</p>
-                      </div>
-                      <div>
-                        <h4 className="text-white font-medium mb-2">
-                          Property ID
-                        </h4>
-                        <p className="text-white/70 text-sm font-mono">
-                          {propertyData.ownerId.slice(0, 8)}...
-                        </p>
-                      </div>
-                    </div>
+                    <p className="text-white/60 line-through text-lg">
+                      ₹{property.actualPrice.toLocaleString()}
+                    </p>
+                    <p className="text-sm text-green-400 mt-2">
+                      You save ₹{(property.actualPrice - property.discountPrice).toLocaleString()}
+                    </p>
                   </div>
+                ) : (
+                  <p className="text-4xl font-bold">
+                    ₹{property.actualPrice.toLocaleString()}
+                  </p>
                 )}
+                <p className="text-sm text-white/60 mt-2">
+                  ₹{pricePerSqft.toLocaleString()} per sq.ft.
+                </p>
+              </div>
 
-                {selectedTab === "amenities" && (
-                  <div className="space-y-6">
-                    <div>
-                      <h3 className="text-xl font-bold text-white mb-4">
-                        Amenities
-                      </h3>
-                      <div className="grid grid-cols-2 gap-3">
-                        {propertyData.amenities?.map((amenity, index) => (
-                          <div
-                            key={index}
-                            className="flex items-center gap-3 bg-white/5 backdrop-blur-md p-3 rounded-xl border border-white/10"
-                          >
-                            <span className="text-white/80">{amenity}</span>
-                          </div>
-                        )) || (
-                          <p className="text-white/60">No amenities listed</p>
-                        )}
-                      </div>
-                    </div>
-
-                    <div>
-                      <h3 className="text-xl font-bold text-white mb-4">
-                        Property Features
-                      </h3>
-                      <div className="grid grid-cols-2 gap-3">
-                        {propertyData.propertyFeatures?.map((feature, index) => (
-                          <div
-                            key={index}
-                            className="flex items-center gap-3 bg-white/5 backdrop-blur-md p-3 rounded-xl border border-white/10"
-                          >
-                            <span className="text-white/80">{feature}</span>
-                          </div>
-                        )) || (
-                          <p className="text-white/60">No features listed</p>
-                        )}
-                      </div>
-                    </div>
+              <div className="mb-6">
+                <h3 className="text-lg font-bold mb-3">Quick Details</h3>
+                <div className="space-y-3 text-sm">
+                  <div className="flex justify-between items-center py-2 border-b border-white/10">
+                    <span className="text-white/60">Type:</span>
+                    <span className="font-medium">{property.type}</span>
                   </div>
-                )}
-
-                {selectedTab === "location" && (
-                  <div className="space-y-4">
-                    <h3 className="text-xl font-bold text-white mb-4">
-                      Location Details
-                    </h3>
-                    <div className="space-y-3">
-                      <div className="flex items-start gap-3">
-                        <MapPin className="w-5 h-5 text-white/60 mt-1" />
-                        <div>
-                          <div className="text-white font-medium">Address</div>
-                          <div className="text-white/70">
-                            {propertyData.location.addressLine1}
-                          </div>
-                          {propertyData.location.addressLine2 && (
-                            <div className="text-white/70">
-                              {propertyData.location.addressLine2}
-                            </div>
-                          )}
-                          <div className="text-white/70">
-                            {propertyData.location.city}, {propertyData.location.state}{" "}
-                            {propertyData.location.pincode}
-                          </div>
-                          <div className="text-white/70">
-                            {propertyData.location.country}
-                          </div>
-                        </div>
-                      </div>
-                      {propertyData.location.landmark && (
-                        <div className="flex items-center gap-3">
-                          <div className="w-5 h-5 flex items-center justify-center">
-                            <div className="w-2 h-2 bg-white/60 rounded-full"></div>
-                          </div>
-                          <div>
-                            <div className="text-white/70">
-                              Landmark: {propertyData.location.landmark}
-                            </div>
-                          </div>
-                        </div>
-                      )}
-                    </div>
+                  <div className="flex justify-between items-center py-2 border-b border-white/10">
+                    <span className="text-white/60">Category:</span>
+                    <span className="font-medium">{property.category}</span>
                   </div>
-                )}
-
-                {selectedTab === "contact" && (
-                  <div className="space-y-6">
-                    <h3 className="text-xl font-bold text-white mb-4">
-                      Contact Information
-                    </h3>
-                    <div className="bg-white/5 backdrop-blur-md p-6 rounded-xl border border-white/10">
-                      <div className="flex items-center gap-3 mb-4">
-                        <User className="w-8 h-8 text-white/60" />
-                        <div>
-                          <div className="text-white font-medium">
-                            Property Owner
-                          </div>
-                          <div className="text-white/60 text-sm">
-                            ID: {propertyData.ownerId}
-                          </div>
-                        </div>
-                      </div>
-
-                      <div className="space-y-4">
-                        <button className="w-full bg-white/90 backdrop-blur-md text-black py-3 px-6 rounded-xl font-medium hover:bg-white transition-all duration-300 border border-white/20 hover:shadow-lg transform hover:scale-[1.02] flex items-center justify-center gap-2">
-                          <Phone className="w-4 h-4" />
-                          Call Now
-                        </button>
-                        <button className="w-full bg-white/10 backdrop-blur-md text-white py-3 px-6 rounded-xl font-medium hover:bg-white/20 transition-all duration-300 border border-white/20 hover:border-white/40 flex items-center justify-center gap-2">
-                          <Mail className="w-4 h-4" />
-                          Send Message
-                        </button>
-                        <button className="w-full bg-white/10 backdrop-blur-md text-white py-3 px-6 rounded-xl font-medium hover:bg-white/20 transition-all duration-300 border border-white/20 hover:border-white/40 flex items-center justify-center gap-2">
-                          <Calendar className="w-4 h-4" />
-                          Schedule Visit
-                        </button>
-                      </div>
-                    </div>
+                  <div className="flex justify-between items-center py-2 border-b border-white/10">
+                    <span className="text-white/60">Status:</span>
+                    <span className="font-medium text-green-400">{property.status}</span>
                   </div>
-                )}
+                  <div className="flex justify-between items-center py-2 border-b border-white/10">
+                    <span className="text-white/60">Furnishing:</span>
+                    <span className="font-medium">{property.furnishing}</span>
+                  </div>
+                  <div className="flex justify-between items-center py-2">
+                    <span className="text-white/60">Construction:</span>
+                    <span className="font-medium">{property.constructionStatus}</span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="mb-6">
+                <h3 className="text-lg font-bold mb-3 flex items-center gap-2">
+                  <Shield className="w-5 h-5" />
+                  Owner Information
+                </h3>
+                <div className="bg-white/5 p-4 rounded-lg">
+                  <p className="font-medium text-white/90">{property.ownerName}</p>
+                  <p className="text-sm text-white/60 mt-1">Property Owner</p>
+                </div>
+              </div>
+
+              <div className="space-y-3">
+                <button className="w-full bg-white text-black py-3 rounded-xl font-semibold hover:bg-white/90 transition-all duration-300 flex items-center justify-center gap-2 group">
+                  <Phone className="w-5 h-5 group-hover:rotate-12 transition-transform" />
+                  Contact Owner
+                </button>
+                <button className="w-full border border-white/20 text-white py-3 rounded-xl font-semibold hover:bg-white/10 transition-all duration-300 flex items-center justify-center gap-2">
+                  <Calendar className="w-5 h-5" />
+                  Schedule Visit
+                </button>
+                <button className="w-full border border-white/20 text-white py-3 rounded-xl font-semibold hover:bg-white/10 transition-all duration-300 flex items-center justify-center gap-2">
+                  <Mail className="w-5 h-5" />
+                  Send Enquiry
+                </button>
               </div>
             </div>
           </div>
         </div>
       </div>
+
+      {/* Image Modal */}
+      {showImageModal && property.files && property.files.length > 0 && (
+        <div className="fixed inset-0 bg-black/90 backdrop-blur-sm z-50 flex items-center justify-center p-4" onClick={() => setShowImageModal(false)}>
+          <div className="relative max-w-6xl max-h-full" onClick={(e) => e.stopPropagation()}>
+            <button
+              onClick={() => setShowImageModal(false)}
+              aria-label="Close image gallery"
+              className="absolute -top-4 -right-4 z-10 bg-white/10 hover:bg-white/20 text-white p-2 rounded-full transition-colors"
+            >
+              <X className="w-6 h-6" />
+            </button>
+            <img
+              src={property.files[selectedImageIndex]}
+              alt={`${property.title} ${selectedImageIndex + 1}`}
+              className="max-w-full max-h-[90vh] object-contain rounded-lg"
+            />
+            {property.files.length > 1 && (
+              <>
+                <button
+                  onClick={prevImage}
+                  aria-label="Previous image"
+                  className="absolute left-4 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white p-2 rounded-full transition-colors"
+                >
+                  <ChevronLeft className="w-6 h-6" />
+                </button>
+                <button
+                  onClick={nextImage}
+                  aria-label="Next image"
+                  className="absolute right-4 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white p-2 rounded-full transition-colors"
+                >
+                  <ChevronRight className="w-6 h-6" />
+                </button>
+                <div className="absolute bottom-4 left-1/2 -translate-x-1/2 bg-black/50 px-4 py-2 rounded-full text-white text-sm">
+                  {selectedImageIndex + 1} / {property.files.length}
+                </div>
+              </>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 };
 
-export default PropertyDetails;
+export default PropertyDetail;

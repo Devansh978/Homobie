@@ -16,7 +16,48 @@ import FormProperties from "./FormProperties";
 
 const baseUrl = "https://homobiebackend-railway-production.up.railway.app";
 
-// Updated Auth helper functions to match your localStorage structure
+
+
+// Helper function to convert byte array to image URL
+const convertByteArrayToImageUrl = (byteArray) => {
+  if (!byteArray || byteArray.length === 0) return "/placeholder.jpg";
+  
+  try {
+    // Convert byte array to Uint8Array if it's not already
+    const uint8Array = new Uint8Array(byteArray);
+    // Create blob from byte array
+    const blob = new Blob([uint8Array], { type: 'image/jpeg' });
+    // Create object URL
+    return URL.createObjectURL(blob);
+  } catch (error) {
+    console.error("Error converting byte array to image:", error);
+    return "/placeholder.jpg";
+  }
+};
+
+// Helper function to convert multiple byte arrays to image URLs
+const convertImagesToUrls = (images) => {
+  if (!images || !Array.isArray(images)) return [];
+  return images.map(byteArray => convertByteArrayToImageUrl(byteArray));
+};
+
+const savePropertyToList = (newProperty) => {
+  const existingProperties = JSON.parse(localStorage.getItem('userProperties') || '[]');
+  const updatedProperties = [...existingProperties, newProperty];
+  localStorage.setItem('userProperties', JSON.stringify(updatedProperties));
+  localStorage.setItem('currentPropertyId', newProperty.propertyId);
+  localStorage.setItem('currentProperty', JSON.stringify(newProperty));
+};
+
+const handleAddProperty = async (propertyData) => {
+  const response = await addProperty(propertyData);
+  if(response && response.propertyId) {
+    savePropertyToList(response);
+  }
+};
+ 
+
+// Auth helper functions
 const getAuthTokens = () => {
   const authUser = localStorage.getItem("auth_user");
   return {
@@ -54,7 +95,7 @@ api.interceptors.request.use(
   (error) => Promise.reject(error)
 );
 
-// Updated response interceptor to match your token structure
+// Response interceptor
 api.interceptors.response.use(
   (response) => response,
   async (error) => {
@@ -67,10 +108,9 @@ api.interceptors.response.use(
         const { refreshToken } = getAuthTokens();
         if (refreshToken) {
           const response = await axios.post(`${baseUrl}/auth/refresh`, {
-            refresh_token: refreshToken  // Changed to match your backend's expected parameter
+            refresh_token: refreshToken
           });
           
-          // Update tokens in localStorage to match your structure
           localStorage.setItem("auth_token", response.data.access_token);
           localStorage.setItem("auth_refresh_token", response.data.refresh_token);
           
@@ -94,7 +134,6 @@ const Properties = () => {
   const [viewMode, setViewMode] = useState("grid");
   const [searchTerm, setSearchTerm] = useState("");
   const [filters, setFilters] = useState({
-    bedroom: "",
     type: "",
     minPrice: "",
     maxPrice: "",
@@ -130,19 +169,124 @@ const Properties = () => {
     
     return true;
   };
+ const fetchIndividualProperty = async (propertyId) => {
+    if (!checkAuth()) return null;
+    
+    setIsLoading(true);
+    setError(null);
+    
+    try {
+      const response = await api.get(`${baseUrl}/properties/getIndividualProperty?propertyId=${propertyId}`);
+      console.log("Individual Property Response:", response.data);
+      
+      if (response.data) {
+        // Transform the individual property data to match the expected structure
+        const transformedProperty = {
+          id: response.data.propertyId,
+          propertyId: response.data.propertyId,
+          ownerName: response.data.ownerName,
+          property: {
+            title: response.data.title,
+            type: response.data.type,
+            constructionStatus: response.data.constructionStatus,
+            propertyStatus: response.data.propertyStatus,
+            location: response.data.location,
+            actualPrice: response.data.actualPrice,
+            discountPrice: response.data.discountPrice,
+            price: response.data.actualPrice,
+            // Add any other property fields that might be in the response
+            description: response.data.description,
+            bedrooms: response.data.bedrooms,
+            bathrooms: response.data.bathrooms,
+            squareFeet: response.data.squareFeet,
+            furnishing: response.data.furnishing,
+            amenities: response.data.amenities
+          },
+          files: convertImagesToUrls(response.data.images)
+        };
+        
+        setIndividualProperty(transformedProperty);
+        
+        // Update localStorage with the fetched property
+        localStorage.setItem('currentProperty', JSON.stringify(transformedProperty));
+        
+        return transformedProperty;
+      } else {
+        throw new Error("Property not found");
+      }
+    } catch (err) {
+      console.error("Fetch individual property error:", err);
+      setError(err.response?.data?.message || err.message || "Failed to fetch property details");
+      return null;
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
-  const fetchAllProperties = async () => {
+  // Helper function to get individual property from localStorage or fetch from API
+  const getIndividualProperty = async (propertyId = null) => {
+    const targetPropertyId = propertyId || localStorage.getItem('currentPropertyId');
+    
+    if (!targetPropertyId) {
+      setError("No property ID found");
+      return null;
+    }
+
+    // First, try to get from localStorage
+    const storedProperty = localStorage.getItem('currentProperty');
+    if (storedProperty) {
+      try {
+        const parsedProperty = JSON.parse(storedProperty);
+        if (parsedProperty.propertyId === targetPropertyId) {
+          setIndividualProperty(parsedProperty);
+          return parsedProperty;
+        }
+      } catch (e) {
+        console.error("Error parsing stored property:", e);
+      }
+    }
+
+    // If not found in localStorage or different property, fetch from API
+    return await fetchIndividualProperty(targetPropertyId);
+  };
+  const fetchAllProperties = async (pincode = "") => {
     if (!checkAuth()) return;
     
     setIsLoading(true);
     setError(null);
     
     try {
-      const res = await api.get("/properties/allProperties");
+      const url = pincode 
+        ? `/properties/allProperties?pincode=${pincode}`
+        : `/properties/allProperties`;
+      
+      const res = await api.get(url);
+      console.log("API Response:", res.data);
       
       if (res.data && Array.isArray(res.data)) {
-        setAllProperties(res.data);
-        setFeaturedProperties(res.data.filter((p) => p.isFeatured));
+        // Transform the data to match the new DTO structure
+        const transformedProperties = res.data.map(item => ({
+          id: item.propertyId, // Map propertyId to id for consistency
+          propertyId: item.propertyId,
+          ownerName: item.ownerName,
+          property: {
+            title: item.title,
+            type: item.type,
+            constructionStatus: item.constructionStatus,
+            propertyStatus: item.propertyStatus,
+            location: item.location,
+            actualPrice: item.actualPrice,
+            discountPrice: item.discountPrice,
+            price: item.actualPrice // Keep for backward compatibility
+          },
+          files: convertImagesToUrls(item.images) // Convert byte arrays to URLs
+        }));
+        
+        setAllProperties(transformedProperties);
+        
+        // Since there's no isFeatured field, we'll use the first 6 properties as featured
+        // or you can implement your own logic (e.g., highest priced, most recent, etc.)
+        setFeaturedProperties(transformedProperties.slice(0, 6));
       } else {
         throw new Error("Invalid data format received");
       }
@@ -188,6 +332,19 @@ const Properties = () => {
           "Content-Type": "multipart/form-data",
         },
       });
+      
+      console.log("Add property response:", res.data);
+      
+      // Handle the new DTO response structure
+      if (res.data && res.data.propertyId) {
+        const propertyId = res.data.propertyId;
+        localStorage.setItem('currentPropertyId', propertyId);
+        localStorage.setItem('currentProperty', JSON.stringify(res.data));
+        console.log('Property saved to localStorage with ID:', propertyId);
+      } else {
+        console.warn('Unexpected response structure:', res.data);
+        throw new Error('Received unexpected response format from server');
+      }
 
       await fetchAllProperties();
       return res.data;
@@ -233,22 +390,27 @@ const Properties = () => {
     currentView === "featured"
       ? featuredProperties
       : allProperties.filter((item) => {
-          const titleMatch = item.property?.title
+          if (!item.property) return false;
+          
+          const titleMatch = item.property.title
             ?.toLowerCase()
             .includes(searchTerm.toLowerCase());
-          const cityMatch = item.property?.location?.city
+          const cityMatch = item.property.location?.city
             ?.toLowerCase()
             .includes(searchTerm.toLowerCase());
+          const pincodeMatch = 
+            !filters.pincode || 
+            item.property.location?.pincode === filters.pincode;
           const bedroomMatch =
             filters.bedroom === "" ||
-            item.property?.bedrooms === parseInt(filters.bedroom);
+            item.property.bedrooms === parseInt(filters.bedroom);
           const typeMatch =
-            filters.type === "" || item.property?.type === filters.type;
+            filters.type === "" || item.property.type === filters.type;
           const priceMatch =
-            (!filters.minPrice || item.property?.price >= parseFloat(filters.minPrice) * 1000000) &&
-            (!filters.maxPrice || item.property?.price <= parseFloat(filters.maxPrice) * 1000000);
+            (!filters.minPrice || item.property.actualPrice >= parseFloat(filters.minPrice)) &&
+            (!filters.maxPrice || item.property.actualPrice <= parseFloat(filters.maxPrice));
 
-          return (titleMatch || cityMatch) && bedroomMatch && typeMatch && priceMatch;
+          return (titleMatch || cityMatch) && bedroomMatch && typeMatch && priceMatch && pincodeMatch;
         });
 
   useEffect(() => {
@@ -281,6 +443,12 @@ const Properties = () => {
     
     verifyAndFetch();
   }, []);
+
+  useEffect(() => {
+    if (filters.pincode) {
+      fetchAllProperties(filters.pincode);
+    }
+  }, [filters.pincode]);
 
   if (isLoading || isAuthChecking) {
     return (
@@ -353,7 +521,7 @@ const Properties = () => {
               </Link>
             ) : (
               <button
-                onClick={fetchAllProperties}
+                onClick={() => fetchAllProperties(filters.pincode)}
                 className="mt-2 px-4 py-2 bg-white/10 hover:bg-white/20 rounded-lg transition-colors"
               >
                 Retry
@@ -438,11 +606,19 @@ const Properties = () => {
                 className="flex gap-6 overflow-x-auto scrollbar-hide pb-4"
               >
                 {featuredProperties.map((item) => (
-                  <Link key={item.id} href={`/properties/${item.id}`}>
+                  <Link 
+                    key={item.propertyId} 
+                    href={`/properties/${item.propertyId}`}
+                    onClick={() => {
+                      localStorage.setItem('currentPropertyId', item.propertyId);
+                      localStorage.setItem('currentProperty', JSON.stringify(item));
+                    }}
+                  >
                     <a>
                       <PropertyCard
                         property={item.property}
                         files={item.files}
+                        ownerName={item.ownerName}
                         isSlider={true}
                       />
                     </a>
@@ -453,12 +629,19 @@ const Properties = () => {
           ) : viewMode === "list" ? (
             <div className="space-y-6">
               {filteredProperties.map((item) => (
-                <Link key={item.id} href={`/properties/${item.id}`}>
+                <Link 
+                  key={item.propertyId} 
+                  href={`/properties/${item.propertyId}`}
+                  onClick={() => {
+                    localStorage.setItem('currentPropertyId', item.propertyId);
+                    localStorage.setItem('currentProperty', JSON.stringify(item));
+                  }}
+                >
                   <a>
                     <ListViewCard
                       property={item.property}
                       files={item.files}
-                      isSlider={true}
+                      ownerName={item.ownerName}
                     />
                   </a>
                 </Link>
@@ -467,11 +650,19 @@ const Properties = () => {
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
               {filteredProperties.map((item) => (
-                <Link key={item.id} href={`/properties/${item.id}`}>
+                <Link 
+                  key={item.propertyId} 
+                  href={`/properties/${item.propertyId}`}
+                  onClick={() => {
+                    localStorage.setItem('currentPropertyId', item.propertyId);
+                    localStorage.setItem('currentProperty', JSON.stringify(item));
+                  }}
+                >
                   <a>
                     <PropertyCard
                       property={item.property}
                       files={item.files}
+                      ownerName={item.ownerName}
                       isSlider={true}
                     />
                   </a>
