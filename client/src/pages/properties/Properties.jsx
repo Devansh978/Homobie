@@ -19,16 +19,55 @@ const baseUrl = "https://homobiebackend-railway-production.up.railway.app";
 
 
 // Helper function to convert byte array to image URL
+// Updated helper functions for better image handling
 const convertByteArrayToImageUrl = (byteArray) => {
-  if (!byteArray || byteArray.length === 0) return "/placeholder.jpg";
+  if (!byteArray || byteArray.length === 0) {
+    console.warn("Empty or null byte array provided");
+    return "/placeholder.jpg";
+  }
   
   try {
-    // Convert byte array to Uint8Array if it's not already
-    const uint8Array = new Uint8Array(byteArray);
-    // Create blob from byte array
-    const blob = new Blob([uint8Array], { type: 'image/jpeg' });
-    // Create object URL
-    return URL.createObjectURL(blob);
+    // Handle different input formats
+    let uint8Array;
+    
+    if (byteArray instanceof Uint8Array) {
+      uint8Array = byteArray;
+    } else if (Array.isArray(byteArray)) {
+      uint8Array = new Uint8Array(byteArray);
+    } else if (typeof byteArray === 'string') {
+      // Handle base64 strings
+      try {
+        const base64Data = byteArray.includes(',') ? byteArray.split(',')[1] : byteArray;
+        const binaryString = atob(base64Data);
+        uint8Array = new Uint8Array(binaryString.length);
+        for (let i = 0; i < binaryString.length; i++) {
+          uint8Array[i] = binaryString.charCodeAt(i);
+        }
+      } catch (e) {
+        console.error("Failed to decode base64 string:", e);
+        return "/placeholder.jpg";
+      }
+    } else {
+      console.error("Unsupported byte array format:", typeof byteArray);
+      return "/placeholder.jpg";
+    }
+
+    // Create blob with proper MIME type detection
+    let mimeType = 'image/jpeg'; // default
+    
+    // Simple MIME type detection based on file signature
+    if (uint8Array.length > 4) {
+      const signature = Array.from(uint8Array.slice(0, 4)).map(b => b.toString(16).padStart(2, '0')).join('');
+      if (signature.startsWith('8950')) mimeType = 'image/png';
+      else if (signature.startsWith('4749')) mimeType = 'image/gif';
+      else if (signature.startsWith('ffd8')) mimeType = 'image/jpeg';
+      else if (signature.startsWith('5249')) mimeType = 'image/webp';
+    }
+    
+    const blob = new Blob([uint8Array], { type: mimeType });
+    const url = URL.createObjectURL(blob);
+    
+    return url;
   } catch (error) {
     console.error("Error converting byte array to image:", error);
     return "/placeholder.jpg";
@@ -37,9 +76,18 @@ const convertByteArrayToImageUrl = (byteArray) => {
 
 // Helper function to convert multiple byte arrays to image URLs
 const convertImagesToUrls = (images) => {
-  if (!images || !Array.isArray(images)) return [];
-  return images.map(byteArray => convertByteArrayToImageUrl(byteArray));
+  if (!images || !Array.isArray(images)) {
+    console.warn("Invalid images array provided");
+    return [];
+  }
+  
+  return images.map((byteArray, index) => {
+    const url = convertByteArrayToImageUrl(byteArray);
+    console.log(`Converted image ${index}:`, url);
+    return url;
+  }).filter(url => url !== "/placeholder.jpg"); // Remove failed conversions
 };
+
 
 const savePropertyToList = (newProperty) => {
   const existingProperties = JSON.parse(localStorage.getItem('userProperties') || '[]');
@@ -77,7 +125,7 @@ const clearAuthTokens = () => {
 
 const api = axios.create({
   baseURL: baseUrl,
-  timeout: 100000,
+  timeout: 1000000,
   headers: {
     "Content-Type": "application/json",
   },
@@ -415,31 +463,40 @@ const Properties = () => {
 
   useEffect(() => {
     const verifyAndFetch = async () => {
-      setIsAuthChecking(true);
-      try {
-        const { token } = getAuthTokens();
-        
-        if (!token) {
-          setError("Please login to view properties");
-          return;
-        }
-        
-        await api.get("/auth/verify");
-        await fetchAllProperties();
-      } catch (err) {
-        console.error("Initialization error:", err);
-        
-        if (err.response?.status === 401) {
-          setError("Session expired. Please login again.");
-          clearAuthTokens();
-          window.location.href = "/auth";
-        } else {
-          setError("Failed to load properties. Please try again.");
-        }
-      } finally {
-        setIsAuthChecking(false);
+  setIsAuthChecking(true);
+  try {
+    const { token } = getAuthTokens();
+    
+    if (!token) {
+      setError("Please login to view properties");
+      return;
+    }
+    
+    // Verify token by calling protected endpoint
+    await api.get("/auth/verify", {
+      headers: {
+        Authorization: `Bearer ${token}`
       }
-    };
+    });
+    
+    await fetchAllProperties();
+  } catch (err) {
+    console.error("Initialization error:", err);
+    
+    if (err.response?.status === 401) {
+      setError("Session expired. Please login again.");
+      clearAuthTokens();
+      window.location.href = "/auth";
+    } else if (err.response?.status === 404) {
+      setError("Authentication service unavailable.");
+      console.error("Verify endpoint not found");
+    } else {
+      setError("Failed to load properties. Please try again.");
+    }
+  } finally {
+    setIsAuthChecking(false);
+  }
+};
     
     verifyAndFetch();
   }, []);

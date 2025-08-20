@@ -17,7 +17,97 @@ const getPropertyIdFromLocalStorage = () => {
   }
   return null;
 };
+
+// STEP 1: Convert image data to displayable URL
+const convertByteArrayToImageUrl = (imageData) => {
+  if (!imageData) {
+    console.warn("No image data provided");
+    return null;
+  }
   
+  try {
+    // Handle different input formats
+    if (typeof imageData === 'string') {
+      // Already a proper data URL
+      if (imageData.startsWith('data:image/')) {
+        return imageData;
+      }
+      // Base64 JPEG without prefix (common case from your backend)
+      else if (imageData.startsWith('/9j/')) {
+        return `data:image/jpeg;base64,${imageData}`;
+      }
+      // Base64 PNG without prefix
+      else if (imageData.startsWith('iVBORw')) {
+        return `data:image/png;base64,${imageData}`;
+      }
+      // Already a URL
+      else if (imageData.startsWith('http') || imageData.startsWith('blob:')) {
+        return imageData;
+      }
+      // Assume it's base64 data without prefix
+      else {
+        // Try to detect image type from content
+        const firstChars = imageData.substring(0, 20);
+        let mimeType = 'image/jpeg'; // default
+        
+        if (firstChars.includes('PNG') || firstChars.includes('iVBORw')) {
+          mimeType = 'image/png';
+        } else if (firstChars.includes('GIF')) {
+          mimeType = 'image/gif';
+        } else if (firstChars.includes('WEBP')) {
+          mimeType = 'image/webp';
+        }
+        
+        return `data:${mimeType};base64,${imageData}`;
+      }
+    }
+    // Handle Uint8Array or Array
+    else if (imageData instanceof Uint8Array || Array.isArray(imageData)) {
+      // Convert to base64 first, then create data URL
+      const uint8Array = imageData instanceof Uint8Array ? imageData : new Uint8Array(imageData);
+      const binaryString = Array.from(uint8Array).map(byte => String.fromCharCode(byte)).join('');
+      const base64 = btoa(binaryString);
+      return `data:image/jpeg;base64,${base64}`;
+    }
+    
+    console.warn("Unsupported image data format:", typeof imageData);
+    return null;
+    
+  } catch (error) {
+    console.error("Error converting image data to URL:", error);
+    return null;
+  }
+};
+
+// STEP 2: Convert array of image data to array of image URLs
+const convertImageArrayToUrls = (imageArray) => {
+  console.log("Converting image array to URLs:", imageArray);
+  
+  if (!imageArray || !Array.isArray(imageArray)) {
+    console.warn("Invalid or missing image array");
+    return [];
+  }
+  
+  const imageUrls = [];
+  
+  for (let i = 0; i < imageArray.length; i++) {
+    const imageData = imageArray[i];
+    console.log(`Processing image ${i}:`, typeof imageData);
+    
+    const imageUrl = convertByteArrayToImageUrl(imageData);
+    
+    if (imageUrl) {
+      imageUrls.push(imageUrl);
+      console.log(`Successfully converted image ${i}`);
+    } else {
+      console.warn(`Failed to convert image ${i}`);
+    }
+  }
+  
+  console.log(`Converted ${imageUrls.length} out of ${imageArray.length} images`);
+  return imageUrls;
+};
+
 // API function to fetch individual property
 const fetchIndividualProperty = async (propertyId) => {
   const token = getAuthToken();
@@ -27,6 +117,8 @@ const fetchIndividualProperty = async (propertyId) => {
   }
 
   try {
+    console.log(`Fetching property: ${propertyId}`);
+    
     const response = await fetch(`${BASE_URL}/properties/getIndividualProperty?propertyId=${propertyId}`, {
       method: 'GET',
       headers: {
@@ -46,56 +138,137 @@ const fetchIndividualProperty = async (propertyId) => {
     }
 
     const data = await response.json();
+    console.log("Raw API Response:", data);
+    
     return data;
   } catch (error) {
-    if (error instanceof TypeError && error.message.includes('fetch')) {
-      throw new Error('Network error. Please check your internet connection.');
-    }
+    console.error("Fetch error:", error);
     throw error;
   }
 };
-// ADD THIS NEW FUNCTION
-const normalizeSingleProperty = (data) => {
-  if (!data) return null; // Return null if the API response is empty
 
-  return {
+// STEP 3: Process property data and convert images
+const processPropertyData = (rawData) => {
+  if (!rawData) {
+    console.warn("No property data to process");
+    return null;
+  }
+
+  console.log("Processing property data:", rawData);
+
+  // Convert images from various possible fields
+  let imageUrls = [];
+  
+  // Check different possible image fields
+  const imageSources = [
+    rawData.images,
+    rawData.mediaFiles,
+    rawData.imageUrls // if already processed
+  ];
+  
+  for (const source of imageSources) {
+    if (source && Array.isArray(source) && source.length > 0) {
+      console.log("Found images array with length:", source.length);
+      imageUrls = convertImageArrayToUrls(source);
+      if (imageUrls.length > 0) break;
+    }
+  }
+
+  if (imageUrls.length === 0) {
+    console.log("No images found in data");
+  }
+
+  // SECOND: Structure the property data
+  const processedProperty = {
     // IDs
-    id: data.propertyId || `temp-${Math.random().toString(36).substr(2, 9)}`,
-    propertyId: data.propertyId,
+    id: rawData.propertyId || `temp-${Date.now()}`,
+    propertyId: rawData.propertyId,
 
     // Core Details
-    title: data.title || "Untitled Property",
-    description: data.description || "No description available.",
-    actualPrice: data.actualPrice || 0,
-    discountPrice: data.discountPrice || 0,
-    areaSqft: data.areaSqft || 0,
-    bedrooms: data.bedrooms || 0,
-    bathrooms: data.bathrooms || 0,
+    title: rawData.title || "Untitled Property",
+    description: rawData.description || "No description available.",
+    actualPrice: rawData.actualPrice || 0,
+    discountPrice: rawData.discountPrice || 0,
+    areaSqft: rawData.areaSqft || 0,
+    bedrooms: rawData.bedrooms || 0,
+    bathrooms: rawData.bathrooms || 0,
 
     // Categorization
-    type: data.type || "N/A",
-    category: data.category || "N/A",
-    status: data.status || "N/A",
-    furnishing: data.furnishing || "N/A",
-    constructionStatus: data.constructionStatus || "N/A",
+    type: rawData.type || "N/A",
+    category: rawData.category || "N/A",
+    status: rawData.status || "N/A",
+    furnishing: rawData.furnishing || "N/A",
+    constructionStatus: rawData.constructionStatus || "N/A",
 
-    // Location (handle nested object safely)
+    // Location
     location: {
-      address: data.location?.address || "Address not available",
-      city: data.location?.city || "",
-      state: data.location?.state || "",
-      pincode: data.location?.pincode || "",
+      address: rawData.location?.address || rawData.location?.addressLine1 || "Address not available",
+      city: rawData.location?.city || "",
+      state: rawData.location?.state || "",
+      pincode: rawData.location?.pincode || "",
     },
 
-    // Arrays (ensures they are always arrays to prevent .map errors)
-    files: data.files || [], // Assumes API returns a 'files' array of URLs
-    amenities: data.amenities || [],
-    propertyFeatures: data.propertyFeatures || [],
+    // PROCESSED IMAGES - This is the key part!
+    imageUrls: imageUrls, // Array of blob URLs ready for display
+    
+    // Other arrays
+    amenities: rawData.amenities || [],
+    propertyFeatures: rawData.propertyFeatures || [],
 
     // Owner
-    ownerName: data.ownerName || "Private Owner",
+    ownerName: rawData.ownerName || "Private Owner",
   };
+
+  console.log("Processed property with image URLs:", processedProperty.imageUrls);
+  return processedProperty;
 };
+
+// Simple image component with loading and error states
+const PropertyImage = ({ src, alt, className, onClick, loading = "lazy" }) => {
+  const [imageState, setImageState] = useState('loading'); // 'loading', 'loaded', 'error'
+
+  const handleLoad = () => {
+    setImageState('loaded');
+  };
+
+  const handleError = () => {
+    console.error("Failed to load image:", src);
+    setImageState('error');
+  };
+
+  // Show placeholder while loading or on error
+  if (imageState === 'loading') {
+    return (
+      <div className={`${className} bg-gray-800 flex items-center justify-center`}>
+        <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-white"></div>
+      </div>
+    );
+  }
+
+  if (imageState === 'error' || !src) {
+    return (
+      <div className={`${className} bg-gray-800 flex items-center justify-center text-white/60`}>
+        <div className="text-center">
+          <div className="text-4xl mb-2">🖼️</div>
+          <div className="text-sm">Image not available</div>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <img
+      src={src}
+      alt={alt}
+      className={className}
+      onClick={onClick}
+      onLoad={handleLoad}
+      onError={handleError}
+      loading={loading}
+    />
+  );
+};
+
 const PropertyDetail = () => {
   const [property, setProperty] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -105,29 +278,54 @@ const PropertyDetail = () => {
   const [isFavorite, setIsFavorite] = useState(false);
 
   const goBack = () => {
-  window.history.back();
-};
+    window.history.back();
+  };
+
+  // Cleanup blob URLs when component unmounts
+  useEffect(() => {
+    return () => {
+      if (property?.imageUrls) {
+        property.imageUrls.forEach(url => {
+          if (url && url.startsWith('blob:')) {
+            URL.revokeObjectURL(url);
+          }
+        });
+      }
+    };
+  }, [property]);
 
   useEffect(() => {
     const fetchPropertyDetail = async () => {
       const propertyId = getPropertyIdFromLocalStorage();
       
       if (!propertyId) {
-        setError("Property ID not found in localStorage. Please select a property to view.");
+        setError("Property ID not found. Please select a property to view.");
         setIsLoading(false);
         return;
       }
 
       try {
-        const propertyData = await fetchIndividualProperty(propertyId);
-        setProperty(propertyData);
+        // STEP 1: Fetch raw data from API
+        const rawPropertyData = await fetchIndividualProperty(propertyId);
         
+        // STEP 2: Process data and convert images
+        const processedProperty = processPropertyData(rawPropertyData);
+        
+        if (!processedProperty) {
+          throw new Error("Failed to process property data");
+        }
+        
+        // STEP 3: Set the processed data with image URLs
+        setProperty(processedProperty);
+        
+        // Handle favorites
         try {
           const favorites = JSON.parse(sessionStorage.getItem('favorites') || '[]');
           setIsFavorite(favorites.includes(propertyId));
         } catch {
           sessionStorage.setItem('favorites', '[]');
         }
+        
       } catch (err) {
         console.error('Error fetching property:', err);
         setError(err.message || "Failed to load property details");
@@ -138,13 +336,13 @@ const PropertyDetail = () => {
 
     fetchPropertyDetail();
   }, []);
-
-  // --- CORRECTED: Memoized calculations to access the flat data structure ---
+  
+  // Memoized calculations
   const discountPercentage = useMemo(() => {
     if (!property?.discountPrice || !property?.actualPrice) return 0;
     return Math.round(((property.actualPrice - property.discountPrice) / property.actualPrice) * 100);
   }, [property]);
-
+  
   const pricePerSqft = useMemo(() => {
     if (!property?.discountPrice && !property?.actualPrice) return 0;
     const price = property.discountPrice || property.actualPrice;
@@ -153,16 +351,16 @@ const PropertyDetail = () => {
   }, [property]);
 
   const nextImage = () => {
-    if (!property?.files || property.files.length === 0) return;
+    if (!property?.imageUrls || property.imageUrls.length === 0) return;
     setSelectedImageIndex((prev) => 
-      prev === property.files.length - 1 ? 0 : prev + 1
+      prev === property.imageUrls.length - 1 ? 0 : prev + 1
     );
   };
 
   const prevImage = () => {
-    if (!property?.files || property.files.length === 0) return;
+    if (!property?.imageUrls || property.imageUrls.length === 0) return;
     setSelectedImageIndex((prev) => 
-      prev === 0 ? property.files.length - 1 : prev - 1
+      prev === 0 ? property.imageUrls.length - 1 : prev - 1
     );
   };
 
@@ -287,46 +485,51 @@ const PropertyDetail = () => {
         </div>
       </div>
 
-       {/* Property Content */}
-       <div className="max-w-7xl mx-auto px-4 py-8">
+      {/* Property Content */}
+      <div className="max-w-7xl mx-auto px-4 py-8">
         {/* Image Gallery */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-          {property.files && property.files.length > 0 ? (
+          {property.imageUrls && property.imageUrls.length > 0 ? (
             <>
               <div className="relative group">
-                <img
-                  src={property.files[0]}
+                <PropertyImage
+                  src={property.imageUrls[0]}
                   alt={property.title}
                   className="w-full h-96 object-cover rounded-xl cursor-pointer"
                   onClick={() => {
                     setSelectedImageIndex(0);
                     setShowImageModal(true);
                   }}
-                  loading="lazy"
+                  loading="eager"
                 />
                 <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity rounded-xl flex items-center justify-center">
                   <div className="bg-black/50 px-3 py-1 rounded-lg text-sm">
                     <Eye className="w-4 h-4 inline mr-1" />
-                    View Gallery
+                    View Gallery ({property.imageUrls.length} photos)
                   </div>
                 </div>
               </div>
               <div className="hidden lg:grid grid-cols-2 gap-4">
-                {property.files.slice(1, 5).map((file, index) => (
+                {property.imageUrls.slice(1, 5).map((imageUrl, index) => (
                   <div key={index} className="relative group">
-                    <img
-                      src={file}
+                    <PropertyImage
+                      src={imageUrl}
                       alt={`${property.title} ${index + 2}`}
                       className="w-full h-44 object-cover rounded-xl cursor-pointer"
                       onClick={() => {
                         setSelectedImageIndex(index + 1);
                         setShowImageModal(true);
                       }}
-                      loading="lazy"
                     />
-                    {index === 3 && property.files.length > 5 && (
-                      <div className="absolute inset-0 bg-black/60 rounded-xl flex items-center justify-center cursor-pointer" onClick={() => { setSelectedImageIndex(4); setShowImageModal(true); }}>
-                        <span className="text-white font-semibold">+{property.files.length - 5} more</span>
+                    {index === 3 && property.imageUrls.length > 5 && (
+                      <div 
+                        className="absolute inset-0 bg-black/60 rounded-xl flex items-center justify-center cursor-pointer" 
+                        onClick={() => { 
+                          setSelectedImageIndex(4); 
+                          setShowImageModal(true); 
+                        }}
+                      >
+                        <span className="text-white font-semibold">+{property.imageUrls.length - 5} more</span>
                       </div>
                     )}
                   </div>
@@ -335,7 +538,10 @@ const PropertyDetail = () => {
             </>
           ) : (
             <div className="lg:col-span-2 h-96 bg-white/5 rounded-xl flex items-center justify-center text-white/40">
-              No images available
+              <div className="text-center">
+                <div className="text-6xl mb-4">📷</div>
+                <p>No images available for this property</p>
+              </div>
             </div>
           )}
         </div>
@@ -344,7 +550,6 @@ const PropertyDetail = () => {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Main Content */}
           <div className="lg:col-span-2">
-            {/* --- CORRECTED: All JSX now accesses the flat data structure --- */}
             <div className="flex items-start justify-between mb-4">
               <h1 className="text-4xl font-bold flex-1">{property.title}</h1>
               {discountPercentage > 0 && (
@@ -446,7 +651,7 @@ const PropertyDetail = () => {
                   </p>
                 )}
                 <p className="text-sm text-white/60 mt-2">
-                  ₹{pricePerSqft.toLocaleString()} per sq.ft.
+                  {pricePerSqft > 0 ? `₹${pricePerSqft.toLocaleString()} per sq.ft.` : 'Price on request'}
                 </p>
               </div>
 
@@ -507,7 +712,7 @@ const PropertyDetail = () => {
       </div>
 
       {/* Image Modal */}
-      {showImageModal && property.files && property.files.length > 0 && (
+      {showImageModal && property.imageUrls && property.imageUrls.length > 0 && (
         <div className="fixed inset-0 bg-black/90 backdrop-blur-sm z-50 flex items-center justify-center p-4" onClick={() => setShowImageModal(false)}>
           <div className="relative max-w-6xl max-h-full" onClick={(e) => e.stopPropagation()}>
             <button
@@ -517,12 +722,13 @@ const PropertyDetail = () => {
             >
               <X className="w-6 h-6" />
             </button>
-            <img
-              src={property.files[selectedImageIndex]}
+            <PropertyImage
+              src={property.imageUrls[selectedImageIndex]}
               alt={`${property.title} ${selectedImageIndex + 1}`}
               className="max-w-full max-h-[90vh] object-contain rounded-lg"
+              loading="eager"
             />
-            {property.files.length > 1 && (
+            {property.imageUrls.length > 1 && (
               <>
                 <button
                   onClick={prevImage}
@@ -539,7 +745,7 @@ const PropertyDetail = () => {
                   <ChevronRight className="w-6 h-6" />
                 </button>
                 <div className="absolute bottom-4 left-1/2 -translate-x-1/2 bg-black/50 px-4 py-2 rounded-full text-white text-sm">
-                  {selectedImageIndex + 1} / {property.files.length}
+                  {selectedImageIndex + 1} / {property.imageUrls.length}
                 </div>
               </>
             )}
