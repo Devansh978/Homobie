@@ -43,16 +43,13 @@ export function LoanCalculator({ onApply }: LoanCalculatorProps) {
   }, [amount, interestRate, tenure]);
 
   const calculateLoanDetails = () => {
-    // Convert annual interest rate to monthly and decimal form
     const monthlyRate = interestRate / 12 / 100;
     const totalMonths = tenure * 12;
 
-    // EMI calculation formula: EMI = P * r * (1+r)^n / ((1+r)^n - 1)
     const emiAmount =
       (amount * monthlyRate * Math.pow(1 + monthlyRate, totalMonths)) /
       (Math.pow(1 + monthlyRate, totalMonths) - 1);
 
-    // Calculate total payment and interest
     const totalPayment = emiAmount * totalMonths;
     const totalInterestAmount = totalPayment - amount;
     const interestPercent = (totalInterestAmount / amount) * 100;
@@ -84,24 +81,29 @@ export function LoanCalculator({ onApply }: LoanCalculatorProps) {
   };
 
   return (
-    <Card className="bg-black rounded-xl shadow-lg">
+    <Card className="bg-black text-white rounded-xl shadow-lg border border-gray-800 ">
       <CardContent className="p-6">
         <h2 className="text-primary text-xl font-semibold mb-4">
-           EMI Calculator
+          EMI Calculator
         </h2>
 
         <div className="space-y-6">
+          {/* Loan Type */}
           <div>
-            <Label className="text-white mb-1 text-sm font-medium">
+            <Label className="text-gray-300 mb-1 text-sm font-medium">
               Loan Type
             </Label>
             <Select value={loanType} onValueChange={handleLoanTypeChange}>
-              <SelectTrigger className="w-full p-3 border border-neutral-200 rounded-lg bg-neutral-50">
+              <SelectTrigger className="w-full p-3 border border-gray-700 rounded-lg bg-gray-900 text-white">
                 <SelectValue placeholder="Select Loan Type" />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent className="bg-gray-900 text-white border border-gray-700">
                 {LOAN_TYPES.map((type) => (
-                  <SelectItem key={type.id} value={type.id}>
+                  <SelectItem
+                    key={type.id}
+                    value={type.id}
+                    className="hover:bg-gray-800"
+                  >
                     {type.label}
                   </SelectItem>
                 ))}
@@ -109,9 +111,10 @@ export function LoanCalculator({ onApply }: LoanCalculatorProps) {
             </Select>
           </div>
 
+          {/* Loan Amount */}
           <div>
             <div className="flex justify-between items-center mb-1">
-              <Label className="text-white text-sm font-medium">
+              <Label className="text-gray-300 text-sm font-medium">
                 Loan Amount
               </Label>
               <span className="text-primary font-medium">
@@ -124,17 +127,18 @@ export function LoanCalculator({ onApply }: LoanCalculatorProps) {
               step={100000}
               value={[amount]}
               onValueChange={(values) => setAmount(values[0])}
-              className="h-2 bg-neutral-200"
+              className="h-2 bg-gray-700"
             />
-            <div className="flex justify-between text-xs text-neutral-500 mt-1">
+            <div className="flex justify-between text-xs text-white mt-1">
               <span>₹1L</span>
               <span>₹10Cr</span>
             </div>
           </div>
 
+          {/* Interest Rate */}
           <div>
             <div className="flex justify-between items-center mb-1">
-              <Label className="text-white text-sm font-medium">
+              <Label className="text-gray-300 text-sm font-medium">
                 Interest Rate
               </Label>
               <span className="text-primary font-medium">
@@ -147,17 +151,18 @@ export function LoanCalculator({ onApply }: LoanCalculatorProps) {
               step={0.1}
               value={[interestRate]}
               onValueChange={(values) => setInterestRate(values[0])}
-              className="h-2 bg-neutral-200"
+              className="h-2 bg-gray-700"
             />
-            <div className="flex justify-between text-xs text-neutral-500 mt-1">
+            <div className="flex justify-between text-xs text-white mt-1">
               <span>5%</span>
               <span>30%</span>
             </div>
           </div>
 
+          {/* Loan Tenure */}
           <div>
             <div className="flex justify-between items-center mb-1">
-              <Label className="text-white text-sm font-medium">
+              <Label className="text-gray-300 text-sm font-medium">
                 Loan Tenure
               </Label>
               <span className="text-primary font-medium">{tenure} Years</span>
@@ -168,36 +173,37 @@ export function LoanCalculator({ onApply }: LoanCalculatorProps) {
               step={1}
               value={[tenure]}
               onValueChange={(values) => setTenure(values[0])}
-              className="h-2 bg-neutral-200"
+              className="h-2 bg-gray-700"
             />
-            <div className="flex justify-between text-xs text-neutral-500 mt-1">
+            <div className="flex justify-between text-xs text-white mt-1">
               <span>1 Year</span>
               <span>30 Years</span>
             </div>
           </div>
 
-          <div className="p-4 bg-neutral-50 rounded-lg border border-neutral-100">
+          {/* Results Box */}
+          <div className="p-4 bg-gray-900 rounded-lg border border-gray-700">
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <p className="text-sm text-neutral-500">Monthly EMI</p>
+                <p className="text-sm text-white">Monthly EMI</p>
                 <p className="text-xl font-semibold text-primary">
                   {formatCurrency(emi)}
                 </p>
               </div>
               <div>
-                <p className="text-sm text-neutral-500">Interest Payable</p>
+                <p className="text-sm text-white">Interest Payable</p>
                 <p className="text-xl font-semibold text-primary">
                   {formatCurrency(totalInterest)}
                 </p>
               </div>
               <div>
-                <p className="text-sm text-neutral-500">Total Amount</p>
+                <p className="text-sm text-white">Total Amount</p>
                 <p className="text-xl font-semibold text-primary">
                   {formatCurrency(totalAmount)}
                 </p>
               </div>
               <div>
-                <p className="text-sm text-neutral-500">Interest %</p>
+                <p className="text-sm text-white">Interest %</p>
                 <p className="text-xl font-semibold text-primary">
                   {interestPercentage.toFixed(2)}%
                 </p>
@@ -205,6 +211,7 @@ export function LoanCalculator({ onApply }: LoanCalculatorProps) {
             </div>
           </div>
 
+          {/* Apply Button */}
           <Button
             onClick={handleApply}
             className="w-full py-3 bg-primary text-white font-medium rounded-lg hover:bg-primary-dark transition-colors"

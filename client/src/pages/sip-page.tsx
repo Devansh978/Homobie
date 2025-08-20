@@ -635,7 +635,7 @@ export default function SipPage() {
                         <Card>
                           <CardHeader>
                             <CardTitle>SIP Calculator</CardTitle>
-                            <CardDescription>
+                            <CardDescription className='text-white'>
                               Estimate your potential returns with regular SIP
                               investments
                             </CardDescription>
@@ -793,245 +793,231 @@ export default function SipPage() {
                         <Card>
                           <CardHeader>
                             <CardTitle>Start Your SIP Journey</CardTitle>
-                            <CardDescription>
+                            <CardDescription className='text-white'>
                               Set up your Systematic Investment Plan
                             </CardDescription>
                           </CardHeader>
                           <CardContent>
                             <Form {...form}>
-                              <form
-                                onSubmit={form.handleSubmit(onSubmit)}
-                                className="space-y-6"
-                              >
-                                <FormField
-                                  control={form.control}
-                                  name="planName"
-                                  render={({ field }) => (
-                                    <FormItem>
-                                      <FormLabel>SIP Plan</FormLabel>
-                                      <Select
-                                        value={field.value}
-                                        onValueChange={field.onChange}
-                                      >
-                                        <FormControl>
-                                          <SelectTrigger>
-                                            <SelectValue placeholder="Select a SIP plan" />
-                                          </SelectTrigger>
-                                        </FormControl>
-                                        <SelectContent>
-                                          {SIP_PLANS.map((plan) => (
-                                            <SelectItem
-                                              key={plan.id}
-                                              value={plan.name}
-                                            >
-                                              {plan.name} - {plan.riskLevel}{" "}
-                                              Risk
-                                            </SelectItem>
-                                          ))}
-                                        </SelectContent>
-                                      </Select>
-                                      <FormMessage />
-                                    </FormItem>
-                                  )}
-                                />
+  <form
+    onSubmit={form.handleSubmit(onSubmit)}
+    className="space-y-6 bg-black text-white border border-white p-6 rounded-md"
+  >
+    {/* SIP Plan */}
+    <FormField
+      control={form.control}
+      name="planName"
+      render={({ field }) => (
+        <FormItem>
+          <FormLabel className="text-white">SIP Plan</FormLabel>
+          <Select value={field.value} onValueChange={field.onChange}>
+            <FormControl>
+              <SelectTrigger className="bg-black text-white border border-white">
+                <SelectValue placeholder="Select a SIP plan" />
+              </SelectTrigger>
+            </FormControl>
+            <SelectContent className="bg-black text-white border border-white">
+              {SIP_PLANS.map((plan) => (
+                <SelectItem
+                  key={plan.id}
+                  value={plan.name}
+                  className="hover:bg-gray-800"
+                >
+                  {plan.name} - {plan.riskLevel} Risk
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <FormMessage className="text-red-400" />
+        </FormItem>
+      )}
+    />
 
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                  <FormField
-                                    control={form.control}
-                                    name="monthlyAmount"
-                                    render={({ field }) => (
-                                      <FormItem>
-                                        <FormLabel>
-                                          Monthly Investment Amount (₹)
-                                        </FormLabel>
-                                        <FormControl>
-                                          <Input
-                                            type="number"
-                                            placeholder="Enter monthly amount"
-                                            {...field}
-                                          />
-                                        </FormControl>
-                                        <FormDescription>
-                                          Minimum ₹
-                                          {selectedPlanDetails.minAmount} per
-                                          month
-                                        </FormDescription>
-                                        <FormMessage />
-                                      </FormItem>
-                                    )}
-                                  />
+    {/* Monthly Amount + Duration */}
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <FormField
+        control={form.control}
+        name="monthlyAmount"
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel className="text-white">
+              Monthly Investment Amount (₹)
+            </FormLabel>
+            <FormControl>
+              <Input
+                type="number"
+                placeholder="Enter monthly amount"
+                className="bg-black text-white border border-white placeholder-gray-400"
+                {...field}
+              />
+            </FormControl>
+            <FormDescription className="text-gray-300">
+              Minimum ₹{selectedPlanDetails.minAmount} per month
+            </FormDescription>
+            <FormMessage className="text-red-400" />
+          </FormItem>
+        )}
+      />
 
-                                  <FormField
-                                    control={form.control}
-                                    name="durationMonths"
-                                    render={({ field }) => (
-                                      <FormItem>
-                                        <FormLabel>
-                                          Investment Duration (Months)
-                                        </FormLabel>
-                                        <FormControl>
-                                          <Input
-                                            type="number"
-                                            placeholder="Enter duration in months"
-                                            {...field}
-                                          />
-                                        </FormControl>
-                                        <FormDescription>
-                                          Recommended minimum{" "}
-                                          {
-                                            selectedPlanDetails.recommendedDuration
-                                          }{" "}
-                                          months
-                                        </FormDescription>
-                                        <FormMessage />
-                                      </FormItem>
-                                    )}
-                                  />
-                                </div>
+      <FormField
+        control={form.control}
+        name="durationMonths"
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel className="text-white">
+              Investment Duration (Months)
+            </FormLabel>
+            <FormControl>
+              <Input
+                type="number"
+                placeholder="Enter duration in months"
+                className="bg-black text-white border border-white placeholder-gray-400"
+                {...field}
+              />
+            </FormControl>
+            <FormDescription className="text-gray-300">
+              Recommended minimum {selectedPlanDetails.recommendedDuration} months
+            </FormDescription>
+            <FormMessage className="text-red-400" />
+          </FormItem>
+        )}
+      />
+    </div>
 
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                  <FormField
-                                    control={form.control}
-                                    name="startDate"
-                                    render={({ field }) => (
-                                      <FormItem>
-                                        <FormLabel>Start Date</FormLabel>
-                                        <FormControl>
-                                          <Input
-                                            type="date"
-                                            min={
-                                              new Date()
-                                                .toISOString()
-                                                .split("T")[0]
-                                            }
-                                            {...field}
-                                            value={
-                                              field.value instanceof Date
-                                                ? field.value
-                                                    .toISOString()
-                                                    .split("T")[0]
-                                                : field.value
-                                            }
-                                          />
-                                        </FormControl>
-                                        <FormDescription>
-                                          First installment will be debited on
-                                          this date
-                                        </FormDescription>
-                                        <FormMessage />
-                                      </FormItem>
-                                    )}
-                                  />
+    {/* Start Date + Expected Returns */}
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <FormField
+        control={form.control}
+        name="startDate"
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel className="text-white">Start Date</FormLabel>
+            <FormControl>
+              <Input
+                type="date"
+                min={new Date().toISOString().split("T")[0]}
+                className="bg-black text-white border border-white placeholder-gray-400"
+                {...field}
+                value={
+                  field.value instanceof Date
+                    ? field.value.toISOString().split("T")[0]
+                    : field.value
+                }
+              />
+            </FormControl>
+            <FormDescription className="text-gray-300">
+              First installment will be debited on this date
+            </FormDescription>
+            <FormMessage className="text-red-400" />
+          </FormItem>
+        )}
+      />
 
-                                  <FormField
-                                    control={form.control}
-                                    name="expectedReturns"
-                                    render={({ field }) => (
-                                      <FormItem>
-                                        <FormLabel>
-                                          Expected Returns (%)
-                                        </FormLabel>
-                                        <FormControl>
-                                          <Input
-                                            type="number"
-                                            step="0.1"
-                                            placeholder="Enter expected annual returns"
-                                            {...field}
-                                          />
-                                        </FormControl>
-                                        <FormDescription>
-                                          Based on historical performance of
-                                          selected plan
-                                        </FormDescription>
-                                        <FormMessage />
-                                      </FormItem>
-                                    )}
-                                  />
-                                </div>
+      <FormField
+        control={form.control}
+        name="expectedReturns"
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel className="text-white">Expected Returns (%)</FormLabel>
+            <FormControl>
+              <Input
+                type="number"
+                step="0.1"
+                placeholder="Enter expected annual returns"
+                className="bg-black text-white border border-white placeholder-gray-400"
+                {...field}
+              />
+            </FormControl>
+            <FormDescription className="text-gray-300">
+              Based on historical performance of selected plan
+            </FormDescription>
+            <FormMessage className="text-red-400" />
+          </FormItem>
+        )}
+      />
+    </div>
 
-                                <Separator />
+    <Separator className="border-white/40" />
 
-                                <div className="space-y-4">
-                                  <h3 className="text-lg font-medium">
-                                    Payment Details
-                                  </h3>
+    {/* Payment Details */}
+    <div className="space-y-4">
+      <h3 className="text-lg font-medium text-white">Payment Details</h3>
 
-                                  <FormField
-                                    control={form.control}
-                                    name="autoDebit"
-                                    render={({ field }) => (
-                                      <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
-                                        <div className="space-y-0.5">
-                                          <FormLabel className="text-base">
-                                            Auto Debit Authorization
-                                          </FormLabel>
-                                          <FormDescription>
-                                            Allow automatic debit from your bank
-                                            account for SIP installments
-                                          </FormDescription>
-                                        </div>
-                                        <FormControl>
-                                          <input
-                                            type="checkbox"
-                                            checked={field.value}
-                                            onChange={field.onChange}
-                                            className="w-5 h-5 text-white focus:ring-primary"
-                                            aria-label="Auto Debit Authorization"
-                                          />
-                                        </FormControl>
-                                      </FormItem>
-                                    )}
-                                  />
+      <FormField
+        control={form.control}
+        name="autoDebit"
+        render={({ field }) => (
+          <FormItem className="flex flex-row items-center justify-between rounded-lg border border-white p-4 bg-black">
+            <div className="space-y-0.5">
+              <FormLabel className="text-base text-white">
+                Auto Debit Authorization
+              </FormLabel>
+              <FormDescription className="text-gray-300">
+                Allow automatic debit from your bank account for SIP installments
+              </FormDescription>
+            </div>
+            <FormControl>
+              <input
+                type="checkbox"
+                checked={field.value}
+                onChange={field.onChange}
+                className="w-5 h-5 accent-white bg-black border border-white"
+                aria-label="Auto Debit Authorization"
+              />
+            </FormControl>
+          </FormItem>
+        )}
+      />
 
-                                  {form.watch("autoDebit") && (
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                      <FormField
-                                        control={form.control}
-                                        name="bankName"
-                                        render={({ field }) => (
-                                          <FormItem>
-                                            <FormLabel>Bank Name</FormLabel>
-                                            <FormControl>
-                                              <Input
-                                                placeholder="Enter your bank name"
-                                                {...field}
-                                              />
-                                            </FormControl>
-                                            <FormMessage />
-                                          </FormItem>
-                                        )}
-                                      />
-                                      <FormField
-                                        control={form.control}
-                                        name="bankAccountNumber"
-                                        render={({ field }) => (
-                                          <FormItem>
-                                            <FormLabel>Account Number</FormLabel>
-                                            <FormControl>
-                                              <Input
-                                                placeholder="Enter your account number"
-                                                {...field}
-                                              />
-                                            </FormControl>
-                                            <FormMessage />
-                                          </FormItem>
-                                        )}
-                                      />
-                                    </div>
-                                  )}
-                                </div>
+      {form.watch("autoDebit") && (
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <FormField
+            control={form.control}
+            name="bankName"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel className="text-white">Bank Name</FormLabel>
+                <FormControl>
+                  <Input
+                    placeholder="Enter your bank name"
+                    className="bg-black text-white border border-white placeholder-gray-400"
+                    {...field}
+                  />
+                </FormControl>
+                <FormMessage className="text-red-400" />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="bankAccountNumber"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel className="text-white">Account Number</FormLabel>
+                <FormControl>
+                  <Input
+                    placeholder="Enter your account number"
+                    className="bg-black text-white border border-white placeholder-gray-400"
+                    {...field}
+                  />
+                </FormControl>
+                <FormMessage className="text-red-400" />
+              </FormItem>
+            )}
+          />
+        </div>
+      )}
+    </div>
+    <Button
+      type="submit"
+      className="w-full"
+      disabled={isSubmitting}
+    >
+      {isSubmitting ? "Processing..." : "Start SIP Investment"}
+    </Button>
+  </form>
+</Form>
 
-                                <Button
-                                  type="submit"
-                                  className="w-full"
-                                  disabled={isSubmitting}
-                                >
-                                  {isSubmitting
-                                    ? "Processing..."
-                                    : "Start SIP Investment"}
-                                </Button>
-                              </form>
-                            </Form>
                           </CardContent>
                         </Card>
                       </div>

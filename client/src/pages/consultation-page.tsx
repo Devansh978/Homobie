@@ -9,28 +9,28 @@ import { apiRequest, queryClient } from "@/lib/queryClient";
 
 import { ChatbotButton } from "@/components/layout/chatbot-button";
 import { PaymentGateway } from "@/components/ui/payment-gateway";
-import { 
-  Form, 
-  FormControl, 
-  FormDescription, 
-  FormField, 
-  FormItem, 
-  FormLabel, 
-  FormMessage 
+import {
+  Form,
+  FormControl,
+  FormDescription,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
 } from "@/components/ui/form";
-import { 
-  Card, 
-  CardContent, 
-  CardDescription, 
-  CardHeader, 
-  CardTitle 
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
 } from "@/components/ui/card";
-import { 
-  Select, 
-  SelectContent, 
-  SelectItem, 
-  SelectTrigger, 
-  SelectValue 
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
 } from "@/components/ui/select";
 import {
   Popover,
@@ -40,16 +40,16 @@ import {
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { 
-  Calendar as CalendarIcon, 
-  Check, 
-  User, 
-  Phone, 
+import {
+  Calendar as CalendarIcon,
+  Check,
+  User,
+  Phone,
   Calendar as CalendarLucide,
   ClipboardList,
   Clock,
   CalendarCheck,
-  CalendarX
+  CalendarX,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Calendar } from "@/components/ui/calendar";
@@ -57,15 +57,20 @@ import { format } from "date-fns";
 
 const consultationFormSchema = z.object({
   preferredDate: z.union([
-    z.date({
-      required_error: "Please select a date",
-      invalid_type_error: "Please select a valid date",
-    }).refine(date => date > new Date(), {
-      message: "Please select a future date"
-    }),
-    z.string().refine(date => !isNaN(Date.parse(date)), {
-      message: "Please select a valid date"
-    }).transform(date => new Date(date))
+    z
+      .date({
+        required_error: "Please select a date",
+        invalid_type_error: "Please select a valid date",
+      })
+      .refine((date) => date > new Date(), {
+        message: "Please select a future date",
+      }),
+    z
+      .string()
+      .refine((date) => !isNaN(Date.parse(date)), {
+        message: "Please select a valid date",
+      })
+      .transform((date) => new Date(date)),
   ]),
   topic: z.string({
     required_error: "Please select a consultation topic",
@@ -94,7 +99,7 @@ export default function ConsultationPage() {
   const [isSuccess, setIsSuccess] = useState(false);
   const [showPayment, setShowPayment] = useState(false);
   const [consultationId, setConsultationId] = useState<number | null>(null);
-  
+
   // Consultation topics
   const consultationTopics = [
     "Home Loan Consultation",
@@ -106,9 +111,9 @@ export default function ConsultationPage() {
     "Tax Planning",
     "Wealth Management",
     "Debt Consolidation",
-    "Other Financial Services"
+    "Other Financial Services",
   ];
-  
+
   // Available time slots
   const timeSlots = [
     "09:00 AM - 10:00 AM",
@@ -143,14 +148,14 @@ export default function ConsultationPage() {
         preferredDate: data.preferredDate,
         notes: data.notes || "",
       };
-      
+
       const res = await apiRequest("POST", "/api/consultations", apiData);
       return await res.json();
     },
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ["/api/consultations"] });
       setIsSubmitting(false);
-      
+
       // Set the consultation ID and show the payment gateway
       setConsultationId(data.id);
       setShowPayment(false);
@@ -158,21 +163,21 @@ export default function ConsultationPage() {
     onError: (error) => {
       console.error("Error creating consultation:", error);
       setIsSubmitting(false);
-    }
+    },
   });
-  
+
   // Handle payment success
   const handlePaymentSuccess = (paymentData: any) => {
     console.log("Payment successful:", paymentData);
     setShowPayment(true);
     setIsSuccess(true);
-    
+
     // Navigate to dashboard after a delay
     setTimeout(() => {
       navigate("/dashboard");
     }, 3000);
   };
-  
+
   // Handle payment failure
   const handlePaymentFailure = (error: any) => {
     console.error("Payment failed:", error);
@@ -185,7 +190,7 @@ export default function ConsultationPage() {
       navigate("/auth");
       return;
     }
-    
+
     setIsSubmitting(true);
     createConsultationMutation.mutate(data);
   };
@@ -206,9 +211,12 @@ export default function ConsultationPage() {
                   <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
                     <Check className="h-8 w-8 text-green-600" />
                   </div>
-                  <h2 className="text-2xl font-bold text-white mb-2">Consultation Booked Successfully!</h2>
+                  <h2 className="text-2xl font-bold text-white mb-2">
+                    Consultation Booked Successfully!
+                  </h2>
                   <p className="text-white mb-6">
-                    Your consultation has been scheduled. You will receive a confirmation email shortly.
+                    Your consultation has been scheduled. You will receive a
+                    confirmation email shortly.
                   </p>
                   <Button onClick={() => navigate("/dashboard")}>
                     Go to Dashboard
@@ -226,8 +234,10 @@ export default function ConsultationPage() {
                   </CardHeader>
                   <CardContent>
                     <p className="mb-6">
-                      Your consultation has been reserved. To confirm your booking, please complete the payment. 
-                      The consultation fee is ₹0 and includes personalized financial advice from our expert advisors.
+                      Your consultation has been reserved. To confirm your
+                      booking, please complete the payment. The consultation fee
+                      is ₹0 and includes personalized financial advice from our
+                      expert advisors.
                     </p>
                     <PaymentGateway
                       paymentType="consultation"
@@ -247,8 +257,12 @@ export default function ConsultationPage() {
                     Book Your Financial Consultation
                   </h1>
                   <p className="text-white max-w-3xl mx-auto">
-                    Our financial experts will help you understand your options and create a personalized plan to achieve your financial goals.
-                    <span className="block mt-2 text-sm font-semibold">Consultation fee: ₹0</span>
+                    Our financial experts will help you understand your options
+                    and create a personalized plan to achieve your financial
+                    goals.
+                    <span className="block mt-2 text-sm font-semibold">
+                      Consultation fee: ₹0
+                    </span>
                   </p>
                 </div>
 
@@ -257,226 +271,264 @@ export default function ConsultationPage() {
                     <Card>
                       <CardHeader>
                         <CardTitle>Schedule a Consultation</CardTitle>
-                        <CardDescription>
-                          Fill in your details to book a session with our financial experts
+                        <CardDescription className='text-white'>
+                          Fill in your details to book a session with our
+                          financial experts
                         </CardDescription>
                       </CardHeader>
                       <CardContent>
                         <Form {...form}>
-  <form
-    onSubmit={form.handleSubmit(onSubmit)}
-    className="space-y-6 bg-black text-white border border-white p-6 rounded-md"
-  >
-    {/* Topic Selection */}
-    <FormField
-      control={form.control}
-      name="topic"
-      render={({ field }) => (
-        <FormItem>
-          <FormLabel className="text-white">Consultation Topic</FormLabel>
-          <Select value={field.value} onValueChange={field.onChange}>
-            <FormControl>
-              <SelectTrigger className="bg-black text-white border border-white">
-                <SelectValue placeholder="Select a topic" />
-              </SelectTrigger>
-            </FormControl>
-            <SelectContent className="bg-black text-white border border-white">
-              {consultationTopics.map((topic) => (
-                <SelectItem key={topic} value={topic} className="hover:bg-gray-800">
-                  {topic}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-          <FormDescription className="text-gray-300">
-            Select the main topic you'd like to discuss
-          </FormDescription>
-          <FormMessage className="text-red-400" />
-        </FormItem>
-      )}
-    />
+                          <form
+                            onSubmit={form.handleSubmit(onSubmit)}
+                            className="space-y-6 bg-black text-white border border-white p-6 rounded-md"
+                          >
+                            {/* Topic Selection */}
+                            <FormField
+                              control={form.control}
+                              name="topic"
+                              render={({ field }) => (
+                                <FormItem>
+                                  <FormLabel className="text-white">
+                                    Consultation Topic
+                                  </FormLabel>
+                                  <Select
+                                    value={field.value}
+                                    onValueChange={field.onChange}
+                                  >
+                                    <FormControl>
+                                      <SelectTrigger className="bg-black text-white border border-white">
+                                        <SelectValue placeholder="Select a topic" />
+                                      </SelectTrigger>
+                                    </FormControl>
+                                    <SelectContent className="bg-black text-white border border-white">
+                                      {consultationTopics.map((topic) => (
+                                        <SelectItem
+                                          key={topic}
+                                          value={topic}
+                                          className="hover:bg-gray-800"
+                                        >
+                                          {topic}
+                                        </SelectItem>
+                                      ))}
+                                    </SelectContent>
+                                  </Select>
+                                  <FormDescription className="text-gray-300">
+                                    Select the main topic you'd like to discuss
+                                  </FormDescription>
+                                  <FormMessage className="text-red-400" />
+                                </FormItem>
+                              )}
+                            />
 
-    {/* Name + Phone */}
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-      <FormField
-        control={form.control}
-        name="name"
-        render={({ field }) => (
-          <FormItem>
-            <FormLabel className="text-white">Your Name</FormLabel>
-            <FormControl>
-              <div className="flex">
-                <span className="inline-flex items-center px-3 rounded-l-md border border-r-0 border-white bg-black text-white">
-                  <User className="h-4 w-4" />
-                </span>
-                <Input
-                  placeholder="Enter your full name"
-                  className="rounded-l-none bg-black text-white border border-white placeholder-gray-400"
-                  {...field}
-                />
-              </div>
-            </FormControl>
-            <FormMessage className="text-red-400" />
-          </FormItem>
-        )}
-      />
+                            {/* Name + Phone */}
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                              <FormField
+                                control={form.control}
+                                name="name"
+                                render={({ field }) => (
+                                  <FormItem>
+                                    <FormLabel className="text-white">
+                                      Your Name
+                                    </FormLabel>
+                                    <FormControl>
+                                      <div className="flex">
+                                        <span className="inline-flex items-center px-3 rounded-l-md border border-r-0 border-white bg-black text-white">
+                                          <User className="h-4 w-4" />
+                                        </span>
+                                        <Input
+                                          placeholder="Enter your full name"
+                                          className="rounded-l-none bg-black text-white border border-white placeholder-gray-400"
+                                          {...field}
+                                        />
+                                      </div>
+                                    </FormControl>
+                                    <FormMessage className="text-red-400" />
+                                  </FormItem>
+                                )}
+                              />
 
-      <FormField
-        control={form.control}
-        name="phone"
-        render={({ field }) => (
-          <FormItem>
-            <FormLabel className="text-white">Phone Number</FormLabel>
-            <FormControl>
-              <div className="flex">
-                <span className="inline-flex items-center px-3 rounded-l-md border border-r-0 border-white bg-black text-white">
-                  <Phone className="h-4 w-4" />
-                </span>
-                <Input
-                  placeholder="Enter your phone number"
-                  className="rounded-l-none bg-black text-white border border-white placeholder-gray-400"
-                  {...field}
-                />
-              </div>
-            </FormControl>
-            <FormMessage className="text-red-400" />
-          </FormItem>
-        )}
-      />
-    </div>
+                              <FormField
+                                control={form.control}
+                                name="phone"
+                                render={({ field }) => (
+                                  <FormItem>
+                                    <FormLabel className="text-white">
+                                      Phone Number
+                                    </FormLabel>
+                                    <FormControl>
+                                      <div className="flex">
+                                        <span className="inline-flex items-center px-3 rounded-l-md border border-r-0 border-white bg-black text-white">
+                                          <Phone className="h-4 w-4" />
+                                        </span>
+                                        <Input
+                                          placeholder="Enter your phone number"
+                                          className="rounded-l-none bg-black text-white border border-white placeholder-gray-400"
+                                          {...field}
+                                        />
+                                      </div>
+                                    </FormControl>
+                                    <FormMessage className="text-red-400" />
+                                  </FormItem>
+                                )}
+                              />
+                            </div>
 
-    {/* Email */}
-    <FormField
-      control={form.control}
-      name="email"
-      render={({ field }) => (
-        <FormItem>
-          <FormLabel className="text-white">Email Address</FormLabel>
-          <FormControl>
-            <Input
-              type="email"
-              placeholder="Enter your email address"
-              {...field}
-              className="bg-black text-white border border-white placeholder-gray-400"
-            />
-          </FormControl>
-          <FormDescription className="text-gray-300">
-            We'll send confirmation and meeting details to this email
-          </FormDescription>
-          <FormMessage className="text-red-400" />
-        </FormItem>
-      )}
-    />
+                            {/* Email */}
+                            <FormField
+                              control={form.control}
+                              name="email"
+                              render={({ field }) => (
+                                <FormItem>
+                                  <FormLabel className="text-white">
+                                    Email Address
+                                  </FormLabel>
+                                  <FormControl>
+                                    <Input
+                                      type="email"
+                                      placeholder="Enter your email address"
+                                      {...field}
+                                      className="bg-black text-white border border-white placeholder-gray-400"
+                                    />
+                                  </FormControl>
+                                  <FormDescription className="text-gray-300">
+                                    We'll send confirmation and meeting details
+                                    to this email
+                                  </FormDescription>
+                                  <FormMessage className="text-red-400" />
+                                </FormItem>
+                              )}
+                            />
 
-    {/* Date + Time */}
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-      <FormField
-        control={form.control}
-        name="preferredDate"
-        render={({ field }) => (
-          <FormItem className="flex flex-col">
-            <FormLabel className="text-white">Preferred Date</FormLabel>
-            <Popover>
-              <PopoverTrigger asChild>
-                <FormControl>
-                  <Button
-                    variant="outline"
-                    className={cn(
-                      "pl-3 text-left font-normal bg-black text-white border border-white",
-                      !field.value && "text-gray-400"
-                    )}
-                  >
-                    {field.value ? format(field.value, "PPP") : <span>Pick a date</span>}
-                    <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                  </Button>
-                </FormControl>
-              </PopoverTrigger>
-              <PopoverContent
-                className="w-auto p-0 bg-black border border-white text-white"
-                align="start"
-              >
-                <Calendar
-                  mode="single"
-                  selected={field.value as Date}
-                  onSelect={field.onChange}
-                  disabled={(date) =>
-                    date < new Date() || date.getDay() === 0 || date.getDay() === 6
-                  }
-                  initialFocus
-                />
-              </PopoverContent>
-            </Popover>
-            <FormDescription className="text-gray-300">
-              Select a weekday (Monday to Friday)
-            </FormDescription>
-            <FormMessage className="text-red-400" />
-          </FormItem>
-        )}
-      />
+                            {/* Date + Time */}
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                              <FormField
+                                control={form.control}
+                                name="preferredDate"
+                                render={({ field }) => (
+                                  <FormItem className="flex flex-col">
+                                    <FormLabel className="text-white">
+                                      Preferred Date
+                                    </FormLabel>
+                                    <Popover>
+                                      <PopoverTrigger asChild>
+                                        <FormControl>
+                                          <Button
+                                            variant="outline"
+                                            className={cn(
+                                              "pl-3 text-left font-normal bg-black text-white border border-white",
+                                              !field.value && "text-gray-400"
+                                            )}
+                                          >
+                                            {field.value ? (
+                                              format(field.value, "PPP")
+                                            ) : (
+                                              <span>Pick a date</span>
+                                            )}
+                                            <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                                          </Button>
+                                        </FormControl>
+                                      </PopoverTrigger>
+                                      <PopoverContent
+                                        className="w-auto p-0 bg-black border border-white text-white"
+                                        align="start"
+                                      >
+                                        <Calendar
+                                          mode="single"
+                                          selected={field.value as Date}
+                                          onSelect={field.onChange}
+                                          disabled={(date) =>
+                                            date < new Date() ||
+                                            date.getDay() === 0 ||
+                                            date.getDay() === 6
+                                          }
+                                          initialFocus
+                                        />
+                                      </PopoverContent>
+                                    </Popover>
+                                    <FormDescription className="text-gray-300">
+                                      Select a weekday (Monday to Friday)
+                                    </FormDescription>
+                                    <FormMessage className="text-red-400" />
+                                  </FormItem>
+                                )}
+                              />
 
-      <FormField
-        control={form.control}
-        name="preferredTime"
-        render={({ field }) => (
-          <FormItem>
-            <FormLabel className="text-white">Preferred Time</FormLabel>
-            <Select value={field.value} onValueChange={field.onChange}>
-              <FormControl>
-                <SelectTrigger className="bg-black text-white border border-white">
-                  <SelectValue placeholder="Select a time slot" />
-                </SelectTrigger>
-              </FormControl>
-              <SelectContent className="bg-black text-white border border-white">
-                {timeSlots.map((slot) => (
-                  <SelectItem key={slot} value={slot} className="hover:bg-gray-800">
-                    {slot}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            <FormDescription className="text-gray-300">
-              All times are in Indian Standard Time (IST)
-            </FormDescription>
-            <FormMessage className="text-red-400" />
-          </FormItem>
-        )}
-      />
-    </div>
+                              <FormField
+                                control={form.control}
+                                name="preferredTime"
+                                render={({ field }) => (
+                                  <FormItem>
+                                    <FormLabel className="text-white">
+                                      Preferred Time
+                                    </FormLabel>
+                                    <Select
+                                      value={field.value}
+                                      onValueChange={field.onChange}
+                                    >
+                                      <FormControl>
+                                        <SelectTrigger className="bg-black text-white border border-white">
+                                          <SelectValue placeholder="Select a time slot" />
+                                        </SelectTrigger>
+                                      </FormControl>
+                                      <SelectContent className="bg-black text-white border border-white">
+                                        {timeSlots.map((slot) => (
+                                          <SelectItem
+                                            key={slot}
+                                            value={slot}
+                                            className="hover:bg-gray-800"
+                                          >
+                                            {slot}
+                                          </SelectItem>
+                                        ))}
+                                      </SelectContent>
+                                    </Select>
+                                    <FormDescription className="text-gray-300">
+                                      All times are in Indian Standard Time
+                                      (IST)
+                                    </FormDescription>
+                                    <FormMessage className="text-red-400" />
+                                  </FormItem>
+                                )}
+                              />
+                            </div>
 
-    {/* Notes */}
-    <FormField
-      control={form.control}
-      name="notes"
-      render={({ field }) => (
-        <FormItem>
-          <FormLabel className="text-white">Additional Notes (Optional)</FormLabel>
-          <FormControl>
-            <Textarea
-              placeholder="Please share any specific questions or topics you'd like to discuss"
-              className="min-h-[100px] bg-black text-white border border-white placeholder-gray-400"
-              {...field}
-            />
-          </FormControl>
-          <FormMessage className="text-red-400" />
-        </FormItem>
-      )}
-    />
+                            {/* Notes */}
+                            <FormField
+                              control={form.control}
+                              name="notes"
+                              render={({ field }) => (
+                                <FormItem>
+                                  <FormLabel className="text-white">
+                                    Additional Notes (Optional)
+                                  </FormLabel>
+                                  <FormControl>
+                                    <Textarea
+                                      placeholder="Please share any specific questions or topics you'd like to discuss"
+                                      className="min-h-[100px] bg-black text-white border border-white placeholder-gray-400"
+                                      {...field}
+                                    />
+                                  </FormControl>
+                                  <FormMessage className="text-red-400" />
+                                </FormItem>
+                              )}
+                            />
 
-    {/* Submit Button */}
-    <Button
-      type="submit"
-      className="w-full bg-white text-black hover:bg-gray-200"
-      disabled={isSubmitting}
-    >
-      {isSubmitting ? "Booking Your Consultation..." : "Book My Free Consultation"}
-    </Button>
-  </form>
-</Form>
-
+                            {/* Submit Button */}
+                            <Button
+                              type="submit"
+                              className="w-full"
+                              disabled={isSubmitting}
+                            >
+                              {isSubmitting
+                                ? "Booking Your Consultation..."
+                                : "Book My Free Consultation"}
+                            </Button>
+                          </form>
+                        </Form>
                       </CardContent>
                     </Card>
                   </div>
-                  
+
                   <div className="md:col-span-2 space-y-6">
                     <Card className="bg-primary text-white">
                       <CardHeader>
@@ -493,11 +545,12 @@ export default function ConsultationPage() {
                           <div>
                             <h3 className="font-medium">Expert Advisors</h3>
                             <p className="text-sm text-primary-foreground/80">
-                              Our team consists of certified financial experts with years of experience
+                              Our team consists of certified financial experts
+                              with years of experience
                             </p>
                           </div>
                         </div>
-                        
+
                         <div className="flex items-start">
                           <div className="mr-3 bg-white/20 p-2 rounded-full">
                             <ClipboardList className="h-5 w-5" />
@@ -505,11 +558,12 @@ export default function ConsultationPage() {
                           <div>
                             <h3 className="font-medium">Personalized Plans</h3>
                             <p className="text-sm text-primary-foreground/80">
-                              Get a customized financial roadmap tailored to your specific goals
+                              Get a customized financial roadmap tailored to
+                              your specific goals
                             </p>
                           </div>
                         </div>
-                        
+
                         <div className="flex items-start">
                           <div className="mr-3 bg-white/20 p-2 rounded-full">
                             <Clock className="h-5 w-5" />
@@ -517,11 +571,12 @@ export default function ConsultationPage() {
                           <div>
                             <h3 className="font-medium">Flexible Scheduling</h3>
                             <p className="text-sm text-primary-foreground/80">
-                              Choose a time that works best for your busy schedule
+                              Choose a time that works best for your busy
+                              schedule
                             </p>
                           </div>
                         </div>
-                        
+
                         <div className="flex items-start">
                           <div className="mr-3 bg-white/20 p-2 rounded-full">
                             <CalendarCheck className="h-5 w-5" />
@@ -529,13 +584,14 @@ export default function ConsultationPage() {
                           <div>
                             <h3 className="font-medium">First Session Free</h3>
                             <p className="text-sm text-primary-foreground/80">
-                              Your initial consultation is completely free with no obligations
+                              Your initial consultation is completely free with
+                              no obligations
                             </p>
                           </div>
                         </div>
                       </CardContent>
                     </Card>
-                    
+
                     <Card>
                       <CardHeader className="pb-3">
                         <CardTitle>What to Expect</CardTitle>
@@ -543,42 +599,62 @@ export default function ConsultationPage() {
                       <CardContent className="space-y-4">
                         <div className="flex items-center">
                           <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center mr-3">
-                            <span className="text-primary font-semibold">1</span>
+                            <span className="text-primary font-semibold">
+                              1
+                            </span>
                           </div>
-                          <p className="text-sm">Initial assessment of your financial situation</p>
+                          <p className="text-sm">
+                            Initial assessment of your financial situation
+                          </p>
                         </div>
-                        
+
                         <div className="flex items-center">
                           <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center mr-3">
-                            <span className="text-primary font-semibold">2</span>
+                            <span className="text-primary font-semibold">
+                              2
+                            </span>
                           </div>
-                          <p className="text-sm">Discussion about your financial goals and timeline</p>
+                          <p className="text-sm">
+                            Discussion about your financial goals and timeline
+                          </p>
                         </div>
-                        
+
                         <div className="flex items-center">
                           <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center mr-3">
-                            <span className="text-primary font-semibold">3</span>
+                            <span className="text-primary font-semibold">
+                              3
+                            </span>
                           </div>
-                          <p className="text-sm">Explanation of suitable financial products</p>
+                          <p className="text-sm">
+                            Explanation of suitable financial products
+                          </p>
                         </div>
-                        
+
                         <div className="flex items-center">
                           <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center mr-3">
-                            <span className="text-primary font-semibold">4</span>
+                            <span className="text-primary font-semibold">
+                              4
+                            </span>
                           </div>
-                          <p className="text-sm">Recommendations and next steps</p>
+                          <p className="text-sm">
+                            Recommendations and next steps
+                          </p>
                         </div>
                       </CardContent>
                     </Card>
-                    
+
                     <Card className="border-[#FFB800]/30 bg-[#FFB800]/5">
                       <CardContent className="pt-6">
                         <div className="flex items-start">
                           <CalendarX className="h-10 w-10 text-[#FFB800] mr-4" />
                           <div>
-                            <h3 className="font-semibold text-lg mb-1">Need to Reschedule?</h3>
+                            <h3 className="font-semibold text-lg mb-1">
+                              Need to Reschedule?
+                            </h3>
                             <p className="text-sm text-white">
-                              If you need to reschedule your consultation, you can do so from your dashboard up to 24 hours before your appointment.
+                              If you need to reschedule your consultation, you
+                              can do so from your dashboard up to 24 hours
+                              before your appointment.
                             </p>
                           </div>
                         </div>
@@ -586,7 +662,7 @@ export default function ConsultationPage() {
                     </Card>
                   </div>
                 </div>
-                
+
                 {/* <div className="mt-8 bg-neutral-100 rounded-xl p-8">
                   <h2 className="text-2xl font-bold text-center mb-8">What Our Clients Say</h2>
                   

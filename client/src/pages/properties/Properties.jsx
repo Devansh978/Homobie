@@ -283,7 +283,7 @@ const Properties = () => {
                   <a>
                     <PropertyCard
                       property={item.property}
-                      files={item.files}
+                      files={item.images}
                       isSlider={true}
                     />
                   </a>

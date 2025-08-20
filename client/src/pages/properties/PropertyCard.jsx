@@ -70,18 +70,18 @@ const PropertyCard = ({ property, files, isSlider = false }) => {
           </div>
         </div>
         <div className="flex items-center gap-4 mb-5 text-white/60 text-sm">
-          <div className="flex items-center gap-1.5">
+          {/* <div className="flex items-center gap-1.5">
             <Bed className="w-4 h-4" />
             <span>{property.bedrooms} BHK</span>
-          </div>
-          <div className="flex items-center gap-1.5">
+          </div> */}
+          {/* <div className="flex items-center gap-1.5">
             <Bath className="w-4 h-4" />
             <span>{property.bathrooms} Bath</span>
           </div>
           <div className="flex items-center gap-1.5">
             <Square className="w-4 h-4" />
             <span>{property.areaSqft} sqft</span>
-          </div>
+          </div> */}
         </div>
         <button className="flex-1 bg-white/90 backdrop-blur-md text-black py-2.5 px-4 rounded-xl font-medium hover:bg-white transition-all duration-300 border border-white/20 hover:shadow-lg transform hover:scale-[1.02]">
           View Details

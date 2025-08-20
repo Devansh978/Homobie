@@ -22,8 +22,6 @@ const Blog5 = ({ styles }) => (
     <h1 className="text-3xl font-bold mb-4">
       How Does Taking Out a Home Loan Affect Your Income Tax?
     </h1>
-
-    <h2 className="text-2xl font-semibold mb-2">TL;DR</h2>
     <p className="mb-4">
       A home loan offers significant <strong>income tax benefits</strong> in
       India. You can claim deductions on the principal under{" "}

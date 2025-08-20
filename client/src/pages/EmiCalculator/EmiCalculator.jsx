@@ -71,7 +71,8 @@ export function EmiCalculator({ onApply }) {
   };
 
   return (
-    <Card className="bg-black text-white rounded-xl shadow-lg pt-20">
+    <div className='bg-black'>
+    <Card className="bg-black text-white rounded-xl shadow-lg pt-20 mx-24">
       <CardContent className="p-6">
         <h2 className="text-white text-xl font-semibold mb-4">
           EMI Calculator
@@ -203,13 +204,14 @@ export function EmiCalculator({ onApply }) {
 
           <Button
             onClick={handleApply}
-            className="w-full py-3 bg-white text-black font-medium rounded-lg hover:bg-white/90 transition-colors"
+            className="w-[25%] py-3 relative left-[38%] text-white font-medium rounded-lg hover:bg-white/90 hover:text-black transition-colors text-[15px]"
           >
             Apply Now
           </Button>
         </div>
       </CardContent>
     </Card>
+    </div>
   );
 }
 

@@ -421,7 +421,7 @@ export default function LoanApplicationPage() {
                     </CardHeader>
                     <CardContent>
                       <Tabs value={activeTab} onValueChange={setActiveTab}>
-                        <TabsList className="grid w-full grid-cols-2">
+                        <TabsList className="grid w-full grid-cols-2 mb-4">
                           <TabsTrigger value="loan-details">Loan Details</TabsTrigger>
                           <TabsTrigger value="personal-details">Personal Details</TabsTrigger>
                         </TabsList>
@@ -903,7 +903,7 @@ export default function LoanApplicationPage() {
           type="button"
           variant="outline"
           onClick={() => setActiveTab("loan-details")}
-          className="border border-white text-white bg-black"
+          className="border border-white text-white bg-black mr-1 w-25 text-[12px]"
         >
           Back to Loan Details
         </Button>
@@ -916,9 +916,9 @@ export default function LoanApplicationPage() {
             onChange={(e) => e.target.files && handleDocumentUpload(e.target.files)}
             className="hidden"
           />
-          <Button type="button" variant="outline" asChild className=" bg-black border border-white text-white">
+          <Button type="button" variant="outline" asChild className=" bg-black border border-white text-white w-26 text-[13px]">
             <label htmlFor="document-upload" className="cursor-pointer">
-              <Upload className="h-4 w-4 mr-2" />
+              <Upload className="h-4 w-4" />
               Upload Documents
             </label>
           </Button>
@@ -962,7 +962,7 @@ export default function LoanApplicationPage() {
                           <Separator />
                           <div className="flex justify-between">
                             <span className="text-sm text-white">Monthly EMI</span>
-                            <span className="font-semibold text-primary">₹{emiAmount.toLocaleString()}</span>
+                            <span className="font-semibold text-[#FF7F50]">₹{emiAmount.toLocaleString()}</span>
                           </div>
                         </div>
                       </CardContent>
@@ -1006,7 +1006,7 @@ export default function LoanApplicationPage() {
                     </Card>
                     
                     <div className="flex items-center justify-center p-4 bg-black rounded-lg">
-                      <Upload className="h-5 w-5 text-white mr-2" />
+                      <Upload className="h-10 w-10 text-white mr-2" />
                       <p className="text-sm text-white">You can upload documents after submitting your application</p>
                     </div>
                   </div>
