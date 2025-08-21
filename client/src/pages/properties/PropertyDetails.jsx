@@ -18,59 +18,75 @@ const getPropertyIdFromLocalStorage = () => {
   return null;
 };
 
-// STEP 1: Convert image data to displayable URL
-const convertByteArrayToImageUrl = (imageData) => {
+// Debug function to analyze image data
+const debugImageData = (imageData, index = 0) => {
+  console.log(`=== DEBUG Image ${index} ===`);
+  console.log('Type:', typeof imageData);
+  
+  if (typeof imageData === 'string') {
+    console.log('Length:', imageData.length);
+    console.log('First 100 chars:', imageData.substring(0, 100));
+    
+    // Check for the specific malformed pattern from your backend
+    if (imageData.includes('image/jpeg/poses')) {
+      console.log('Detected malformed JPEG data URL with "poses"');
+    } else if (imageData.startsWith('/9j/')) {
+      console.log('Detected: JPEG base64 data (without prefix)');
+    } else if (imageData.startsWith('iVBORw')) {
+      console.log('Detected: PNG base64 data (without prefix)');
+    } else if (imageData.startsWith('data:image/')) {
+      console.log('Detected: Data URL');
+    } else if (imageData.startsWith('http')) {
+      console.log('Detected: HTTP URL');
+    } else {
+      console.log('Unknown format - assuming base64 without prefix');
+    }
+  }
+  
+  console.log(`=== END DEBUG Image ${index} ===`);
+};
+
+// Corrected image conversion function
+const convertImageDataToUrl = (imageData) => {
   if (!imageData) {
     console.warn("No image data provided");
     return null;
   }
   
   try {
-    // Handle different input formats
-    if (typeof imageData === 'string') {
-      // Already a proper data URL
-      if (imageData.startsWith('data:image/')) {
-        return imageData;
+    // If it's already a proper URL, return it
+    if (typeof imageData === 'string' && (imageData.startsWith('http') || imageData.startsWith('blob:') || imageData.startsWith('data:image/'))) {
+      // Fix malformed data URLs from your backend
+      if (imageData.includes('image/jpeg/poses')) {
+        const base64Data = imageData.split('image/jpeg/poses/')[1];
+        return `data:image/jpeg;base64,${base64Data}`;
       }
-      // Base64 JPEG without prefix (common case from your backend)
-      else if (imageData.startsWith('/9j/')) {
+      return imageData;
+    }
+    
+    // If it's a base64 string without prefix, add the proper prefix
+    if (typeof imageData === 'string') {
+      // Check if it looks like base64 data
+      if (imageData.match(/^[A-Za-z0-9+/=]+$/)) {
         return `data:image/jpeg;base64,${imageData}`;
       }
-      // Base64 PNG without prefix
-      else if (imageData.startsWith('iVBORw')) {
-        return `data:image/png;base64,${imageData}`;
-      }
-      // Already a URL
-      else if (imageData.startsWith('http') || imageData.startsWith('blob:')) {
-        return imageData;
-      }
-      // Assume it's base64 data without prefix
-      else {
-        // Try to detect image type from content
-        const firstChars = imageData.substring(0, 20);
-        let mimeType = 'image/jpeg'; // default
-        
-        if (firstChars.includes('PNG') || firstChars.includes('iVBORw')) {
-          mimeType = 'image/png';
-        } else if (firstChars.includes('GIF')) {
-          mimeType = 'image/gif';
-        } else if (firstChars.includes('WEBP')) {
-          mimeType = 'image/webp';
-        }
-        
-        return `data:${mimeType};base64,${imageData}`;
+      
+      // Handle the specific malformed pattern from your backend
+      if (imageData.includes('image/jpeg/poses')) {
+        const base64Data = imageData.split('image/jpeg/poses/')[1];
+        return `data:image/jpeg;base64,${base64Data}`;
       }
     }
-    // Handle Uint8Array or Array
-    else if (imageData instanceof Uint8Array || Array.isArray(imageData)) {
-      // Convert to base64 first, then create data URL
-      const uint8Array = imageData instanceof Uint8Array ? imageData : new Uint8Array(imageData);
-      const binaryString = Array.from(uint8Array).map(byte => String.fromCharCode(byte)).join('');
-      const base64 = btoa(binaryString);
+    
+    // Handle byte arrays
+    if (imageData instanceof Uint8Array || Array.isArray(imageData)) {
+      const bytes = imageData instanceof Uint8Array ? imageData : new Uint8Array(imageData);
+      const binary = bytes.reduce((acc, byte) => acc + String.fromCharCode(byte), '');
+      const base64 = btoa(binary);
       return `data:image/jpeg;base64,${base64}`;
     }
     
-    console.warn("Unsupported image data format:", typeof imageData);
+    console.warn("Unsupported image data format:", typeof imageData, imageData);
     return null;
     
   } catch (error) {
@@ -79,33 +95,29 @@ const convertByteArrayToImageUrl = (imageData) => {
   }
 };
 
-// STEP 2: Convert array of image data to array of image URLs
+// Enhanced convertImageArrayToUrls with debugging
 const convertImageArrayToUrls = (imageArray) => {
-  console.log("Converting image array to URLs:", imageArray);
-  
   if (!imageArray || !Array.isArray(imageArray)) {
     console.warn("Invalid or missing image array");
     return [];
   }
   
-  const imageUrls = [];
+  const urls = [];
   
   for (let i = 0; i < imageArray.length; i++) {
-    const imageData = imageArray[i];
-    console.log(`Processing image ${i}:`, typeof imageData);
+    const imgData = imageArray[i];
+    debugImageData(imgData, i);
     
-    const imageUrl = convertByteArrayToImageUrl(imageData);
-    
-    if (imageUrl) {
-      imageUrls.push(imageUrl);
-      console.log(`Successfully converted image ${i}`);
+    const url = convertImageDataToUrl(imgData);
+    if (url) {
+      urls.push(url);
+      console.log(`Successfully converted image ${i}:`, url.substring(0, 50) + '...');
     } else {
       console.warn(`Failed to convert image ${i}`);
     }
   }
   
-  console.log(`Converted ${imageUrls.length} out of ${imageArray.length} images`);
-  return imageUrls;
+  return urls;
 };
 
 // API function to fetch individual property
@@ -147,7 +159,7 @@ const fetchIndividualProperty = async (propertyId) => {
   }
 };
 
-// STEP 3: Process property data and convert images
+// Process property data and convert images
 const processPropertyData = (rawData) => {
   if (!rawData) {
     console.warn("No property data to process");
@@ -175,10 +187,12 @@ const processPropertyData = (rawData) => {
   }
 
   if (imageUrls.length === 0) {
-    console.log("No images found in data");
+    console.log("No images found in data, using placeholder");
+    // Add a placeholder image
+    imageUrls = ['https://via.placeholder.com/800x600/333/fff?text=No+Image+Available'];
   }
 
-  // SECOND: Structure the property data
+  // Structure the property data
   const processedProperty = {
     // IDs
     id: rawData.propertyId || `temp-${Date.now()}`,
@@ -208,8 +222,8 @@ const processPropertyData = (rawData) => {
       pincode: rawData.location?.pincode || "",
     },
 
-    // PROCESSED IMAGES - This is the key part!
-    imageUrls: imageUrls, // Array of blob URLs ready for display
+    // PROCESSED IMAGES
+    imageUrls: imageUrls,
     
     // Other arrays
     amenities: rawData.amenities || [],
@@ -223,28 +237,47 @@ const processPropertyData = (rawData) => {
   return processedProperty;
 };
 
-// Simple image component with loading and error states
+// FIXED: Simple image component with better loading and error states
 const PropertyImage = ({ src, alt, className, onClick, loading = "lazy" }) => {
-  const [imageState, setImageState] = useState('loading'); // 'loading', 'loaded', 'error'
+  const [imageState, setImageState] = useState('loading');
+  const [imgRef, setImgRef] = useState(null);
 
-  const handleLoad = () => {
-    setImageState('loaded');
-  };
+  useEffect(() => {
+    if (!src) {
+      setImageState('error');
+      return;
+    }
 
-  const handleError = () => {
-    console.error("Failed to load image:", src);
-    setImageState('error');
-  };
+    // Reset state when src changes
+    setImageState('loading');
+    
+    // Create a new image to test if it loads
+    const img = new Image();
+    
+    img.onload = () => {
+      console.log('Image loaded successfully:', src.substring(0, 50) + '...');
+      setImageState('loaded');
+    };
+    
+    img.onerror = (e) => {
+      console.error('Failed to load image:', src.substring(0, 50) + '...', e);
+      setImageState('error');
+    };
+    
+    // Start loading the image
+    img.src = src;
+    setImgRef(img);
+    
+    // Cleanup
+    return () => {
+      if (img) {
+        img.onload = null;
+        img.onerror = null;
+      }
+    };
+  }, [src]);
 
-  // Show placeholder while loading or on error
-  if (imageState === 'loading') {
-    return (
-      <div className={`${className} bg-gray-800 flex items-center justify-center`}>
-        <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-white"></div>
-      </div>
-    );
-  }
-
+  // Show error state
   if (imageState === 'error' || !src) {
     return (
       <div className={`${className} bg-gray-800 flex items-center justify-center text-white/60`}>
@@ -256,15 +289,27 @@ const PropertyImage = ({ src, alt, className, onClick, loading = "lazy" }) => {
     );
   }
 
+  // Show loading state
+  if (imageState === 'loading') {
+    return (
+      <div className={`${className} bg-gray-800 flex items-center justify-center`}>
+        <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-white"></div>
+      </div>
+    );
+  }
+
+  // Show loaded image
   return (
     <img
       src={src}
       alt={alt}
       className={className}
       onClick={onClick}
-      onLoad={handleLoad}
-      onError={handleError}
       loading={loading}
+      onError={() => {
+        console.error('Image failed to display:', src.substring(0, 50) + '...');
+        setImageState('error');
+      }}
     />
   );
 };
@@ -365,23 +410,7 @@ const PropertyDetail = () => {
   };
 
   const toggleFavorite = () => {
-    const propertyId = getPropertyIdFromLocalStorage();
-    if (!propertyId) return;
-
-    try {
-      const favorites = JSON.parse(sessionStorage.getItem('favorites') || '[]');
-      if (isFavorite) {
-        const updatedFavorites = favorites.filter(id => id !== propertyId);
-        sessionStorage.setItem('favorites', JSON.stringify(updatedFavorites));
-      } else {
-        favorites.push(propertyId);
-        sessionStorage.setItem('favorites', JSON.stringify(favorites));
-      }
-      setIsFavorite(!isFavorite);
-    } catch {
-      sessionStorage.setItem('favorites', JSON.stringify([propertyId]));
-      setIsFavorite(true);
-    }
+    setIsFavorite(!isFavorite);
   };
 
   const shareProperty = async () => {
