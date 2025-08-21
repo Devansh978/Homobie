@@ -22,8 +22,6 @@ const Blog4 = ({ styles }) => (
     <h1 className="text-3xl md:text-4xl font-bold text-white mb-6">
       Home Loan Takeover Explained: RBI Guidelines Every Borrower Should Know
     </h1>
-
-    <h2 className="text-2xl font-semibold text-white mb-3">TL;DR</h2>
     <p className="mb-6 leading-relaxed">
       The Reserve Bank of India (RBI) allows borrowers to transfer their home
       loans to another lender—commonly known as a{" "}

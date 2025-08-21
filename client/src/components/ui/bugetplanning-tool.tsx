@@ -121,7 +121,7 @@ const BudgetPlanner = () => {
               callbacks: {
                 label: function(context) {
                   const percentage = Math.round((context.raw / totalExpenses) * 100);
-                  return `${context.label}: $${context.raw} (${percentage}%)`;
+                  return `${context.label}: ₹${context.raw} (${percentage}%)`;
                 }
               },
               bodyColor: '#000000' // Black text for tooltips
@@ -173,7 +173,7 @@ const BudgetPlanner = () => {
             tooltip: {
               callbacks: {
                 label: function(context) {
-                  return `${context.dataset.label}: $${context.raw}`;
+                  return `${context.dataset.label}: ₹${context.raw}`;
                 }
               },
               bodyColor: '#000000' // Black text for tooltips
@@ -191,15 +191,33 @@ const BudgetPlanner = () => {
     };
   }, [expenses, totalExpenses, isMobile, activeChart]); // Added activeChart to dependencies
 
-  // Handle expense amount change
+  // Handle income change with proper clearing
+  const handleIncomeChange = (value) => {
+    if (value === '') {
+      setIncome('');
+    } else {
+      setIncome(parseFloat(value) || 0);
+    }
+  };
+
+  // Handle expense amount change with proper clearing
   const handleExpenseChange = (id, field, value) => {
-    const newValue = parseFloat(value) || 0;
-    setExpenses(expenses.map(expense => {
-      if (expense.id === id) {
-        return { ...expense, [field]: newValue };
-      }
-      return expense;
-    }));
+    if (value === '') {
+      setExpenses(expenses.map(expense => {
+        if (expense.id === id) {
+          return { ...expense, [field]: '' };
+        }
+        return expense;
+      }));
+    } else {
+      const newValue = parseFloat(value) || 0;
+      setExpenses(expenses.map(expense => {
+        if (expense.id === id) {
+          return { ...expense, [field]: newValue };
+        }
+        return expense;
+      }));
+    }
   };
 
   // Add new expense category
@@ -207,7 +225,7 @@ const BudgetPlanner = () => {
     const newId = expenses.length > 0 ? Math.max(...expenses.map(e => e.id)) + 1 : 1;
     setExpenses([
       ...expenses,
-      { id: newId, category: '', amount: 0, max: 0 }
+      { id: newId, category: '', amount: '', max: '' }
     ]);
   };
 
@@ -231,7 +249,7 @@ const BudgetPlanner = () => {
     <div className={`p-3 rounded-lg ${isPositive ? 'bg-green-50' : 'bg-red-50'} mb-2`}>
       <h3 className="text-xs sm:text-sm font-medium text-gray-800">{title}</h3>
       <p className={`text-lg sm:text-xl font-semibold ${isPositive ? 'text-green-600' : 'text-red-600'}`}>
-        ${value.toLocaleString()}
+        ₹{typeof value === 'number' ? value.toLocaleString() : value}
       </p>
     </div>
   );
@@ -304,12 +322,13 @@ const BudgetPlanner = () => {
                 {timeframe === 'monthly' ? 'Monthly Income' : 'Quarterly Income'}
               </label>
               <div className="relative rounded-md shadow-sm">
-                <span className="absolute inset-y-0 left-0 pl-3 flex items-center text-gray-900">$</span>
+                <span className="absolute inset-y-0 left-0 pl-3 flex items-center text-gray-900">₹</span>
                 <input
                   type="number"
                   className="block w-full pl-8 pr-12 py-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500 text-gray-900"
                   value={income}
-                  onChange={(e) => setIncome(parseFloat(e.target.value) || 0)}
+                  onChange={(e) => handleIncomeChange(e.target.value)}
+                  onFocus={(e) => e.target.select()}
                 />
               </div>
             </div>
@@ -348,23 +367,23 @@ const BudgetPlanner = () => {
               <div className="space-y-3">
                 <div className="p-3 bg-gray-50 rounded-lg">
                   <h3 className="text-sm font-medium text-gray-900">Total Income</h3>
-                  <p className="text-xl font-semibold text-gray-900">${income.toLocaleString()}</p>
+                  <p className="text-xl font-semibold text-gray-900">₹{(typeof income === 'number' ? income : 0).toLocaleString()}</p>
                 </div>
 
                 <div className="p-3 bg-gray-50 rounded-lg">
                   <h3 className="text-sm font-medium text-gray-900">Total Expenses</h3>
-                  <p className="text-xl font-semibold text-gray-900">${totalExpenses.toLocaleString()}</p>
+                  <p className="text-xl font-semibold text-gray-900">₹{totalExpenses.toLocaleString()}</p>
                 </div>
 
                 <div className="p-3 bg-gray-50 rounded-lg">
                   <h3 className="text-sm font-medium text-gray-900">Savings</h3>
-                  <p className="text-xl font-semibold text-green-600">${savings.toLocaleString()}</p>
+                  <p className="text-xl font-semibold text-green-600">₹{savings.toLocaleString()}</p>
                 </div>
 
                 <div className={`p-3 rounded-lg ${remainingBudget >= 0 ? 'bg-green-50' : 'bg-red-50'}`}>
                   <h3 className="text-sm font-medium text-gray-900">Remaining Budget</h3>
                   <p className={`text-xl font-semibold ${remainingBudget >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                    ${remainingBudget.toLocaleString()}
+                    ₹{remainingBudget.toLocaleString()}
                   </p>
                   {remainingBudget < 0 && (
                     <p className="text-xs text-red-600 mt-1">Warning: You're overspending!</p>
@@ -432,7 +451,7 @@ const BudgetPlanner = () => {
                   </thead>
                   <tbody className="bg-white divide-y divide-gray-200">
                     {expenses.map((expense) => (
-                      <tr key={expense.id} className={expense.amount > expense.max ? 'bg-red-50' : ''}>
+                      <tr key={expense.id} className={(expense.amount || 0) > (expense.max || 0) ? 'bg-red-50' : ''}>
                         <td className="px-2 sm:px-4 py-2 whitespace-nowrap">
                           <input
                             type="text"
@@ -444,30 +463,32 @@ const BudgetPlanner = () => {
                         </td>
                         <td className="px-2 sm:px-4 py-2 whitespace-nowrap">
                           <div className="relative rounded-md shadow-sm">
-                            <span className="absolute inset-y-0 left-0 pl-2 flex items-center text-gray-900 text-sm">$</span>
+                            <span className="absolute inset-y-0 left-0 pl-2 flex items-center text-gray-900 text-sm">₹</span>
                             <input
                               type="number"
                               className="block w-full pl-6 pr-2 py-1 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500 text-sm sm:text-base text-gray-900"
                               value={expense.amount}
                               onChange={(e) => handleExpenseChange(expense.id, 'amount', e.target.value)}
+                              onFocus={(e) => e.target.select()}
                             />
                           </div>
                         </td>
                         {!isMobile && (
                           <td className="px-2 sm:px-4 py-2 whitespace-nowrap">
                             <div className="relative rounded-md shadow-sm">
-                              <span className="absolute inset-y-0 left-0 pl-2 flex items-center text-gray-900 text-sm">$</span>
+                              <span className="absolute inset-y-0 left-0 pl-2 flex items-center text-gray-900 text-sm">₹</span>
                               <input
                                 type="number"
                                 className="block w-full pl-6 pr-2 py-1 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500 text-sm sm:text-base text-gray-900"
                                 value={expense.max}
                                 onChange={(e) => handleExpenseChange(expense.id, 'max', e.target.value)}
+                                onFocus={(e) => e.target.select()}
                               />
                             </div>
                           </td>
                         )}
                         <td className="px-2 sm:px-4 py-2 whitespace-nowrap">
-                          {expense.amount > expense.max ? (
+                          {(expense.amount || 0) > (expense.max || 0) ? (
                             <span className="px-1 py-0.5 text-xs font-semibold text-red-800 bg-red-200 rounded-full">Over</span>
                           ) : (
                             <span className="px-1 py-0.5 text-xs font-semibold text-green-800 bg-green-200 rounded-full">OK</span>
@@ -506,7 +527,7 @@ const BudgetPlanner = () => {
                   <tbody className="bg-white divide-y divide-gray-200">
                     <tr>
                       <td className="px-2 sm:px-4 py-2 whitespace-nowrap font-medium text-gray-900">Income</td>
-                      <td className="px-2 sm:px-4 py-2 whitespace-nowrap text-gray-900">${income.toLocaleString()}</td>
+                      <td className="px-2 sm:px-4 py-2 whitespace-nowrap text-gray-900">₹{(typeof income === 'number' ? income : 0).toLocaleString()}</td>
                       {!isMobile && (
                         <td className="px-2 sm:px-4 py-2 whitespace-nowrap text-gray-900">100%</td>
                       )}
@@ -514,26 +535,25 @@ const BudgetPlanner = () => {
                     {expenses.map((expense) => (
                       <tr key={expense.id}>
                         <td className="px-2 sm:px-4 py-2 whitespace-nowrap text-gray-900">{expense.category || 'Unnamed'}</td>
-                        <td className="px-2 sm:px-4 py-2 whitespace-nowrap text-gray-900">${expense.amount.toLocaleString()}</td>
+                        <td className="px-2 sm:px-4 py-2 whitespace-nowrap text-gray-900">₹{(expense.amount || 0).toLocaleString()}</td>
                         {!isMobile && (
-                          <td className="px-2 sm:px-4 py-2 whitespace-nowrap text-gray-900">{Math.round((expense.amount / income) * 100)}%</td>
+                          <td className="px-2 sm:px-4 py-2 whitespace-nowrap text-gray-900">{Math.round(((expense.amount || 0) / (typeof income === 'number' ? income : 1)) * 100)}%</td>
                         )}
                       </tr>
                     ))}
                     <tr className="bg-gray-50">
                       <td className="px-2 sm:px-4 py-2 whitespace-nowrap font-medium text-gray-900">Total Expenses</td>
-                      <td className="px-2 sm:px-4 py-2 whitespace-nowrap font-medium text-gray-900">${totalExpenses.toLocaleString()}</td>
+                      <td className="px-2 sm:px-4 py-2 whitespace-nowrap font-medium text-gray-900">₹{totalExpenses.toLocaleString()}</td>
                       {!isMobile && (
-                        <td className="px-2 sm:px-4 py-2 whitespace-nowrap font-medium text-gray-900">{Math.round((totalExpenses / income) * 100)}%</td>
+                        <td className="px-2 sm:px-4 py-2 whitespace-nowrap font-medium text-gray-900">{Math.round((totalExpenses / (typeof income === 'number' ? income : 1)) * 100)}%</td>
                       )}
                     </tr>
                     <tr className="bg-green-50">
                       <td className="px-2 sm:px-4 py-2 whitespace-nowrap font-medium text-green-800">Remaining</td>
-                      <td className="px-2 sm:px-4 py-2 whitespace-nowrap font-medium text-green-800">${remainingBudget.toLocaleString()}</td>
+                      <td className="px-2 sm:px-4 py-2 whitespace-nowrap font-medium text-green-800">₹{remainingBudget.toLocaleString()}</td>
                       {!isMobile && (
-                        <td className="px-2 sm:px-4 py-2 whitespace-nowrap font-medium text-green-800">{Math.round((remainingBudget / income) * 100)}%</td>
+                        <td className="px-2 sm:px-4 py-2 whitespace-nowrap font-medium text-green-800">{Math.round((remainingBudget / (typeof income === 'number' ? income : 1)) * 100)}%</td>
                       )}
-            
                     </tr>
                   </tbody>
                 </table>

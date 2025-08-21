@@ -1,38 +1,11 @@
-import React, { useState, useEffect } from "react";
-import { Link, useLocation } from "wouter";
-import { useAuth } from "@/hooks/use-auth";
-import { motion, AnimatePresence } from "framer-motion";
-import {
-  Menu,
-  X,
-  User,
-  LogOut,
-  LayoutDashboard,
-  Settings,
-  Shield,
-  ChevronDown,
-  Users,
-  ArrowRight,
-} from "lucide-react";
-import { Button } from "@/components/ui/button";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-  DropdownMenuSub,
-  DropdownMenuSubContent,
-  DropdownMenuSubTrigger,
-} from "@/components/ui/dropdown-menu";
-import { cn } from "@/lib/utils";
-import "./header.css";
+import React, { useState, useEffect, useRef } from "react";
+import { ChevronDown, Menu, X, User, LogOut } from "lucide-react";
 
-// --- Constants ---
-const NAV_ITEMS = [
+// --- Data definitions ---
+const navData = [
   {
     label: "Loans",
-    subItems: [
+    children: [
       { label: "Home Loans", path: "/loan-application?type=home-loan" },
       { label: "LAP", path: "/loan-application?type=lap" },
       { label: "BT Top-Up", path: "/loan-application?type=bt-topup" },
@@ -40,11 +13,11 @@ const NAV_ITEMS = [
   },
   {
     label: "Investment",
-    subItems: [{ label: "SIP", path: "/sip" }],
+    children: [{ label: "SIP", path: "/sip" }],
   },
   {
     label: "Services",
-    subItems: [{ label: "Consultation", path: "/consultation" }],
+    children: [{ label: "Consultation", path: "/consultation" }],
   },
   {
     label: "About",
@@ -60,401 +33,486 @@ const NAV_ITEMS = [
   },
 ];
 
-const PARTNER_LOGIN_URL = "https://homobie-frontend-portal-bco8.vercel.app/";
-const PARTNER_ROLES = ["Builder", "Broker", "User", "Telecaller"];
+const partnerLoginUrl = "https://homobie-frontend-portal-bco8.vercel.app/";
+const partnerRoles = ["Builder", "Broker", "User", "Telecaller"];
 
-// --- Mobile Navigation ---
-const MobileNav = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) => {
-  const [activeSubmenu, setActiveSubmenu] = useState<string | null>(null);
-  const [_, navigate] = useLocation();
-  const { user, logoutMutation } = useAuth();
+// Glassmorphism DesktopNavDropdown component
+const DesktopNavDropdown = ({ item, isActive, onHover, onLeave }) => {
+  const hasChildren = item.children && item.children.length > 0;
 
-  const handleNavigate = (path: string) => {
-    navigate(path);
-    onClose();
+  const handleMouseEnter = () => {
+    onHover();
+  };
+
+  if (!hasChildren) {
+    return (
+      <li className="relative">
+        <a
+          href={item.path || "/"}
+          className="flex items-center px-4 py-2 text-white/90 hover:text-white transition-all duration-300 font-medium tracking-wide hover:bg-white/10 rounded-lg backdrop-blur-sm"
+        >
+          {item.label}
+        </a>
+      </li>
+    );
+  }
+
+  return (
+    <li
+      className="relative"
+      onMouseEnter={handleMouseEnter}
+    >
+      <button className="flex items-center px-4 py-2 text-white/90 hover:text-white transition-all duration-300 font-medium tracking-wide hover:bg-white/10 rounded-lg backdrop-blur-sm">
+        {item.label}
+        <ChevronDown 
+          className={`ml-2 h-4 w-4 transition-transform duration-300 ${
+            isActive ? "rotate-180" : ""
+          }`} 
+        />
+      </button>
+    </li>
+  );
+};
+
+// Mobile Nav Item Component
+const MobileNavItem = ({ item, onClose }) => {
+  const [isOpen, setIsOpen] = useState(false);
+  const hasChildren = item.children && item.children.length > 0;
+
+  const handleItemClick = () => {
+    if (!hasChildren && onClose) {
+      onClose();
+    }
+  };
+
+  if (!hasChildren) {
+    return (
+      <a
+        href={item.path || "/"}
+        onClick={handleItemClick}
+        className="block px-4 py-3 text-white hover:text-blue-300 hover:bg-white/10 rounded-lg transition-all duration-300 font-medium"
+      >
+        {item.label}
+      </a>
+    );
+  }
+
+  return (
+    <div>
+      <button
+        onClick={() => setIsOpen(!isOpen)}
+        className="w-full flex items-center justify-between px-4 py-3 text-white hover:text-blue-300 hover:bg-white/10 rounded-lg transition-all duration-300 font-medium"
+      >
+        {item.label}
+        <ChevronDown className={`h-4 w-4 transition-transform duration-300 ${isOpen ? "rotate-180" : ""}`} />
+      </button>
+      
+      <div className={`overflow-hidden transition-all duration-300 ${
+        isOpen ? "max-h-96 opacity-100" : "max-h-0 opacity-0"
+      }`}>
+        <div className="ml-4 mt-2 space-y-2">
+          {item.children.map((child, index) => (
+            <a
+              key={index}
+              href={child.path}
+              onClick={handleItemClick}
+              className="block px-4 py-2 text-white/80 hover:text-white hover:bg-white/10 rounded-lg transition-all duration-300"
+              target={child.external ? "_blank" : undefined}
+              rel={child.external ? "noopener noreferrer" : undefined}
+            >
+              {child.label}
+            </a>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// Main Navigation Component
+export const Header = () => {
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [activeDropdown, setActiveDropdown] = useState(null);
+  const [scrolled, setScrolled] = useState(false);
+  const [loginDropdownOpen, setLoginDropdownOpen] = useState(false);
+  const dropdownTimeoutRef = useRef(null);
+  const loginTimeoutRef = useRef(null);
+
+  // Mock auth state - replace with your actual auth hook
+  const user = null; // { name: "John Doe", email: "john@example.com" };
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setScrolled(window.scrollY > 20);
+    };
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
+  // Close mobile menu on escape key
+  useEffect(() => {
+    const handleEscape = (e) => {
+      if (e.key === "Escape" && isMobileMenuOpen) {
+        setIsMobileMenuOpen(false);
+      }
+    };
+    document.addEventListener("keydown", handleEscape);
+    return () => document.removeEventListener("keydown", handleEscape);
+  }, [isMobileMenuOpen]);
+
+  // Prevent body scroll when mobile menu is open
+  useEffect(() => {
+    if (isMobileMenuOpen) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "unset";
+    }
+    return () => {
+      document.body.style.overflow = "unset";
+    };
+  }, [isMobileMenuOpen]);
+
+  const handleDropdownHover = (index) => {
+    if (dropdownTimeoutRef.current) {
+      clearTimeout(dropdownTimeoutRef.current);
+    }
+    setActiveDropdown(index);
+  };
+
+  const handleDropdownLeave = () => {
+    dropdownTimeoutRef.current = setTimeout(() => {
+      setActiveDropdown(null);
+    }, 300); // 300ms delay
+  };
+
+  const handleDropdownContentEnter = () => {
+    if (dropdownTimeoutRef.current) {
+      clearTimeout(dropdownTimeoutRef.current);
+    }
+  };
+
+  const handleLoginDropdownEnter = () => {
+    if (loginTimeoutRef.current) {
+      clearTimeout(loginTimeoutRef.current);
+    }
+    setLoginDropdownOpen(true);
+  };
+
+  const handleLoginDropdownLeave = () => {
+    loginTimeoutRef.current = setTimeout(() => {
+      setLoginDropdownOpen(false);
+    }, 300); // 300ms delay
+  };
+
+  const closeMobileMenu = () => {
+    setIsMobileMenuOpen(false);
   };
 
   return (
-    <AnimatePresence>
-      {isOpen && (
-        <div className="fixed inset-0 z-50 lg:hidden">
-          {/* Backdrop */}
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black/50 backdrop-blur-sm"
-            onClick={onClose}
-          />
-          
-          {/* Navigation Panel */}
-          <motion.div
-            initial={{ x: "-100%" }}
-            animate={{ x: 0 }}
-            exit={{ x: "-100%" }}
-            transition={{ type: "tween", ease: "easeInOut", duration: 0.3 }}
-            className="fixed inset-y-0 left-0 w-4/5 max-w-sm bg-white shadow-xl"
-          >
-            <div className="flex flex-col h-full">
-              {/* Header */}
-              <div className="flex items-center justify-between p-4 border-b">
-                <Link href="/" className="text-xl font-bold text-primary">
-                  <img 
-                    src="/assets/wmremove-transformed - Edited.jpg" 
-                    alt="Logo" 
-                    className="h-8"
+    <>
+      <nav className={`fixed top-0 left-0 right-0 z-40 transition-all duration-500 font-bold${
+        scrolled 
+          ? "bg-slate-900/95 backdrop-blur-2xl border-b border-white/10 shadow-2xl" 
+          : "bg-slate-900/50 backdrop-blur-xl"
+      } ${activeDropdown !== null ? 'pb-6' : ''}`}>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
+          <div className="flex items-center justify-between h-20">
+            {/* Logo */}
+            <div className="flex-shrink-0">
+              <a href="/" className="flex items-center">
+                <img 
+                  src="/assets/homobie-logo.png" 
+                  alt="Homobie Logo" 
+                  className="h-12 w-auto object-contain"
+                />
+              </a>
+            </div>
+
+            {/* Desktop Navigation */}
+            <div className="hidden lg:block  font-bold">
+              <ul className="flex items-center space-x-2 relative"
+                  onMouseLeave={handleDropdownLeave}>
+                {navData.map((item, index) => (
+                  <DesktopNavDropdown
+                    key={index}
+                    item={item}
+                    isActive={activeDropdown === index}
+                    onHover={() => handleDropdownHover(index)}
+                    onLeave={handleDropdownLeave}
                   />
-                </Link>
-                <button onClick={onClose} className="p-1 rounded-full hover:bg-gray-100">
-                  <X className="w-6 h-6" />
-                </button>
-              </div>
+                ))}
+              </ul>
+            </div>
 
-              {/* Content */}
-              <div className="flex-1 overflow-y-auto">
-                <nav className="flex flex-col p-4 space-y-2">
-                  {NAV_ITEMS.map((item) => (
-                    <div key={item.label} className="group">
-                      {item.subItems ? (
-                        <>
-                          <button
-                            onClick={() => setActiveSubmenu(activeSubmenu === item.label ? null : item.label)}
-                            className="flex items-center justify-between w-full p-3 text-left rounded-lg hover:bg-gray-50"
-                          >
-                            <span className="font-medium">{item.label}</span>
-                            <ChevronDown className={`w-5 h-5 transition-transform ${activeSubmenu === item.label ? "rotate-180" : ""}`} />
-                          </button>
-                          {activeSubmenu === item.label && (
-                            <motion.div
-                              initial={{ opacity: 0, height: 0 }}
-                              animate={{ opacity: 1, height: "auto" }}
-                              exit={{ opacity: 0, height: 0 }}
-                              className="pl-4 space-y-2"
-                            >
-                              {item.subItems.map((subItem) => (
-                                <button
-                                  key={subItem.label}
-                                  onClick={() => handleNavigate(subItem.path)}
-                                  className="block w-full p-2 text-left rounded-lg hover:bg-gray-50"
-                                >
-                                  {subItem.label}
-                                </button>
-                              ))}
-                            </motion.div>
-                          )}
-                        </>
-                      ) : (
-                        <button
-                          onClick={() => handleNavigate(item.path!)}
-                          className="block w-full p-3 text-left rounded-lg hover:bg-gray-50"
-                        >
-                          <span className="font-medium">{item.label}</span>
-                        </button>
-                      )}
-                    </div>
-                  ))}
-                </nav>
-
-                {/* Auth Section */}
-                <div className="p-4 mt-auto border-t">
-                  {user ? (
-                    <div className="space-y-3">
-                      <Link
-                        href="/dashboard"
-                        className="flex items-center p-3 rounded-lg hover:bg-gray-50"
-                      >
-                        <LayoutDashboard className="w-5 h-5 mr-3" />
-                        <span>Dashboard</span>
-                      </Link>
-                      {user.role === "admin" || user.role === "superadmin" ? (
-                        <Link
-                          href="/admin"
-                          className="flex items-center p-3 rounded-lg hover:bg-gray-50"
-                        >
-                          <Settings className="w-5 h-5 mr-3" />
-                          <span>Admin Panel</span>
-                        </Link>
-                      ) : null}
-                      <button
-                        onClick={() => logoutMutation.mutate()}
-                        disabled={logoutMutation.isPending}
-                        className="flex items-center w-full p-3 rounded-lg hover:bg-gray-50 text-red-600"
-                      >
-                        <LogOut className="w-5 h-5 mr-3" />
-                        <span>{logoutMutation.isPending ? "Signing out..." : "Sign Out"}</span>
+            {/* Desktop User Menu / Auth Buttons */}
+            <div className="hidden lg:flex items-center space-x-4">
+              {user ? (
+                <div className="relative">
+                  <button 
+                    className="flex items-center px-4 py-2 bg-white/10 hover:bg-white/20 backdrop-blur-sm text-white rounded-xl transition-all duration-300 border border-white/20"
+                    onMouseEnter={handleLoginDropdownEnter}
+                    onMouseLeave={handleLoginDropdownLeave}
+                  >
+                    <User className="h-4 w-4 mr-2" />
+                    <span className="font-medium">{user.name}</span>
+                    <ChevronDown className={`ml-2 h-4 w-4 transition-transform duration-300 ${loginDropdownOpen ? "rotate-180" : ""}`} />
+                  </button>
+                  
+                  {/* User Dropdown */}
+                  <div 
+                    className={`absolute right-0 top-full mt-2 w-48 bg-white/10 backdrop-blur-xl border border-white/20 rounded-2xl shadow-2xl transition-all duration-300 ${
+                      loginDropdownOpen ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
+                    }`}
+                    onMouseEnter={handleLoginDropdownEnter}
+                    onMouseLeave={handleLoginDropdownLeave}
+                  >
+                    <div className="p-2">
+                      <a href="/profile" className="block px-4 py-3 text-white/90 hover:text-white hover:bg-white/20 rounded-lg transition-all duration-200">
+                        Profile
+                      </a>
+                      <a href="/settings" className="block px-4 py-3 text-white/90 hover:text-white hover:bg-white/20 rounded-lg transition-all duration-200">
+                        Settings
+                      </a>
+                      <button className="w-full text-left px-4 py-3 text-white/90 hover:text-white hover:bg-white/20 rounded-lg transition-all duration-200 flex items-center">
+                        <LogOut className="h-4 w-4 mr-2" />
+                        Logout
                       </button>
                     </div>
-                  ) : (
-                    <div className="space-y-3">
-                      <Link
-                        href="/auth"
-                        className="flex items-center justify-between p-3 rounded-lg hover:bg-gray-50"
-                      >
-                        <div className="flex items-center">
-                          <User className="w-5 h-5 mr-3" />
-                          <span>User Login</span>
+                  </div>
+                </div>
+              ) : (
+                <div className="flex items-center space-x-3">
+                  {/* Login Dropdown */}
+                  <div className="relative">
+                    <button
+                      className="flex items-center px-6 py-2 text-white/90 hover:text-white font-medium transition-all duration-300 hover:bg-white/10 rounded-lg backdrop-blur-sm"
+                      onMouseEnter={handleLoginDropdownEnter}
+                      onMouseLeave={handleLoginDropdownLeave}
+                    >
+                      Login
+                      <ChevronDown className={`ml-1 h-4 w-4 transition-transform duration-300 ${loginDropdownOpen ? "rotate-180" : ""}`} />
+                    </button>
+                    
+                    {/* Login Options Dropdown */}
+                    <div 
+                      className={`absolute right-0 top-full mt-2 w-56 bg-white/10 backdrop-blur-xl border border-white/20 rounded-2xl shadow-2xl transition-all duration-300 ${
+                        loginDropdownOpen ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
+                      }`}
+                      onMouseEnter={handleLoginDropdownEnter}
+                      onMouseLeave={handleLoginDropdownLeave}
+                    >
+                      <div className="p-2">
+                        {/* User Login */}
+                        <a href="/auth" className="block px-4 py-3 text-white/90 hover:text-white hover:bg-white/20 rounded-lg transition-all duration-200 font-medium">
+                          User Login
+                        </a>
+                        
+                        {/* Divider */}
+                        <div className="border-t border-white/20 my-2"></div>
+                        
+                        {/* Partner Login Header */}
+                        <div className="px-4 py-2 text-white/70 text-sm font-medium">
+                          Partner Login
                         </div>
-                        <ArrowRight className="w-5 h-5" />
-                      </Link>
-                      <div className="pl-8 space-y-2">
-                        <p className="text-sm font-medium text-gray-500">Partner Login</p>
-                        {PARTNER_ROLES.map((role) => (
+                        
+                        {/* Partner Login Options */}
+                        {partnerRoles.map((role, index) => (
                           <a
-                            key={role}
-                            href={PARTNER_LOGIN_URL}
+                            key={index}
+                            href={partnerLoginUrl}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="block p-2 rounded-lg hover:bg-gray-50"
+                            className="block px-4 py-2 text-white/80 hover:text-white hover:bg-white/20 rounded-lg transition-all duration-200 ml-2"
                           >
                             {role}
                           </a>
                         ))}
                       </div>
                     </div>
+                  </div>
+                  
+                  <a
+                    href="/register"
+                    className="px-6 py-2 bg-gradient-to-r from-blue-500 to-purple-600 text-white font-medium rounded-lg hover:from-blue-600 hover:to-purple-700 transition-all duration-300 shadow-lg hover:shadow-xl backdrop-blur-sm border border-white/20"
+                  >
+                    Sign Up
+                  </a>
+                </div>
+              )}
+            </div>
+
+            {/* Mobile menu button */}
+            <div className="lg:hidden">
+              <button
+                onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+                className="p-2 rounded-lg text-white hover:bg-white/20 transition-all duration-300 backdrop-blur-sm"
+                aria-label="Toggle mobile menu"
+              >
+                {isMobileMenuOpen ? (
+                  <X className="h-6 w-6" />
+                ) : (
+                  <Menu className="h-6 w-6" />
+                )}
+              </button>
+            </div>
+          </div>
+          
+          {/* Dropdown Container - Expands the nav height */}
+          <div 
+            className={`transition-all duration-300 overflow-hidden ${
+              activeDropdown !== null ? 'max-h-80 opacity-100' : 'max-h-0 opacity-0'
+            }`}
+            onMouseEnter={handleDropdownContentEnter}
+            onMouseLeave={handleDropdownLeave}
+          >
+            <div className="py-4">
+              <div className="flex justify-center">
+                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8 max-w-6xl">
+                  {/* Render active dropdown content */}
+                  {activeDropdown !== null && navData[activeDropdown]?.children && (
+                    <>
+                      <div className="space-y-4">
+                        <h3 className="text-white font-semibold text-lg border-b border-white/20 pb-2">
+                          {navData[activeDropdown].label}
+                        </h3>
+                        {navData[activeDropdown].children.map((child, index) => (
+                          <a
+                            key={index}
+                            href={child.path}
+                            className="block text-white/80 hover:text-white transition-all duration-200 font-medium py-1"
+                          >
+                            {child.label}
+                          </a>
+                        ))}
+                      </div>
+                    </>
                   )}
                 </div>
               </div>
             </div>
-          </motion.div>
-        </div>
-      )}
-    </AnimatePresence>
-  );
-};
-
-// --- Desktop Navigation Item ---
-const NavItem = ({ item }: { item: typeof NAV_ITEMS[0] }) => {
-  const [isOpen, setIsOpen] = useState(false);
-
-  if (item.path) {
-    return (
-      <Link
-        href={item.path}
-        className="px-4 py-2 text-sm font-medium transition-colors hover:text-primary"
-      >
-        {item.label}
-      </Link>
-    );
-  }
-
-  return (
-    <DropdownMenu onOpenChange={setIsOpen}>
-      <DropdownMenuTrigger asChild>
-        <button
-          className={cn(
-            "flex items-center px-4 py-2 text-sm font-medium transition-colors hover:text-primary",
-            isOpen ? "text-primary" : ""
-          )}
-        >
-          {item.label}
-          <ChevronDown
-            className={cn(
-              "ml-1 h-4 w-4 transition-transform",
-              isOpen ? "rotate-180" : ""
-            )}
-          />
-        </button>
-      </DropdownMenuTrigger>
-      <DropdownMenuContent
-        align="start"
-        className="w-48 p-2 rounded-lg shadow-lg"
-      >
-        {item.subItems?.map((subItem) => (
-          <DropdownMenuItem key={subItem.label} asChild>
-            <Link
-              href={subItem.path}
-              className="w-full px-3 py-2 text-sm rounded-md hover:bg-gray-50"
-            >
-              {subItem.label}
-            </Link>
-          </DropdownMenuItem>
-        ))}
-      </DropdownMenuContent>
-    </DropdownMenu>
-  );
-};
-
-// --- User Dropdown ---
-const UserDropdown = ({
-  user,
-  onLogout,
-  isLoggingOut,
-}: {
-  user: any;
-  onLogout: () => void;
-  isLoggingOut: boolean;
-}) => {
-  return (
-    <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <Button
-          variant="ghost"
-          className="flex items-center space-x-2 hover:bg-gray-50"
-        >
-          <div className="flex items-center justify-center w-8 h-8 rounded-full bg-primary/10 text-primary">
-            <User className="w-4 h-4" />
           </div>
-          <span className="hidden md:inline font-medium">
-            {user.username || "Account"}
-          </span>
-        </Button>
-      </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="w-56 p-2 rounded-lg shadow-lg">
-        <DropdownMenuItem asChild>
-          <Link
-            href="/dashboard"
-            className="flex items-center w-full px-3 py-2 text-sm rounded-md hover:bg-gray-50"
-          >
-            <LayoutDashboard className="w-4 h-4 mr-2" />
-            <span>Dashboard</span>
-          </Link>
-        </DropdownMenuItem>
-        {(user.role === "admin" || user.role === "superadmin") && (
-          <DropdownMenuItem asChild>
-            <Link
-              href="/admin"
-              className="flex items-center w-full px-3 py-2 text-sm rounded-md hover:bg-gray-50"
-            >
-              <Settings className="w-4 h-4 mr-2" />
-              <span>Admin Panel</span>
-            </Link>
-          </DropdownMenuItem>
-        )}
-        {user.role === "superadmin" && (
-          <DropdownMenuItem asChild>
-            <Link
-              href="/super-admin"
-              className="flex items-center w-full px-3 py-2 text-sm rounded-md hover:bg-gray-50"
-            >
-              <Shield className="w-4 h-4 mr-2" />
-              <span>Super Admin</span>
-            </Link>
-          </DropdownMenuItem>
-        )}
-        <DropdownMenuSeparator />
-        <DropdownMenuItem
-          onClick={onLogout}
-          disabled={isLoggingOut}
-          className="flex items-center w-full px-3 py-2 text-sm rounded-md hover:bg-red-50 text-red-600"
-        >
-          <LogOut className="w-4 h-4 mr-2" />
-          <span>{isLoggingOut ? "Signing out..." : "Sign Out"}</span>
-        </DropdownMenuItem>
-      </DropdownMenuContent>
-    </DropdownMenu>
-  );
-};
+        </div>
+      </nav>
 
-// --- Main Header Component ---
-export function Header() {
-  const { user, logoutMutation } = useAuth();
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [scrolled, setScrolled] = useState(false);
-  const [location] = useLocation();
-
-  useEffect(() => {
-    const handleScroll = () => setScrolled(window.scrollY > 10);
-    window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
-
-  useEffect(() => {
-    setMobileMenuOpen(false);
-  }, [location]);
-
-  return (
-    <>
-      <header
-        className={cn(
-          "fixed top-0 left-0 right-0 z-40 transition-all duration-300 border-b",
-          scrolled ? "bg-white/95 backdrop-blur-sm shadow-sm" : "bg-white/90",
-          "border-gray-100"
-        )}
+      {/* Mobile Glass Drawer */}
+      <div
+        className={`fixed inset-0 z-50 lg:hidden transition-all duration-300 ${
+          isMobileMenuOpen 
+            ? "opacity-100 pointer-events-auto" 
+            : "opacity-0 pointer-events-none"
+        }`}
       >
-        <div className="container flex items-center justify-between h-16 px-4 mx-auto">
-          {/* Logo */}
-          <Link href="/" className="flex items-center">
-            <img
-              src="/assets/wmremove-transformed - Edited.jpg"
-              alt="Logo"
-              className="h-8"
-            />
-          </Link>
-
-          {/* Desktop Navigation */}
-          <nav className="hidden lg:flex items-center space-x-2">
-            {NAV_ITEMS.map((item) => (
-              <NavItem key={item.label} item={item} />
-            ))}
-          </nav>
-
-          {/* Right Side */}
-          <div className="flex items-center space-x-4">
-            {user ? (
-              <UserDropdown
-                user={user}
-                onLogout={() => logoutMutation.mutate()}
-                isLoggingOut={logoutMutation.isPending}
+        {/* Backdrop */}
+        <div 
+          className="absolute inset-0 backdrop-blur-sm"
+          onClick={closeMobileMenu}
+        />
+        
+        {/* Glass Drawer */}
+        <div className={`absolute right-0 top-0 h-full w-full max-w-sm backdrop-blur-2xl border-l border-white/20 shadow-2xl transition-all duration-300 ${
+          isMobileMenuOpen ? "translate-x-0" : "translate-x-full"
+        }`}>
+          <div className="flex flex-col h-full">
+            {/* Mobile Header */}
+            <div className="flex items-center justify-between p-6 border-b border-white/20">
+              <img 
+                src="/assets/wmremove-transformed - Edited.jpg" 
+                alt="Homobie Logo" 
+                className="h-8 w-auto object-contain"
               />
-            ) : (
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button className="px-4 py-2 text-sm font-medium transition-colors bg-primary hover:bg-primary/90">
-                    <span className="hidden md:inline">Login</span>
-                    <ChevronDown className="w-4 h-4 ml-2" />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-48 p-2 rounded-lg shadow-lg">
-                  <DropdownMenuItem asChild>
-                    <Link
-                      href="/auth"
-                      className="flex items-center w-full px-3 py-2 text-sm rounded-md hover:bg-gray-50"
-                    >
-                      <User className="w-4 h-4 mr-2" />
-                      <span>User Login</span>
-                    </Link>
-                  </DropdownMenuItem>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuSub>
-                    <DropdownMenuSubTrigger className="flex items-center w-full px-3 py-2 text-sm rounded-md hover:bg-gray-50">
-                      <Users className="w-4 h-4 mr-2" />
-                      <span>Partner Login</span>
-                    </DropdownMenuSubTrigger>
-                    <DropdownMenuSubContent className="w-48 p-2 rounded-lg shadow-lg">
-                      {PARTNER_ROLES.map((role) => (
-                        <DropdownMenuItem key={role} asChild>
-                          <a
-                            href={PARTNER_LOGIN_URL}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="block w-full px-3 py-2 text-sm rounded-md hover:bg-gray-50"
-                          >
-                            {role}
-                          </a>
-                        </DropdownMenuItem>
-                      ))}
-                    </DropdownMenuSubContent>
-                  </DropdownMenuSub>
-                </DropdownMenuContent>
-              </DropdownMenu>
-            )}
+              <button
+                onClick={closeMobileMenu}
+                className="p-2 rounded-lg text-white hover:bg-white/20 transition-all duration-300"
+                aria-label="Close menu"
+              >
+                <X className="h-6 w-6" />
+              </button>
+            </div>
 
-            {/* Mobile Menu Button */}
-            <button
-              onClick={() => setMobileMenuOpen(true)}
-              className="p-2 lg:hidden text-gray-500 hover:text-gray-700"
-            >
-              <Menu className="w-6 h-6" />
-            </button>
+            {/* Mobile Nav Items */}
+            <div className="flex-1 overflow-y-auto p-6">
+              <div className="space-y-2">
+                {navData.map((item, index) => (
+                  <MobileNavItem key={index} item={item} onClose={closeMobileMenu} />
+                ))}
+              </div>
+            </div>
+
+            {/* Mobile Auth Section */}
+            <div className="border-t border-white/20 p-6">
+              {user ? (
+                <div className="space-y-4">
+                  <div className="flex items-center space-x-3 p-4 bg-white/10 rounded-xl backdrop-blur-sm">
+                    <User className="h-8 w-8 text-white" />
+                    <div>
+                      <div className="text-white font-medium">{user.name}</div>
+                      <div className="text-white/70 text-sm">{user.email}</div>
+                    </div>
+                  </div>
+                  <div className="space-y-2">
+                    <a
+                      href="/profile"
+                      onClick={closeMobileMenu}
+                      className="block w-full px-4 py-3 text-center text-white bg-white/10 hover:bg-white/20 rounded-lg transition-all duration-300"
+                    >
+                      Profile
+                    </a>
+                    <a
+                      href="/settings"
+                      onClick={closeMobileMenu}
+                      className="block w-full px-4 py-3 text-center text-white bg-white/10 hover:bg-white/20 rounded-lg transition-all duration-300"
+                    >
+                      Settings
+                    </a>
+                    <button className="w-full flex items-center justify-center px-4 py-3 bg-red-500/20 text-red-300 rounded-lg hover:bg-red-500/30 transition-all duration-300">
+                      <LogOut className="h-4 w-4 mr-2" />
+                      Logout
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  {/* User Login */}
+                  <a
+                    href="/auth"
+                    onClick={closeMobileMenu}
+                    className="block w-full px-4 py-3 text-center text-white bg-white/10 hover:bg-white/20 rounded-lg transition-all duration-300 backdrop-blur-sm"
+                  >
+                    User Login
+                  </a>
+                  
+                  {/* Partner Login Section */}
+                  <div className="space-y-2">
+                    <div className="text-white/70 text-sm font-medium px-2">Partner Login</div>
+                    {partnerRoles.map((role, index) => (
+                      <a
+                        key={index}
+                        href={partnerLoginUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        onClick={closeMobileMenu}
+                        className="block w-full px-4 py-2 text-center text-white/80 bg-white/5 hover:bg-white/10 rounded-lg transition-all duration-300 text-sm"
+                      >
+                        {role}
+                      </a>
+                    ))}
+                  </div>
+                  
+                  <a
+                    href="/register"
+                    onClick={closeMobileMenu}
+                    className="block w-full px-4 py-3 text-center text-white bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 rounded-lg transition-all duration-300"
+                  >
+                    Sign Up
+                  </a>
+                </div>
+              )}
+            </div>
           </div>
         </div>
-      </header>
-
-      {/* Spacer for header height */}
-      <div className="h-16" />
-
-      {/* Mobile Navigation */}
-      <MobileNav isOpen={mobileMenuOpen} onClose={() => setMobileMenuOpen(false)} />
+      </div>
     </>
   );
-}
+};
+
+export default Header;

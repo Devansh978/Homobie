@@ -22,6 +22,9 @@ import AboutPage from "@/pages/about-page";
 import OurTeamPage from "@/pages/ourteam-page";
 import PropertyDetails from "@/pages/properties/PropertyDetails";
 import Properties from "@/pages/properties/Properties";
+import SipCalculator from "@/pages/SipCalculator/SipCalculator";
+import EmiCalculator from "@/pages/EmiCalculator/EmiCalculator";
+import BudgetPlanningTool from "@/pages/BudgetPlanningTool/BudgetPlanningTool";
 
 function Router() {
   return (
@@ -43,6 +46,9 @@ function Router() {
       <Route path="/properties/:id">
   {params => <PropertyDetails id={params.id} />}
 </Route>
+ <Route path="/tools/sip-loan-calculator" component={SipCalculator} />
+      <Route path="/tools/emi-calculator" component={EmiCalculator} />
+      <Route path="/tools/budget-planner" component={BudgetPlanningTool} />
       
       <ProtectedRoute path="/dashboard" component={DashboardPage} />
       <ProtectedRoute path="/admin" component={AdminPage} />
@@ -61,7 +67,7 @@ function App() {
         <AuthProvider>
           <div className="flex flex-col min-h-screen">
             <Header />
-            <main className="">
+            <main>
               <Router />
             </main>
             
