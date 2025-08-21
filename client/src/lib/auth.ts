@@ -40,6 +40,7 @@ export interface AuthResponse {
   firstName: string;
   lastName: string;
   userId: string;
+  propertyId?: string; 
 }
 
 export interface ApiError {
@@ -54,6 +55,8 @@ export class AuthService {
   private user: AuthUser | null = null;
   private readonly baseUrl = "https://homobiebackend-railway-production.up.railway.app";
   private tokenRefreshPromise: Promise<void> | null = null;
+  private propertyId: string | null = null;
+  private userId: string | null = null;
 
   constructor() {
     this.loadFromStorage();
@@ -66,6 +69,9 @@ private loadFromStorage() {
 
     this.token = localStorage.getItem("auth_token");
     this.refreshToken = localStorage.getItem("auth_refresh_token");
+    this.propertyId = localStorage.getItem('${propertyId}');
+    this.userId = localStorage.getItem("userId");
+    this.ownerId = localStorage.getItem("ownerId");
 
     const userJson = localStorage.getItem("auth_user");
     try {
@@ -84,10 +90,12 @@ private loadFromStorage() {
 }
 
   // Save auth data to storage
-  private saveToStorage(token: string, refreshToken: string, user: AuthUser) {
+  private saveToStorage(token: string, refreshToken: string, user: AuthUser , propertyId?: string) {
     this.token = token;
     this.refreshToken = refreshToken;
     this.user = user;
+    this.propertyId = '${propertyId}';
+    this.userId = user.userId;
 
     if (typeof window !== "undefined") {
       
@@ -95,7 +103,8 @@ private loadFromStorage() {
       
       localStorage.setItem("auth_refresh_token", refreshToken);
       localStorage.setItem("auth_user", JSON.stringify(user));
-
+      localStorage.setItem('${propertyId}', JSON.stringify('${propertyId}'));
+      localStorage.setItem("userId", user.userId);
     }
   }
 
@@ -109,6 +118,8 @@ private loadFromStorage() {
       localStorage.removeItem("auth_token");
       localStorage.removeItem("auth_refresh_token");
       localStorage.removeItem("auth_user");
+      localStorage.removeItem("propertyId");
+      localStorage.removeItem("userId");
     }
   }
 
@@ -385,7 +396,9 @@ private loadFromStorage() {
   public getUser(): AuthUser | null {
     return this.user;
   }
-
+  public getPropertyId(): string | null {
+    return this.propertyId;
+  }
   // Check if user is authenticated
   isAuthenticated(): boolean {
     return !!this.token && !!this.user;
