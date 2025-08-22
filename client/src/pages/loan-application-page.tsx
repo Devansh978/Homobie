@@ -57,7 +57,6 @@ import {
   AlertCircle,  
   Check,  
   FileText,  
-  Upload, 
   DollarSign 
 } from "lucide-react"; 
 import { getQueryParam, getLoanTypeLabel, calculateEMI } from "../lib/utils"; 
@@ -108,6 +107,15 @@ const loanFormSchema = z.object({
     required_error: "Please select your employment type",
   }),
   existingLoanDetails: z.any().optional(),
+}).refine((data) => {
+  // Custom validation for property-based loans
+  if (data.loanType === "HOME_LOAN" || data.loanType === "LAP") {
+    return data.propertyValue && data.propertyValue > 0;
+  }
+  return true;
+}, {
+  message: "Property value is required for Home Loan and Loan Against Property",
+  path: ["propertyValue"],
 });
 
 type LoanFormValues = z.infer<typeof loanFormSchema>;
@@ -118,7 +126,6 @@ export default function LoanApplicationPage() {
   const [activeTab, setActiveTab] = useState("loan-details");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
-  const [documentUploadVisible, setDocumentUploadVisible] = useState(false);
   const [apiError, setApiError] = useState<string | null>(null);
   
   const loanTypeParam = getQueryParam("type") || "home-loan";
@@ -176,19 +183,30 @@ export default function LoanApplicationPage() {
       const userId = getUserId();
       const token = getToken();
 
+      console.log("Debug - Auth Info:", {
+        userId: userId ? "Present" : "Missing",
+        token: token ? `Present (${token.length} chars)` : "Missing",
+        tokenPreview: token ? token.substring(0, 20) + "..." : "None"
+      });
+
       if (!userId || !token) {
         throw new Error("Authentication required. Please login again.");
+      }
+
+      // Validate required fields based on loan type
+      if ((data.loanType === "HOME_LOAN" || data.loanType === "LAP") && !data.propertyValue) {
+        throw new Error("Property value is required for this loan type");
       }
 
       const payload = {
         userId: userId,
         loanType: data.loanType,
-        amount: data.amount,
-        tenure: data.tenure,
-        interestRate: data.interestRate,
+        amount: Number(data.amount),
+        tenure: Number(data.tenure),
+        interestRate: Number(data.interestRate),
         purpose: data.purpose,
         collateral: (data.loanType === "HOME_LOAN" || data.loanType === "LAP") ? {
-          propertyValue: data.propertyValue,
+          propertyValue: Number(data.propertyValue),
           propertyAddress: {
             addressLine1: data.propertyAddressLine1 || "",
             addressLine2: data.propertyAddressLine2 || "",
@@ -200,40 +218,79 @@ export default function LoanApplicationPage() {
           }
         } : undefined,
         applicantProfile: {
-          monthlyIncome: data.monthlyIncome,
-          cibilScore: data.cibilScore,
-          age: data.age,
+          monthlyIncome: Number(data.monthlyIncome),
+          cibilScore: Number(data.cibilScore),
+          age: Number(data.age),
           employmentType: data.employmentType.toUpperCase(),
           existingLoanDetails: data.existingLoanDetails || "None"
         }
       };
 
       console.log("Submitting payload:", payload);
+      console.log("Request headers:", {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${token.substring(0, 20)}...`
+      });
 
       const response = await fetch(`${BASE_URL}/loan/add`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "Authorization": `Bearer ${token}`
+          "Authorization": `Bearer ${token}`,
+          // Try additional headers that might be required
+          "Accept": "application/json",
+          "X-Requested-With": "XMLHttpRequest"
         },
         body: JSON.stringify(payload)
       });
 
       const endTime = performance.now();
       console.log(`API call took ${endTime - startTime}ms`);
+      console.log("Response status:", response.status);
+      console.log("Response headers:", Object.fromEntries(response.headers.entries()));
 
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
         console.error("API Error Response:", errorData);
-        throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
+        console.error("Full response details:", {
+          status: response.status,
+          statusText: response.statusText,
+          url: response.url,
+          headers: Object.fromEntries(response.headers.entries())
+        });
+        
+        // Handle specific error cases
+        if (response.status === 401) {
+          localStorage.removeItem("auth_token");
+          localStorage.removeItem("token");
+          localStorage.removeItem("auth_user");
+          throw new Error("Session expired. Please login again.");
+        } else if (response.status === 403) {
+          throw new Error("Access forbidden. Please check your permissions or contact support.");
+        } else if (response.status === 400) {
+          throw new Error(errorData.message || "Please check your input data and try again.");
+        } else if (response.status >= 500) {
+          throw new Error("Server error. Please try again later.");
+        } else {
+          throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
+        }
       }
 
-      return await response.json();
+      const result = await response.json();
+      
+      // Validate response structure
+      if (!result.id && !result.applicationId) {
+        console.warn("Response missing application ID:", result);
+      }
+      
+      return result;
     } catch (error) {
       console.error("API Error:", error);
       if (error instanceof Error) {
         setApiError(error.message);
-        if (error.message.includes("Authentication required")) {
+        if (error.message.includes("Authentication required") || 
+            error.message.includes("Session expired") ||
+            error.message.includes("Access forbidden")) {
           navigate("/auth");
         }
       }
@@ -244,19 +301,39 @@ export default function LoanApplicationPage() {
   const { mutateAsync: createLoan } = useMutation({
     mutationFn: submitLoanApplication,
     onSuccess: (data) => {
-      setSubmittedData(data);
-      setIsSuccess(true);
-      setDocumentUploadVisible(true);
-      toast({
-        title: "Success",
-        description: "Loan application submitted successfully!",
-      });
+      console.log("Loan application response:", data);
+      
+      if (data && (data.id || data.applicationId)) {
+        setSubmittedData(data);
+        setIsSuccess(true);
+        
+        toast({
+          title: "Success",
+          description: "Loan application submitted successfully!",
+        });
+        
+        // Optional: Clear form data
+        form.reset();
+      } else {
+        console.warn("Unexpected response format:", data);
+        toast({
+          title: "Warning",
+          description: "Application may have been submitted, but we didn't receive confirmation. Please check your dashboard.",
+          variant: "destructive"
+        });
+      }
     },
     onError: (error) => {
       console.error("Submission error:", error);
+      
+      let errorMessage = "Failed to submit application";
+      if (error instanceof Error) {
+        errorMessage = error.message;
+      }
+      
       toast({
         title: "Error",
-        description: error instanceof Error ? error.message : "Failed to submit application",
+        description: errorMessage,
         variant: "destructive"
       });
     },
@@ -281,18 +358,26 @@ export default function LoanApplicationPage() {
       return;
     }
 
+    // Additional client-side validation
+    if ((data.loanType === "HOME_LOAN" || data.loanType === "LAP") && !data.propertyValue) {
+      toast({
+        title: "Missing Information",
+        description: "Property value is required for this loan type",
+        variant: "destructive"
+      });
+      return;
+    }
+
     try {
       setIsSubmitting(true);
+      setApiError(null);
+      
       await createLoan(data);
+      
     } catch (error) {
       console.error("Form submission error:", error);
     }
   };
-
-  function handleDocumentUpload(files: FileList) {
-    console.log("Files uploaded:", files);
-    // Implement document upload logic here
-  }
 
   const watchAmount = form.watch("amount");
   const watchTenure = form.watch("tenure");
@@ -326,37 +411,6 @@ export default function LoanApplicationPage() {
                   </CardContent>
                 </Card>
                 
-                {documentUploadVisible && (
-                  <Card>
-                    <CardHeader>
-                      <CardTitle>Upload Required Documents</CardTitle>
-                      <CardDescription>
-                        Please upload all required documents to complete your application
-                      </CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="flex flex-col items-center justify-center p-8 border-2 border-dashed border-gray-300 rounded-lg">
-                        <Upload className="h-10 w-10 text-primary mb-4" />
-                        <p className="text-sm text-gray-500 mb-4">
-                          Drag and drop your documents here, or click to browse
-                        </p>
-                        <input
-                          type="file"
-                          id="document-upload"
-                          multiple
-                          onChange={(e) => e.target.files && handleDocumentUpload(e.target.files)}
-                          className="hidden"
-                        />
-                        <Button asChild>
-                          <label htmlFor="document-upload" className="cursor-pointer">
-                            Select Files
-                          </label>
-                        </Button>
-                      </div>
-                    </CardContent>
-                  </Card>
-                )}
-
                 <Card>
                   <CardHeader>
                     <CardTitle>Processing Fee Payment</CardTitle>
@@ -804,9 +858,9 @@ export default function LoanApplicationPage() {
                               <Separator />
                               
                               <div className="space-y-4">
-                                <h3 className="text-lg font-medium">Required Documents</h3>
+                                <h3 className="text-lg font-medium">Required Documents (For Reference)</h3>
                                 <p className="text-sm text-neutral-600">
-                                  Please ensure you have the following documents ready for upload after submitting your application
+                                  Please ensure you have the following documents ready for when our representative contacts you
                                 </p>
                                 
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -853,32 +907,13 @@ export default function LoanApplicationPage() {
                                   Back to Loan Details
                                 </Button>
                                 
-                                <div className="flex items-center gap-4">
-                                  <input
-                                    type="file"
-                                    id="document-upload"
-                                    multiple
-                                    onChange={(e) => e.target.files && handleDocumentUpload(e.target.files)}
-                                    className="hidden"
-                                  />
-                                  <Button 
-                                    type="button"
-                                    variant="outline"
-                                    asChild
-                                  >
-                                    <label htmlFor="document-upload" className="cursor-pointer">
-                                      <Upload className="h-4 w-4 mr-2" />
-                                      Upload Documents
-                                    </label>
-                                  </Button>
-                                  
-                                  <Button 
-                                    type="submit"
-                                    disabled={isSubmitting}
-                                  >
-                                    {isSubmitting ? "Submitting..." : "Submit Application"}
-                                  </Button>
-                                </div>
+                                <Button 
+                                  type="submit"
+                                  disabled={isSubmitting}
+                                  className="min-w-[150px]"
+                                >
+                                  {isSubmitting ? "Submitting..." : "Submit Application"}
+                                </Button>
                               </div>
                             </TabsContent>
                           </form>
@@ -942,7 +977,7 @@ export default function LoanApplicationPage() {
                           <AccordionItem value="documents">
                             <AccordionTrigger className="text-sm font-medium">Document Requirements</AccordionTrigger>
                             <AccordionContent className="text-sm text-neutral-600">
-                              Identity proof, address proof, income proof, and property documents are mandatory.
+                              Identity proof, address proof, income proof, and property documents are mandatory for processing.
                             </AccordionContent>
                           </AccordionItem>
                           
@@ -956,9 +991,9 @@ export default function LoanApplicationPage() {
                       </CardContent>
                     </Card>
                     
-                    <div className="flex items-center justify-center p-4 bg-primary/10 rounded-lg">
-                      <Upload className="h-5 w-5 text-primary mr-2" />
-                      <p className="text-sm text-primary">You can upload documents after submitting your application</p>
+                    <div className="flex items-center justify-center p-4 bg-blue-50 rounded-lg border border-blue-200">
+                      <AlertCircle className="h-5 w-5 text-blue-600 mr-2" />
+                      <p className="text-sm text-blue-700">Our representative will contact you for document collection</p>
                     </div>
                   </div>
                 </div>
