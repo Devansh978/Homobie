@@ -289,14 +289,14 @@ const SubmissionSuccess = ({ submittedData }: { submittedData: any }) => {
           </div>
           <h2 className="text-2xl font-bold mb-2">Application Submitted!</h2>
           <p className="text-gray-600 mb-6">
-            Your application (ID: <span className="font-medium">{submittedData?.id || 'N/A'}</span>) has been received. Please pay the processing fee to continue.
+            Your application (ID: <span className="font-medium">{submittedData?.id || 'N/A'}</span>) has been received.
           </p>
         </CardContent>
       </Card>
       <Card>
         <CardHeader>
           <CardTitle></CardTitle>
-          <CardDescription>our team will get in touch with you soon</CardDescription>
+          <CardDescription className="font-bold mb-3 text-center">our team will get in touch with you soon</CardDescription>
         </CardHeader>
         <CardContent>
           {/* <PaymentGateway
@@ -801,7 +801,48 @@ export default function LoanApplicationPage() {
                   onSubmit={onSubmit}
                   isSubmitting={loanApplicationMutation.isPending}
                 />
+                <Card className="mb-8">
+                  <CardHeader>
+                    <CardTitle>Not sure about your loan amount?</CardTitle>
+                    <CardDescription>Use our calculator to find the perfect loan for your needs</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <LoanCalculator onApply={(loanDetails) => {
+                      form.setValue("loanType", getLoanTypeFromParam(loanDetails.loanType));
+                      form.setValue("amount", loanDetails.amount);
+                      form.setValue("interestRate", loanDetails.interestRate);
+                      form.setValue("tenure", loanDetails.tenure * 12);
+                    }} />
+                  </CardContent>
+                </Card>
+                
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                  <div className="p-6 rounded-xl border border-neutral-100 bg-neutral-50 hover:shadow-md transition-shadow">
+                    <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center mb-4">
+                      <Home className="text-primary text-xl" />
+                    </div>
+                    <h3 className="text-xl font-semibold mb-2">Home Loans</h3>
+                    <p className="text-neutral-600 mb-4">Make your dream home a reality with our competitive interest rates starting from 7.5% p.a.</p>
+                  </div>
+                  
+                  <div className="p-6 rounded-xl border border-neutral-100 bg-neutral-50 hover:shadow-md transition-shadow">
+                    <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center mb-4">
+                      <Building className="text-primary text-xl" />
+                    </div>
+                    <h3 className="text-xl font-semibold mb-2">Loan Against Property</h3>
+                    <p className="text-neutral-600 mb-4">Leverage your property to secure funds for business expansion or other major expenses.</p>
+                  </div>
+                  
+                  <div className="p-6 rounded-xl border border-neutral-100 bg-neutral-50 hover:shadow-md transition-shadow">
+                    <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center mb-4">
+                      <ArrowRightLeft className="text-primary text-xl" />
+                    </div>
+                    <h3 className="text-xl font-semibold mb-2">Balance Transfer</h3>
+                    <p className="text-neutral-600 mb-4">Transfer your existing loan and get additional funds at lower interest rates.</p>
+                  </div>
+                </div>
               </div>
+      
             )}
           </div>
         </div>
