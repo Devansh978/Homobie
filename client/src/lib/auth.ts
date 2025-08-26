@@ -41,6 +41,7 @@ export interface AuthResponse {
   lastName: string;
   userId: string;
   propertyId?: string; 
+  timeSlotId?: string;
 }
 
 export interface ApiError {
@@ -57,7 +58,7 @@ export class AuthService {
   private tokenRefreshPromise: Promise<void> | null = null;
   private propertyId: string | null = null;
   private userId: string | null = null;
-
+  private timeSlotId: string | null = null;
   constructor() {
     this.loadFromStorage();
     this.setupTokenRefresh();
@@ -72,6 +73,7 @@ private loadFromStorage() {
     this.propertyId = localStorage.getItem('${propertyId}');
     this.userId = localStorage.getItem("userId");
     this.ownerId = localStorage.getItem("ownerId");
+    this.timeSlotId = localStorage.getItem("timeSlotId");
 
     const userJson = localStorage.getItem("auth_user");
     try {
@@ -90,12 +92,13 @@ private loadFromStorage() {
 }
 
   // Save auth data to storage
-  private saveToStorage(token: string, refreshToken: string, user: AuthUser , propertyId?: string) {
+  private saveToStorage(token: string, refreshToken: string, user: AuthUser , propertyId?: string, timeSlotId?: string) {
     this.token = token;
     this.refreshToken = refreshToken;
     this.user = user;
     this.propertyId = '${propertyId}';
     this.userId = user.userId;
+    this.timeSlotId =timeSlotId;
 
     if (typeof window !== "undefined") {
       
@@ -105,6 +108,7 @@ private loadFromStorage() {
       localStorage.setItem("auth_user", JSON.stringify(user));
       localStorage.setItem('${propertyId}', JSON.stringify('${propertyId}'));
       localStorage.setItem("userId", user.userId);
+      localStorage.setItem("timeSlotId", timeSlotId || "");
     }
   }
 
@@ -120,6 +124,7 @@ private loadFromStorage() {
       localStorage.removeItem("auth_user");
       localStorage.removeItem("propertyId");
       localStorage.removeItem("userId");
+      localStorage.removeItem("timeSlotId");
     }
   }
 
@@ -398,6 +403,9 @@ private loadFromStorage() {
   }
   public getPropertyId(): string | null {
     return this.propertyId;
+  }
+  public getTimeSlotId(): string | null {
+    return this.timeSlotId;
   }
   // Check if user is authenticated
   isAuthenticated(): boolean {

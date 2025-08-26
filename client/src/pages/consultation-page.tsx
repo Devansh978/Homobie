@@ -119,12 +119,29 @@ export default function ConsultationPage() {
   const [showRescheduleForm, setShowRescheduleForm] = useState(false);
   const [selectedConsultationForAction, setSelectedConsultationForAction] = useState<any>(null);
   const [apiErrors, setApiErrors] = useState<Record<string, string>>({});
-  const [authData, setAuthData] = useState<{ token: string | null; userId: string | null; user: any | null; }>({
+  const [authData, setAuthData] = useState<{ token: string | null; userId: string | null;  timeSlotId: string | null; user: any | null; }>({
     token: null,
     userId: null,
     user: null,
+    timeSlotId: null,
   });
 
+  const savedTimeslotId = localStorage.getItem('timeslotId');
+const savedTimeslot = JSON.parse(localStorage.getItem('selectedTimeslot') || 'null');
+// Save timeSlotId in localStorage
+const saveTimeSlotId = (timeSlotId: string) => {
+  localStorage.setItem("timeSlotId", timeSlotId);
+};
+
+// Get timeSlotId from localStorage
+const getTimeSlotId = () => {
+  return localStorage.getItem("timeSlotId");
+};
+
+// Remove timeSlotId from localStorage
+const removeTimeSlotId = () => {
+  localStorage.removeItem("timeSlotId");
+};
   // Enhanced auth data retrieval with better error handling
   const getAuthDataFromStorage = () => {
     try {
@@ -295,27 +312,36 @@ export default function ConsultationPage() {
   };
 
   // Fetch available time slots
-  const { data: availableSlots, isLoading: slotsLoading, error: slotsError } = useQuery({
-    queryKey: ['consultation-available-slots', selectedDate],
-    queryFn: async () => {
-      if (!selectedDate) {
-        throw new Error("No date selected");
-      }
-
-      const dateStr = selectedDate.toISOString().split('T')[0];
-      const timezone = 'Asia/Kolkata';
-
-      const response = await authenticatedRequest('GET', `/consultation/available-slots?date=${dateStr}&timezone=${timezone}`);
-      return Array.isArray(response) ? response : response?.slots || response?.data || [];
-    },
-    enabled: !!selectedDate && !!token,
-    retry: 2,
-    onError: (error) => {
-      console.error("Error fetching available slots:", error);
-      toast.error("Failed to load available time slots");
-      setApiErrors(prev => ({ ...prev, slots: error instanceof Error ? error.message : 'Unknown error' }));
+const { data: availableSlots, isLoading: slotsLoading, error: slotsError } = useQuery({
+  queryKey: ['consultation-available-slots', selectedDate],
+  queryFn: async () => {
+    if (!selectedDate) {
+      throw new Error("No date selected");
     }
-  });
+    
+    const dateStr = selectedDate.toISOString().split('T')[0];
+    const timezone = 'Asia/Kolkata';
+
+    const response = await authenticatedRequest('GET', `/consultation/available-slots?date=${dateStr}&timezone=${timezone}`);
+    
+    // Process the response and save timeslotId if available
+    const slots = Array.isArray(response) ? response : response?.slots || response?.data || [];
+    
+    // If you want to save a specific timeslotId from the first available slot
+    if (slots.length > 0 && slots[0].timeslotId) {
+      localStorage.setItem('timeslotId', slots[0].timeslotId);
+    }
+    
+    return slots;
+  },
+  enabled: !!selectedDate && !!token,
+  retry: 2,
+  onError: (error) => {
+    console.error("Error fetching available slots:", error);
+    toast.error("Failed to load available time slots");
+    setApiErrors(prev => ({ ...prev, slots: error instanceof Error ? error.message : 'Unknown error' }));
+  }
+});
 
  // Fetch user's consultations
 const { data: userConsultations, refetch: refetchConsultations, error: consultationsError } = useQuery({
@@ -446,7 +472,7 @@ const { data: userConsultations, refetch: refetchConsultations, error: consultat
         status: 'PENDING',
         createdAt: new Date().toISOString(),
       };
-
+      
       console.log('Sending consultation booking payload:', payload);
       return await authenticatedRequest('POST', '/consultation/book', payload);
     },
@@ -527,6 +553,7 @@ const { data: userConsultations, refetch: refetchConsultations, error: consultat
     mutationFn: async (data: RescheduleFormValues) => {
       const currentToken = localStorage.getItem('auth_token');
       const currentUserId = localStorage.getItem('userId') || JSON.parse(localStorage.getItem('user') || '{}').id;
+      const timeSlotId = getTimeSlotId();
 
       if (!currentToken || !currentUserId) {
         throw new Error("Authentication required. Please log in.");

@@ -31,6 +31,7 @@ function Router() {
     <Switch>
       <Route path="/" component={HomePage} />
       <Route path="/auth" component={AuthPage} />
+      <Route path="/dashboard" component={DashboardPage} />
       <Route path="/loan-application" component={LoanApplicationPage} />
       <Route path="/loan-application?type=home-loan" component={LoanApplicationPage} /> 
       <Route path="/loan-application?type=lap" component={LoanApplicationPage} /> 
