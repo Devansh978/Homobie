@@ -143,7 +143,7 @@ const Blog1 = ({ styles }) => (
 
     <section className="p-4 rounded-lg mt-8">
       <h2 className="text-xl font-semibold mb-4">
-        TL;DR – Fast & Easy Home Loan Eligibility Checklist
+         Fast & Easy Home Loan Eligibility Checklist
       </h2>
       <ul className="list-disc pl-6 space-y-2">
         <li>

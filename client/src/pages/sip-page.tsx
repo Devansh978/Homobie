@@ -258,23 +258,23 @@ export default function SipPage() {
 
   return (
     <div>
-      <main className="bg-neutral-50 py-12">
+      <main className="bg-black py-12 pt-24">
         <div className="container mx-auto px-4">
           {isSuccess ? (
             <div className="max-w-3xl mx-auto space-y-8">
               <Card className="mb-8">
                 <CardContent className="pt-6 pb-8 text-center">
-                  <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <div className="w-16 h-16 bg-black rounded-full flex items-center justify-center mx-auto mb-4">
                     <Check className="h-8 w-8 text-green-600" />
                   </div>
-                  <h2 className="text-2xl font-bold text-gray-900 mb-2">
+                  <h2 className="text-2xl font-bold text-white mb-2">
                     SIP Plan Created Successfully!
                   </h2>
-                  <p className="text-gray-600 mb-2">
+                  <p className="text-white mb-2">
                     Your SIP investment plan has been set up. Plan ID:{" "}
                     <span className="font-medium">{submittedData?.id}</span>
                   </p>
-                  <p className="text-gray-600 mb-6">
+                  <p className="text-white mb-6">
                     To activate your SIP, please complete your first
                     contribution payment below.
                   </p>
@@ -338,10 +338,10 @@ export default function SipPage() {
           ) : (
             <>
               <div className="max-w-4xl mx-auto mb-12 text-center">
-                <h1 className="text-3xl font-bold text-neutral-800 mb-4">
+                <h1 className="text-3xl font-bold text-white mb-4">
                   Start Your Wealth Creation Journey with SIP
                 </h1>
-                <p className="text-neutral-600 mb-8 max-w-3xl mx-auto">
+                <p className="text-white mb-8 max-w-3xl mx-auto">
                   Systematic Investment Plans (SIPs) allow you to invest small
                   amounts regularly in mutual funds, helping you build wealth
                   over time through the power of compounding.
@@ -350,13 +350,13 @@ export default function SipPage() {
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6 text-left mt-12">
                   <div className="flex items-start">
                     <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center mt-1 mr-4">
-                      <ChartLine className="text-primary" />
+                      <ChartLine className="text-white" />
                     </div>
                     <div>
                       <h3 className="font-semibold text-lg mb-1">
                         Power of Compounding
                       </h3>
-                      <p className="text-neutral-600">
+                      <p className="text-white">
                         Start early and let your investments grow exponentially
                         over time.
                       </p>
@@ -365,13 +365,13 @@ export default function SipPage() {
 
                   <div className="flex items-start">
                     <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center mt-1 mr-4">
-                      <Calendar className="text-primary" />
+                      <Calendar className="text-white" />
                     </div>
                     <div>
                       <h3 className="font-semibold text-lg mb-1">
                         Disciplined Investing
                       </h3>
-                      <p className="text-neutral-600">
+                      <p className="text-white">
                         Regular investments help you develop a saving habit and
                         financial discipline.
                       </p>
@@ -380,13 +380,13 @@ export default function SipPage() {
 
                   <div className="flex items-start">
                     <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center mt-1 mr-4">
-                      <DollarSign className="text-primary" />
+                      <DollarSign className="text-white" />
                     </div>
                     <div>
                       <h3 className="font-semibold text-lg mb-1">
                         Start with Just ₹500
                       </h3>
-                      <p className="text-neutral-600">
+                      <p className="text-white">
                         Begin your investment journey with as little as ₹500 per
                         month.
                       </p>
@@ -450,16 +450,16 @@ export default function SipPage() {
                           <CardContent>
                             <div className="grid grid-cols-2 gap-4 mb-4">
                               <div>
-                                <p className="text-sm text-neutral-500 mb-1">
+                                <p className="text-sm text-white mb-1">
                                   Expected Returns
                                 </p>
-                                <p className="text-lg font-semibold text-primary flex items-center">
+                                <p className="text-lg font-semibold text-white flex items-center">
                                   {plan.expectedReturns}%{" "}
                                   <ArrowUpRight className="h-4 w-4 ml-1" />
                                 </p>
                               </div>
                               <div>
-                                <p className="text-sm text-neutral-500 mb-1">
+                                <p className="text-sm text-white mb-1">
                                   Risk Level
                                 </p>
                                 <p
@@ -477,7 +477,7 @@ export default function SipPage() {
                                 </p>
                               </div>
                               <div>
-                                <p className="text-sm text-neutral-500 mb-1">
+                                <p className="text-sm text-white mb-1">
                                   Minimum Investment
                                 </p>
                                 <p className="font-medium">
@@ -485,7 +485,7 @@ export default function SipPage() {
                                 </p>
                               </div>
                               <div>
-                                <p className="text-sm text-neutral-500 mb-1">
+                                <p className="text-sm text-white mb-1">
                                   Recommended Duration
                                 </p>
                                 <p className="font-medium">
@@ -530,7 +530,7 @@ export default function SipPage() {
                           <CardFooter className="pt-0">
                             <Button
                               variant="outline"
-                              className="w-full border-primary text-primary hover:bg-primary hover:text-white"
+                              className="w-full border-primary bg-black text-white hover:bg-primary hover:text-white"
                               onClick={() => {
                                 setSelectedPlan(plan.id);
                                 const element = document.querySelector(
@@ -635,7 +635,7 @@ export default function SipPage() {
                         <Card>
                           <CardHeader>
                             <CardTitle>SIP Calculator</CardTitle>
-                            <CardDescription>
+                            <CardDescription className='text-white'>
                               Estimate your potential returns with regular SIP
                               investments
                             </CardDescription>
@@ -694,7 +694,7 @@ export default function SipPage() {
                                 </p>
                               </div>
                               <div className="text-center">
-                                <div className="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-2">
+                                <div className="w-12 h-12 bg-black rounded-full flex items-center justify-center mx-auto mb-2">
                                   <BarChart className="h-6 w-6" />
                                 </div>
                                 <p className="text-xs text-white/80">
@@ -741,13 +741,13 @@ export default function SipPage() {
                           <CardContent className="space-y-4">
                             <div className="flex items-start">
                               <div className="mr-3 bg-primary/10 p-2 rounded-full">
-                                <BarChart3 className="h-5 w-5 text-primary" />
+                                <BarChart3 className="h-5 w-5 text-white" />
                               </div>
                               <div>
                                 <h3 className="font-medium">
                                   Rupee Cost Averaging
                                 </h3>
-                                <p className="text-sm text-neutral-600">
+                                <p className="text-sm text-white">
                                   Buy more units when prices are low and fewer
                                   when prices are high, reducing overall cost.
                                 </p>
@@ -756,13 +756,13 @@ export default function SipPage() {
 
                             <div className="flex items-start">
                               <div className="mr-3 bg-primary/10 p-2 rounded-full">
-                                <Target className="h-5 w-5 text-primary" />
+                                <Target className="h-5 w-5 text-white" />
                               </div>
                               <div>
                                 <h3 className="font-medium">
                                   Goal-Based Investing
                                 </h3>
-                                <p className="text-sm text-neutral-600">
+                                <p className="text-sm text-white">
                                   Align your investments with specific financial
                                   goals like education, retirement, etc.
                                 </p>
@@ -771,11 +771,11 @@ export default function SipPage() {
 
                             <div className="flex items-start">
                               <div className="mr-3 bg-primary/10 p-2 rounded-full">
-                                <ShieldCheck className="h-5 w-5 text-primary" />
+                                <ShieldCheck className="h-5 w-5 text-white" />
                               </div>
                               <div>
                                 <h3 className="font-medium">Risk Mitigation</h3>
-                                <p className="text-sm text-neutral-600">
+                                <p className="text-sm text-white">
                                   Reduce impact of market volatility through
                                   systematic investing.
                                 </p>
@@ -793,251 +793,237 @@ export default function SipPage() {
                         <Card>
                           <CardHeader>
                             <CardTitle>Start Your SIP Journey</CardTitle>
-                            <CardDescription>
+                            <CardDescription className='text-white'>
                               Set up your Systematic Investment Plan
                             </CardDescription>
                           </CardHeader>
                           <CardContent>
                             <Form {...form}>
-                              <form
-                                onSubmit={form.handleSubmit(onSubmit)}
-                                className="space-y-6"
-                              >
-                                <FormField
-                                  control={form.control}
-                                  name="planName"
-                                  render={({ field }) => (
-                                    <FormItem>
-                                      <FormLabel>SIP Plan</FormLabel>
-                                      <Select
-                                        value={field.value}
-                                        onValueChange={field.onChange}
-                                      >
-                                        <FormControl>
-                                          <SelectTrigger>
-                                            <SelectValue placeholder="Select a SIP plan" />
-                                          </SelectTrigger>
-                                        </FormControl>
-                                        <SelectContent>
-                                          {SIP_PLANS.map((plan) => (
-                                            <SelectItem
-                                              key={plan.id}
-                                              value={plan.name}
-                                            >
-                                              {plan.name} - {plan.riskLevel}{" "}
-                                              Risk
-                                            </SelectItem>
-                                          ))}
-                                        </SelectContent>
-                                      </Select>
-                                      <FormMessage />
-                                    </FormItem>
-                                  )}
-                                />
+  <form
+    onSubmit={form.handleSubmit(onSubmit)}
+    className="space-y-6 bg-black text-white border border-white p-6 rounded-md"
+  >
+    {/* SIP Plan */}
+    <FormField
+      control={form.control}
+      name="planName"
+      render={({ field }) => (
+        <FormItem>
+          <FormLabel className="text-white">SIP Plan</FormLabel>
+          <Select value={field.value} onValueChange={field.onChange}>
+            <FormControl>
+              <SelectTrigger className="bg-black text-white border border-white">
+                <SelectValue placeholder="Select a SIP plan" />
+              </SelectTrigger>
+            </FormControl>
+            <SelectContent className="bg-black text-white border border-white">
+              {SIP_PLANS.map((plan) => (
+                <SelectItem
+                  key={plan.id}
+                  value={plan.name}
+                  className="hover:bg-gray-800"
+                >
+                  {plan.name} - {plan.riskLevel} Risk
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <FormMessage className="text-red-400" />
+        </FormItem>
+      )}
+    />
 
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                  <FormField
-                                    control={form.control}
-                                    name="monthlyAmount"
-                                    render={({ field }) => (
-                                      <FormItem>
-                                        <FormLabel>
-                                          Monthly Investment Amount (₹)
-                                        </FormLabel>
-                                        <FormControl>
-                                          <Input
-                                            type="number"
-                                            placeholder="Enter monthly amount"
-                                            {...field}
-                                          />
-                                        </FormControl>
-                                        <FormDescription>
-                                          Minimum ₹
-                                          {selectedPlanDetails.minAmount} per
-                                          month
-                                        </FormDescription>
-                                        <FormMessage />
-                                      </FormItem>
-                                    )}
-                                  />
+    {/* Monthly Amount + Duration */}
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <FormField
+        control={form.control}
+        name="monthlyAmount"
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel className="text-white">
+              Monthly Investment Amount (₹)
+            </FormLabel>
+            <FormControl>
+              <Input
+                type="number"
+                placeholder="Enter monthly amount"
+                className="bg-black text-white border border-white placeholder-gray-400"
+                {...field}
+              />
+            </FormControl>
+            <FormDescription className="text-gray-300">
+              Minimum ₹{selectedPlanDetails.minAmount} per month
+            </FormDescription>
+            <FormMessage className="text-red-400" />
+          </FormItem>
+        )}
+      />
 
-                                  <FormField
-                                    control={form.control}
-                                    name="durationMonths"
-                                    render={({ field }) => (
-                                      <FormItem>
-                                        <FormLabel>
-                                          Investment Duration (Months)
-                                        </FormLabel>
-                                        <FormControl>
-                                          <Input
-                                            type="number"
-                                            placeholder="Enter duration in months"
-                                            {...field}
-                                          />
-                                        </FormControl>
-                                        <FormDescription>
-                                          Recommended minimum{" "}
-                                          {
-                                            selectedPlanDetails.recommendedDuration
-                                          }{" "}
-                                          months
-                                        </FormDescription>
-                                        <FormMessage />
-                                      </FormItem>
-                                    )}
-                                  />
-                                </div>
+      <FormField
+        control={form.control}
+        name="durationMonths"
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel className="text-white">
+              Investment Duration (Months)
+            </FormLabel>
+            <FormControl>
+              <Input
+                type="number"
+                placeholder="Enter duration in months"
+                className="bg-black text-white border border-white placeholder-gray-400"
+                {...field}
+              />
+            </FormControl>
+            <FormDescription className="text-gray-300">
+              Recommended minimum {selectedPlanDetails.recommendedDuration} months
+            </FormDescription>
+            <FormMessage className="text-red-400" />
+          </FormItem>
+        )}
+      />
+    </div>
 
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                  <FormField
-                                    control={form.control}
-                                    name="startDate"
-                                    render={({ field }) => (
-                                      <FormItem>
-                                        <FormLabel>Start Date</FormLabel>
-                                        <FormControl>
-                                          <Input
-                                            type="date"
-                                            min={
-                                              new Date()
-                                                .toISOString()
-                                                .split("T")[0]
-                                            }
-                                            {...field}
-                                            value={
-                                              field.value instanceof Date
-                                                ? field.value
-                                                    .toISOString()
-                                                    .split("T")[0]
-                                                : field.value
-                                            }
-                                          />
-                                        </FormControl>
-                                        <FormDescription>
-                                          First installment will be debited on
-                                          this date
-                                        </FormDescription>
-                                        <FormMessage />
-                                      </FormItem>
-                                    )}
-                                  />
+    {/* Start Date + Expected Returns */}
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <FormField
+        control={form.control}
+        name="startDate"
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel className="text-white">Start Date</FormLabel>
+            <FormControl>
+              <Input
+                type="date"
+                min={new Date().toISOString().split("T")[0]}
+                className="bg-black text-white border border-white placeholder-gray-400"
+                {...field}
+                value={
+                  field.value instanceof Date
+                    ? field.value.toISOString().split("T")[0]
+                    : field.value
+                }
+              />
+            </FormControl>
+            <FormDescription className="text-gray-300">
+              First installment will be debited on this date
+            </FormDescription>
+            <FormMessage className="text-red-400" />
+          </FormItem>
+        )}
+      />
 
-                                  <FormField
-                                    control={form.control}
-                                    name="expectedReturns"
-                                    render={({ field }) => (
-                                      <FormItem>
-                                        <FormLabel>
-                                          Expected Returns (%)
-                                        </FormLabel>
-                                        <FormControl>
-                                          <Input
-                                            type="number"
-                                            step="0.1"
-                                            placeholder="Enter expected annual returns"
-                                            {...field}
-                                          />
-                                        </FormControl>
-                                        <FormDescription>
-                                          Based on historical performance of
-                                          selected plan
-                                        </FormDescription>
-                                        <FormMessage />
-                                      </FormItem>
-                                    )}
-                                  />
-                                </div>
+      <FormField
+        control={form.control}
+        name="expectedReturns"
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel className="text-white">Expected Returns (%)</FormLabel>
+            <FormControl>
+              <Input
+                type="number"
+                step="0.1"
+                placeholder="Enter expected annual returns"
+                className="bg-black text-white border border-white placeholder-gray-400"
+                {...field}
+              />
+            </FormControl>
+            <FormDescription className="text-gray-300">
+              Based on historical performance of selected plan
+            </FormDescription>
+            <FormMessage className="text-red-400" />
+          </FormItem>
+        )}
+      />
+    </div>
 
-                                <Separator />
+    <Separator className="border-white/40" />
 
-                                <div className="space-y-4">
-                                  <h3 className="text-lg font-medium">
-                                    Payment Details
-                                  </h3>
+    {/* Payment Details */}
+    <div className="space-y-4">
+      <h3 className="text-lg font-medium text-white">Payment Details</h3>
 
-                                  <FormField
-                                    control={form.control}
-                                    name="autoDebit"
-                                    render={({ field }) => (
-                                      <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
-                                        <div className="space-y-0.5">
-                                          <FormLabel className="text-base">
-                                            Auto Debit Authorization
-                                          </FormLabel>
-                                          <FormDescription>
-                                            Allow automatic debit from your bank
-                                            account for SIP installments
-                                          </FormDescription>
-                                        </div>
-                                        <FormControl>
-                                          <input
-                                            type="checkbox"
-                                            checked={field.value}
-                                            onChange={field.onChange}
-                                            className="w-5 h-5 text-primary focus:ring-primary"
-                                            aria-label="Auto Debit Authorization"
-                                          />
-                                        </FormControl>
-                                      </FormItem>
-                                    )}
-                                  />
+      <FormField
+        control={form.control}
+        name="autoDebit"
+        render={({ field }) => (
+          <FormItem className="flex flex-row items-center justify-between rounded-lg border border-white p-4 bg-black">
+            <div className="space-y-0.5">
+              <FormLabel className="text-base text-white">
+                Auto Debit Authorization
+              </FormLabel>
+              <FormDescription className="text-gray-300">
+                Allow automatic debit from your bank account for SIP installments
+              </FormDescription>
+            </div>
+            <FormControl>
+              <input
+                type="checkbox"
+                checked={field.value}
+                onChange={field.onChange}
+                className="w-5 h-5 accent-white bg-black border border-white"
+                aria-label="Auto Debit Authorization"
+              />
+            </FormControl>
+          </FormItem>
+        )}
+      />
 
-                                  {form.watch("autoDebit") && (
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                      <FormField
-                                        control={form.control}
-                                        name="bankName"
-                                        render={({ field }) => (
-                                          <FormItem>
-                                            <FormLabel>Bank Name</FormLabel>
-                                            <FormControl>
-                                              <Input
-                                                placeholder="Enter your bank name"
-                                                {...field}
-                                              />
-                                            </FormControl>
-                                            <FormMessage />
-                                          </FormItem>
-                                        )}
-                                      />
-                                      <FormField
-                                        control={form.control}
-                                        name="bankAccountNumber"
-                                        render={({ field }) => (
-                                          <FormItem>
-                                            <FormLabel>Account Number</FormLabel>
-                                            <FormControl>
-                                              <Input
-                                                placeholder="Enter your account number"
-                                                {...field}
-                                              />
-                                            </FormControl>
-                                            <FormMessage />
-                                          </FormItem>
-                                        )}
-                                      />
-                                    </div>
-                                  )}
-                                </div>
+      {form.watch("autoDebit") && (
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <FormField
+            control={form.control}
+            name="bankName"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel className="text-white">Bank Name</FormLabel>
+                <FormControl>
+                  <Input
+                    placeholder="Enter your bank name"
+                    className="bg-black text-white border border-white placeholder-gray-400"
+                    {...field}
+                  />
+                </FormControl>
+                <FormMessage className="text-red-400" />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="bankAccountNumber"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel className="text-white">Account Number</FormLabel>
+                <FormControl>
+                  <Input
+                    placeholder="Enter your account number"
+                    className="bg-black text-white border border-white placeholder-gray-400"
+                    {...field}
+                  />
+                </FormControl>
+                <FormMessage className="text-red-400" />
+              </FormItem>
+            )}
+          />
+        </div>
+      )}
+    </div>
+    <Button
+      type="submit"
+      className="w-full"
+      disabled={isSubmitting}
+    >
+      {isSubmitting ? "Processing..." : "Start SIP Investment"}
+    </Button>
+  </form>
+</Form>
 
-                                <Button
-                                  type="submit"
-                                  className="w-full"
-                                  disabled={isSubmitting}
-                                >
-                                  {isSubmitting
-                                    ? "Processing..."
-                                    : "Start SIP Investment"}
-                                </Button>
-                              </form>
-                            </Form>
                           </CardContent>
                         </Card>
                       </div>
 
                       <div className="space-y-6">
-                        <Card className="bg-[#F8FAFC] border-primary/20">
+                        <Card className="bg-black border-primary/20">
                           <CardHeader className="pb-2">
                             <CardTitle className="text-lg">
                               Your SIP Summary
@@ -1046,7 +1032,7 @@ export default function SipPage() {
                           <CardContent>
                             <div className="space-y-3">
                               <div className="flex justify-between">
-                                <span className="text-sm text-neutral-600">
+                                <span className="text-sm text-white">
                                   SIP Plan
                                 </span>
                                 <span className="font-medium">
@@ -1054,7 +1040,7 @@ export default function SipPage() {
                                 </span>
                               </div>
                               <div className="flex justify-between">
-                                <span className="text-sm text-neutral-600">
+                                <span className="text-sm text-white">
                                   Monthly Investment
                                 </span>
                                 <span className="font-medium">
@@ -1062,7 +1048,7 @@ export default function SipPage() {
                                 </span>
                               </div>
                               <div className="flex justify-between">
-                                <span className="text-sm text-neutral-600">
+                                <span className="text-sm text-white">
                                   Investment Period
                                 </span>
                                 <span className="font-medium">
@@ -1071,7 +1057,7 @@ export default function SipPage() {
                                 </span>
                               </div>
                               <div className="flex justify-between">
-                                <span className="text-sm text-neutral-600">
+                                <span className="text-sm text-white">
                                   Expected Returns
                                 </span>
                                 <span className="font-medium">
@@ -1080,7 +1066,7 @@ export default function SipPage() {
                               </div>
                               <Separator />
                               <div className="flex justify-between">
-                                <span className="text-sm text-neutral-600">
+                                <span className="text-sm text-white">
                                   Total Investment
                                 </span>
                                 <span className="font-medium">
@@ -1088,7 +1074,7 @@ export default function SipPage() {
                                 </span>
                               </div>
                               <div className="flex justify-between">
-                                <span className="text-sm text-neutral-600">
+                                <span className="text-sm text-white">
                                   Estimated Returns
                                 </span>
                                 <span className="font-medium">
@@ -1096,10 +1082,10 @@ export default function SipPage() {
                                 </span>
                               </div>
                               <div className="flex justify-between">
-                                <span className="text-sm text-neutral-600">
+                                <span className="text-sm text-white">
                                   Total Value
                                 </span>
-                                <span className="font-semibold text-primary">
+                                <span className="font-semibold text-white">
                                   {formatCurrency(sipReturns.totalValue)}
                                 </span>
                               </div>
@@ -1111,7 +1097,7 @@ export default function SipPage() {
                                   Investment vs. Returns
                                 </span>
                               </div>
-                              <div className="w-full h-4 rounded-full overflow-hidden bg-neutral-100">
+                              <div className="w-full h-4 rounded-full overflow-hidden bg-black">
                                 <div className="flex h-full">
                                   <div
                                     className="bg-primary h-full"
@@ -1157,7 +1143,7 @@ export default function SipPage() {
                           </CardHeader>
                           <CardContent>
                             <div className="space-y-4">
-                              <p className="text-sm text-neutral-600">
+                              <p className="text-sm text-white">
                                 The selected plan has a{" "}
                                 <span
                                   className={`font-medium ${
@@ -1191,7 +1177,7 @@ export default function SipPage() {
 
                               <div className="h-2 relative bg-gradient-to-r from-green-500 via-amber-500 to-red-500 rounded-full">
                                 <div
-                                  className="absolute top-0 h-4 w-4 bg-white border-2 border-primary rounded-full -mt-1 transform -translate-x-1/2"
+                                  className="absolute top-0 h-4 w-4 bg-black border-2 border-primary rounded-full -mt-1 transform -translate-x-1/2"
                                   style={{
                                     left:
                                       selectedPlanDetails.riskLevel === "High"
@@ -1207,7 +1193,7 @@ export default function SipPage() {
                                 ></div>
                               </div>
 
-                              <div className="text-xs text-neutral-500 mt-4">
+                              <div className="text-xs text-white mt-4">
                                 Investments are subject to market risks. Past
                                 performance is not indicative of future returns.
                               </div>
@@ -1216,8 +1202,8 @@ export default function SipPage() {
                         </Card>
 
                         <div className="flex items-center justify-center p-4 bg-primary/10 rounded-lg">
-                          <Landmark className="h-5 w-5 text-primary mr-2" />
-                          <p className="text-sm text-primary">
+                          <Landmark className="h-5 w-5 text-white mr-2" />
+                          <p className="text-sm text-white">
                             Regulated by SEBI. 100% secure investments.
                           </p>
                         </div>

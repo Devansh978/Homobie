@@ -23,7 +23,7 @@ const Blog2 = ({ styles }) => (
       What is the Best CIBIL Score for a Loan Approval? A Complete Guide for 2025
     </h1>
 
-    <h2 className="text-2xl font-semibold mb-3">TL;DR – Quick Summary</h2>
+    <h2 className="text-2xl font-semibold mb-3">Quick Summary</h2>
     <ul className="list-disc list-inside mb-6 space-y-2">
       <li>
         Ideal CIBIL score: <strong className="italic">750+</strong> for home loan approval

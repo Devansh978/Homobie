@@ -4,6 +4,11 @@ import Blog2 from "./blog/Blog2";
 import Blog3 from "./blog/Blog3";
 import Blog4 from "./blog/Blog4";
 import Blog5 from "./blog/Blog5";
+import Blog6 from "./blog/Blog6";
+import Blog7 from "./blog/Blog7";
+import Blog8 from "./blog/Blog8";
+import Blog9 from "./blog/Blog9";
+import Blog10 from "./blog/Blog10";
 
 // --- STYLES (CSS-in-JS) ---
 const styles = {
@@ -12,7 +17,7 @@ const styles = {
     color: "#e0e0e0",
     fontFamily: "'Segoe UI', 'Helvetica Neue', Arial, sans-serif",
     lineHeight: 1.7,
-    margin: 0,
+    marginTop: "30px",
     padding: 0,
   },
   mainContainer: {
@@ -56,7 +61,7 @@ const styles = {
   cardHover: {
     transform: "translateY(-5px)",
     boxShadow: "0 10px 25px rgba(0, 0, 0, 0.3)",
-    borderColor: "#FF7F50",
+    borderColor: "#4f46e5",
   },
   cardImage: {
     width: "100%",
@@ -93,14 +98,14 @@ const styles = {
   },
   cardTag: {
     backgroundColor: "#333",
-    color: "#FF7F50",
+    color: "#4f46e5",
     padding: "4px 12px",
     borderRadius: "15px",
     fontSize: "12px",
     fontWeight: "500",
   },
   cardReadMore: {
-    color: "#FF7F50",
+    color: "#4f46e5",
     fontSize: "14px",
     fontWeight: "600",
     textTransform: "uppercase",
@@ -128,7 +133,7 @@ const styles = {
     textAlign: "center",
     marginBottom: "20px",
     paddingBottom: "15px",
-    borderBottom: "2px solid #FF7F50",
+    borderBottom: "2px solid #4f46e5",
   },
   h2: {
     color: "#ffffff",
@@ -139,16 +144,16 @@ const styles = {
     marginBottom: "20px",
   },
   strong: {
-    color: "#FF7F50",
+    color: "#4f46e5",
     fontWeight: 600,
   },
   a: {
-    color: "#FF7F50",
+    color: "#4f46e5",
     textDecoration: "none",
   },
   ctaButton: {
     display: "inline-block",
-    backgroundColor: "#FF7F50",
+    backgroundColor: "#4f46e5",
     color: "#121212",
     padding: "12px 25px",
     borderRadius: "50px",
@@ -233,6 +238,51 @@ const blogData = [
     image: "/assets/blog-sample.jpg",
     readTime: "6 min read"
   },
+  { 
+    id: 6, 
+    component: Blog6,
+    title: "Home Loan Insurance: Essential for New Buyers in 2025",
+    date: "JULY 8TH 2025",
+    tags: ["Sustainability", "Technology", "Future trends"],
+    image: "/assets/blog-sample.jpg",
+    readTime: "6 min read"
+  },
+  { 
+    id: 7, 
+    component: Blog7,
+    title: "Which Bank or Finance Service Is Best for a Housing Loan?",
+    date: "JULY 8TH 2025",
+    tags: ["Sustainability", "Technology", "Future trends"],
+    image: "/assets/blog-sample.jpg",
+    readTime: "6 min read"
+  },
+  { 
+    id: 8, 
+    component: Blog8,
+    title: "What Documents Are Essential for Home Loan Approval?",
+    date: "JULY 8TH 2025",
+    tags: ["Sustainability", "Technology", "Future trends"],
+    image: "/assets/blog-sample.jpg",
+    readTime: "6 min read"
+  },
+  { 
+    id: 9, 
+    component: Blog9,
+    title: "Which Home Loan Type Should You Choose? A Simple Guide for Indian Buyers",
+    date: "JULY 8TH 2025",
+    tags: ["Sustainability", "Technology", "Future trends"],
+    image: "/assets/blog-sample.jpg",
+    readTime: "6 min read"
+  },
+  { 
+    id: 10, 
+    component: Blog10,
+    title: "How to Pay Off Your Home Loan in 10 Years: Smart Strategies for Indian Borrowers",
+    date: "JULY 8TH 2025",
+    tags: ["Sustainability", "Technology", "Future trends"],
+    image: "/assets/blog-sample.jpg",
+    readTime: "6 min read"
+  },
 ];
 
 // --- CARD COMPONENT ---
@@ -263,7 +313,7 @@ const BlogCard = ({ blog, onClick, isHovered, onHover, onLeave }) => (
         ))}
       </div>
       <div style={styles.cardReadMore}>
-        DISCOVER MORE 
+        READ MORE 
         <span style={{
           ...styles.arrow,
           transform: isHovered ? 'translateX(4px)' : 'translateX(0)'

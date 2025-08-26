@@ -18,32 +18,33 @@ import {
 import { motion } from "framer-motion";
 import { companyInfo } from "@/lib/company-info";
 import homobieLogo from "/assets/homobie-logo.png";
-import CalculatorComponent from "@/components/ui/calculator";
-import SiploancalculatorComponent from "@/components/ui/sip&loan-calculator"
-import BudgetplanningToolComponent from "@/components/ui/bugetplanning-tool"
+import SipCalculator from "../../pages/SipCalculator/SipCalculator";
+import EmiCalculator from "../../pages/EmiCalculator/EmiCalculator";
+import BudgetPlanningTool from "../../pages/BudgetPlanningTool/BudgetPlanningTool";
+
 
 const toolItems = [
   {
     name: "EMI Calculator",
     icon: Calculator,
-    path: "tools/emi-calculator",
+    path: "/tools/emi-calculator",
     ariaLabel: "Open EMI Calculator",
-    component: <CalculatorComponent />,
-    isModal: true,
+    component: <EmiCalculator />,
+    isModal: false,
   },
   {
     name: "SIP & Loan Calculator",
     icon: Coins,
     path: "/tools/sip-loan-calculator",
-    component: <SiploancalculatorComponent />,
-      isModal: true,
+    component: <SipCalculator />,
+      isModal: false,
   },
   {
     name: "Budget Planning Tool",
     icon: PieChart,
     path: "/tools/budget-planner",
-    component: <BudgetplanningToolComponent />,
-      isModal: true,
+    component: <BudgetPlanningTool />,
+      isModal: false,
   },
   {
     name: "Retirement Planner",
