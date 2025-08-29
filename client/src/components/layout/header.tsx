@@ -58,16 +58,13 @@ const DesktopNavDropdown = ({ item, isActive, onHover, onLeave }) => {
   }
 
   return (
-    <li
-      className="relative"
-      onMouseEnter={handleMouseEnter}
-    >
+    <li className="relative" onMouseEnter={handleMouseEnter}>
       <button className="flex items-center px-4 py-2 text-white/90 hover:text-white transition-all duration-300 font-medium tracking-wide hover:bg-white/10 rounded-lg backdrop-blur-sm">
         {item.label}
-        <ChevronDown 
+        <ChevronDown
           className={`ml-2 h-4 w-4 transition-transform duration-300 ${
             isActive ? "rotate-180" : ""
-          }`} 
+          }`}
         />
       </button>
     </li>
@@ -104,12 +101,18 @@ const MobileNavItem = ({ item, onClose }) => {
         className="w-full flex items-center justify-between px-4 py-3 text-white hover:text-blue-300 hover:bg-white/10 rounded-lg transition-all duration-300 font-medium"
       >
         {item.label}
-        <ChevronDown className={`h-4 w-4 transition-transform duration-300 ${isOpen ? "rotate-180" : ""}`} />
+        <ChevronDown
+          className={`h-4 w-4 transition-transform duration-300 ${
+            isOpen ? "rotate-180" : ""
+          }`}
+        />
       </button>
-      
-      <div className={`overflow-hidden transition-all duration-300 ${
-        isOpen ? "max-h-96 opacity-100" : "max-h-0 opacity-0"
-      }`}>
+
+      <div
+        className={`overflow-hidden transition-all duration-300 ${
+          isOpen ? "max-h-96 opacity-100" : "max-h-0 opacity-0"
+        }`}
+      >
         <div className="ml-4 mt-2 space-y-2">
           {item.children.map((child, index) => (
             <a
@@ -139,7 +142,7 @@ export const Header = () => {
   const loginTimeoutRef = useRef(null);
 
   // Mock auth state - replace with your actual auth hook
-  const user = null; // { name: "John Doe", email: "john@example.com" };
+  const user = null;
 
   useEffect(() => {
     const handleScroll = () => {
@@ -210,19 +213,21 @@ export const Header = () => {
 
   return (
     <>
-      <nav className={`fixed top-0 left-0 right-0 z-40 transition-all duration-500 font-bold${
-        scrolled 
-          ? "bg-slate-900/95 backdrop-blur-2xl border-b border-white/10 shadow-2xl" 
-          : "bg-slate-900/50 backdrop-blur-xl"
-      } ${activeDropdown !== null ? 'pb-6' : ''}`}>
+      <nav
+        className={`fixed top-0 left-0 right-0 z-40 transition-all duration-500 font-bold${
+          scrolled
+            ? "bg-slate-900/95 backdrop-blur-2xl border-b border-white/10 shadow-2xl"
+            : "bg-slate-900/50 backdrop-blur-xl"
+        } ${activeDropdown !== null ? "pb-6" : ""}`}
+      >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
           <div className="flex items-center justify-between h-20">
             {/* Logo */}
             <div className="flex-shrink-0">
               <a href="/" className="flex items-center">
-                <img 
-                  src="/assets/homobie-logo.png" 
-                  alt="Homobie Logo" 
+                <img
+                  src="/assets/homobie-logo.png"
+                  alt="Homobie Logo"
                   className="h-12 w-auto object-contain"
                 />
               </a>
@@ -230,8 +235,10 @@ export const Header = () => {
 
             {/* Desktop Navigation */}
             <div className="hidden lg:block  font-bold">
-              <ul className="flex items-center space-x-2 relative"
-                  onMouseLeave={handleDropdownLeave}>
+              <ul
+                className="flex items-center space-x-2 relative"
+                onMouseLeave={handleDropdownLeave}
+              >
                 {navData.map((item, index) => (
                   <DesktopNavDropdown
                     key={index}
@@ -248,29 +255,41 @@ export const Header = () => {
             <div className="hidden lg:flex items-center space-x-4">
               {user ? (
                 <div className="relative">
-                  <button 
+                  <button
                     className="flex items-center px-4 py-2 bg-white/10 hover:bg-white/20 backdrop-blur-sm text-white rounded-xl transition-all duration-300 border border-white/20"
                     onMouseEnter={handleLoginDropdownEnter}
                     onMouseLeave={handleLoginDropdownLeave}
                   >
                     <User className="h-4 w-4 mr-2" />
                     <span className="font-medium">{user.name}</span>
-                    <ChevronDown className={`ml-2 h-4 w-4 transition-transform duration-300 ${loginDropdownOpen ? "rotate-180" : ""}`} />
+                    <ChevronDown
+                      className={`ml-2 h-4 w-4 transition-transform duration-300 ${
+                        loginDropdownOpen ? "rotate-180" : ""
+                      }`}
+                    />
                   </button>
-                  
+
                   {/* User Dropdown */}
-                  <div 
+                  <div
                     className={`absolute right-0 top-full mt-2 w-48 bg-white/10 backdrop-blur-xl border border-white/20 rounded-2xl shadow-2xl transition-all duration-300 ${
-                      loginDropdownOpen ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
+                      loginDropdownOpen
+                        ? "opacity-100 pointer-events-auto"
+                        : "opacity-0 pointer-events-none"
                     }`}
                     onMouseEnter={handleLoginDropdownEnter}
                     onMouseLeave={handleLoginDropdownLeave}
                   >
                     <div className="p-2">
-                      <a href="/profile" className="block px-4 py-3 text-white/90 hover:text-white hover:bg-white/20 rounded-lg transition-all duration-200">
+                      <a
+                        href="/profile"
+                        className="block px-4 py-3 text-white/90 hover:text-white hover:bg-white/20 rounded-lg transition-all duration-200"
+                      >
                         Profile
                       </a>
-                      <a href="/settings" className="block px-4 py-3 text-white/90 hover:text-white hover:bg-white/20 rounded-lg transition-all duration-200">
+                      <a
+                        href="/settings"
+                        className="block px-4 py-3 text-white/90 hover:text-white hover:bg-white/20 rounded-lg transition-all duration-200"
+                      >
                         Settings
                       </a>
                       <button className="w-full text-left px-4 py-3 text-white/90 hover:text-white hover:bg-white/20 rounded-lg transition-all duration-200 flex items-center">
@@ -290,31 +309,40 @@ export const Header = () => {
                       onMouseLeave={handleLoginDropdownLeave}
                     >
                       Login
-                      <ChevronDown className={`ml-1 h-4 w-4 transition-transform duration-300 ${loginDropdownOpen ? "rotate-180" : ""}`} />
+                      <ChevronDown
+                        className={`ml-1 h-4 w-4 transition-transform duration-300 ${
+                          loginDropdownOpen ? "rotate-180" : ""
+                        }`}
+                      />
                     </button>
-                    
+
                     {/* Login Options Dropdown */}
-                    <div 
+                    <div
                       className={`absolute right-0 top-full mt-2 w-56 bg-white/10 backdrop-blur-xl border border-white/20 rounded-2xl shadow-2xl transition-all duration-300 ${
-                        loginDropdownOpen ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
+                        loginDropdownOpen
+                          ? "opacity-100 pointer-events-auto"
+                          : "opacity-0 pointer-events-none"
                       }`}
                       onMouseEnter={handleLoginDropdownEnter}
                       onMouseLeave={handleLoginDropdownLeave}
                     >
                       <div className="p-2">
                         {/* User Login */}
-                        <a href="/auth" className="block px-4 py-3 text-white/90 hover:text-white hover:bg-white/20 rounded-lg transition-all duration-200 font-medium">
+                        <a
+                          href="/auth"
+                          className="block px-4 py-3 text-white/90 hover:text-white hover:bg-white/20 rounded-lg transition-all duration-200 font-medium"
+                        >
                           User Login
                         </a>
-                        
+
                         {/* Divider */}
                         <div className="border-t border-white/20 my-2"></div>
-                        
+
                         {/* Partner Login Header */}
                         <div className="px-4 py-2 text-white/70 text-sm font-medium">
                           Partner Login
                         </div>
-                        
+
                         {/* Partner Login Options */}
                         {partnerRoles.map((role, index) => (
                           <a
@@ -330,7 +358,7 @@ export const Header = () => {
                       </div>
                     </div>
                   </div>
-                  
+
                   <a
                     href="/register"
                     className="px-6 py-2 bg-gradient-to-r from-blue-500 to-purple-600 text-white font-medium rounded-lg hover:from-blue-600 hover:to-purple-700 transition-all duration-300 shadow-lg hover:shadow-xl backdrop-blur-sm border border-white/20"
@@ -356,38 +384,44 @@ export const Header = () => {
               </button>
             </div>
           </div>
-          
+
           {/* Dropdown Container - Expands the nav height */}
-          <div 
-            className={`transition-all duration-300 overflow-hidden ${
-              activeDropdown !== null ? 'max-h-80 opacity-100' : 'max-h-0 opacity-0'
+          {/* Dropdown */}
+          <div
+            className={`transition-all duration-500 overflow-hidden ${
+              activeDropdown !== null ? "h-screen opacity-100" : "h-0 opacity-0"
             }`}
             onMouseEnter={handleDropdownContentEnter}
             onMouseLeave={handleDropdownLeave}
           >
-            <div className="py-4">
-              <div className="flex justify-center">
-                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8 max-w-6xl">
-                  {/* Render active dropdown content */}
-                  {activeDropdown !== null && navData[activeDropdown]?.children && (
+            <div className="py-8 px-8">
+              <div className="flex items-start justify-start gap-16">
+                {activeDropdown !== null &&
+                  navData[activeDropdown]?.children && (
                     <>
-                      <div className="space-y-4">
-                        <h3 className="text-white font-semibold text-lg border-b border-white/20 pb-2">
+                      {/* Left Heading */}
+                      <div className="w-1/4">
+                        <h3 className="text-white font-semibold text-2xl border-b border-white/20 pb-4">
                           {navData[activeDropdown].label}
                         </h3>
-                        {navData[activeDropdown].children.map((child, index) => (
-                          <a
-                            key={index}
-                            href={child.path}
-                            className="block text-white/80 hover:text-white transition-all duration-200 font-medium py-1"
-                          >
-                            {child.label}
-                          </a>
-                        ))}
+                      </div>
+
+                      {/* Right Options */}
+                      <div className="flex-1 grid grid-row-2 md:grid-row-3 lg:grid-row-4 gap-6">
+                        {navData[activeDropdown].children.map(
+                          (child, index) => (
+                            <a
+                              key={index}
+                              href={child.path}
+                              className="block text-white/80 hover:text-white transition-all duration-200 font-medium py-1"
+                            >
+                              {child.label}
+                            </a>
+                          )
+                        )}
                       </div>
                     </>
                   )}
-                </div>
               </div>
             </div>
           </div>
@@ -397,27 +431,29 @@ export const Header = () => {
       {/* Mobile Glass Drawer */}
       <div
         className={`fixed inset-0 z-50 lg:hidden transition-all duration-300 ${
-          isMobileMenuOpen 
-            ? "opacity-100 pointer-events-auto" 
+          isMobileMenuOpen
+            ? "opacity-100 pointer-events-auto"
             : "opacity-0 pointer-events-none"
         }`}
       >
         {/* Backdrop */}
-        <div 
+        <div
           className="absolute inset-0 backdrop-blur-sm"
           onClick={closeMobileMenu}
         />
-        
+
         {/* Glass Drawer */}
-        <div className={`absolute right-0 top-0 h-full w-full max-w-sm backdrop-blur-2xl border-l border-white/20 shadow-2xl transition-all duration-300 ${
-          isMobileMenuOpen ? "translate-x-0" : "translate-x-full"
-        }`}>
+        <div
+          className={`absolute right-0 top-0 h-full w-full max-w-sm backdrop-blur-2xl border-l border-white/20 shadow-2xl transition-all duration-300 ${
+            isMobileMenuOpen ? "translate-x-0" : "translate-x-full"
+          }`}
+        >
           <div className="flex flex-col h-full">
             {/* Mobile Header */}
             <div className="flex items-center justify-between p-6 border-b border-white/20">
-              <img 
-                src="/assets/wmremove-transformed - Edited.jpg" 
-                alt="Homobie Logo" 
+              <img
+                src="/assets/wmremove-transformed - Edited.jpg"
+                alt="Homobie Logo"
                 className="h-8 w-auto object-contain"
               />
               <button
@@ -433,7 +469,11 @@ export const Header = () => {
             <div className="flex-1 overflow-y-auto p-6">
               <div className="space-y-2">
                 {navData.map((item, index) => (
-                  <MobileNavItem key={index} item={item} onClose={closeMobileMenu} />
+                  <MobileNavItem
+                    key={index}
+                    item={item}
+                    onClose={closeMobileMenu}
+                  />
                 ))}
               </div>
             </div>
@@ -441,38 +481,41 @@ export const Header = () => {
             {/* Mobile Auth Section */}
             <div className="border-t border-white/20 p-6">
               {user ? (
+                // ✅ Logged-in view with initials and dashboard/admin links
                 <div className="space-y-4">
                   <div className="flex items-center space-x-3 p-4 bg-white/10 rounded-xl backdrop-blur-sm">
-                    <User className="h-8 w-8 text-white" />
+                    <div className="w-10 h-10 rounded-full bg-blue-600 flex items-center justify-center text-white font-bold">
+                      {`${user.firstName[0]}${user.lastName[0]}`}
+                    </div>
                     <div>
-                      <div className="text-white font-medium">{user.name}</div>
-                      <div className="text-white/70 text-sm">{user.email}</div>
+                      <div className="text-white font-medium">
+                        {user.firstName} {user.lastName}
+                      </div>
+                      <div className="text-white/70 text-sm">{user.role}</div>
                     </div>
                   </div>
                   <div className="space-y-2">
                     <a
-                      href="/profile"
+                      href="/dashboard"
                       onClick={closeMobileMenu}
                       className="block w-full px-4 py-3 text-center text-white bg-white/10 hover:bg-white/20 rounded-lg transition-all duration-300"
                     >
-                      Profile
+                      Dashboard
                     </a>
-                    <a
-                      href="/settings"
-                      onClick={closeMobileMenu}
-                      className="block w-full px-4 py-3 text-center text-white bg-white/10 hover:bg-white/20 rounded-lg transition-all duration-300"
-                    >
-                      Settings
-                    </a>
-                    <button className="w-full flex items-center justify-center px-4 py-3 bg-red-500/20 text-red-300 rounded-lg hover:bg-red-500/30 transition-all duration-300">
-                      <LogOut className="h-4 w-4 mr-2" />
-                      Logout
-                    </button>
+                    {user.role === "admin" && (
+                      <a
+                        href="/admin"
+                        onClick={closeMobileMenu}
+                        className="block w-full px-4 py-3 text-center text-white bg-white/10 hover:bg-white/20 rounded-lg transition-all duration-300"
+                      >
+                        Admin Dashboard
+                      </a>
+                    )}
                   </div>
                 </div>
               ) : (
-                <div className="space-y-3">
-                  {/* User Login */}
+                // ❌ Not logged-in view (Login + Partner login + Sign Up)
+                <>
                   <a
                     href="/auth"
                     onClick={closeMobileMenu}
@@ -480,10 +523,11 @@ export const Header = () => {
                   >
                     User Login
                   </a>
-                  
-                  {/* Partner Login Section */}
-                  <div className="space-y-2">
-                    <div className="text-white/70 text-sm font-medium px-2">Partner Login</div>
+
+                  <div className="space-y-2 mt-2">
+                    <div className="text-white/70 text-sm font-medium px-2">
+                      Partner Login
+                    </div>
                     {partnerRoles.map((role, index) => (
                       <a
                         key={index}
@@ -497,7 +541,7 @@ export const Header = () => {
                       </a>
                     ))}
                   </div>
-                  
+
                   <a
                     href="/register"
                     onClick={closeMobileMenu}
@@ -505,7 +549,7 @@ export const Header = () => {
                   >
                     Sign Up
                   </a>
-                </div>
+                </>
               )}
             </div>
           </div>

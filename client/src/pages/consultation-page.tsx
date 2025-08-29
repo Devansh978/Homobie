@@ -253,7 +253,7 @@ export default function ConsultationPage() {
             ) : (
               <>
                 <div className="mb-8 text-center">
-                  <h1 className="text-3xl font-bold text-white mb-2">
+                  <h1 className="text-3xl font-bold text-white my-2">
                     Book Your Financial Consultation
                   </h1>
                   <p className="text-white max-w-3xl mx-auto">
@@ -530,7 +530,7 @@ export default function ConsultationPage() {
                   </div>
 
                   <div className="md:col-span-2 space-y-6">
-                    <Card className="bg-primary text-white">
+                    <Card className="bg-[#191e80] text-white">
                       <CardHeader>
                         <CardTitle>Why Choose Our Consultation?</CardTitle>
                         <CardDescription className="text-primary-foreground/80">

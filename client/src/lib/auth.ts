@@ -13,7 +13,14 @@ export interface AuthUser {
   userId: string;
 }
 
-export type UserRole = "super_admin" | "admin" | "ca" | "builder" | "broker" | "user" | "telecaller";
+export type UserRole =
+  | "super_admin"
+  | "admin"
+  | "ca"
+  | "builder"
+  | "broker"
+  | "user"
+  | "telecaller";
 
 export interface LoginCredentials {
   username: string;
@@ -33,7 +40,7 @@ export interface RegisterData {
 
 export interface AuthResponse {
   email: string;
-  role: string; // Note: This is a string in the response, not UserRole type
+  role: string; // backend sends string
   token: string;
   refreshToken: string;
   message?: string;
@@ -52,7 +59,8 @@ export class AuthService {
   private token: string | null = null;
   private refreshToken: string | null = null;
   private user: AuthUser | null = null;
-  private readonly baseUrl = "https://homobiebackend-railway-production.up.railway.app";
+  private readonly baseUrl =
+    "https://homobiebackend-railway-production.up.railway.app";
   private tokenRefreshPromise: Promise<void> | null = null;
 
   constructor() {
@@ -60,46 +68,35 @@ export class AuthService {
     this.setupTokenRefresh();
   }
 
-  // Initialize from localStorage
-private loadFromStorage() {
-  if (typeof window !== "undefined") {
+  // === Storage Management ===
+  private loadFromStorage() {
+    if (typeof window === "undefined") return;
 
     this.token = localStorage.getItem("auth_token");
     this.refreshToken = localStorage.getItem("auth_refresh_token");
 
     const userJson = localStorage.getItem("auth_user");
     try {
-      // Safely parse the user data. If userJson is null, null is assigned.
-      // If parsing fails, the catch block will handle it.
       this.user = userJson ? JSON.parse(userJson) : null;
     } catch (error) {
-      console.error("Could not parse auth_user from localStorage, resetting.", error);
-      // If data is corrupted, set user to null and remove the bad entry
+      console.error("Could not parse auth_user from localStorage, resetting.");
       this.user = null;
       localStorage.removeItem("auth_user");
     }
-
-  
   }
-}
 
-  // Save auth data to storage
   private saveToStorage(token: string, refreshToken: string, user: AuthUser) {
     this.token = token;
     this.refreshToken = refreshToken;
     this.user = user;
 
     if (typeof window !== "undefined") {
-      
       localStorage.setItem("auth_token", token);
-      
       localStorage.setItem("auth_refresh_token", refreshToken);
       localStorage.setItem("auth_user", JSON.stringify(user));
-
     }
   }
 
-  // Clear auth data
   private clearStorage() {
     this.token = null;
     this.refreshToken = null;
@@ -112,108 +109,79 @@ private loadFromStorage() {
     }
   }
 
-  // Clear token method for external use
-  clearToken() {
-    this.clearStorage();
+  // === NEW PUBLIC METHOD ===
+  public setAuthData(user: AuthUser, tokens: { token: string; refreshToken: string }) {
+    this.saveToStorage(tokens.token, tokens.refreshToken, user);
+    this.setupTokenRefresh();
   }
 
-  // Setup automatic token refresh
-  private setupTokenRefresh() {
-    if (typeof window !== "undefined" && this.token && this.refreshToken) {
-      const jwt = this.parseJwt(this.token);
-      if (jwt && jwt.exp) {
-        const expiresIn = (jwt.exp * 1000) - Date.now() - 60000;
-        if (expiresIn > 0) {
-          setTimeout(() => this.refreshAuthToken(), expiresIn);
-        }
-      }
-    }
-  }
-
-  // Parse JWT token
-  private parseJwt(token: string) {
-    try {
-      return JSON.parse(atob(token.split('.')[1]));
-    } catch {
-      return null;
-    }
-  }
-
-  // Register new user
+  // === Auth API Calls ===
   async register(data: RegisterData): Promise<AuthResponse> {
-    try {
-      const response = await apiRequest("POST", `${this.baseUrl}/register`, data);
-      const jsonResponse: AuthResponse = await response.json();
+    const response = await apiRequest(
+      "POST",
+      `${this.baseUrl}/register`,
+      data
+    );
+    const jsonResponse: AuthResponse = await response.json();
 
-      // Validate response structure
-      if (!this.isValidAuthResponse(jsonResponse)) {
-        throw new Error("Invalid response from server");
-      }
-
-      // Save auth data
-      const user: AuthUser = {
-        email: jsonResponse.email,
-        firstName: jsonResponse.firstName,
-        lastName: jsonResponse.lastName,
-        role: jsonResponse.role.toLowerCase() as UserRole,
-        userId: jsonResponse.userId,
-      };
-
-      this.saveToStorage(
-        jsonResponse.token,
-        jsonResponse.refreshToken || "",
-        user
-      );
-      this.setupTokenRefresh();
-
-      return jsonResponse;
-    } catch (error) {
-      throw this.createAuthError(error, "Registration failed");
+    if (!this.isValidAuthResponse(jsonResponse)) {
+      throw new Error("Invalid response from server");
     }
+
+    const user: AuthUser = {
+      email: jsonResponse.email,
+      firstName: jsonResponse.firstName,
+      lastName: jsonResponse.lastName,
+      role: jsonResponse.role.toLowerCase() as UserRole,
+      userId: jsonResponse.userId,
+    };
+
+    this.saveToStorage(
+      jsonResponse.token,
+      jsonResponse.refreshToken || "",
+      user
+    );
+    this.setupTokenRefresh();
+
+    return jsonResponse;
   }
 
-  // User login - FIXED VERSION
   async login(credentials: LoginCredentials): Promise<AuthResponse> {
-    try {
-      const response = await apiRequest("POST", `${this.baseUrl}/auth/login`, credentials);
-      const jsonResponse: AuthResponse = await response.json();
+    const response = await apiRequest(
+      "POST",
+      `${this.baseUrl}/auth/login`,
+      credentials
+    );
+    const jsonResponse: AuthResponse = await response.json();
 
-      if (!this.isValidAuthResponse(jsonResponse)) {
-        throw new Error("Invalid credentials");
-      }
-
-      // Create user object from response
-      const user: AuthUser = {
-        email: jsonResponse.email,
-        firstName: jsonResponse.firstName,
-        lastName: jsonResponse.lastName,
-        role: jsonResponse.role.toLowerCase() as UserRole,
-        userId: jsonResponse.userId,
-      };
-
-      // Save auth data
-      this.saveToStorage(
-        jsonResponse.token,
-        jsonResponse.refreshToken,
-        user
-      );
-      this.setupTokenRefresh();
-
-      return jsonResponse;
-    } catch (error) {
-      throw this.createAuthError(error, "Login failed");
+    if (!this.isValidAuthResponse(jsonResponse)) {
+      throw new Error("Invalid credentials");
     }
+
+    const user: AuthUser = {
+      email: jsonResponse.email,
+      firstName: jsonResponse.firstName,
+      lastName: jsonResponse.lastName,
+      role: jsonResponse.role.toLowerCase() as UserRole,
+      userId: jsonResponse.userId,
+    };
+
+    this.saveToStorage(
+      jsonResponse.token,
+      jsonResponse.refreshToken,
+      user
+    );
+    this.setupTokenRefresh();
+
+    return jsonResponse;
   }
 
-  // Logout user
   async logout(): Promise<void> {
     try {
       if (this.token) {
         await fetch(`${this.baseUrl}/auth/logout`, {
           method: "POST",
-          headers: {
-            Authorization: `Bearer ${this.token}`,
-          },
+          headers: { Authorization: `Bearer ${this.token}` },
         });
       }
     } catch (error) {
@@ -223,7 +191,6 @@ private loadFromStorage() {
     }
   }
 
-  // Refresh auth token
   public async refreshAuthToken(): Promise<void> {
     if (!this.refreshToken || this.tokenRefreshPromise) return;
 
@@ -231,14 +198,10 @@ private loadFromStorage() {
       try {
         const response = await fetch(`${this.baseUrl}/auth/refresh`, {
           method: "POST",
-          headers: {
-            Authorization: `Bearer ${this.refreshToken}`,
-          },
+          headers: { Authorization: `Bearer ${this.refreshToken}` },
         });
 
-        if (!response.ok) {
-          throw new Error("Token refresh failed");
-        }
+        if (!response.ok) throw new Error("Token refresh failed");
 
         const jsonResponse: AuthResponse = await response.json();
 
@@ -249,6 +212,7 @@ private loadFromStorage() {
           role: jsonResponse.role.toLowerCase() as UserRole,
           userId: jsonResponse.userId,
         };
+
         if (this.isValidAuthResponse(jsonResponse)) {
           this.saveToStorage(
             jsonResponse.token,
@@ -268,205 +232,62 @@ private loadFromStorage() {
     await this.tokenRefreshPromise;
   }
 
-  // Get current user (with optional force refresh)
-  // async getCurrentUser(forceRefresh = false): Promise<AuthUser | null> {
-  //   if (!this.token) return null;
+  private setupTokenRefresh() {
+    if (typeof window === "undefined" || !this.token || !this.refreshToken)
+      return;
 
-  //   if (forceRefresh) {
-  //     try {
-  //       const response = await apiRequest<{ user: AuthUser }>(`${this.baseUrl}/auth/me`, {
-  //         headers: {
-  //           Authorization: `Bearer ${this.token}`,
-  //         },
-  //       });
+    const jwt = this.parseJwt(this.token);
+    if (jwt && jwt.exp) {
+      const expiresIn = jwt.exp * 1000 - Date.now() - 60000;
+      if (expiresIn > 0) {
+        setTimeout(() => this.refreshAuthToken(), expiresIn);
+      }
+    }
+  }
 
-  //       if (response.user) {
-  //         this.user = response.user;
-  //         if (typeof window !== "undefined") {
-  //           localStorage.setItem("auth_user", JSON.stringify(response.user));
-  //         }
-  //         return response.user;
-  //       }
-  //     } catch (error) {
-  //       console.error("Failed to refresh user data:", error);
-  //     }
-  //   }
+  private parseJwt(token: string) {
+    try {
+      return JSON.parse(atob(token.split(".")[1]));
+    } catch {
+      return null;
+    }
+  }
 
-  //   return this.user;
-  // }
-
-  // // Verify email
-  // async verifyEmail(token: string): Promise<AuthResponse> {
-  //   try {
-  //     const response = await apiRequest<AuthResponse>(`${this.baseUrl}/auth/verify-email`, {
-  //       method: "POST",
-  //       body: JSON.stringify({ token }),
-  //     });
-
-  //     if (this.isValidAuthResponse(response)) {
-  //       this.saveToStorage(
-  //         response.token,
-  //         response.refreshToken || this.refreshToken || "",
-  //         response.user
-  //       );
-  //       this.setupTokenRefresh();
-  //     }
-
-  //     return response;
-  //   } catch (error) {
-  //     throw this.createAuthError(error, "Email verification failed");
-  //   }
-  // }
-
-  // Request password reset
-//   async requestPasswordReset(email: string): Promise<{ message: string }> {
-//     return apiRequest(`${this.baseUrl}/auth/request-password-reset`, {
-//       method: "POST",
-//       body: JSON.stringify({ email }),
-//     });
-//   }
-
-  // // Reset password
-  // async resetPassword(token: string, newPassword: string): Promise<AuthResponse> {
-  //   try {
-  //     const response = await apiRequest<AuthResponse>(`${this.baseUrl}/auth/reset-password`, {
-  //       method: "POST",
-  //       body: JSON.stringify({ token, newPassword }),
-  //     });
-
-  //     if (this.isValidAuthResponse(response)) {
-  //       this.saveToStorage(
-  //         response.token,
-  //         response.refreshToken || "",
-  //         response.user
-  //       );
-  //       this.setupTokenRefresh();
-  //     }
-
-  //     return response;
-  //   } catch (error) {
-  //     throw this.createAuthError(error, "Password reset failed");
-  //   }
-  // }
-
-  // Validate auth response structure
-  // private isValidAuthResponse(response: any): response is AuthResponse {
-  //   return response &&
-  //     typeof response.token === 'string' &&
-  //     response.token.length > 0 &&
-  //     response.user &&
-  //     typeof response.user === 'object' &&
-  //     response.user.id;
-  // }
-  // Update your type guard to match the actual response structure
   private isValidAuthResponse(response: any): response is AuthResponse {
     return (
       response &&
-      typeof response.token === 'string' &&
+      typeof response.token === "string" &&
       response.token.length > 0 &&
-      typeof response.refreshToken === 'string' &&
+      typeof response.refreshToken === "string" &&
       response.refreshToken.length > 0 &&
-      typeof response.email === 'string' &&
-      typeof response.role === 'string' &&
-      typeof response.firstName === 'string' &&
-      typeof response.lastName === 'string'
+      typeof response.email === "string" &&
+      typeof response.role === "string" &&
+      typeof response.firstName === "string" &&
+      typeof response.lastName === "string"
     );
   }
 
-  // If you want to transform the backend response to match AuthResponse
-  // (Removed unused transformAuthResponse method and example usage)
-
-  // Get current token
+  // === Getters ===
   public getToken(): string | null {
     return this.token;
   }
 
-  // Get current user
   public getUser(): AuthUser | null {
     return this.user;
   }
 
-  // Check if user is authenticated
-  isAuthenticated(): boolean {
+  public isAuthenticated(): boolean {
     return !!this.token && !!this.user;
   }
 
-  // Check if user has specific role
-  hasRole(roles: UserRole[]): boolean {
+  public hasRole(roles: UserRole[]): boolean {
     return this.user ? roles.includes(this.user.role) : false;
   }
-
-  // Check if user has permission
-  hasPermission(permission: string): boolean {
-    if (!this.user) return false;
-
-    const rolePermissions: Record<UserRole, string[]> = {
-      super_admin: [
-        "manage_users",
-        "manage_all_leads",
-        "view_audit_logs",
-        "manage_crm_integrations",
-        "assign_leads",
-        "delete_leads",
-      ],
-      admin: [
-        "manage_users",
-        "manage_all_leads",
-        "view_audit_logs",
-        "assign_leads",
-        "delete_leads",
-      ],
-      telecaller: [
-        "manage_all_leads",
-        "customize_leads",
-      ],
-      ca: [
-        "manage_all_leads",
-        "view_audit_logs",
-      ],
-      builder: [
-        "view_own_leads",
-        "create_leads",
-      ],
-      broker: [
-        "view_own_leads",
-        "create_leads",
-        "manage_own_leads",
-      ],
-      user: [
-        "view_own_leads",
-      ],
-    };
-
-    return rolePermissions[this.user.role]?.includes(permission) || false;
-  }
-
-  // FIXED: Create proper error without always throwing
-  private createAuthError(error: unknown, defaultMessage: string): Error {
-    if (typeof error === "object" && error !== null) {
-      const apiError = error as ApiError;
-
-      if (apiError.status === 401) {
-        this.clearStorage();
-        if (typeof window !== "undefined") {
-          window.location.href = "/login";
-        }
-      }
-
-      return new Error(apiError.message || defaultMessage);
-    } else if (typeof error === "string") {
-      return new Error(error);
-    } else {
-      return new Error(defaultMessage);
-    }
-  }
-
-  // DEPRECATED: The handleApiError method has been removed as it was unused.
 }
 
 export const authService = new AuthService();
 
-// Enhanced authenticated fetch with better error handling
+// === Authenticated fetch helper ===
 export async function authenticatedFetch(
   url: string,
   options: RequestInit = {}
@@ -474,32 +295,21 @@ export async function authenticatedFetch(
   const token = authService.getToken();
 
   const headers = new Headers(options.headers);
-  if (token) {
-    headers.set("Authorization", `Bearer ${token}`);
-  }
+  if (token) headers.set("Authorization", `Bearer ${token}`);
   headers.set("Content-Type", "application/json");
 
   try {
-    const response = await fetch(url, {
-      ...options,
-      headers,
-    });
+    const response = await fetch(url, { ...options, headers });
 
     if (response.status === 401) {
-      // Try to refresh token if we have a refresh token
       if (authService.getToken() && authService.getUser()) {
         await authService.refreshAuthToken();
         const newToken = authService.getToken();
         if (newToken) {
           headers.set("Authorization", `Bearer ${newToken}`);
-          return fetch(url, {
-            ...options,
-            headers,
-          });
+          return fetch(url, { ...options, headers });
         }
       }
-
-      // If still unauthorized, logout
       await authService.logout();
       if (typeof window !== "undefined") {
         window.location.href = "/login";

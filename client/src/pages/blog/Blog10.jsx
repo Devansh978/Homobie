@@ -71,7 +71,7 @@ const Blog10 = ({ styles }) => {
       <p>
         Invest ~10% of your EMI monthly in a mutual fund SIP. After 3–5 years, redeem it for
         a lump-sum prepayment—reducing tenure and interest. <strong>Homobie</strong> offers{" "}
-        <a href="/sip-reinvestment-plan" className="text-blue-600 underline" target="_blank" rel="noopener noreferrer">
+        <a href="/sip" className="text-blue-600 underline" target="_blank" rel="noopener noreferrer">
           SIP reinvestment plans
         </a>{" "}
         aligned with EMI timelines.
@@ -125,8 +125,11 @@ const Blog10 = ({ styles }) => {
         <strong>Homobie</strong> helps you execute—matching you to the right loan, simulating plans, and guiding SIP reinvestments.
       </p>
       <p className="text-center">
+        <p className="leading-relaxed mt-10 text-left">
+        <strong>Start your journey to debt freedom with clarity, tools, and a plan—with Homobie.of your borrowing with clarity.</strong>
+        </p>
       <CtaButton styles={styles} href="loan-application?type=home-loan">
-        Start your journey to debt freedom with clarity, tools, and a plan—with Homobie.of your borrowing with clarity. Match smarter and borrow better with Homobie.
+         Match smarter and borrow better with Homobie.
       </CtaButton>
     </p>
     </div>

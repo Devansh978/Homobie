@@ -161,12 +161,15 @@ const Blog9 = ({ styles }) => {
           <strong>Homobie</strong> simplifies the decision with profiling,
           tools, and lender matching—so you borrow smarter and faster.
         </p>
+        <p className="leading-relaxed mt-10">
+        <strong>Take control of your borrowing with clarity..</strong>
+        </p>
       </div>
 
       {/* CTA */}
       <div className="text-center mt-10">
         <CtaButton styles={styles} href="loan-application?type=home-loan">
-          Take control of your borrowing with clarity. Match smarter and borrow
+          Match smarter and borrow
           better with Homobie.
         </CtaButton>
       </div>
