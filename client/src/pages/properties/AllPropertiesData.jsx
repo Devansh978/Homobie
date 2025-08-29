@@ -1,39 +1,49 @@
-import FeaturedPropertiesData from "./FeaturedPropertiesData";
+import { normalizePropertyData } from './AllPropertiesData';
 
-const AllPropertiesData = [
-  ...FeaturedPropertiesData.map((item) => ({
-    ...item,
-    files: ["/assets/property-sample.jpg"],
-  })),
-  {
-    id: "3",
-    files: ["/assets/property-sample.jpg", "/assets/property-sample.jpg"],
+// Inside an async function in your component...
+const response = await fetch('https://homobiebackend-railway-production.up.railway./properties/allProperties?pincode=string');
+const apiData = await response.json();
+
+// Normalize the messy API data into a clean format
+const cleanProperties = normalizePropertyData(apiData);
+
+// Now you can safely use cleanProperties to render your UI
+setProperties(cleanProperties);
+
+export const normalizePropertyData = (apiData) => {
+  if (!apiData) return [];
+  
+  return apiData.map(item => ({
+    id: item.propertyId || `temp-${Math.random().toString(36).substr(2, 9)}`,
+    files: item.images || [DEFAULT_PROPERTY_IMAGE],
     property: {
-      actualPrice: 1500.75,
-      amenities: ["CCTV", "Lift"],
-      areaSqft: 1200,
-      bathrooms: 2,
-      bedrooms: 2,
-      category: "Apartment",
-      constructionStatus: "Under Construction",
-      description: "Compact 2BHK flat with great ventilation.",
-      furnishing: "Semi-Furnished",
-      ownerId: "98765432-abcd-90ef-5678-1234567890ab",
-      propertyFeatures: ["Balcony", "Power Backup"],
-      status: "Available",
-      title: "2 BHK Flat",
-      type: "Flat",
-      discountPrice: 100.5,
+      actualPrice: item.actualPrice,
+      discountPrice: item.discountPrice || 0,
+      title: item.title || "Untitled Property",
+      type: item.type,
+      constructionStatus: item.constructionStatus,
+      status: item.propertyStatus,
       location: {
-        addressLine1: "45 MG Road",
-        addressLine2: "Near Metro Station",
-        city: "Bangalore",
-        country: "India",
-        landmark: "Next to Mall",
-        pincode: "560038",
-        state: "Karnataka",
+        addressLine1: item.location?.addressLine1 || "",
+        addressLine2: item.location?.addressLine2 || "",
+        city: item.location?.city || "",
+        state: item.location?.state || "",
+        pincode: item.location?.pincode || "",
+        country: item.location?.country || "",
+        landmark: item.location?.landmark || ""
       },
+      // Add default values for missing fields
+      bedrooms: 0,
+      bathrooms: 0,
+      areaSqft: 0,
+      furnishing: "Not Specified",
+      category: "Not Specified",
+      description: "No description available",
+      amenities: [],
+      propertyFeatures: []
     },
-  },
-];
+    isFeatured: false // You might want to add this field in your API
+  }));
+};
+
 export default AllPropertiesData;

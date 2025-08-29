@@ -54,6 +54,8 @@ function Router() {
       <Route path="/blog" component={BlogPage} />
       <Route path="/about" component={AboutPage} />
       <Route path="/ourteam" component={OurTeamPage} />
+       <Route path="/properties" component={Properties} />
+      <Route path="/properties/:propertyId" component={PropertyDetails} />
       <Route path="/properties" component={Properties} />
       <Route path="/properties/:id">
         {params => <PropertyDetails id={params.id} />}

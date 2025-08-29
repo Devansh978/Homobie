@@ -47,6 +47,7 @@ export interface AuthResponse {
   firstName: string;
   lastName: string;
   userId: string;
+  propertyId?: string; 
 }
 
 export interface ApiError {
@@ -62,6 +63,8 @@ export class AuthService {
   private readonly baseUrl =
     "https://homobiebackend-railway-production.up.railway.app";
   private tokenRefreshPromise: Promise<void> | null = null;
+  private propertyId: string | null = null;
+  private userId: string | null = null;
 
   constructor() {
     this.loadFromStorage();
@@ -74,6 +77,9 @@ export class AuthService {
 
     this.token = localStorage.getItem("auth_token");
     this.refreshToken = localStorage.getItem("auth_refresh_token");
+    this.propertyId = localStorage.getItem('${propertyId}');
+    this.userId = localStorage.getItem("userId");
+    this.ownerId = localStorage.getItem("ownerId");
 
     const userJson = localStorage.getItem("auth_user");
     try {
@@ -85,15 +91,20 @@ export class AuthService {
     }
   }
 
-  private saveToStorage(token: string, refreshToken: string, user: AuthUser) {
+  // Save auth data to storage
+  private saveToStorage(token: string, refreshToken: string, user: AuthUser , propertyId?: string) {
     this.token = token;
     this.refreshToken = refreshToken;
     this.user = user;
+    this.propertyId = '${propertyId}';
+    this.userId = user.userId;
 
     if (typeof window !== "undefined") {
       localStorage.setItem("auth_token", token);
       localStorage.setItem("auth_refresh_token", refreshToken);
       localStorage.setItem("auth_user", JSON.stringify(user));
+      localStorage.setItem('${propertyId}', JSON.stringify('${propertyId}'));
+      localStorage.setItem("userId", user.userId);
     }
   }
 
@@ -106,16 +117,39 @@ export class AuthService {
       localStorage.removeItem("auth_token");
       localStorage.removeItem("auth_refresh_token");
       localStorage.removeItem("auth_user");
+      localStorage.removeItem("propertyId");
+      localStorage.removeItem("userId");
     }
   }
 
-  // === NEW PUBLIC METHOD ===
-  public setAuthData(user: AuthUser, tokens: { token: string; refreshToken: string }) {
-    this.saveToStorage(tokens.token, tokens.refreshToken, user);
-    this.setupTokenRefresh();
+  // Clear token method for external use
+  clearToken() {
+    this.clearStorage();
   }
 
-  // === Auth API Calls ===
+  // Setup automatic token refresh
+  private setupTokenRefresh() {
+    if (typeof window !== "undefined" && this.token && this.refreshToken) {
+      const jwt = this.parseJwt(this.token);
+      if (jwt && jwt.exp) {
+        const expiresIn = (jwt.exp * 1000) - Date.now() - 60000;
+        if (expiresIn > 0) {
+          setTimeout(() => this.refreshAuthToken(), expiresIn);
+        }
+      }
+    }
+  }
+
+  // Parse JWT token
+  private parseJwt(token: string) {
+    try {
+      return JSON.parse(atob(token.split('.')[1]));
+    } catch {
+      return null;
+    }
+  }
+
+  // Register new user
   async register(data: RegisterData): Promise<AuthResponse> {
     const response = await apiRequest(
       "POST",
@@ -275,8 +309,11 @@ export class AuthService {
   public getUser(): AuthUser | null {
     return this.user;
   }
-
-  public isAuthenticated(): boolean {
+  public getPropertyId(): string | null {
+    return this.propertyId;
+  }
+  // Check if user is authenticated
+  isAuthenticated(): boolean {
     return !!this.token && !!this.user;
   }
 
