@@ -14,7 +14,7 @@ import ListViewCard from "./ListViewCard";
 import PropertyFilters from "./PropertyFilters";
 import FormProperties from "./FormProperties";
 
-const baseUrl = "https://homobiebackend-railway-production.up.railway.app";
+const baseUrl = "http://homobie.ap-south-1.elasticbeanstalk.com";
 
 
 
