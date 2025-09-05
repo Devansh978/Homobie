@@ -7,10 +7,8 @@ import { useMutation } from "@tanstack/react-query";
 import { Toaster, toast } from "sonner";
 import axios from "axios";
 
-// --- Importing from your auth service (for login and user state) ---
-import { authService, LoginCredentials } from "../lib/auth"; // Adjust path if needed
+import { authService, LoginCredentials } from "../lib/auth";
 
-// Import shadcn/ui components
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -37,8 +35,8 @@ import {
 } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Shield } from "lucide-react";
+import OAuth from "./OAuth"
 
-// --- Schema definitions (unchanged) ---
 const registerSchema = z
   .object({
     user: z.object({
@@ -83,6 +81,32 @@ const loginSchema = z.object({
   username: z.string().min(1, "Username is required"),
   password: z.string().min(1, "Password is required"),
 });
+export const forgotSchema = z.object({
+  email: z.string().email("Invalid email address"),
+});
+export const otpSchema = z.object({
+  email: z.string().email("Invalid email address"),
+  otp: z.string().min(6, "OTP must be 6 digits").max(6, "OTP must be 6 digits"),
+});
+
+export const resetSchema = z
+  .object({
+    email: z.string().email("Invalid email address"),
+    newPassword: z
+      .string()
+      .min(6, "New password must be at least 6 characters"),
+    confirmNewPassword: z.string().min(6, "Confirm your new password"),
+    source: z.string().min(1, "Source is required"),
+  })
+  .refine((data) => data.newPassword === data.confirmNewPassword, {
+    message: "Passwords do not match",
+    path: ["confirmNewPassword"],
+  });
+
+// Forgot Password
+const onForgotSubmit = (data: any) => {
+  forgotMutation.mutate({ email: data.email });
+};
 
 type RegisterFormData = z.infer<typeof registerSchema>;
 type LoginFormData = z.infer<typeof loginSchema>;
@@ -91,15 +115,12 @@ export default function AuthPage() {
   const [activeTab, setActiveTab] = useState("login");
   const [, navigate] = useLocation();
   const [user, setUser] = useState(authService.getUser());
+  const [userEmail, setUserEmail] = useState("");
 
   const loginMutation = useMutation({
     mutationFn: (credentials: LoginCredentials) =>
       authService.login(credentials),
-    // MODIFICATION: The onSuccess callback receives the response from the mutation function.
-    // We capture it here as 'response' to access the backend message.
     onSuccess: (response) => {
-      // MODIFICATION: Use the message from the backend response.
-      // Provide a fallback text in case the message is not present.
       toast.success(response.message || "Login successful!");
       setUser(authService.getUser());
       navigate("/");
@@ -139,7 +160,69 @@ export default function AuthPage() {
     },
   });
 
-  // ... rest of your component is unchanged
+  const forgotMutation = useMutation({
+    mutationFn: async (data: { email: string }) => {
+      const res = await axios.post(
+        `https://homobiebackend-railway-production.up.railway.app/request-forgotPassword`,
+        null,
+        {
+          params: {
+            email: data.email,
+          },
+        }
+      );
+      return res.data;
+    },
+    onSuccess: (data, variables) => {
+      toast.success("OTP sent to your email! Please check your inbox.");
+      setUserEmail(variables.email); // Store the email
+      setActiveTab("otp"); // Switch to OTP tab after successful request
+      // Pre-fill the OTP form with the email
+      otpForm.setValue("email", variables.email);
+    },
+    onError: (err: any) => {
+      toast.error(
+        err.response?.data?.message || "Failed to send OTP. Please try again."
+      );
+    },
+  });
+
+  const resetMutation = useMutation({
+    mutationFn: async (data: {
+      email: string;
+      newPassword: string;
+      source: string;
+    }) => {
+      const res = await axios.post(
+        // `https://homobiebackend-railway-production.up.railway.app/reset-password?email=string&newPassword=string&source=string`,
+        `https://homobiebackend-railway-production.up.railway.app/reset-password`,
+        null,
+        {
+          params: {
+            email: data.email,
+            newPassword: data.newPassword,
+            source: data.source,
+          },
+        }
+      );
+      return res.data;
+    },
+    onSuccess: () => {
+      toast.success("Password has been reset successfully!");
+      setActiveTab("login"); 
+      // Reset forms
+      resetForm.reset();
+      forgotForm.reset();
+      otpForm.reset();
+      setUserEmail("");
+    },
+    onError: (err: any) => {
+      toast.error(
+        err.response?.data?.message ||
+          "Something went wrong while resetting password"
+      );
+    },
+  });
 
   const loginForm = useForm<LoginFormData>({
     resolver: zodResolver(loginSchema),
@@ -168,7 +251,42 @@ export default function AuthPage() {
       },
     },
   });
-
+  const otpMutation = useMutation({
+    mutationFn: async (data: { email: string; otp: string }) => {
+      const res = await axios.post(
+        `https://homobiebackend-railway-production.up.railway.app/verify-Otp`,
+        null,
+        {
+          params: {
+            email: data.email,
+            otp: data.otp,
+          },
+        }
+      );
+      return res.data;
+    },
+    onSuccess: () => {
+      toast.success("OTP verified successfully!");
+      setActiveTab("reset");
+      resetForm.setValue("email", userEmail);
+    },
+    onError: (err: any) => {
+      toast.error(
+        err.response?.data?.message || "Invalid OTP. Please try again."
+      );
+    },
+  });
+  const forgotForm = useForm({
+    resolver: zodResolver(forgotSchema),
+    defaultValues: { email: "" },
+  });
+  const otpForm = useForm({
+    resolver: zodResolver(otpSchema),
+    defaultValues: {
+      email: "",
+      otp: "",
+    },
+  });
   const selectedRole = registerForm.watch("roleData.roleType");
 
   useEffect(() => {
@@ -176,7 +294,6 @@ export default function AuthPage() {
       navigate("/auth");
     }
   }, [user, navigate]);
-
   const onLoginSubmit = (data: LoginFormData) => {
     loginMutation.mutate(data);
   };
@@ -184,6 +301,29 @@ export default function AuthPage() {
   const onRegisterSubmit = (data: RegisterFormData) => {
     const { ...payload } = data;
     registerMutation.mutate(payload);
+  };
+  const resetForm = useForm({
+    resolver: zodResolver(resetSchema),
+    defaultValues: {
+      email: "",
+      newPassword: "",
+      confirmNewPassword: "",
+      source: "WEB", // default (can be dynamic e.g. "APP")
+    },
+  });
+
+  const onResetSubmit = (data: any) => {
+    resetMutation.mutate({
+      email: data.email,
+      newPassword: data.newPassword,
+      source: data.source,
+    });
+  };
+  const onOtpSubmit = (data: any) => {
+    otpMutation.mutate({
+      email: data.email,
+      otp: data.otp,
+    });
   };
 
   return (
@@ -204,10 +344,23 @@ export default function AuthPage() {
                       <Shield className="w-8 h-8 mr-2" />
                       {activeTab === "login"
                         ? "Welcome Back"
-                        : "Create an Account"}
+                        : activeTab === "register"
+                        ? "Create an Account"
+                        : activeTab === "forgot"
+                        ? "Forgot Password"
+                        : activeTab === "otp"
+                        ? "Verify OTP"
+                        : "Update Password"}
                     </CardTitle>
                     <CardDescription className="text-center">
-                      Please log in or create an account to continue
+                      {activeTab === "login" && "Please log in to continue"}
+                      {activeTab === "register" &&
+                        "Please create an account to continue"}
+                      {activeTab === "forgot" &&
+                        "Enter your email to reset your password"}
+                      {activeTab === "otp" &&
+                        "Enter the OTP sent to your email"}
+                      {activeTab === "update" && "Enter your new password"}
                     </CardDescription>
                   </CardHeader>
                   <CardContent>
@@ -271,6 +424,275 @@ export default function AuthPage() {
                             {loginMutation.isPending
                               ? "Logging in..."
                               : "Login"}
+                          </Button>
+                          <OAuth />
+                          <div className="flex flex-col space-y-2 pt-2 border-t border-gray-700">
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              className="text-[#4f46e5] p-1 h-auto font-normal hover:bg-transparent"
+                              onClick={() => setActiveTab("forgot")}
+                            >
+                              Forgot Password?
+                            </Button>
+                          </div>
+                        </form>
+                      </Form>
+                    </TabsContent>
+
+                    {/* Forgot Password*/}
+                    <TabsContent value="forgot">
+                      <Form {...forgotForm}>
+                        <form
+                          onSubmit={forgotForm.handleSubmit((data) =>
+                            forgotMutation.mutate(data)
+                          )}
+                          className="space-y-6 bg-black text-white p-6 rounded-lg"
+                        >
+                          <FormField
+                            control={forgotForm.control}
+                            name="email"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel className="text-white">
+                                  Email Address
+                                </FormLabel>
+                                <FormControl>
+                                  <Input
+                                    type="email"
+                                    placeholder="Enter your email address"
+                                    className="bg-black text-white border border-white placeholder-gray-400 focus:ring-white focus:border-white"
+                                    {...field}
+                                  />
+                                </FormControl>
+                                <FormMessage className="text-red-400" />
+                              </FormItem>
+                            )}
+                          />
+
+                          <Button
+                            type="submit"
+                            className="w-full disabled:opacity-50"
+                            disabled={forgotMutation.isPending}
+                          >
+                            {forgotMutation.isPending
+                              ? "Sending..."
+                              : "Send OTP"}
+                          </Button>
+
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            className="w-full text-[#4f46e5] hover:text-black"
+                            onClick={() => setActiveTab("login")}
+                          >
+                            Back to Login
+                          </Button>
+                        </form>
+                      </Form>
+                    </TabsContent>
+
+                    {/* OTP */}
+                    {/* OTP */}
+                    <TabsContent value="otp">
+                      <Form {...otpForm}>
+                        <form
+                          onSubmit={otpForm.handleSubmit((data) =>
+                            otpMutation.mutate(data)
+                          )}
+                          className="space-y-6 bg-black text-white p-6 rounded-lg"
+                        >
+                          <div className="text-center mb-4">
+                            <p className="text-gray-300 text-sm">
+                              We've sent a 6-digit OTP to:{" "}
+                              <span className="font-medium text-white">
+                                {userEmail}
+                              </span>
+                            </p>
+                          </div>
+
+                          {/* Hidden email field - auto-filled */}
+                          <FormField
+                            control={otpForm.control}
+                            name="email"
+                            render={({ field }) => (
+                              <FormItem className="hidden">
+                                <FormControl>
+                                  <Input type="hidden" {...field} />
+                                </FormControl>
+                              </FormItem>
+                            )}
+                          />
+
+                          <FormField
+                            control={otpForm.control}
+                            name="otp"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel className="text-white">
+                                  Enter OTP
+                                </FormLabel>
+                                <FormControl>
+                                  <Input
+                                    type="text"
+                                    placeholder="Enter 6-digit OTP"
+                                    className="bg-black text-white border border-white placeholder-gray-400 focus:ring-white focus:border-white text-center text-lg tracking-widest"
+                                    maxLength={6}
+                                    {...field}
+                                  />
+                                </FormControl>
+                                <FormMessage className="text-red-400" />
+                              </FormItem>
+                            )}
+                          />
+
+                          <div className="text-center">
+                            <p className="text-gray-400 text-sm mb-2">
+                              Didn't receive the code?
+                            </p>
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              className="text-[#4f46e5] text-sm font-medium hover:text-indigo-400 p-0 h-auto"
+                              onClick={() => {
+                                // Resend OTP using the stored email
+                                if (userEmail) {
+                                  forgotMutation.mutate({ email: userEmail });
+                                }
+                              }}
+                              disabled={forgotMutation.isPending}
+                            >
+                              {forgotMutation.isPending
+                                ? "Sending..."
+                                : "Resend OTP"}
+                            </Button>
+                          </div>
+
+                          <Button
+                            type="submit"
+                            className="w-full disabled:opacity-50"
+                            disabled={otpMutation.isPending}
+                          >
+                            {otpMutation.isPending
+                              ? "Verifying..."
+                              : "Verify OTP"}
+                          </Button>
+
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            className="w-full text-[#4f46e5] hover:text-black"
+                            onClick={() => setActiveTab("forgot")}
+                          >
+                            Back to Email
+                          </Button>
+                        </form>
+                      </Form>
+                    </TabsContent>
+
+                    {/* Reset Password */}
+                    <TabsContent value="reset">
+                      <Form {...resetForm}>
+                        <form
+                          onSubmit={resetForm.handleSubmit((data) =>
+                            resetMutation.mutate(data)
+                          )}
+                          className="space-y-6 bg-black text-white p-6 rounded-lg"
+                        >
+                          <FormField
+                            control={resetForm.control}
+                            name="email"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel className="text-white">
+                                  Email Address
+                                </FormLabel>
+                                <FormControl>
+                                  <Input
+                                    type="email"
+                                    placeholder="Enter your email address"
+                                    className="bg-gray-800 text-white border border-white placeholder-gray-400 focus:ring-white focus:border-white"
+                                    readOnly
+                                    {...field}
+                                  />
+                                </FormControl>
+                                <FormMessage className="text-red-400" />
+                              </FormItem>
+                            )}
+                          />
+
+                          <FormField
+                            control={resetForm.control}
+                            name="newPassword"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel className="text-white">
+                                  New Password
+                                </FormLabel>
+                                <FormControl>
+                                  <Input
+                                    type="password"
+                                    placeholder="Enter your new password"
+                                    className="bg-black text-white border border-white placeholder-gray-400 focus:ring-white focus:border-white"
+                                    {...field}
+                                  />
+                                </FormControl>
+                                <FormMessage className="text-red-400" />
+                              </FormItem>
+                            )}
+                          />
+
+                          <FormField
+                            control={resetForm.control}
+                            name="confirmNewPassword"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel className="text-white">
+                                  Confirm New Password
+                                </FormLabel>
+                                <FormControl>
+                                  <Input
+                                    type="password"
+                                    placeholder="Confirm your new password"
+                                    className="bg-black text-white border border-white placeholder-gray-400 focus:ring-white focus:border-white"
+                                    {...field}
+                                  />
+                                </FormControl>
+                                <FormMessage className="text-red-400" />
+                              </FormItem>
+                            )}
+                          />
+
+                          {/* Hidden source field with default value */}
+                          <FormField
+                            control={resetForm.control}
+                            name="source"
+                            render={({ field }) => (
+                              <FormItem className="hidden">
+                                <FormControl>
+                                  <Input type="hidden" {...field} />
+                                </FormControl>
+                              </FormItem>
+                            )}
+                          />
+
+                          <Button
+                            type="submit"
+                            className="w-full disabled:opacity-50"
+                            disabled={resetMutation.isPending}
+                          >
+                            {resetMutation.isPending
+                              ? "Resetting..."
+                              : "Reset Password"}
+                          </Button>
+
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            className="w-full text-[#4f46e5] hover:text-black"
+                            onClick={() => setActiveTab("login")}
+                          >
+                            Back to Login
                           </Button>
                         </form>
                       </Form>
@@ -581,9 +1003,9 @@ export default function AuthPage() {
                   <div className="bg-white p-3 rounded-full mr-4">
                     <Shield className="h-6 w-6 text-primary" />
                   </div>
-                  <div>
-                    <h3 className="font-semibold text-lg">Secure Account</h3>
-                    <p className="text-white">
+                  <div className="text-white">
+                    <h3 className=" font-semibold text-lg">Secure Account</h3>
+                    <p className="">
                       Your financial data is protected with bank-level security.
                     </p>
                   </div>
@@ -592,7 +1014,7 @@ export default function AuthPage() {
                   <div className="bg-white p-3 rounded-full mr-4">
                     <Shield className="h-6 w-6 text-primary" />
                   </div>
-                  <div>
+                  <div className="text-white">
                     <h3 className="font-semibold text-lg">
                       Customized Solutions
                     </h3>
@@ -605,7 +1027,7 @@ export default function AuthPage() {
                   <div className="bg-white p-3 rounded-full mr-4">
                     <Shield className="h-6 w-6 text-primary" />
                   </div>
-                  <div>
+                  <div className="text-white">
                     <h3 className="font-semibold text-lg">24/7 Dashboard</h3>
                     <p className="text-white">
                       Monitor all your finances in one place, anytime.

@@ -71,17 +71,17 @@ export function EmiCalculator({ onApply }) {
   };
 
   return (
-    <div className='bg-black'>
-    <Card className="bg-black text-white rounded-xl shadow-lg pt-20 mx-24">
+    <div className='bg-black pt-24 pb-10'>
+    <Card className="bg-black text-white rounded-xl shadow-lg mx-36">
       <CardContent className="p-6">
-        <h2 className="text-white text-xl font-semibold mb-4">
+        <h2 className="text-white text-2xl font-semibold mb-4">
           EMI Calculator
         </h2>
 
         <div className="space-y-6">
           {/* Loan Type */}
           <div>
-            <Label className="text-white mb-1 text-sm font-medium">
+            <Label className="text-white mb-1 text-md font-medium">
               Loan Type
             </Label>
             <Select value={loanType} onValueChange={handleLoanTypeChange}>
@@ -105,7 +105,7 @@ export function EmiCalculator({ onApply }) {
           {/* Loan Amount */}
           <div>
             <div className="flex justify-between items-center mb-1">
-              <Label className="text-white text-sm font-medium">
+              <Label className="text-white text-md font-medium">
                 Loan Amount
               </Label>
               <span className="text-white font-medium">
@@ -120,7 +120,7 @@ export function EmiCalculator({ onApply }) {
               onValueChange={(values) => setAmount(values[0])}
               className="h-2 bg-white/20"
             />
-            <div className="flex justify-between text-xs text-white/70 mt-1">
+            <div className="flex justify-between text-md text-white/70 mt-1">
               <span>₹1L</span>
               <span>₹10Cr</span>
             </div>
@@ -129,7 +129,7 @@ export function EmiCalculator({ onApply }) {
           {/* Interest Rate */}
           <div>
             <div className="flex justify-between items-center mb-1">
-              <Label className="text-white text-sm font-medium">
+              <Label className="text-white text-md font-medium">
                 Interest Rate
               </Label>
               <span className="text-white font-medium">
@@ -144,7 +144,7 @@ export function EmiCalculator({ onApply }) {
               onValueChange={(values) => setInterestRate(values[0])}
               className="h-2 bg-white/20"
             />
-            <div className="flex justify-between text-xs text-white/70 mt-1">
+            <div className="flex justify-between text-md text-white/70 mt-1">
               <span>5%</span>
               <span>30%</span>
             </div>
@@ -153,7 +153,7 @@ export function EmiCalculator({ onApply }) {
           {/* Loan Tenure */}
           <div>
             <div className="flex justify-between items-center mb-1">
-              <Label className="text-white text-sm font-medium">
+              <Label className="text-white text-md font-medium">
                 Loan Tenure
               </Label>
               <span className="text-white font-medium">{tenure} Years</span>
@@ -166,7 +166,7 @@ export function EmiCalculator({ onApply }) {
               onValueChange={(values) => setTenure(values[0])}
               className="h-2 bg-white/20"
             />
-            <div className="flex justify-between text-xs text-white/70 mt-1">
+            <div className="flex justify-between text-md text-white/70 mt-1">
               <span>1 Year</span>
               <span>30 Years</span>
             </div>
@@ -176,25 +176,25 @@ export function EmiCalculator({ onApply }) {
           <div className="p-4 bg-black border border-white/30 rounded-lg">
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <p className="text-sm text-white/70">Monthly EMI</p>
+                <p className="text-md text-white/70">Monthly EMI</p>
                 <p className="text-xl font-semibold text-white">
                   {formatCurrency(emi)}
                 </p>
               </div>
               <div>
-                <p className="text-sm text-white/70">Interest Payable</p>
+                <p className="text-md text-white/70">Interest Payable</p>
                 <p className="text-xl font-semibold text-white">
                   {formatCurrency(totalInterest)}
                 </p>
               </div>
               <div>
-                <p className="text-sm text-white/70">Total Amount</p>
+                <p className="text-md text-white/70">Total Amount</p>
                 <p className="text-xl font-semibold text-white">
                   {formatCurrency(totalAmount)}
                 </p>
               </div>
               <div>
-                <p className="text-sm text-white/70">Interest %</p>
+                <p className="text-md text-white/70">Interest %</p>
                 <p className="text-xl font-semibold text-white">
                   {interestPercentage.toFixed(2)}%
                 </p>
@@ -204,7 +204,7 @@ export function EmiCalculator({ onApply }) {
 
           <Button
             onClick={handleApply}
-            className="w-[25%] py-3 relative left-[38%] text-white font-medium rounded-lg hover:bg-white/90 hover:text-black transition-colors text-[15px]"
+            className="w-[25%] py-3 relative left-[38%] text-white font-medium rounded-lg hover:bg-white/90 hover:text-black transition-colors text-[18px]"
           >
             Apply Now
           </Button>
