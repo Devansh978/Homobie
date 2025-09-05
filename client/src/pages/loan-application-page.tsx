@@ -105,11 +105,11 @@ const getToken = (): string => {
 /**
  * A centralized function for making API requests.
  */
-const apiClient = async <T>(
+const apiClient = async function<T>(
   endpoint: string,
   method: 'POST',
   body?: any
-): Promise<T> => {
+): Promise<T> {
   const controller = new AbortController();
   const timeoutId = setTimeout(() => controller.abort(), 30000); // 30-second timeout
 
@@ -240,6 +240,18 @@ type LoanFormValues = z.infer<typeof loanFormSchema>;
 const getUserId = () => {
   const authUser = localStorage.getItem("auth_user");
   return authUser ? JSON.parse(authUser)?.userId : null;
+};
+
+// Helper function to get loan type from param
+const getLoanTypeFromParam = (loanType: string) => {
+  switch (loanType) {
+    case "lap":
+      return "LAP";
+    case "bt-topup":
+      return "BT_TOPUP";
+    default:
+      return "HOME_LOAN";
+  }
 };
 
 // ============================================================================
