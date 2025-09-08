@@ -38,14 +38,17 @@ function Router() {
       <Route path="/" component={HomePage} />
       <Route path="/auth" component={AuthPage} />
 
-      <Route path="/complete-profile">
-        {() => {
-          const searchParams = new URLSearchParams(window.location.search);
-          const email = searchParams.get("email") || "";
-          const firstName = searchParams.get("firstName") || "";
-          return <CompleteProfile email={email} firstName={firstName} />;
-        }}
-      </Route>
+     <Route path="/complete-profile">
+  {() => {
+    console.log("Complete profile route matched!");
+    const search = window.location.search;
+    const searchParams = new URLSearchParams(search);
+    const email = searchParams.get('email') || '';
+    const firstName = searchParams.get('firstName') || '';
+    console.log("Email:", email, "FirstName:", firstName);
+    return <CompleteProfile email={email} firstName={firstName} />;
+  }}
+</Route>
 
       <Route path="/loan-application" component={LoanApplicationPage} />
       <Route path="/consultation" component={ConsultationPage} />

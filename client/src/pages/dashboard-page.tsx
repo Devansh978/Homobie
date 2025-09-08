@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { Link } from "wouter";
 import { useAuth } from "@/hooks/use-auth";
@@ -11,6 +11,18 @@ import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { Progress } from "@/components/ui/progress";
 import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 import { 
   AlertCircle, 
   FileText, 
@@ -21,80 +33,674 @@ import {
   Clock, 
   CheckCircle,
   XCircle, 
-  Upload
+  Upload,
+  Edit2,
+  X
 } from "lucide-react";
-// import { LoanApplication, Consultation, SipInvestment, KycDocument, Transaction } from "@shared/schema";
 import { formatCurrency, formatDate, getStatusColor } from "@/lib/utils";
+
+// Temporary type definitions
+type Consultation = {
+  id: string;
+  consultationId?: string;
+  topic: string;
+  bookedAt: string;
+  preferredDate: string;
+  notes?: string;
+  status: string;
+};
+
+type TimeSlot = {
+  id: string;
+  timeSlotId: string;
+  startTime: string;
+  endTime: string;
+  slotTime: string;
+  isAvailable: boolean;
+};
+
+// Helper function to properly convert UTC to local time
+const convertUTCToLocal = (utcDateString: string | undefined | null): Date => {
+  if (!utcDateString || typeof utcDateString !== 'string') {
+    console.warn('convertUTCToLocal received invalid date string:', utcDateString);
+    return new Date();
+  }
+  
+  const utcDate = new Date(utcDateString);
+  
+  if (isNaN(utcDate.getTime())) {
+    console.warn('convertUTCToLocal received invalid date string:', utcDateString);
+    return new Date();
+  }
+  
+  if (!utcDateString.includes('Z') && !utcDateString.includes('+') && !utcDateString.includes('-', 10)) {
+    return new Date(utcDateString + 'Z');
+  }
+  
+  return utcDate;
+};
+
+// Helper function to format date/time in local timezone
+const formatDateTimeLocal = (dateString: string | undefined | null) => {
+  if (!dateString) return 'Date not available';
+  
+  try {
+    const localDate = convertUTCToLocal(dateString);
+    const options: Intl.DateTimeFormatOptions = {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+      hour: 'numeric',
+      minute: '2-digit',
+      hour12: true,
+      timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone
+    };
+    return localDate.toLocaleString(undefined, options);
+  } catch (error) {
+    console.error('Error formatting date time:', error);
+    return 'Invalid date';
+  }
+};
+
+const formatDateLocal = (dateString: string | undefined | null) => {
+  if (!dateString) return 'Date not available';
+  
+  try {
+    const localDate = convertUTCToLocal(dateString);
+    const options: Intl.DateTimeFormatOptions = {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+      timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone
+    };
+    return localDate.toLocaleDateString(undefined, options);
+  } catch (error) {
+    console.error('Error formatting date:', error);
+    return 'Invalid date';
+  }
+};
+
+const formatTimeLocal = (dateString: string | undefined | null) => {
+  if (!dateString) return 'Time not available';
+  
+  try {
+    const localDate = convertUTCToLocal(dateString);
+    const options: Intl.DateTimeFormatOptions = {
+      hour: 'numeric',
+      minute: '2-digit',
+      hour12: true,
+      timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone
+    };
+    return localDate.toLocaleTimeString(undefined, options);
+  } catch (error) {
+    console.error('Error formatting time:', error);
+    return 'Invalid time';
+  }
+};
+
+// Enhanced API request helper for consultations
+const authenticatedConsultationRequest = async (method: string, endpoint: string, data?: any) => {
+  const BASE_URL = 'https://homobiebackend-railway-production.up.railway.app';
+
+  try {
+    const authToken = localStorage.getItem('auth_token');
+    const userDataStr = localStorage.getItem('user');
+    const userIdFromStorage = localStorage.getItem('userId');
+    
+    let userId = userIdFromStorage;
+    if (!userId && userDataStr) {
+      try {
+        const userData = JSON.parse(userDataStr);
+        userId = userData.id;
+      } catch (parseError) {
+        console.error('Error parsing user data from localStorage:', parseError);
+      }
+    }
+
+    console.log(`=== ${method} ${endpoint} ===`);
+    console.log(`Auth Token: ${authToken ? `${authToken.substring(0, 20)}...` : 'NOT FOUND'}`);
+    console.log(`User ID: ${userId || 'NOT FOUND'}`);
+
+    if (!authToken) {
+      throw new Error('Authentication token missing');
+    }
+
+    if (!userId) {
+      throw new Error('User ID missing');
+    }
+
+    const headers: Record<string, string> = {
+      'Content-Type': 'application/json',
+      'Accept': 'application/json',
+      'Authorization': `Bearer ${authToken}`,
+    };
+
+    const config: RequestInit = {
+      method,
+      headers,
+      credentials: 'include',
+    };
+
+    if (data && (method === 'POST' || method === 'PUT' || method === 'PATCH')) {
+      config.body = JSON.stringify(data);
+      console.log(`Request payload:`, JSON.stringify(data, null, 2));
+    }
+
+    const url = `${BASE_URL}${endpoint}`;
+    console.log(`Request URL: ${url}`);
+
+    const response = await fetch(url, config);
+    console.log(`Response status: ${response.status} ${response.statusText}`);
+
+    if (!response.ok) {
+      let errorMessage = `HTTP ${response.status}`;
+      try {
+        const errorText = await response.text();
+        console.log(`Error response body:`, errorText);
+        if (errorText) {
+          try {
+            const errorData = JSON.parse(errorText);
+            errorMessage = errorData?.message || errorData?.error || errorData?.detail || errorText;
+          } catch {
+            errorMessage = errorText;
+          }
+        }
+      } catch {
+        // Use default error message
+      }
+      throw new Error(`API Error [${response.status}]: ${errorMessage}`);
+    }
+
+    const contentType = response.headers.get('content-type');
+    if (contentType && contentType.includes('application/json')) {
+      const responseText = await response.text();
+      if (responseText) {
+        try {
+          const responseData = JSON.parse(responseText);
+          console.log(`Response data:`, responseData);
+          return responseData;
+        } catch {
+          return { success: true, rawResponse: responseText };
+        }
+      }
+    }
+    
+    return { success: true };
+
+  } catch (error) {
+    console.error(`=== REQUEST FAILED: ${error instanceof Error ? error.message : 'Unknown error'} ===`);
+    throw error;
+  }
+};
+
+// Consultation Action Dialog Components
+const CancelConsultationDialog = ({ consultation, onCancel, isLoading }: { 
+  consultation: Consultation, 
+  onCancel: (consultationId: string, remark: string, reason?: string) => void,
+  isLoading: boolean 
+}) => {
+  const [open, setOpen] = useState(false);
+  const [cancelRemark, setCancelRemark] = useState('');
+  const [cancelReason, setCancelReason] = useState('');
+
+  const handleSubmit = () => {
+    if (cancelRemark.trim()) {
+      const consultationId = consultation.consultationId || consultation.id;
+      onCancel(consultationId, cancelRemark, cancelReason);
+      setOpen(false);
+      setCancelRemark('');
+      setCancelReason('');
+    }
+  };
+
+  return (
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger asChild>
+        <Button variant="destructive" size="sm" className="ml-2" disabled={isLoading}>
+          <X className="h-4 w-4 mr-1" />
+          Cancel
+        </Button>
+      </DialogTrigger>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Cancel Consultation</DialogTitle>
+          <DialogDescription>
+            Are you sure you want to cancel your consultation for "{consultation.topic}" 
+            scheduled on {formatDateTimeLocal(consultation.preferredDate)}?
+          </DialogDescription>
+        </DialogHeader>
+        <div className="space-y-4">
+          <div>
+            <Label htmlFor="cancelRemark">Cancellation Reason (Required)</Label>
+            <Textarea
+              id="cancelRemark"
+              placeholder="Please provide a reason for cancellation..."
+              value={cancelRemark}
+              onChange={(e) => setCancelRemark(e.target.value)}
+              className="mt-2"
+            />
+          </div>
+          <div>
+            <Label htmlFor="cancelReason">Additional Notes (Optional)</Label>
+            <Input
+              id="cancelReason"
+              placeholder="Any additional information..."
+              value={cancelReason}
+              onChange={(e) => setCancelReason(e.target.value)}
+              className="mt-2"
+            />
+          </div>
+        </div>
+        <DialogFooter>
+          <Button variant="outline" onClick={() => setOpen(false)} disabled={isLoading}>
+            Keep Consultation
+          </Button>
+          <Button 
+            variant="destructive" 
+            onClick={handleSubmit}
+            disabled={!cancelRemark.trim() || isLoading}
+          >
+            {isLoading ? 'Cancelling...' : 'Cancel Consultation'}
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+};
+
+const RescheduleConsultationDialog = ({ consultation, onReschedule, isLoading }: { 
+  consultation: Consultation, 
+  onReschedule: (consultationId: string, timeSlotId: string, remark: string, reason?: string) => void,
+  isLoading: boolean 
+}) => {
+  const [open, setOpen] = useState(false);
+  const [selectedDate, setSelectedDate] = useState('');
+  const [selectedTimeSlot, setSelectedTimeSlot] = useState<TimeSlot | null>(null);
+  const [rescheduleRemark, setRescheduleRemark] = useState('');
+  const [rescheduleReason, setRescheduleReason] = useState('');
+  const [availableSlots, setAvailableSlots] = useState<TimeSlot[]>([]);
+  const [isLoadingSlots, setIsLoadingSlots] = useState(false);
+  const [slotsError, setSlotsError] = useState<string | null>(null);
+
+  // Fetch available slots when date is selected
+  useEffect(() => {
+    const fetchAvailableSlots = async () => {
+      if (!selectedDate) {
+        setAvailableSlots([]);
+        return;
+      }
+      
+      setIsLoadingSlots(true);
+      setSlotsError(null);
+      try {
+        const authToken = localStorage.getItem('auth_token');
+        const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+        
+        const response = await fetch(
+          `https://homobiebackend-railway-production.up.railway.app/consultation/available-slots?date=${selectedDate}&timezone=${encodeURIComponent(timezone)}`,
+          {
+            headers: {
+              'Authorization': `Bearer ${authToken}`,
+              'Content-Type': 'application/json',
+            }
+          }
+        );
+        
+        if (response.ok) {
+          const data = await response.json();
+          console.log('Available slots response:', data);
+          setAvailableSlots(Array.isArray(data) ? data : data?.slots || data?.data || []);
+        } else {
+          const errorText = await response.text();
+          console.error('Failed to fetch available slots:', errorText);
+          setSlotsError('Failed to load available time slots');
+          setAvailableSlots([]);
+        }
+      } catch (error) {
+        console.error('Error fetching available slots:', error);
+        setSlotsError('Error loading time slots');
+        setAvailableSlots([]);
+      } finally {
+        setIsLoadingSlots(false);
+      }
+    };
+    
+    fetchAvailableSlots();
+  }, [selectedDate]);
+
+  const handleSubmit = () => {
+    if (selectedDate && selectedTimeSlot && rescheduleRemark.trim()) {
+      const consultationId = consultation.consultationId || consultation.id;
+      // Use the timeSlotId from the slot object, or get from storage as fallback
+      const timeSlotId = selectedTimeSlot.timeSlotId || selectedTimeSlot.id || getTimeSlotIdFromStorage();
+      
+      if (!timeSlotId) {
+        console.error('TimeSlot ID not found');
+        return;
+      }
+      
+      onReschedule(consultationId, timeSlotId, rescheduleRemark, rescheduleReason);
+      setOpen(false);
+      setSelectedDate('');
+      setSelectedTimeSlot(null);
+      setRescheduleRemark('');
+      setRescheduleReason('');
+    }
+  };
+
+  // Get minimum date (tomorrow)
+  const tomorrow = new Date();
+  tomorrow.setDate(tomorrow.getDate() + 1);
+  const minDate = tomorrow.toISOString().split('T')[0];
+
+  return (
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger asChild>
+        <Button variant="outline" size="sm" disabled={isLoading}>
+          <Edit2 className="h-4 w-4 mr-1" />
+          Reschedule
+        </Button>
+      </DialogTrigger>
+      <DialogContent className="max-w-md">
+        <DialogHeader>
+          <DialogTitle>Reschedule Consultation</DialogTitle>
+          <DialogDescription>
+            Current appointment: {formatDateTimeLocal(consultation.preferredDate)}
+          </DialogDescription>
+        </DialogHeader>
+        <div className="space-y-4">
+          <div>
+            <Label htmlFor="newDate">New Date</Label>
+            <Input
+              id="newDate"
+              type="date"
+              min={minDate}
+              value={selectedDate}
+              onChange={(e) => setSelectedDate(e.target.value)}
+              className="mt-2"
+            />
+          </div>
+          
+          {selectedDate && (
+            <div>
+              <Label htmlFor="newTime">New Time</Label>
+              {isLoadingSlots ? (
+                <div className="mt-2 text-sm text-gray-500">Loading available time slots...</div>
+              ) : slotsError ? (
+                <div className="mt-2 text-sm text-red-500">{slotsError}</div>
+              ) : availableSlots.length > 0 ? (
+                <div className="mt-2 space-y-2 max-h-40 overflow-y-auto">
+                  {availableSlots
+                    .filter(slot => slot.isAvailable)
+                    .map(slot => {
+                      // Use slotTime if available, otherwise fallback to startTime
+                      const slotDateTime = slot.slotTime || slot.startTime;
+                      const timeDate = new Date(slotDateTime);
+                      
+                      if (isNaN(timeDate.getTime())) {
+                        console.warn('Invalid slot time:', slotDateTime);
+                        return null;
+                      }
+                      
+                      const timeStr = timeDate.toLocaleTimeString([], { 
+                        hour: '2-digit', 
+                        minute: '2-digit',
+                        hour12: true
+                      });
+                      
+                      return (
+                        <div
+                          key={slot.timeSlotId || slot.id}
+                          className={`p-3 border rounded-md cursor-pointer transition-colors ${
+                            selectedTimeSlot?.timeSlotId === (slot.timeSlotId || slot.id)
+                              ? 'bg-primary text-primary-foreground border-primary' 
+                              : 'hover:bg-gray-50 border-gray-200'
+                          }`}
+                          onClick={() => {
+                            setSelectedTimeSlot(slot);
+                            // Save the timeSlotId when selected
+                            saveTimeSlotIdToStorage(slot.timeSlotId || slot.id);
+                          }}
+                        >
+                          <div className="text-sm font-medium">{timeStr}</div>
+                          <div className="text-xs opacity-75">
+                            ID: {(slot.timeSlotId || slot.id).substring(0, 8)}...
+                          </div>
+                        </div>
+                      );
+                    })
+                    .filter(Boolean)}
+                </div>
+              ) : (
+                <div className="mt-2 text-sm text-gray-500">No available time slots for this date</div>
+              )}
+            </div>
+          )}
+          
+          <div>
+            <Label htmlFor="rescheduleRemark">Reason for Rescheduling (Required)</Label>
+            <Textarea
+              id="rescheduleRemark"
+              placeholder="Please provide a reason for rescheduling..."
+              value={rescheduleRemark}
+              onChange={(e) => setRescheduleRemark(e.target.value)}
+              className="mt-2"
+            />
+          </div>
+          <div>
+            <Label htmlFor="rescheduleReason">Additional Notes (Optional)</Label>
+            <Input
+              id="rescheduleReason"
+              placeholder="Any additional information..."
+              value={rescheduleReason}
+              onChange={(e) => setRescheduleReason(e.target.value)}
+              className="mt-2"
+            />
+          </div>
+        </div>
+        <DialogFooter>
+          <Button variant="outline" onClick={() => setOpen(false)} disabled={isLoading}>
+            Cancel
+          </Button>
+          <Button 
+            onClick={handleSubmit}
+            disabled={!selectedDate || !selectedTimeSlot || !rescheduleRemark.trim() || isLoading}
+          >
+            {isLoading ? 'Rescheduling...' : 'Reschedule'}
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+};
 
 export default function DashboardPage() {
   const { user } = useAuth();
+  const [actionErrors, setActionErrors] = useState<{[key: string]: string}>({});
 
-  // Fetch loan applications
+  // Fetch consultations with updated API call
   const { 
-    data: loanApplications = [], 
-    isLoading: isLoadingLoans 
-  } = useQuery<LoanApplication[]>({
-    queryKey: ["/api/loan-applications"],
+    data: consultations = [], 
+    isLoading: isLoadingConsultations,
+    refetch: refetchConsultations,
+    error: consultationsError
+  } = useQuery<Consultation[]>({
+    queryKey: ["consultations"],
+    queryFn: async () => {
+      const authToken = localStorage.getItem('auth_token');
+      const userDataStr = localStorage.getItem('user');
+      const userIdFromStorage = localStorage.getItem('userId');
+      
+      let userId = userIdFromStorage;
+      if (!userId && userDataStr) {
+        try {
+          const userData = JSON.parse(userDataStr);
+          userId = userData.id;
+        } catch (parseError) {
+          console.error('Error parsing user data from localStorage:', parseError);
+        }
+      }
+
+      if (!authToken || !userId) {
+        throw new Error("Authentication required");
+      }
+
+      try {
+        const response = await authenticatedConsultationRequest('GET', `/consultation/all-bookings?userId=${userId}`);
+        return Array.isArray(response) ? response : response?.consultations || response?.data || [];
+      } catch (error) {
+        console.error("Error fetching consultations:", error);
+        throw error;
+      }
+    },
+    enabled: !!localStorage.getItem('auth_token'),
+    retry: 2,
+    onError: (error) => {
+      console.error("Consultations query error:", error);
+    }
   });
 
-  // Fetch consultations
-  // const { 
-  //   data: consultations = [], 
-  //   isLoading: isLoadingConsultations 
-  // } = useQuery<Consultation[]>({
-  //   queryKey: ["/api/consultations"],
-  // });
+  // Cancel consultation mutation
+  const cancelConsultationMutation = useMutation({
+    mutationFn: async ({ consultationId, cancelRemark, cancelReason }: {
+      consultationId: string;
+      cancelRemark: string;
+      cancelReason?: string;
+    }) => {
+      const authToken = localStorage.getItem('auth_token');
+      const userDataStr = localStorage.getItem('user');
+      const userIdFromStorage = localStorage.getItem('userId');
+      
+      let userId = userIdFromStorage;
+      if (!userId && userDataStr) {
+        try {
+          const userData = JSON.parse(userDataStr);
+          userId = userData.id;
+        } catch (parseError) {
+          console.error('Error parsing user data from localStorage:', parseError);
+        }
+      }
 
-  // Fetch SIP investments
-  // const { 
-  //   data: sipInvestments = [], 
-  //   isLoading: isLoadingSips 
-  // } = useQuery<SipInvestment[]>({
-  //   queryKey: ["/api/sip-investments"],
-  // });
+      if (!authToken || !userId) {
+        throw new Error("Authentication required");
+      }
 
-  // Fetch KYC documents
-  // const { 
-  //   data: kycDocuments = [], 
-  //   isLoading: isLoadingKyc 
-  // } = useQuery<KycDocument[]>({
-  //   queryKey: ["/api/kyc-documents"],
-  // });
+      if (!consultationId) {
+        throw new Error("Consultation ID is required");
+      }
 
-  // Fetch transactions
-  // const { 
-  //   data: transactions = [], 
-  //   isLoading: isLoadingTransactions 
-  // } = useQuery<Transaction[]>({
-  //   queryKey: ["/api/transactions"],
-  // });
+      const payload = {
+        consultationId,
+        userId,
+        cancelRemark,
+        cancelReason: cancelReason || "",
+        cancelledAt: new Date().toISOString(),
+        cancelledBy: userId,
+      };
 
-  // Check if KYC is complete
-  const isKycComplete = kycDocuments.some(doc => doc.verificationStatus === "verified");
-  
-  // Get loan applications stats
-  const totalLoans = loanApplications.length;
-  const pendingLoans = loanApplications.filter(loan => loan.status === "pending").length;
-  const approvedLoans = loanApplications.filter(loan => loan.status === "approved").length;
-  const rejectedLoans = loanApplications.filter(loan => loan.status === "rejected").length;
+      console.log("Cancel consultation payload:", payload);
+      return await authenticatedConsultationRequest('POST', '/consultation/cancel', payload);
+    },
+    onSuccess: () => {
+      refetchConsultations();
+      console.log("Consultation cancelled successfully");
+      setActionErrors({});
+    },
+    onError: (error) => {
+      console.error("Error cancelling consultation:", error);
+      setActionErrors(prev => ({
+        ...prev,
+        cancel: error instanceof Error ? error.message : 'Failed to cancel consultation'
+      }));
+    }
+  });
+
+  // Reschedule consultation mutation
+  const rescheduleConsultationMutation = useMutation({
+    mutationFn: async ({ consultationId, timeSlotId, rescheduleRemark, rescheduleReason }: {
+      consultationId: string;
+      timeSlotId: string;
+      rescheduleRemark: string;
+      rescheduleReason?: string;
+    }) => {
+      const authToken = localStorage.getItem('auth_token');
+      const userDataStr = localStorage.getItem('user');
+      const userIdFromStorage = localStorage.getItem('userId');
+      
+      let userId = userIdFromStorage;
+      if (!userId && userDataStr) {
+        try {
+          const userData = JSON.parse(userDataStr);
+          userId = userData.id;
+        } catch (parseError) {
+          console.error('Error parsing user data from localStorage:', parseError);
+        }
+      }
+
+      if (!authToken || !userId) {
+        throw new Error("Authentication required");
+      }
+
+      if (!consultationId || !timeSlotId) {
+        throw new Error("Consultation ID and TimeSlot ID are required");
+      }
+
+      const payload = {
+        consultationId,
+        userId,
+        timeSlotId,
+        rescheduleRemark,
+        rescheduleReason: rescheduleReason || "",
+        rescheduledAt: new Date().toISOString(),
+        rescheduledBy: userId,
+      };
+
+      console.log("Reschedule consultation payload:", payload);
+      return await authenticatedConsultationRequest('POST', '/consultation/reschedule', payload);
+    },
+    onSuccess: () => {
+      refetchConsultations();
+      console.log("Consultation rescheduled successfully");
+      setActionErrors({});
+    },
+    onError: (error) => {
+      console.error("Error rescheduling consultation:", error);
+      setActionErrors(prev => ({
+        ...prev,
+        reschedule: error instanceof Error ? error.message : 'Failed to reschedule consultation'
+      }));
+    }
+  });
+
+  // Helper functions for consultation actions
+  const handleCancelConsultation = (consultationId: string, remark: string, reason?: string) => {
+    cancelConsultationMutation.mutate({
+      consultationId,
+      cancelRemark: remark,
+      cancelReason: reason,
+    });
+  };
+
+  const handleRescheduleConsultation = (consultationId: string, timeSlotId: string, remark: string, reason?: string) => {
+    rescheduleConsultationMutation.mutate({
+      consultationId,
+      timeSlotId,
+      rescheduleRemark: remark,
+      rescheduleReason: reason,
+    });
+  };
+
+  // Mock data for other sections
+  const loanApplications = [];
+  const sipInvestments = [];
+  const kycDocuments = [];
+  const transactions = [];
+  const isKycComplete = false;
 
   // Get next consultation if any
   const upcomingConsultation = consultations
-    .filter(c => c.status === "scheduled")
+    .filter(c => c.status === "scheduled" || c.status === "BOOKED")
     .sort((a, b) => new Date(a.preferredDate).getTime() - new Date(b.preferredDate).getTime())[0];
-
-  // Calculate total SIP value
-  const totalSipValue = sipInvestments.reduce((sum, sip) => {
-    const monthlyAmount = Number(sip.monthlyAmount);
-    const duration = sip.durationMonths;
-    const expectedReturn = Number(sip.expectedReturns) / 100;
-    
-    // Simple calculation (not compound interest formula for brevity)
-    const principal = monthlyAmount * duration;
-    const estimatedValue = principal * (1 + expectedReturn);
-    
-    return sum + estimatedValue;
-  }, 0);
 
   return (
     <div>
@@ -104,6 +710,27 @@ export default function DashboardPage() {
             <h1 className="text-3xl font-bold text-neutral-800">Dashboard</h1>
             <p className="text-neutral-600">Welcome back, {user?.fullName}</p>
           </div>
+
+          {/* Error Messages */}
+          {actionErrors.cancel && (
+            <Alert className="mb-4 bg-red-50 border-red-200">
+              <AlertCircle className="h-4 w-4 text-red-600" />
+              <AlertTitle className="text-red-800">Cancellation Failed</AlertTitle>
+              <AlertDescription className="text-red-700">
+                {actionErrors.cancel}
+              </AlertDescription>
+            </Alert>
+          )}
+
+          {actionErrors.reschedule && (
+            <Alert className="mb-4 bg-red-50 border-red-200">
+              <AlertCircle className="h-4 w-4 text-red-600" />
+              <AlertTitle className="text-red-800">Rescheduling Failed</AlertTitle>
+              <AlertDescription className="text-red-700">
+                {actionErrors.reschedule}
+              </AlertDescription>
+            </Alert>
+          )}
 
           {!isKycComplete && (
             <Alert className="mb-6 bg-amber-50 border-amber-200">
@@ -133,12 +760,8 @@ export default function DashboardPage() {
                     <CreditCard className="h-4 w-4 text-primary" />
                   </div>
                   <div>
-                    <div className="text-2xl font-bold">
-                      {formatCurrency(loanApplications.reduce((sum, loan) => sum + Number(loan.amount), 0))}
-                    </div>
-                    <p className="text-xs text-neutral-500">
-                      {approvedLoans} approved of {totalLoans} applications
-                    </p>
+                    <div className="text-2xl font-bold">₹0</div>
+                    <p className="text-xs text-neutral-500">0 applications</p>
                   </div>
                 </div>
               </CardContent>
@@ -154,13 +777,8 @@ export default function DashboardPage() {
                     <ChartPie className="h-4 w-4 text-primary" />
                   </div>
                   <div>
-                    <div className="text-2xl font-bold">
-                      {formatCurrency(sipInvestments.reduce((sum, sip) => sum + Number(sip.monthlyAmount), 0))}
-                      <span className="text-xs ml-1">/ month</span>
-                    </div>
-                    <p className="text-xs text-neutral-500">
-                      Est. value: {formatCurrency(totalSipValue)}
-                    </p>
+                    <div className="text-2xl font-bold">₹0 <span className="text-xs ml-1">/ month</span></div>
+                    <p className="text-xs text-neutral-500">No active SIPs</p>
                   </div>
                 </div>
               </CardContent>
@@ -179,7 +797,7 @@ export default function DashboardPage() {
                     {upcomingConsultation ? (
                       <>
                         <div className="text-base font-bold">
-                          {formatDate(upcomingConsultation.preferredDate)}
+                          {formatDateLocal(upcomingConsultation.preferredDate)}
                         </div>
                         <p className="text-xs text-neutral-500">
                           {upcomingConsultation.topic}
@@ -201,265 +819,30 @@ export default function DashboardPage() {
             </Card>
           </div>
 
-          <Tabs defaultValue="loans">
+          <Tabs defaultValue="consultations">
             <TabsList className="mb-6">
+              <TabsTrigger value="consultations">Consultations</TabsTrigger>
               <TabsTrigger value="loans">Loan Applications</TabsTrigger>
               <TabsTrigger value="investments">SIP Investments</TabsTrigger>
-              <TabsTrigger value="consultations">Consultations</TabsTrigger>
               <TabsTrigger value="kyc">KYC Documents</TabsTrigger>
-              <TabsTrigger value="transactions">Transactions</TabsTrigger>
             </TabsList>
-
-            <TabsContent value="loans">
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-                <Card className="bg-blue-50 border-blue-200">
-                  <CardContent className="flex items-center justify-between p-4">
-                    <div className="flex items-center">
-                      <Clock className="h-5 w-5 text-blue-600 mr-2" />
-                      <div>
-                        <p className="text-sm font-medium text-blue-700">Pending</p>
-                        <p className="text-xl font-bold text-blue-800">{pendingLoans}</p>
-                      </div>
-                    </div>
-                    <Progress value={(pendingLoans / Math.max(totalLoans, 1)) * 100} className="w-16 bg-blue-200" indicatorClassName="bg-blue-600" />
-                  </CardContent>
-                </Card>
-                
-                <Card className="bg-green-50 border-green-200">
-                  <CardContent className="flex items-center justify-between p-4">
-                    <div className="flex items-center">
-                      <CheckCircle className="h-5 w-5 text-green-600 mr-2" />
-                      <div>
-                        <p className="text-sm font-medium text-green-700">Approved</p>
-                        <p className="text-xl font-bold text-green-800">{approvedLoans}</p>
-                      </div>
-                    </div>
-                    <Progress value={(approvedLoans / Math.max(totalLoans, 1)) * 100} className="w-16 bg-green-200" indicatorClassName="bg-green-600" />
-                  </CardContent>
-                </Card>
-                
-                <Card className="bg-red-50 border-red-200">
-                  <CardContent className="flex items-center justify-between p-4">
-                    <div className="flex items-center">
-                      <XCircle className="h-5 w-5 text-red-600 mr-2" />
-                      <div>
-                        <p className="text-sm font-medium text-red-700">Rejected</p>
-                        <p className="text-xl font-bold text-red-800">{rejectedLoans}</p>
-                      </div>
-                    </div>
-                    <Progress value={(rejectedLoans / Math.max(totalLoans, 1)) * 100} className="w-16 bg-red-200" indicatorClassName="bg-red-600" />
-                  </CardContent>
-                </Card>
-              </div>
-
-              {isLoadingLoans ? (
-                <div className="text-center py-8">Loading your loan applications...</div>
-              ) : loanApplications.length === 0 ? (
-                <Card className="bg-neutral-50 text-center p-8">
-                  <FileText className="mx-auto h-12 w-12 text-neutral-300 mb-4" />
-                  <h3 className="text-lg font-medium text-neutral-700">No Loan Applications</h3>
-                  <p className="text-neutral-500 mb-4">You haven't applied for any loans yet.</p>
-                  <Link href="/loan-application?type=home-loan">
-                    <Button>Apply for a Loan</Button>
-                  </Link>
-                </Card>
-              ) : (
-                <div className="space-y-4">
-                  {loanApplications.map((loan) => (
-                    <Card key={loan.id} className="overflow-hidden">
-                      <CardContent className="p-0">
-                        <div className="flex flex-col md:flex-row">
-                          <div className="md:w-2/3 p-6">
-                            <div className="flex items-start justify-between">
-                              <div>
-                                <h3 className="text-lg font-semibold">{loan.loanType}</h3>
-                                <p className="text-sm text-neutral-500">Applied on {formatDate(loan.appliedAt)}</p>
-                              </div>
-                              <Badge className={`${getStatusColor(loan.status).bg} ${getStatusColor(loan.status).text}`}>
-                                {loan.status.charAt(0).toUpperCase() + loan.status.slice(1)}
-                              </Badge>
-                            </div>
-                            {loan.purpose && (
-                              <div className="mt-4">
-                                <p className="text-sm font-medium text-neutral-700">Purpose</p>
-                                <p className="text-sm text-neutral-600">{loan.purpose}</p>
-                              </div>
-                            )}
-                            <div className="mt-4 grid grid-cols-2 gap-4">
-                              <div>
-                                <p className="text-sm font-medium text-neutral-700">Loan Amount</p>
-                                <p className="text-base text-neutral-800">{formatCurrency(Number(loan.amount))}</p>
-                              </div>
-                              <div>
-                                <p className="text-sm font-medium text-neutral-700">Interest Rate</p>
-                                <p className="text-base text-neutral-800">{loan.interestRate}%</p>
-                              </div>
-                              <div>
-                                <p className="text-sm font-medium text-neutral-700">Tenure</p>
-                                <p className="text-base text-neutral-800">{loan.tenure} months</p>
-                              </div>
-                              <div>
-                                <p className="text-sm font-medium text-neutral-700">Monthly EMI</p>
-                                <p className="text-base text-neutral-800">
-                                  {formatCurrency(
-                                    (Number(loan.amount) * (Number(loan.interestRate) / 12 / 100) * 
-                                    Math.pow(1 + Number(loan.interestRate) / 12 / 100, loan.tenure)) / 
-                                    (Math.pow(1 + Number(loan.interestRate) / 12 / 100, loan.tenure) - 1)
-                                  )}
-                                </p>
-                              </div>
-                            </div>
-                          </div>
-                          <div className="md:w-1/3 bg-neutral-50 p-6 flex flex-col justify-between border-t md:border-t-0 md:border-l border-neutral-200">
-                            <div className="mb-4">
-                              <h4 className="text-sm font-medium text-neutral-700 mb-2">Application Status</h4>
-                              <div className="space-y-2">
-                                <div className="flex items-center">
-                                  <div className="h-2 w-2 rounded-full bg-green-500 mr-2"></div>
-                                  <span className="text-sm text-neutral-600">Application submitted</span>
-                                </div>
-                                <div className="flex items-center">
-                                  <div className={`h-2 w-2 rounded-full ${
-                                    loan.status !== 'pending' ? 'bg-green-500' : 'bg-neutral-300'
-                                  } mr-2`}></div>
-                                  <span className={`text-sm ${
-                                    loan.status !== 'pending' ? 'text-neutral-600' : 'text-neutral-400'
-                                  }`}>Document verification</span>
-                                </div>
-                                <div className="flex items-center">
-                                  <div className={`h-2 w-2 rounded-full ${
-                                    loan.status === 'approved' ? 'bg-green-500' : (
-                                      loan.status === 'rejected' ? 'bg-red-500' : 'bg-neutral-300'
-                                    )
-                                  } mr-2`}></div>
-                                  <span className={`text-sm ${
-                                    loan.status === 'pending' ? 'text-neutral-400' : 'text-neutral-600'
-                                  }`}>
-                                    {loan.status === 'approved' ? 'Approved' : (
-                                      loan.status === 'rejected' ? 'Rejected' : 'Final approval'
-                                    )}
-                                  </span>
-                                </div>
-                              </div>
-                            </div>
-                            <div>
-                              <Button className="w-full" variant={
-                                loan.status === 'approved' ? 'default' : 
-                                loan.status === 'rejected' ? 'destructive' : 'outline'
-                              }>
-                                {loan.status === 'approved' ? 'View Details' : 
-                                  loan.status === 'rejected' ? 'See Rejection Reason' : 'Check Status'}
-                              </Button>
-                            </div>
-                          </div>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  ))}
-                </div>
-              )}
-
-              {loanApplications.length > 0 && (
-                <div className="mt-6 text-center">
-                  <Link href="/loan-application?type=home-loan">
-                    <Button>Apply for Another Loan</Button>
-                  </Link>
-                </div>
-              )}
-            </TabsContent>
-
-            <TabsContent value="investments">
-              {isLoadingSips ? (
-                <div className="text-center py-8">Loading your SIP investments...</div>
-              ) : sipInvestments.length === 0 ? (
-                <Card className="bg-neutral-50 text-center p-8">
-                  <ChartPie className="mx-auto h-12 w-12 text-neutral-300 mb-4" />
-                  <h3 className="text-lg font-medium text-neutral-700">No Active SIP Investments</h3>
-                  <p className="text-neutral-500 mb-4">Start your wealth creation journey with regular SIP investments.</p>
-                  <Link href="/sip">
-                    <Button>Start SIP Now</Button>
-                  </Link>
-                </Card>
-              ) : (
-                <div className="space-y-4">
-                  {sipInvestments.map((sip) => (
-                    <Card key={sip.id}>
-                      <CardContent className="p-6">
-                        <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-4">
-                          <div>
-                            <h3 className="text-lg font-semibold">{sip.planName}</h3>
-                            <p className="text-sm text-neutral-500">Started on {formatDate(sip.startDate)}</p>
-                          </div>
-                          <Badge className={`${
-                            sip.status === 'active' ? 'bg-green-100 text-green-800' : 
-                            sip.status === 'paused' ? 'bg-amber-100 text-amber-800' : 
-                            'bg-blue-100 text-blue-800'
-                          }`}>
-                            {sip.status.charAt(0).toUpperCase() + sip.status.slice(1)}
-                          </Badge>
-                        </div>
-
-                        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
-                          <div>
-                            <p className="text-sm font-medium text-neutral-700">Monthly Amount</p>
-                            <p className="text-base text-neutral-800">{formatCurrency(Number(sip.monthlyAmount))}</p>
-                          </div>
-                          <div>
-                            <p className="text-sm font-medium text-neutral-700">Duration</p>
-                            <p className="text-base text-neutral-800">{sip.durationMonths} months</p>
-                          </div>
-                          <div>
-                            <p className="text-sm font-medium text-neutral-700">Expected Returns</p>
-                            <p className="text-base text-neutral-800">{sip.expectedReturns}% p.a.</p>
-                          </div>
-                          <div>
-                            <p className="text-sm font-medium text-neutral-700">Total Investment</p>
-                            <p className="text-base text-neutral-800">{formatCurrency(Number(sip.monthlyAmount) * sip.durationMonths)}</p>
-                          </div>
-                        </div>
-
-                        <div className="bg-neutral-50 p-4 rounded-lg border border-neutral-100">
-                          <div className="flex justify-between items-center mb-2">
-                            <span className="text-sm font-medium text-neutral-700">Investment Progress</span>
-                            <span className="text-sm text-neutral-600">
-                              {Math.min(12, sip.durationMonths)} of {sip.durationMonths} months
-                            </span>
-                          </div>
-                          <Progress value={(Math.min(12, sip.durationMonths) / sip.durationMonths) * 100} className="mb-4" />
-                          
-                          <div className="grid grid-cols-2 gap-4">
-                            <div>
-                              <p className="text-sm text-neutral-500">Current Value</p>
-                              <p className="text-lg font-semibold text-primary">
-                                {formatCurrency(Number(sip.monthlyAmount) * Math.min(12, sip.durationMonths) * (1 + Number(sip.expectedReturns) / 100 / 12))}
-                              </p>
-                            </div>
-                            <div>
-                              <p className="text-sm text-neutral-500">Projected Value</p>
-                              <p className="text-lg font-semibold text-primary">
-                                {formatCurrency(
-                                  Number(sip.monthlyAmount) * sip.durationMonths * (1 + Number(sip.expectedReturns) / 100)
-                                )}
-                              </p>
-                            </div>
-                          </div>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  ))}
-                </div>
-              )}
-
-              {sipInvestments.length > 0 && (
-                <div className="mt-6 text-center">
-                  <Link href="/sip">
-                    <Button>Start Another SIP</Button>
-                  </Link>
-                </div>
-              )}
-            </TabsContent>
-
+            
             <TabsContent value="consultations">
+              {consultationsError && (
+                <Alert className="mb-4 bg-red-50 border-red-200">
+                  <AlertCircle className="h-4 w-4 text-red-600" />
+                  <AlertTitle className="text-red-800">Failed to Load Consultations</AlertTitle>
+                  <AlertDescription className="text-red-700">
+                    {consultationsError instanceof Error ? consultationsError.message : 'Unknown error occurred'}
+                    <div className="mt-2">
+                      <Button variant="outline" size="sm" onClick={() => refetchConsultations()}>
+                        Retry
+                      </Button>
+                    </div>
+                  </AlertDescription>
+                </Alert>
+              )}
+
               {isLoadingConsultations ? (
                 <div className="text-center py-8">Loading your consultations...</div>
               ) : consultations.length === 0 ? (
@@ -473,58 +856,124 @@ export default function DashboardPage() {
                 </Card>
               ) : (
                 <div className="space-y-4">
-                  {consultations.map((consultation) => (
-                    <Card key={consultation.id}>
-                      <CardContent className="flex flex-col md:flex-row justify-between p-6">
-                        <div>
-                          <div className="flex items-center mb-2">
-                            <Badge className={`mr-2 ${getStatusColor(consultation.status).bg} ${getStatusColor(consultation.status).text}`}>
-                              {consultation.status.charAt(0).toUpperCase() + consultation.status.slice(1)}
-                            </Badge>
-                            <h3 className="text-lg font-semibold">{consultation.topic}</h3>
+                  {consultations.map((consultation) => {
+                    const consultationId = consultation.consultationId || consultation.id;
+                    const isCancelling = cancelConsultationMutation.isPending && 
+                      cancelConsultationMutation.variables?.consultationId === consultationId;
+                    const isRescheduling = rescheduleConsultationMutation.isPending && 
+                      rescheduleConsultationMutation.variables?.consultationId === consultationId;
+                    const isActionPending = isCancelling || isRescheduling;
+
+                    return (
+                      <Card key={consultationId} className={isActionPending ? "opacity-60" : ""}>
+                        <CardContent className="p-6">
+                          <div className="flex flex-col lg:flex-row justify-between">
+                            <div className="flex-1">
+                              <div className="flex items-center mb-3">
+                                <Badge className={`mr-3 ${getStatusColor(consultation.status).bg} ${getStatusColor(consultation.status).text}`}>
+                                  {consultation.status.charAt(0).toUpperCase() + consultation.status.slice(1)}
+                                </Badge>
+                                <h3 className="text-lg font-semibold">{consultation.topic}</h3>
+                              </div>
+                              
+                              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                                <div>
+                                  <p className="text-sm font-medium text-neutral-700">Booked On</p>
+                                  <p className="text-base text-neutral-800">{formatDateLocal(consultation.bookedAt)}</p>
+                                </div>
+                                <div>
+                                  <p className="text-sm font-medium text-neutral-700">Preferred Date & Time</p>
+                                  <p className="text-base text-neutral-800">{formatDateTimeLocal(consultation.preferredDate)}</p>
+                                </div>
+                                <div>
+                                  <p className="text-sm font-medium text-neutral-700">Consultation ID</p>
+                                  <p className="text-xs text-neutral-600 font-mono bg-neutral-100 px-2 py-1 rounded">
+                                    {consultationId || 'Not available'}
+                                  </p>
+                                </div>
+                                <div>
+                                  <p className="text-sm font-medium text-neutral-700">Local Time Zone</p>
+                                  <p className="text-xs text-neutral-600">
+                                    {Intl.DateTimeFormat().resolvedOptions().timeZone}
+                                  </p>
+                                </div>
+                              </div>
+                              
+                              {consultation.notes && (
+                                <div className="mb-4">
+                                  <p className="text-sm font-medium text-neutral-700">Notes</p>
+                                  <p className="text-sm text-neutral-600 bg-neutral-50 p-3 rounded-md">{consultation.notes}</p>
+                                </div>
+                              )}
+                            </div>
+                            
+                            <div className="lg:ml-6 lg:w-48 flex flex-col justify-between">
+                              {(consultation.status === 'scheduled' || consultation.status === 'BOOKED') && (
+                                <div className="mb-4 p-3 bg-blue-50 rounded-lg border border-blue-200">
+                                  <div className="flex items-center text-sm text-blue-700 mb-2">
+                                    <Clock className="mr-2 h-4 w-4" />
+                                    <span className="font-medium">Upcoming</span>
+                                  </div>
+                                  <p className="text-xs text-blue-600">
+                                    {formatTimeLocal(consultation.preferredDate)}
+                                  </p>
+                                </div>
+                              )}
+                              
+                              <div className="flex flex-col space-y-2">
+                                {(consultation.status === 'scheduled' || consultation.status === 'BOOKED') && (
+                                  <>
+                                    <RescheduleConsultationDialog
+                                      consultation={consultation}
+                                      onReschedule={handleRescheduleConsultation}
+                                      isLoading={isRescheduling}
+                                    />
+                                    <CancelConsultationDialog
+                                      consultation={consultation}
+                                      onCancel={handleCancelConsultation}
+                                      isLoading={isCancelling}
+                                    />
+                                  </>
+                                )}
+                                
+                                {consultation.status === 'completed' && (
+                                  <Button variant="outline">
+                                    View Summary
+                                  </Button>
+                                )}
+                                
+                                {consultation.status === 'cancelled' && (
+                                  <Link href="/consultation">
+                                    <Button variant="outline">
+                                      Book Again
+                                    </Button>
+                                  </Link>
+                                )}
+                              </div>
+                            </div>
                           </div>
-                          <p className="text-sm text-neutral-500">Booked on {formatDate(consultation.bookedAt)}</p>
                           
-                          <div className="mt-4">
-                            <p className="text-sm font-medium text-neutral-700">Preferred Date</p>
-                            <p className="text-base text-neutral-800">{formatDate(consultation.preferredDate)}</p>
-                          </div>
-                          
-                          {consultation.notes && (
-                            <div className="mt-2">
-                              <p className="text-sm font-medium text-neutral-700">Notes</p>
-                              <p className="text-sm text-neutral-600">{consultation.notes}</p>
+                          {isCancelling && (
+                            <div className="mt-4 p-3 bg-red-50 border border-red-200 rounded-md">
+                              <div className="flex items-center">
+                                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-red-600 mr-2"></div>
+                                <p className="text-sm text-red-700">Cancelling consultation...</p>
+                              </div>
                             </div>
                           )}
-                        </div>
-                        
-                        <div className="mt-4 md:mt-0 md:ml-6 flex flex-col md:items-end justify-between">
-                          {consultation.status === 'scheduled' && (
-                            <div className="flex items-center text-sm text-neutral-600 mb-4">
-                              <Clock className="mr-2 h-4 w-4 text-neutral-500" />
-                              <span>{
-                                new Date(consultation.preferredDate).toLocaleTimeString('en-US', {
-                                  hour: 'numeric',
-                                  minute: '2-digit',
-                                  hour12: true
-                                })
-                              }</span>
+                          
+                          {isRescheduling && (
+                            <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-md">
+                              <div className="flex items-center">
+                                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600 mr-2"></div>
+                                <p className="text-sm text-blue-700">Rescheduling consultation...</p>
+                              </div>
                             </div>
                           )}
-                          
-                          <Button variant={
-                            consultation.status === 'scheduled' ? 'default' : 
-                            consultation.status === 'completed' ? 'outline' : 
-                            'secondary'
-                          }>
-                            {consultation.status === 'scheduled' ? 'Reschedule' : 
-                             consultation.status === 'completed' ? 'View Summary' : 
-                             'Book Again'}
-                          </Button>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  ))}
+                        </CardContent>
+                      </Card>
+                    );
+                  })}
                 </div>
               )}
 
@@ -535,144 +984,78 @@ export default function DashboardPage() {
               </div>
             </TabsContent>
 
+            <TabsContent value="loans">
+              <Card className="bg-neutral-50 text-center p-8">
+                <FileText className="mx-auto h-12 w-12 text-neutral-300 mb-4" />
+                <h3 className="text-lg font-medium text-neutral-700">No Loan Applications</h3>
+                <p className="text-neutral-500 mb-4">You haven't applied for any loans yet.</p>
+                <Button>Apply for a Loan</Button>
+              </Card>
+            </TabsContent>
+
+            <TabsContent value="investments">
+              <Card className="bg-neutral-50 text-center p-8">
+                <ChartPie className="mx-auto h-12 w-12 text-neutral-300 mb-4" />
+                <h3 className="text-lg font-medium text-neutral-700">No Active SIP Investments</h3>
+                <p className="text-neutral-500 mb-4">Start your wealth creation journey with regular SIP investments.</p>
+                <Button>Start SIP Now</Button>
+              </Card>
+            </TabsContent>
+
             <TabsContent value="kyc">
               <Card>
                 <CardHeader>
                   <CardTitle>KYC Documents</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  {isLoadingKyc ? (
-                    <div className="text-center py-8">Loading your KYC documents...</div>
-                  ) : kycDocuments.length === 0 ? (
-                    <div className="text-center py-6">
-                      <Upload className="mx-auto h-12 w-12 text-neutral-300 mb-4" />
-                      <h3 className="text-lg font-medium text-neutral-700 mb-2">No KYC Documents Uploaded</h3>
-                      <p className="text-neutral-500 mb-6 max-w-md mx-auto">
-                        Please upload your identification documents to complete KYC verification and unlock all features.
-                      </p>
-                      
-                      <div className="space-y-4">
-                        <Card className="border-dashed">
-                          <CardContent className="p-4 flex items-center justify-between">
-                            <div className="flex items-center">
-                              <FileText className="h-6 w-6 text-neutral-400 mr-3" />
-                              <div>
-                                <p className="font-medium">PAN Card</p>
-                                <p className="text-sm text-neutral-500">Upload your PAN card for identity verification</p>
-                              </div>
-                            </div>
-                            <Button variant="outline">Upload</Button>
-                          </CardContent>
-                        </Card>
-                        
-                        <Card className="border-dashed">
-                          <CardContent className="p-4 flex items-center justify-between">
-                            <div className="flex items-center">
-                              <FileText className="h-6 w-6 text-neutral-400 mr-3" />
-                              <div>
-                                <p className="font-medium">Aadhaar Card</p>
-                                <p className="text-sm text-neutral-500">Upload your Aadhaar card for address verification</p>
-                              </div>
-                            </div>
-                            <Button variant="outline">Upload</Button>
-                          </CardContent>
-                        </Card>
-                        
-                        <Card className="border-dashed">
-                          <CardContent className="p-4 flex items-center justify-between">
-                            <div className="flex items-center">
-                              <FileText className="h-6 w-6 text-neutral-400 mr-3" />
-                              <div>
-                                <p className="font-medium">Salary Slip</p>
-                                <p className="text-sm text-neutral-500">Upload your last 3 months salary slips for income verification</p>
-                              </div>
-                            </div>
-                            <Button variant="outline">Upload</Button>
-                          </CardContent>
-                        </Card>
-                      </div>
-                    </div>
-                  ) : (
+                  <div className="text-center py-6">
+                    <Upload className="mx-auto h-12 w-12 text-neutral-300 mb-4" />
+                    <h3 className="text-lg font-medium text-neutral-700 mb-2">No KYC Documents Uploaded</h3>
+                    <p className="text-neutral-500 mb-6 max-w-md mx-auto">
+                      Please upload your identification documents to complete KYC verification and unlock all features.
+                    </p>
+                    
                     <div className="space-y-4">
-                      {kycDocuments.map((doc) => (
-                        <Card key={doc.id}>
-                          <CardContent className="p-4 flex items-center justify-between">
-                            <div className="flex items-center">
-                              <FileText className="h-6 w-6 text-neutral-400 mr-3" />
-                              <div>
-                                <p className="font-medium">{doc.documentType}</p>
-                                <p className="text-sm text-neutral-500">Uploaded on {formatDate(doc.uploadedAt)}</p>
-                              </div>
-                            </div>
-                            <Badge className={`${getStatusColor(doc.verificationStatus).bg} ${getStatusColor(doc.verificationStatus).text}`}>
-                              {doc.verificationStatus.charAt(0).toUpperCase() + doc.verificationStatus.slice(1)}
-                            </Badge>
-                          </CardContent>
-                        </Card>
-                      ))}
-                      
-                      {kycDocuments.length < 3 && (
-                        <Button className="mt-4">Upload More Documents</Button>
-                      )}
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
-            </TabsContent>
-
-            <TabsContent value="transactions">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Transaction History</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  {isLoadingTransactions ? (
-                    <div className="text-center py-8">Loading your transactions...</div>
-                  ) : transactions.length === 0 ? (
-                    <div className="text-center py-6">
-                      <Wallet className="mx-auto h-12 w-12 text-neutral-300 mb-4" />
-                      <h3 className="text-lg font-medium text-neutral-700">No Transactions Yet</h3>
-                      <p className="text-neutral-500">Your transaction history will appear here once you start using our services.</p>
-                    </div>
-                  ) : (
-                    <div className="space-y-2">
-                      {transactions.map((transaction) => (
-                        <div key={transaction.id} className="flex items-center justify-between py-3 border-b border-neutral-100 last:border-0">
+                      <Card className="border-dashed">
+                        <CardContent className="p-4 flex items-center justify-between">
                           <div className="flex items-center">
-                            <div className={`w-10 h-10 rounded-full flex items-center justify-center ${
-                              transaction.transactionType === 'loan_disbursement' ? 'bg-green-100' :
-                              transaction.transactionType === 'emi_payment' ? 'bg-blue-100' : 'bg-purple-100'
-                            }`}>
-                              {transaction.transactionType === 'loan_disbursement' ? (
-                                <CreditCard className="h-5 w-5 text-green-600" />
-                              ) : transaction.transactionType === 'emi_payment' ? (
-                                <Clock className="h-5 w-5 text-blue-600" />
-                              ) : (
-                                <Wallet className="h-5 w-5 text-purple-600" />
-                              )}
-                            </div>
-                            <div className="ml-3">
-                              <p className="font-medium">{
-                                transaction.transactionType === 'loan_disbursement' ? 'Loan Disbursement' :
-                                transaction.transactionType === 'emi_payment' ? 'EMI Payment' : 'SIP Contribution'
-                              }</p>
-                              <p className="text-sm text-neutral-500">{formatDate(transaction.transactionDate)}</p>
+                            <FileText className="h-6 w-6 text-neutral-400 mr-3" />
+                            <div>
+                              <p className="font-medium">PAN Card</p>
+                              <p className="text-sm text-neutral-500">Upload your PAN card for identity verification</p>
                             </div>
                           </div>
-                          <div className="text-right">
-                            <p className={`font-semibold ${
-                              transaction.transactionType === 'loan_disbursement' ? 'text-green-600' : 'text-blue-600'
-                            }`}>
-                              {transaction.transactionType === 'loan_disbursement' ? '+' : '-'}{formatCurrency(Number(transaction.amount))}
-                            </p>
-                            {transaction.description && (
-                              <p className="text-xs text-neutral-500">{transaction.description}</p>
-                            )}
+                          <Button variant="outline">Upload</Button>
+                        </CardContent>
+                      </Card>
+                      
+                      <Card className="border-dashed">
+                        <CardContent className="p-4 flex items-center justify-between">
+                          <div className="flex items-center">
+                            <FileText className="h-6 w-6 text-neutral-400 mr-3" />
+                            <div>
+                              <p className="font-medium">Aadhaar Card</p>
+                              <p className="text-sm text-neutral-500">Upload your Aadhaar card for address verification</p>
+                            </div>
                           </div>
-                        </div>
-                      ))}
+                          <Button variant="outline">Upload</Button>
+                        </CardContent>
+                      </Card>
+
+                      <Card className="border-dashed">
+                        <CardContent className="p-4 flex items-center justify-between">
+                          <div className="flex items-center">
+                            <FileText className="h-6 w-6 text-neutral-400 mr-3" />
+                            <div>
+                              <p className="font-medium">Salary Slip</p>
+                              <p className="text-sm text-neutral-500">Upload your last 3 months salary slips for income verification</p>
+                            </div>
+                          </div>
+                          <Button variant="outline">Upload</Button>
+                        </CardContent>
+                      </Card>
                     </div>
-                  )}
+                  </div>
                 </CardContent>
               </Card>
             </TabsContent>
