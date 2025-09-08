@@ -127,6 +127,14 @@ export class AuthService {
     }
   }
 
+    // === NEW PUBLIC METHOD ===
+  public setAuthData(user: AuthUser, tokens: { token: string; refreshToken: string }) {
+    this.saveToStorage(tokens.token, tokens.refreshToken, user);
+    this.setupTokenRefresh();
+  }
+
+  // === Auth API Calls ===
+
   // Clear token method for external use
   clearToken() {
     this.clearStorage();
@@ -320,8 +328,6 @@ export class AuthService {
   public getTimeSlotId(): string | null {
     return this.timeSlotId;
   }
-  // Check if user is authenticated
-  isAuthenticated(): boolean {
 
   public isAuthenticated(): boolean {
     return !!this.token && !!this.user;

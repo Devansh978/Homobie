@@ -3,10 +3,7 @@ import { ChevronDown, Menu, X, User, LogOut } from "lucide-react";
 
 // --- Data definitions ---
 const navData = [
-  {
-    label: "Dashboard",
-    path: "/dashboard",
-  },
+
   {
     label: "Loans",
     children: [

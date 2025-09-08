@@ -140,7 +140,7 @@ const formatTimeLocal = (dateString: string | undefined | null) => {
 
 // Enhanced API request helper for consultations
 const authenticatedConsultationRequest = async (method: string, endpoint: string, data?: any) => {
-  const BASE_URL = 'https://homobiebackend-railway-production.up.railway.app';
+  const BASE_URL = 'http://homobie.ap-south-1.elasticbeanstalk.com';
 
   try {
     const authToken = localStorage.getItem('auth_token');
@@ -337,7 +337,7 @@ const RescheduleConsultationDialog = ({ consultation, onReschedule, isLoading }:
         const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
         
         const response = await fetch(
-          `https://homobiebackend-railway-production.up.railway.app/consultation/available-slots?date=${selectedDate}&timezone=${encodeURIComponent(timezone)}`,
+          `http://homobie.ap-south-1.elasticbeanstalk.com/consultation/available-slots?date=${selectedDate}&timezone=${encodeURIComponent(timezone)}`,
           {
             headers: {
               'Authorization': `Bearer ${authToken}`,
