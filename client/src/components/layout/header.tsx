@@ -28,8 +28,16 @@ const navData = [
     path: "/blog",
   },
   {
-    label: "Properties",
+    label: "Explore Properties",
     path: "/properties",
+  },
+  {
+    label: "Financial Tools",
+    children: [
+      { label: "EMI Calculator", path: "/tools/emi-calculator" },
+      { label: "SIP & Loan Calculator", path: "/tools/sip-loan-calculator" },
+      { label: "Budget Planning Tool", path: "/tools/budget-planner" },
+    ],
   },
 ];
 
@@ -49,7 +57,7 @@ const DesktopNavDropdown = ({ item, isActive, onHover, onLeave }) => {
       <li className="relative">
         <a
           href={item.path || "/"}
-          className="flex items-center px-4 py-2 text-white/90 hover:text-white transition-all duration-300 font-medium tracking-wide hover:bg-white/10 rounded-lg backdrop-blur-sm"
+          className="flex items-center px-2 py-2 text-white/90 hover:text-white transition-all duration-300 font-medium text-[16px] tracking-wide hover:bg-white/10 rounded-lg backdrop-blur-sm"
         >
           {item.label}
         </a>
@@ -59,10 +67,10 @@ const DesktopNavDropdown = ({ item, isActive, onHover, onLeave }) => {
 
   return (
     <li className="relative" onMouseEnter={handleMouseEnter}>
-      <button className="flex items-center px-4 py-2 text-white/90 hover:text-white transition-all duration-300 font-medium tracking-wide hover:bg-white/10 rounded-lg backdrop-blur-sm">
+      <button className="flex items-center px-2 py-2 text-white/90 hover:text-white transition-all duration-300 font-medium text-[16px] tracking-wide hover:bg-white/10 rounded-lg backdrop-blur-sm">
         {item.label}
         <ChevronDown
-          className={`ml-2 h-4 w-4 transition-transform duration-300 ${
+          className={`ml-1 h-3 w-3 transition-transform duration-300 ${
             isActive ? "rotate-180" : ""
           }`}
         />
@@ -220,7 +228,7 @@ export const Header = () => {
             : "bg-slate-900/50 backdrop-blur-xl"
         } ${activeDropdown !== null ? "pb-6" : ""}`}
       >
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
+        <div className="max-w-8xl mx-auto px-2 sm:px-4 lg:px-6 relative">
           <div className="flex items-center justify-between h-20">
             {/* Logo */}
             <div className="flex-shrink-0">
@@ -234,9 +242,9 @@ export const Header = () => {
             </div>
 
             {/* Desktop Navigation */}
-            <div className="hidden lg:block  font-bold">
+            <div className="hidden lg:block font-bold">
               <ul
-                className="flex items-center space-x-2 relative"
+                className="flex items-center space-x-4 relative"
                 onMouseLeave={handleDropdownLeave}
               >
                 {navData.map((item, index) => (
@@ -252,11 +260,11 @@ export const Header = () => {
             </div>
 
             {/* Desktop User Menu / Auth Buttons */}
-            <div className="hidden lg:flex items-center space-x-4">
+            <div className="hidden lg:flex items-center space-x-2">
               {user ? (
                 <div className="relative">
                   <button
-                    className="flex items-center px-4 py-2 bg-white/10 hover:bg-white/20 backdrop-blur-sm text-white rounded-xl transition-all duration-300 border border-white/20"
+                    className="flex items-center px-3 py-2 bg-white/10 hover:bg-white/20 backdrop-blur-sm text-white rounded-xl transition-all duration-300 border border-white/20 text-[16px]"
                     onMouseEnter={handleLoginDropdownEnter}
                     onMouseLeave={handleLoginDropdownLeave}
                   >
@@ -300,17 +308,17 @@ export const Header = () => {
                   </div>
                 </div>
               ) : (
-                <div className="flex items-center space-x-3">
+                <div className="flex items-center space-x-2">
                   {/* Login Dropdown */}
                   <div className="relative">
                     <button
-                      className="flex items-center px-6 py-2 text-white/90 hover:text-white font-medium transition-all duration-300 hover:bg-white/10 rounded-lg backdrop-blur-sm"
+                      className="flex items-center px-3 py-2 text-white/90 hover:text-white font-medium transition-all duration-300 hover:bg-white/10 rounded-lg backdrop-blur-sm text-[16px]"
                       onMouseEnter={handleLoginDropdownEnter}
                       onMouseLeave={handleLoginDropdownLeave}
                     >
                       Login
                       <ChevronDown
-                        className={`ml-1 h-4 w-4 transition-transform duration-300 ${
+                        className={`ml-1 h-3 w-3 transition-transform duration-300 ${
                           loginDropdownOpen ? "rotate-180" : ""
                         }`}
                       />
@@ -318,7 +326,7 @@ export const Header = () => {
 
                     {/* Login Options Dropdown */}
                     <div
-                      className={`absolute right-0 top-full mt-2 w-56 bg-white/10 backdrop-blur-xl border border-white/20 rounded-2xl shadow-2xl transition-all duration-300 ${
+                      className={`absolute right-0 top-full mt-2 w-56 bg-black backdrop-blur-xl border border-white/20 rounded-2xl shadow-2xl transition-all duration-300 ${
                         loginDropdownOpen
                           ? "opacity-100 pointer-events-auto"
                           : "opacity-0 pointer-events-none"
@@ -339,7 +347,7 @@ export const Header = () => {
                         <div className="border-t border-white/20 my-2"></div>
 
                         {/* Partner Login Header */}
-                        <div className="px-4 py-2 text-white/70 text-sm font-medium">
+                        <div className="px-4 py-2 text-white/70 text-[16px] font-medium">
                           Partner Login
                         </div>
 
@@ -361,7 +369,7 @@ export const Header = () => {
 
                   <a
                     href="/register"
-                    className="px-6 py-2 bg-gradient-to-r from-blue-500 to-purple-600 text-white font-medium rounded-lg hover:from-blue-600 hover:to-purple-700 transition-all duration-300 shadow-lg hover:shadow-xl backdrop-blur-sm border border-white/20"
+                    className="px-3 py-2 bg-gradient-to-r from-blue-500 to-purple-600 text-white font-medium rounded-lg hover:from-blue-600 hover:to-purple-700 transition-all duration-300 shadow-lg hover:shadow-xl backdrop-blur-sm border border-white/20 text-[16px]"
                   >
                     Sign Up
                   </a>
@@ -481,7 +489,6 @@ export const Header = () => {
             {/* Mobile Auth Section */}
             <div className="border-t border-white/20 p-6">
               {user ? (
-                // ✅ Logged-in view with initials and dashboard/admin links
                 <div className="space-y-4">
                   <div className="flex items-center space-x-3 p-4 bg-white/10 rounded-xl backdrop-blur-sm">
                     <div className="w-10 h-10 rounded-full bg-blue-600 flex items-center justify-center text-white font-bold">
@@ -491,7 +498,7 @@ export const Header = () => {
                       <div className="text-white font-medium">
                         {user.firstName} {user.lastName}
                       </div>
-                      <div className="text-white/70 text-sm">{user.role}</div>
+                      <div className="text-white/70 text-[16px]">{user.role}</div>
                     </div>
                   </div>
                   <div className="space-y-2">
@@ -514,7 +521,6 @@ export const Header = () => {
                   </div>
                 </div>
               ) : (
-                // ❌ Not logged-in view (Login + Partner login + Sign Up)
                 <>
                   <a
                     href="/auth"
@@ -525,7 +531,7 @@ export const Header = () => {
                   </a>
 
                   <div className="space-y-2 mt-2">
-                    <div className="text-white/70 text-sm font-medium px-2">
+                    <div className="text-white/70 text-[16px] font-medium px-2">
                       Partner Login
                     </div>
                     {partnerRoles.map((role, index) => (
@@ -535,7 +541,7 @@ export const Header = () => {
                         target="_blank"
                         rel="noopener noreferrer"
                         onClick={closeMobileMenu}
-                        className="block w-full px-4 py-2 text-center text-white/80 bg-white/5 hover:bg-white/10 rounded-lg transition-all duration-300 text-sm"
+                        className="block w-full px-4 py-2 text-center text-white/80 bg-white/5 hover:bg-white/10 rounded-lg transition-all duration-300 text-[16px]"
                       >
                         {role}
                       </a>

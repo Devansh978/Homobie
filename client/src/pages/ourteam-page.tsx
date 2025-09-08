@@ -108,7 +108,7 @@ const TeamCard = ({ member, index }) => {
             className="w-full h-full object-cover"
             loading="lazy"
           />
-          <div className="absolute inset-0 bg-black/10 dark:bg-white/10 group-hover:opacity-0 transition-opacity" />
+          <div className="absolute inset-0 bg-transparent/10 dark:bg-white/10 group-hover:opacity-0 transition-opacity" />
         </motion.div>
 
         {/* Name & Role */}

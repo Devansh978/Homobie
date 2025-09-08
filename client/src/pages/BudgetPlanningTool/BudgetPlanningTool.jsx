@@ -319,7 +319,7 @@ const BudgetPlanner = () => {
   return (
     <div
       ref={appRef}
-      className={`bg-black pt-20 ${
+      className={` pt-[100px] ${
         isFullScreen ? "fixed inset-0 overflow-auto" : "min-h-screen"
       } py-2 px-2 sm:px-4 md:px-6`}
     >

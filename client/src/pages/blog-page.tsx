@@ -23,7 +23,7 @@ const styles = {
   mainContainer: {
     maxWidth: "1200px",
     margin: "40px auto",
-    padding: "20px",
+    padding: "50px 20px",
   },
   filtersContainer: {
     display: "flex",

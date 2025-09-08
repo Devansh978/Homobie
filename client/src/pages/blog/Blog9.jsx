@@ -1,176 +1,93 @@
 import React, { useState } from "react";
+import { Home, Hammer, Edit, Layers, FileText, Users, CheckCircle, TrendingUp, DollarSign, Globe } from "lucide-react";
 
-const CtaButton = ({ href = "#", children, styles }) => {
+
+const CtaButton = ({ href = "#", children }) => {
   const [isHovered, setIsHovered] = useState(false);
   return (
     <a
       href={href}
-      style={{
-        ...styles.ctaButton,
-        ...(isHovered ? styles.ctaButtonHover : null),
-      }}
+      className={`
+        inline-flex items-center px-8 py-4 bg-gradient-to-r from-blue-600 to-blue-700 
+        text-white font-semibold rounded-lg shadow-lg transform transition-all duration-300
+        hover:from-blue-700 hover:to-blue-800 hover:shadow-xl hover:scale-105
+        focus:outline-none focus:ring-4 focus:ring-blue-500
+      `}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
-      className="inline-block text-center"
     >
       {children}
+      <TrendingUp className={`ml-2 w-5 h-5 transition-transform duration-300 ${isHovered ? "translate-x-1" : ""}`} />
     </a>
   );
 };
 
-const Blog9 = ({ styles }) => {
-  return (
-    <div className="max-w-4xl mx-auto px-4 py-8 text-white">
-      {/* Title */}
-      <h1 className="text-2xl sm:text-3xl font-bold mb-6">
-        Which Home Loan Type Should You Choose? A Simple Guide for Indian Buyers
-      </h1>
-      <div className="mb-8">
-        <p className="leading-relaxed">
-          If you’re planning to buy, build, expand, renovate, or refinance a
-          home in India, different loan types are designed for each purpose.
-          From a standard home purchase loan to loan against property or NRI
-          loans—understanding each option helps you pick the right one. Use
-          tools like an <strong>EMI calculator online</strong> or explore a{" "}
-          <strong>SIP investment plan</strong> strategy if considering top-up or
-          refinancing. <strong>Homobie</strong> helps match your profile to the
-          best-fit loan effortlessly.
-        </p>
+const SectionCard = ({ title, description, icon: Icon }) => (
+  <div className="bg-gray-800 border border-gray-700 rounded-xl p-6 shadow-md hover:shadow-lg transition-shadow duration-300 mb-6">
+    <div className="flex items-start gap-4">
+      <div className="bg-gray-700 p-3 rounded-lg">
+        <Icon className="w-6 h-6 text-blue-400" />
       </div>
+      <div className="flex-1">
+        <h3 className="text-xl font-semibold text-gray-100 mb-2">{title}</h3>
+        <p className="text-gray-300 leading-relaxed">{description}</p>
+      </div>
+    </div>
+  </div>
+);
 
-      {/* Sections */}
-      {[
-        {
-          title: "1. Home Purchase Loan",
-          text: "The most common type of home loan—it lets you borrow money to buy a new or resale home, or even an under-construction property. Lenders typically fund up to 75-90% of the property value. Many lenders offer options for both fixed- and floating-rate interest. Ideal for first-time buyers and salaried professionals.",
-        },
-        {
-          title: "2. Home Construction Loan",
-          text: "Own land and want to build your home? A construction loan disburses funds in stages based on building progress. Can also cover plot purchase (if bought within the past year) plus construction costs.",
-        },
-        {
-          title: "3. Home Improvement / Renovation Loan",
-          text: "Used for repainting, repairs, upgrades, or interior renovations. Comes with faster approvals and smaller ticket sizes—helpful for homeowners improving existing property.",
-        },
-        {
-          title: "4. Home Extension Loan",
-          text: "For expanding an existing home—adding rooms or floors. Often chosen by growing families. Easy approval for salaried or retired borrowers.",
-        },
-        {
-          title: "5. Plot or Land Purchase Loan",
-          text: "Helps buy residential land. Borrowers can later use another loan to build. Lenders usually fund 70-85% of plot value. Ideal for investors or future builders.",
-        },
-        {
-          title: "6. Composite Loan (Plot + Construction)",
-          text: "Combines plot purchase and construction cost in one loan. Useful when you plan to build immediately. Offers merged repayment schedules.",
-        },
-        {
-          title: "7. Balance Transfer Loan",
-          text: "Already repaying a home loan? A balance transfer lets you switch to a lender offering lower interest. Can reduce EMI or tenure—but watch out for processing fees. Use an EMI calculator online to check savings.",
-        },
-        {
-          title: "8. Top-up Loan on Existing Home Loan",
-          text: "Need more funds beyond your current loan? A top-up lets you borrow extra without a new application. Suitable for renovation, education, or emergencies.",
-        },
-        {
-          title: "9. Loan Against Property (LAP)",
-          text: "A secured loan where you pledge property as collateral. Offers higher amounts at competitive loan against property interest rates. Useful for business capital, debt consolidation, or personal needs.",
-        },
-        {
-          title: "10. NRI Home Loans",
-          text: "Tailored for NRIs buying property in India. Includes special documentation and income verification. Offered by most top lenders with compliance focus.",
-        },
-      ].map((section, i) => (
-        <div key={i} className="mb-6">
-          <h2 className="text-xl font-semibold mb-2">{section.title}</h2>
-          <p className="leading-relaxed">{section.text}</p>
-        </div>
+const Blog9 = () => {
+  const sections = [
+    { title: "1. Home Purchase Loan", icon: Home, text: "Borrow money to buy new/resale property; fixed/floating rates; 75-90% funding." },
+    { title: "2. Home Construction Loan", icon: Hammer, text: "Build on own land; disbursed in stages; covers plot + construction." },
+    { title: "3. Home Improvement / Renovation Loan", icon: Edit, text: "For repairs, upgrades, interiors; faster approval; small ticket size." },
+    { title: "4. Home Extension Loan", icon: Layers, text: "Add rooms/floors; suitable for growing families; easy approval." },
+    { title: "5. Plot or Land Purchase Loan", icon: FileText, text: "Buy residential land; 70-85% funding; good for future construction." },
+    { title: "6. Composite Loan (Plot + Construction)", icon: Layers, text: "Merge plot + construction; single repayment schedule." },
+    { title: "7. Balance Transfer Loan", icon: DollarSign, text: "Switch to lower interest lender; reduce EMI/tenure; check fees." },
+    { title: "8. Top-up Loan on Existing Home Loan", icon: DollarSign, text: "Extra funds on current loan; ideal for renovation, education, emergencies." },
+    { title: "9. Loan Against Property (LAP)", icon: Home, text: "Secured by property; higher amounts; good for business or debt consolidation." },
+    { title: "10. NRI Home Loans", icon: Globe, text: "For NRIs buying in India; special documentation; top lenders offer compliance." },
+  ];
+
+  return (
+    <div className="min-h-screen  text-gray-100 px-6 py-12 max-w-4xl mx-auto">
+      <h1 className="text-3xl md:text-4xl font-bold mb-8 text-center">Which Home Loan Type Should You Choose? A Simple Guide for Indian Buyers</h1>
+      <div className="w-24 h-1 bg-gradient-to-r from-blue-500 to-blue-600 mx-auto mb-5"></div>
+      <p className="leading-relaxed mb-10 text-gray-300 text-center">
+        Understand your options—home purchase, construction, renovation, top-up, LAP, or NRI loans. Tools like <strong>EMI calculator online</strong> or a <strong>SIP investment plan</strong> strategy help you plan. <strong>Homobie</strong> matches your profile to the best-fit loan.
+      </p>
+
+      {sections.map((s, i) => (
+        <SectionCard key={i} title={s.title} description={s.text} icon={s.icon} />
       ))}
 
-      {/* How to Choose */}
-      <div className="mb-8">
-        <h2 className="text-xl font-semibold mb-2">
-          How to Choose the Right Loan Type
-        </h2>
-        <ul className="list-disc list-inside space-y-2">
-          <li>
-            <strong>Define your purpose</strong>: Purchase, build, extend,
-            renovate, refinance?
-          </li>
-          <li>
-            <strong>Salaried vs Self-employed</strong>: Different eligibility
-            and documentation. Check eligibility free at{" "}
-            <strong>Homobie</strong>.
-          </li>
-          <li>
-            <strong>Loan size and tenure</strong>: Plot and construction loans
-            may require staged disbursement; LAP funds larger amounts.
-          </li>
-          <li>
-            <strong>Interest structure</strong>: Fixed vs floating. Public banks
-            usually offer lower floaters; HFCs offer flexible terms.
-          </li>
-          <li>
-            <strong>Financial planning tools</strong>: Use an{" "}
-            <strong>EMI calculator online</strong> to compare repayments.
-            Consider a <strong>SIP investment plan</strong> to reinvest savings.
-          </li>
+      <div className="mb-10">
+        <h2 className="text-2xl font-semibold mb-4">How to Choose the Right Loan Type</h2>
+        <ul className="list-disc list-inside space-y-2 text-gray-300">
+          <li><strong>Define your purpose:</strong> Purchase, build, extend, renovate, refinance?</li>
+          <li><strong>Salaried vs Self-employed:</strong> Check eligibility free at <strong>Homobie</strong>.</li>
+          <li><strong>Loan size & tenure:</strong> Plot/construction loans may have staged disbursement; LAP funds larger amounts.</li>
+          <li><strong>Interest structure:</strong> Fixed vs floating; public banks lower floaters, HFCs flexible terms.</li>
+          <li><strong>Financial planning tools:</strong> Use <strong>EMI calculator online</strong> and <strong>SIP investment plan</strong> for smart planning.</li>
         </ul>
       </div>
 
-      {/* Why Homobie */}
-      <div className="mb-8">
-        <h2 className="text-xl font-semibold mb-2">
-          Why Homobie Helps You Choose Smarter
-        </h2>
-        <ul className="list-disc list-inside space-y-2">
-          <li>
-            Analyzes your profile and goals to recommend the right{" "}
-            <strong>home loan</strong> or <strong>mortgage loan</strong>.
-          </li>
-          <li>
-            Shows refinancing and <strong>balance transfer</strong> options to
-            lower EMIs.
-          </li>
-          <li>
-            Compares <strong>loan against property interest rates</strong> for
-            large funding needs.
-          </li>
-          <li>
-            Includes an intuitive <strong>EMI calculator online</strong> for
-            instant repayment views.
-          </li>
-          <li>
-            Supports smart planning with a <strong>SIP investment plan</strong>.
-          </li>
-          <li>
-            Reduces paperwork with digital onboarding and document checklists.
-          </li>
+      <div className="mb-12">
+        <h2 className="text-2xl font-semibold mb-4">Why Homobie Helps You Choose Smarter</h2>
+        <ul className="list-disc list-inside space-y-2 text-gray-300">
+          <li>Analyzes your profile to recommend the right <strong>home loan</strong> or <strong>mortgage loan</strong>.</li>
+          <li>Shows refinancing & <strong>balance transfer</strong> options to reduce EMI.</li>
+          <li>Compares <strong>loan against property interest rates</strong>.</li>
+          <li>Provides instant <strong>EMI calculator online</strong> results.</li>
+          <li>Supports planning with <strong>SIP investment plan</strong>.</li>
+          <li>Reduces paperwork with digital onboarding & checklists.</li>
         </ul>
       </div>
 
-      {/* Conclusion */}
-      <div className="mb-8">
-        <h2 className="text-xl font-semibold mb-2">Conclusion</h2>
-        <p className="leading-relaxed mb-2">
-          India offers many home loan types—purchase, construction, renovation,
-          extension, top-up, or LAP. Choosing depends on your goals, employment,
-          and financial plan.
-        </p>
-        <p className="leading-relaxed">
-          <strong>Homobie</strong> simplifies the decision with profiling,
-          tools, and lender matching—so you borrow smarter and faster.
-        </p>
-        <p className="leading-relaxed mt-10">
-        <strong>Take control of your borrowing with clarity..</strong>
-        </p>
-      </div>
-
-      {/* CTA */}
-      <div className="text-center mt-10">
-        <CtaButton styles={styles} href="loan-application?type=home-loan">
-          Match smarter and borrow
-          better with Homobie.
+      <div className="text-center">
+        <CtaButton href="loan-application?type=home-loan">
+          Match smarter and borrow better with Homobie.
         </CtaButton>
       </div>
     </div>

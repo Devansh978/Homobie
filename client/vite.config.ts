@@ -14,5 +14,11 @@ export default defineConfig({
     fs: {
       allow: ['.'],
     }, 
+    proxy: {
+      '/api': {
+        target: 'http://homobie.ap-south-1.elasticbeanstalk.com',
+        changeOrigin: true,
+        secure: false,
+      },
   },
 });
