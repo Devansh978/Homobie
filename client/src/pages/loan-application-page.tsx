@@ -105,11 +105,11 @@ const getToken = (): string => {
 /**
  * A centralized function for making API requests.
  */
-const apiClient = async <T>(
-  endpoint: string,
-  method: 'POST',
-  body?: any
-): Promise<T> => {
+const apiClient = async (
+  endpoint,
+  method = "POST",
+  body
+) => {
   const controller = new AbortController();
   const timeoutId = setTimeout(() => controller.abort(), 30000); // 30-second timeout
 
