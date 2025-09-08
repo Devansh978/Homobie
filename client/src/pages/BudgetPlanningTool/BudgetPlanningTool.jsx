@@ -414,7 +414,7 @@ const BudgetPlanner = () => {
           {/* Income and Summary Section */}
           <div
             id="income-section"
-            className="lg:col-span-1 bg-gray-900 p-4 sm:p-6 rounded-lg shadow border border-gray-700"
+            className="lg:col-span-1 p-4 sm:p-6 rounded-lg shadow border border-gray-700"
           >
             <h2 className="text-lg sm:text-xl font-semibold text-white mb-4">
               Income & Summary
@@ -542,7 +542,7 @@ const BudgetPlanner = () => {
             {/* Chart Selection and Display */}
             <div
               id="charts-section"
-              className="bg-gray-900 p-4 sm:p-6 rounded-lg shadow border border-gray-700"
+              className=" p-4 sm:p-6 rounded-lg shadow border border-gray-700"
             >
               <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-4">
                 <h2 className="text-lg sm:text-xl font-semibold text-white mb-2 sm:mb-0">
@@ -583,7 +583,7 @@ const BudgetPlanner = () => {
             {/* Expense Categories */}
             <div
               id="expenses-section"
-              className="bg-gray-900 p-4 sm:p-6 rounded-lg shadow border border-gray-700"
+              className=" p-4 sm:p-6 rounded-lg shadow border border-gray-700"
             >
               <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-4">
                 <h2 className="text-lg sm:text-xl font-semibold text-white mb-2 sm:mb-0">
@@ -620,7 +620,7 @@ const BudgetPlanner = () => {
                       </th>
                     </tr>
                   </thead>
-                  <tbody className="bg-gray-900 divide-y divide-gray-700">
+                  <tbody className=" divide-y divide-gray-700">
                     {expenses.map((expense) => (
                       <tr
                         key={expense.id}
@@ -715,7 +715,7 @@ const BudgetPlanner = () => {
             {/* Summary Table */}
             <div
               id="summary-section"
-              className="bg-gray-900 p-4 sm:p-6 rounded-lg shadow border border-gray-700"
+              className=" p-4 sm:p-6 rounded-lg shadow border border-gray-700"
             >
               <h2 className="text-lg sm:text-xl font-semibold text-white mb-4">
                 {timeframe === "monthly" ? "Monthly" : "Quarterly"} Summary
@@ -738,7 +738,7 @@ const BudgetPlanner = () => {
                       )}
                     </tr>
                   </thead>
-                  <tbody className="bg-gray-900 divide-y divide-gray-700">
+                  <tbody className=" divide-y divide-gray-700">
                     <tr>
                       <td className="px-2 sm:px-4 py-2 whitespace-nowrap font-medium text-white">
                         Income
