@@ -65,6 +65,7 @@ const CompleteProfile: React.FC<CompleteProfileProps> = ({
         pincode: formData.pincode,
       };
 
+
       roleData = {
         roleType: 'BUILDER',
         companyName: formData.companyName,
@@ -80,6 +81,9 @@ const CompleteProfile: React.FC<CompleteProfileProps> = ({
     const response = await fetch(
       'http://homobie.ap-south-1.elasticbeanstalk.com/register/update',
       {
+
+      const response = await fetch('http://homobie.ap-south-1.elasticbeanstalk.com/register/update', {
+
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(requestPayload),

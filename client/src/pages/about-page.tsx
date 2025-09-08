@@ -111,7 +111,7 @@ const AboutPage = () => {
       </section>
 
       {/* Leadership Section */}
-      <section className="bg-gray-100 py-16 px-6">
+{/*       <section className="bg-gray-100 py-16 px-6">
         <div className="max-w-5xl mx-auto">
           <h2 className="text-3xl font-semibold text-center mb-12">Leadership</h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-10 text-center">
@@ -124,7 +124,7 @@ const AboutPage = () => {
             ))}
           </div>
         </div>
-      </section>
+      </section> */}
     </main>
   );
 };

@@ -68,7 +68,11 @@ import { getQueryParam, getLoanTypeLabel, calculateEMI } from "../lib/utils";
 // ============================================================================
 // 1. CONSTANTS & API LOGIC (Centralized in this file)
 // ============================================================================
+
 const BASE_URL = "http://homobie.ap-south-1.elasticbeanstalk.com";
+
+const BASE_URL = "http://homobie.ap-south-1.elasticbeanstalk.com/register/user";
+
 
 /**
  * A custom error class for handling API errors in a structured way.
@@ -105,11 +109,19 @@ const getToken = (): string => {
 /**
  * A centralized function for making API requests.
  */
+
 const apiClient = async (
   endpoint,
   method = "POST",
   body
 ) => {
+=======
+const apiClient = async function<T>(
+  endpoint: string,
+  method: 'POST',
+  body?: any
+): Promise<T> {
+
   const controller = new AbortController();
   const timeoutId = setTimeout(() => controller.abort(), 30000); // 30-second timeout
 
@@ -240,6 +252,18 @@ type LoanFormValues = z.infer<typeof loanFormSchema>;
 const getUserId = () => {
   const authUser = localStorage.getItem("auth_user");
   return authUser ? JSON.parse(authUser)?.userId : null;
+};
+
+// Helper function to get loan type from param
+const getLoanTypeFromParam = (loanType: string) => {
+  switch (loanType) {
+    case "lap":
+      return "LAP";
+    case "bt-topup":
+      return "BT_TOPUP";
+    default:
+      return "HOME_LOAN";
+  }
 };
 
 // ============================================================================

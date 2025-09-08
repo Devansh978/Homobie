@@ -199,6 +199,9 @@ export default function AuthPage() {
       source: string;
     }) => {
       const res = await axios.post(
+
+        // `https://homobiebackend-railway-production.up.railway.app/reset-password?email=string&newPassword=string&source=string`,
+
         `http://homobie.ap-south-1.elasticbeanstalk.com/reset-password`,
         null,
         {
