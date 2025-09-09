@@ -434,7 +434,7 @@ const PropertyDetail = () => {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-black text-white flex items-center justify-center">
+      <div className="min-h-screen bg-transparent text-white flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-white mx-auto mb-4"></div>
           <p className="text-lg">Loading property details...</p>
@@ -445,7 +445,7 @@ const PropertyDetail = () => {
 
   if (error) {
     return (
-      <div className="min-h-screen bg-black text-white flex items-center justify-center p-4">
+      <div className="min-h-screen bg-transparent text-white flex items-center justify-center p-4">
         <div className="text-center max-w-md bg-white/5 border border-white/10 rounded-lg p-8">
           <div className="text-red-400 text-6xl mb-4">⚠️</div>
           <h2 className="text-2xl font-bold mb-4">Oops! Something went wrong</h2>
@@ -463,7 +463,7 @@ const PropertyDetail = () => {
 
   if (!property?.title) {
     return (
-      <div className="min-h-screen bg-black text-white flex items-center justify-center p-4">
+      <div className="min-h-screen bg-transparent text-white flex items-center justify-center p-4">
         <div className="text-center">
           <div className="text-6xl mb-4">🏠</div>
           <h2 className="text-2xl font-bold mb-4">Property Not Found</h2>
@@ -480,9 +480,9 @@ const PropertyDetail = () => {
   }
   
   return (
-    <div className="min-h-screen bg-black text-white">
+    <div className="min-h-screen text-white pt-[80px]">
       {/* Header */}
-      <div className="border-b border-white/10 bg-black/20 backdrop-blur-xl sticky top-0 z-40">
+      <div className="border-b border-white/10 bg-transparent/20 backdrop-blur-xl sticky top-0 z-40">
         <div className="max-w-7xl mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
             <button
@@ -531,8 +531,8 @@ const PropertyDetail = () => {
                   }}
                   loading="eager"
                 />
-                <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity rounded-xl flex items-center justify-center">
-                  <div className="bg-black/50 px-3 py-1 rounded-lg text-sm">
+                <div className="absolute inset-0 bg-transparent/20 opacity-0 group-hover:opacity-100 transition-opacity rounded-xl flex items-center justify-center">
+                  <div className="bg-transparent/50 px-3 py-1 rounded-lg text-sm">
                     <Eye className="w-4 h-4 inline mr-1" />
                     View Gallery ({property.imageUrls.length} photos)
                   </div>
@@ -552,7 +552,7 @@ const PropertyDetail = () => {
                     />
                     {index === 3 && property.imageUrls.length > 5 && (
                       <div 
-                        className="absolute inset-0 bg-black/60 rounded-xl flex items-center justify-center cursor-pointer" 
+                        className="absolute inset-0 bg-transparent/60 rounded-xl flex items-center justify-center cursor-pointer" 
                         onClick={() => { 
                           setSelectedImageIndex(4); 
                           setShowImageModal(true); 
@@ -742,7 +742,7 @@ const PropertyDetail = () => {
 
       {/* Image Modal */}
       {showImageModal && property.imageUrls && property.imageUrls.length > 0 && (
-        <div className="fixed inset-0 bg-black/90 backdrop-blur-sm z-50 flex items-center justify-center p-4" onClick={() => setShowImageModal(false)}>
+        <div className="fixed inset-0 bg-transparent/90 backdrop-blur-sm z-50 flex items-center justify-center p-4" onClick={() => setShowImageModal(false)}>
           <div className="relative max-w-6xl max-h-full" onClick={(e) => e.stopPropagation()}>
             <button
               onClick={() => setShowImageModal(false)}
@@ -762,18 +762,18 @@ const PropertyDetail = () => {
                 <button
                   onClick={prevImage}
                   aria-label="Previous image"
-                  className="absolute left-4 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white p-2 rounded-full transition-colors"
+                  className="absolute left-4 top-1/2 -translate-y-1/2 bg-transparent/50 hover:bg-transparent/70 text-white p-2 rounded-full transition-colors"
                 >
                   <ChevronLeft className="w-6 h-6" />
                 </button>
                 <button
                   onClick={nextImage}
                   aria-label="Next image"
-                  className="absolute right-4 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white p-2 rounded-full transition-colors"
+                  className="absolute right-4 top-1/2 -translate-y-1/2 bg-transparent/50 hover:bg-transparent/70 text-white p-2 rounded-full transition-colors"
                 >
                   <ChevronRight className="w-6 h-6" />
                 </button>
-                <div className="absolute bottom-4 left-1/2 -translate-x-1/2 bg-black/50 px-4 py-2 rounded-full text-white text-sm">
+                <div className="absolute bottom-4 left-1/2 -translate-x-1/2 bg-transparent/50 px-4 py-2 rounded-full text-white text-sm">
                   {selectedImageIndex + 1} / {property.imageUrls.length}
                 </div>
               </>

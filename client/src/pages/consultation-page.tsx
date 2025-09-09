@@ -723,20 +723,22 @@ const { data: userConsultations, refetch: refetchConsultations, error: consultat
 
   return (
     <div>
-      <main className="bg-neutral-50 py-12">
+      <main className=" pt-20">
         <div className="container mx-auto px-4">
           <div className="max-w-6xl mx-auto">
-           
-
             {/* API Error Banner */}
-            {Object.values(apiErrors).some(error => error) && (
+            {Object.values(apiErrors).some((error) => error) && (
               <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
                 <div className="flex items-center">
                   <AlertCircle className="h-5 w-5 text-red-500 mr-2" />
                   <h3 className="text-red-800 font-medium">API Error</h3>
                 </div>
                 {Object.entries(apiErrors).map(([key, error]) =>
-                  error ? <p key={key} className="text-red-700 text-sm mt-1"><strong>{key}:</strong> {error}</p> : null
+                  error ? (
+                    <p key={key} className="text-red-700 text-sm mt-1">
+                      <strong>{key}:</strong> {error}
+                    </p>
+                  ) : null
                 )}
                 <Button
                   size="sm"
@@ -756,18 +758,19 @@ const { data: userConsultations, refetch: refetchConsultations, error: consultat
                   <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
                     <Check className="h-8 w-8 text-green-600" />
                   </div>
-                  <h2 className="text-2xl font-bold text-gray-900 mb-2">Consultation Booked Successfully!</h2>
+                  <h2 className="text-2xl font-bold text-gray-900 mb-2">
+                    Consultation Booked Successfully!
+                  </h2>
                   <p className="text-gray-600 mb-6">
-                    Your consultation has been scheduled. You will receive a confirmation email shortly.
+                    Your consultation has been scheduled. You will receive a
+                    confirmation email shortly.
                   </p>
                   <Button onClick={() => navigate("/dashboard")}>
                     Go to Dashboard
                   </Button>
                 </CardContent>
               </Card>
-            ) :
-
-            /* Payment State */
+            ) : /* Payment State */
             showPayment && consultationId ? (
               <div className="max-w-md mx-auto">
                 <Card>
@@ -779,8 +782,10 @@ const { data: userConsultations, refetch: refetchConsultations, error: consultat
                   </CardHeader>
                   <CardContent>
                     <p className="mb-6">
-                      Your consultation has been reserved. To confirm your booking, please complete the payment.
-                      The consultation fee is ₹0 and includes personalized financial advice from our expert advisors.
+                      Your consultation has been reserved. To confirm your
+                      booking, please complete the payment. The consultation fee
+                      is ₹0 and includes personalized financial advice from our
+                      expert advisors.
                     </p>
                     <PaymentGateway
                       paymentType="consultation"
@@ -800,9 +805,7 @@ const { data: userConsultations, refetch: refetchConsultations, error: consultat
                   </CardContent>
                 </Card>
               </div>
-            ) :
-
-            /* Email Verification State */
+            ) : /* Email Verification State */
             showEmailVerify ? (
               <div className="max-w-md mx-auto">
                 <Card>
@@ -814,7 +817,12 @@ const { data: userConsultations, refetch: refetchConsultations, error: consultat
                   </CardHeader>
                   <CardContent>
                     <Form {...emailVerifyForm}>
-                      <form onSubmit={emailVerifyForm.handleSubmit(onSubmitEmailVerify)} className="space-y-4">
+                      <form
+                        onSubmit={emailVerifyForm.handleSubmit(
+                          onSubmitEmailVerify
+                        )}
+                        className="space-y-4"
+                      >
                         <FormField
                           control={emailVerifyForm.control}
                           name="email"
@@ -823,13 +831,13 @@ const { data: userConsultations, refetch: refetchConsultations, error: consultat
                               <FormLabel>Email Address</FormLabel>
                               <FormControl>
                                 <div className="flex">
-                                  <span className="inline-flex items-center px-3 rounded-l-md border border-r-0 border-neutral-300 bg-neutral-100 text-neutral-500">
+                                  <span className="inline-flex items-center px-3 rounded-l-md border border-r-0 border-neutral-300 bg-neutral-100 text-black0">
                                     <Mail className="h-4 w-4" />
                                   </span>
                                   <Input
+                                    className="bg-transparent text-white border border-white placeholder-gray-400"
                                     type="email"
                                     placeholder="Enter your email address"
-                                    className="rounded-l-none"
                                     {...field}
                                   />
                                 </div>
@@ -838,7 +846,7 @@ const { data: userConsultations, refetch: refetchConsultations, error: consultat
                             </FormItem>
                           )}
                         />
-                        
+
                         <FormField
                           control={emailVerifyForm.control}
                           name="verificationCode"
@@ -847,13 +855,13 @@ const { data: userConsultations, refetch: refetchConsultations, error: consultat
                               <FormLabel>Verification Code</FormLabel>
                               <FormControl>
                                 <div className="flex">
-                                  <span className="inline-flex items-center px-3 rounded-l-md border border-r-0 border-neutral-300 bg-neutral-100 text-neutral-500">
+                                  <span className="inline-flex items-center px-3 rounded-l-md border border-r-0 border-neutral-300 bg-neutral-100 text-black0">
                                     <Shield className="h-4 w-4" />
                                   </span>
                                   <Input
                                     placeholder="Enter 6-digit code"
                                     maxLength={6}
-                                    className="rounded-l-none"
+                                    className="bg-transparent text-white border border-white placeholder-gray-400"
                                     {...field}
                                   />
                                 </div>
@@ -862,7 +870,7 @@ const { data: userConsultations, refetch: refetchConsultations, error: consultat
                             </FormItem>
                           )}
                         />
-                        
+
                         <div className="flex space-x-4">
                           <Button
                             type="button"
@@ -874,7 +882,9 @@ const { data: userConsultations, refetch: refetchConsultations, error: consultat
                           </Button>
                           <Button
                             type="submit"
-                            disabled={emailVerifyMutation.isPending || isSubmitting}
+                            disabled={
+                              emailVerifyMutation.isPending || isSubmitting
+                            }
                             className="flex-1"
                           >
                             {emailVerifyMutation.isPending || isSubmitting ? (
@@ -892,9 +902,7 @@ const { data: userConsultations, refetch: refetchConsultations, error: consultat
                   </CardContent>
                 </Card>
               </div>
-            ) :
-
-            /* Cancel Form State */
+            ) : /* Cancel Form State */
             showCancelForm ? (
               <div className="max-w-md mx-auto">
                 <Card>
@@ -909,36 +917,56 @@ const { data: userConsultations, refetch: refetchConsultations, error: consultat
                       <div className="space-y-4">
                         <div>
                           <p className="text-sm text-gray-600 mb-4">
-                            <strong>Topic:</strong> {selectedConsultationForAction?.topic}<br/>
-                            <strong>Date:</strong> {selectedConsultationForAction?.timeStamp && format(new Date(selectedConsultationForAction.timeStamp), "PPp")}
+                            <strong>Topic:</strong>{" "}
+                            {selectedConsultationForAction?.topic}
+                            <br />
+                            <strong>Date:</strong>{" "}
+                            {selectedConsultationForAction?.timeStamp &&
+                              format(
+                                new Date(
+                                  selectedConsultationForAction.timeStamp
+                                ),
+                                "PPp"
+                              )}
                           </p>
                         </div>
-                        
+
                         <FormField
                           control={cancelForm.control}
                           name="cancelReason"
                           render={({ field }) => (
                             <FormItem>
                               <FormLabel>Cancellation Category</FormLabel>
-                              <Select value={field.value} onValueChange={field.onChange}>
+                              <Select
+                                value={field.value}
+                                onValueChange={field.onChange}
+                              >
                                 <FormControl>
                                   <SelectTrigger>
                                     <SelectValue placeholder="Select a reason category" />
                                   </SelectTrigger>
                                 </FormControl>
                                 <SelectContent>
-                                  <SelectItem value="schedule_conflict">Schedule Conflict</SelectItem>
-                                  <SelectItem value="emergency">Emergency</SelectItem>
-                                  <SelectItem value="health_issue">Health Issue</SelectItem>
+                                  <SelectItem value="schedule_conflict">
+                                    Schedule Conflict
+                                  </SelectItem>
+                                  <SelectItem value="emergency">
+                                    Emergency
+                                  </SelectItem>
+                                  <SelectItem value="health_issue">
+                                    Health Issue
+                                  </SelectItem>
                                   <SelectItem value="travel">Travel</SelectItem>
-                                  <SelectItem value="financial_constraint">Financial Constraint</SelectItem>
+                                  <SelectItem value="financial_constraint">
+                                    Financial Constraint
+                                  </SelectItem>
                                   <SelectItem value="other">Other</SelectItem>
                                 </SelectContent>
                               </Select>
                             </FormItem>
                           )}
                         />
-                        
+
                         <FormField
                           control={cancelForm.control}
                           name="cancelRemark"
@@ -956,7 +984,7 @@ const { data: userConsultations, refetch: refetchConsultations, error: consultat
                             </FormItem>
                           )}
                         />
-                        
+
                         <div className="flex space-x-4">
                           <Button
                             type="button"
@@ -992,16 +1020,15 @@ const { data: userConsultations, refetch: refetchConsultations, error: consultat
                   </CardContent>
                 </Card>
               </div>
-            ) :
-
-            /* Reschedule Form State */
+            ) : /* Reschedule Form State */
             showRescheduleForm ? (
               <div className="max-w-md mx-auto">
                 <Card>
                   <CardHeader>
                     <CardTitle>Reschedule Consultation</CardTitle>
                     <CardDescription>
-                      Select a new time slot and provide a reason for rescheduling
+                      Select a new time slot and provide a reason for
+                      rescheduling
                     </CardDescription>
                   </CardHeader>
                   <CardContent>
@@ -1009,8 +1036,17 @@ const { data: userConsultations, refetch: refetchConsultations, error: consultat
                       <div className="space-y-4">
                         <div>
                           <p className="text-sm text-gray-600 mb-4">
-                            <strong>Current Topic:</strong> {selectedConsultationForAction?.topic}<br/>
-                            <strong>Current Date:</strong> {selectedConsultationForAction?.timeStamp && format(new Date(selectedConsultationForAction.timeStamp), "PPp")}
+                            <strong>Current Topic:</strong>{" "}
+                            {selectedConsultationForAction?.topic}
+                            <br />
+                            <strong>Current Date:</strong>{" "}
+                            {selectedConsultationForAction?.timeStamp &&
+                              format(
+                                new Date(
+                                  selectedConsultationForAction.timeStamp
+                                ),
+                                "PPp"
+                              )}
                           </p>
                         </div>
 
@@ -1020,26 +1056,39 @@ const { data: userConsultations, refetch: refetchConsultations, error: consultat
                           render={({ field }) => (
                             <FormItem>
                               <FormLabel>Reschedule Category</FormLabel>
-                              <Select value={field.value} onValueChange={field.onChange}>
+                              <Select
+                                value={field.value}
+                                onValueChange={field.onChange}
+                              >
                                 <FormControl>
                                   <SelectTrigger>
                                     <SelectValue placeholder="Select a reason category" />
                                   </SelectTrigger>
                                 </FormControl>
                                 <SelectContent>
-                                  <SelectItem value="schedule_conflict">Schedule Conflict</SelectItem>
-                                  <SelectItem value="emergency">Emergency</SelectItem>
-                                  <SelectItem value="health_issue">Health Issue</SelectItem>
+                                  <SelectItem value="schedule_conflict">
+                                    Schedule Conflict
+                                  </SelectItem>
+                                  <SelectItem value="emergency">
+                                    Emergency
+                                  </SelectItem>
+                                  <SelectItem value="health_issue">
+                                    Health Issue
+                                  </SelectItem>
                                   <SelectItem value="travel">Travel</SelectItem>
-                                  <SelectItem value="better_time">Need Better Time Slot</SelectItem>
-                                  <SelectItem value="preparation">Need More Preparation Time</SelectItem>
+                                  <SelectItem value="better_time">
+                                    Need Better Time Slot
+                                  </SelectItem>
+                                  <SelectItem value="preparation">
+                                    Need More Preparation Time
+                                  </SelectItem>
                                   <SelectItem value="other">Other</SelectItem>
                                 </SelectContent>
                               </Select>
                             </FormItem>
                           )}
                         />
-                        
+
                         <FormField
                           control={rescheduleForm.control}
                           name="rescheduleRemark"
@@ -1059,7 +1108,9 @@ const { data: userConsultations, refetch: refetchConsultations, error: consultat
                         />
 
                         <div className="flex flex-col">
-                          <label className="text-sm font-medium text-gray-700 mb-2">New Preferred Date</label>
+                          <label className="text-sm font-medium text-gray-700 mb-2">
+                            New Preferred Date
+                          </label>
                           <Popover>
                             <PopoverTrigger asChild>
                               <Button
@@ -1077,13 +1128,17 @@ const { data: userConsultations, refetch: refetchConsultations, error: consultat
                                 <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
                               </Button>
                             </PopoverTrigger>
-                            <PopoverContent className="w-auto p-0" align="start">
+                            <PopoverContent
+                              className="w-auto p-0"
+                              align="start"
+                            >
                               <CalendarComponent
                                 mode="single"
                                 selected={selectedDate}
                                 onSelect={setSelectedDate}
                                 disabled={(date) =>
-                                  date < new Date(new Date().setHours(0, 0, 0, 0)) ||
+                                  date <
+                                    new Date(new Date().setHours(0, 0, 0, 0)) ||
                                   date.getDay() === 0 ||
                                   date.getDay() === 6
                                 }
@@ -1092,7 +1147,7 @@ const { data: userConsultations, refetch: refetchConsultations, error: consultat
                             </PopoverContent>
                           </Popover>
                         </div>
-                        
+
                         <FormField
                           control={rescheduleForm.control}
                           name="timeSlotId"
@@ -1106,13 +1161,15 @@ const { data: userConsultations, refetch: refetchConsultations, error: consultat
                               >
                                 <FormControl>
                                   <SelectTrigger>
-                                    <SelectValue placeholder={
-                                      !selectedDate
-                                        ? "Select a date first"
-                                        : slotsLoading
+                                    <SelectValue
+                                      placeholder={
+                                        !selectedDate
+                                          ? "Select a date first"
+                                          : slotsLoading
                                           ? "Loading slots..."
                                           : "Select a new time slot"
-                                    } />
+                                      }
+                                    />
                                   </SelectTrigger>
                                 </FormControl>
                                 <SelectContent>
@@ -1123,10 +1180,29 @@ const { data: userConsultations, refetch: refetchConsultations, error: consultat
                                         Loading slots...
                                       </div>
                                     </SelectItem>
-                                  ) : availableSlots && availableSlots.length > 0 ? (
+                                  ) : availableSlots &&
+                                    availableSlots.length > 0 ? (
                                     availableSlots.map((slot: any) => (
-                                      <SelectItem key={slot.timeSlotId || slot.id} value={slot.timeSlotId || slot.id}>
-                                        {format(new Date(slot.slotTime || slot.startTime), "HH:mm")} - {format(new Date(new Date(slot.slotTime || slot.startTime).getTime() + 60*60*1000), "HH:mm")}
+                                      <SelectItem
+                                        key={slot.timeSlotId || slot.id}
+                                        value={slot.timeSlotId || slot.id}
+                                      >
+                                        {format(
+                                          new Date(
+                                            slot.slotTime || slot.startTime
+                                          ),
+                                          "HH:mm"
+                                        )}{" "}
+                                        -{" "}
+                                        {format(
+                                          new Date(
+                                            new Date(
+                                              slot.slotTime || slot.startTime
+                                            ).getTime() +
+                                              60 * 60 * 1000
+                                          ),
+                                          "HH:mm"
+                                        )}
                                       </SelectItem>
                                     ))
                                   ) : selectedDate ? (
@@ -1140,7 +1216,7 @@ const { data: userConsultations, refetch: refetchConsultations, error: consultat
                             </FormItem>
                           )}
                         />
-                        
+
                         <div className="flex space-x-4">
                           <Button
                             type="button"
@@ -1157,8 +1233,13 @@ const { data: userConsultations, refetch: refetchConsultations, error: consultat
                           </Button>
                           <Button
                             type="button"
-                            onClick={rescheduleForm.handleSubmit(onSubmitReschedule)}
-                            disabled={rescheduleConsultationMutation.isPending || !selectedDate}
+                            onClick={rescheduleForm.handleSubmit(
+                              onSubmitReschedule
+                            )}
+                            disabled={
+                              rescheduleConsultationMutation.isPending ||
+                              !selectedDate
+                            }
                             className="flex-1"
                           >
                             {rescheduleConsultationMutation.isPending ? (
@@ -1177,16 +1258,19 @@ const { data: userConsultations, refetch: refetchConsultations, error: consultat
                 </Card>
               </div>
             ) : (
-
               /* Main Booking Form */
               <>
                 <div className="mb-8 text-center">
-                  <h1 className="text-3xl font-bold text-neutral-800 mb-2">
+                  <h1 className="text-3xl font-bold text-white mb-2">
                     Book Your Financial Consultation
                   </h1>
-                  <p className="text-neutral-600 max-w-3xl mx-auto">
-                    Our financial experts will help you understand your options and create a personalized plan to achieve your financial goals.
-                    <span className="block mt-2 text-sm font-semibold">Consultation fee: ₹0</span>
+                  <p className="text-white max-w-3xl mx-auto">
+                    Our financial experts will help you understand your options
+                    and create a personalized plan to achieve your financial
+                    goals.
+                    <span className="block mt-2 text-sm font-semibold">
+                      Consultation fee: ₹0
+                    </span>
                   </p>
                 </div>
 
@@ -1196,14 +1280,21 @@ const { data: userConsultations, refetch: refetchConsultations, error: consultat
                     <div className="flex items-center">
                       <AlertCircle className="h-5 w-5 text-amber-600 mr-2" />
                       <div>
-                        <p className="text-amber-800 font-medium">Authentication Required</p>
+                        <p className="text-amber-800 font-medium">
+                          Authentication Required
+                        </p>
                         <p className="text-amber-700 text-sm">
-                          Please log in to book a consultation. You'll be redirected to the login page after filling the form.
+                          Please log in to book a consultation. You'll be
+                          redirected to the login page after filling the form.
                         </p>
                       </div>
                     </div>
                     <div className="mt-2 flex space-x-2">
-                      <Button size="sm" onClick={() => navigate("/auth")} variant="outline">
+                      <Button
+                        size="sm"
+                        onClick={() => navigate("/auth")}
+                        variant="outline"
+                      >
                         Log In Now
                       </Button>
                       <Button
@@ -1219,12 +1310,13 @@ const { data: userConsultations, refetch: refetchConsultations, error: consultat
 
                 <div className="grid grid-cols-1 md:grid-cols-5 gap-8">
                   {/* --- LEFT COLUMN: Main Form --- */}
-                  <div className="md:col-span-3">
+                  <div className="md:col-span-3 mb-6">
                     <Card>
                       <CardHeader>
                         <CardTitle>Schedule a Consultation</CardTitle>
                         <CardDescription>
-                          Fill in your details to book a session with our financial experts
+                          Fill in your details to book a session with our
+                          financial experts
                         </CardDescription>
                       </CardHeader>
                       <CardContent>
@@ -1232,7 +1324,9 @@ const { data: userConsultations, refetch: refetchConsultations, error: consultat
                         {!user && (
                           <Card className="mb-6 bg-gray-50">
                             <CardHeader className="pb-3">
-                              <CardTitle className="text-lg">Your Information</CardTitle>
+                              <CardTitle className="text-lg">
+                                Your Information
+                              </CardTitle>
                               <CardDescription>
                                 Please provide your contact details
                               </CardDescription>
@@ -1248,12 +1342,12 @@ const { data: userConsultations, refetch: refetchConsultations, error: consultat
                                         <FormLabel>Full Name *</FormLabel>
                                         <FormControl>
                                           <div className="flex">
-                                            <span className="inline-flex items-center px-3 rounded-l-md border border-r-0 border-neutral-300 bg-neutral-100 text-neutral-500">
+                                            <span className="inline-flex items-center px-3 rounded-l-md border border-r-0 border-neutral-300 bg-neutral-100 text-black0">
                                               <User className="h-4 w-4" />
                                             </span>
                                             <Input
                                               placeholder="Enter your full name"
-                                              className="rounded-l-none"
+                                              className="bg-transparent text-white border border-white placeholder-gray-400"
                                               {...field}
                                             />
                                           </div>
@@ -1262,7 +1356,7 @@ const { data: userConsultations, refetch: refetchConsultations, error: consultat
                                       </FormItem>
                                     )}
                                   />
-                                  
+
                                   <FormField
                                     control={guestForm.control}
                                     name="email"
@@ -1271,13 +1365,13 @@ const { data: userConsultations, refetch: refetchConsultations, error: consultat
                                         <FormLabel>Email Address *</FormLabel>
                                         <FormControl>
                                           <div className="flex">
-                                            <span className="inline-flex items-center px-3 rounded-l-md border border-r-0 border-neutral-300 bg-neutral-100 text-neutral-500">
+                                            <span className="inline-flex items-center px-3 rounded-l-md border border-r-0 border-neutral-300 bg-neutral-100 text-black0">
                                               <Mail className="h-4 w-4" />
                                             </span>
                                             <Input
                                               type="email"
                                               placeholder="Enter your email address"
-                                              className="rounded-l-none"
+                                              className="bg-transparent text-white border border-white placeholder-gray-400"
                                               {...field}
                                             />
                                           </div>
@@ -1295,12 +1389,12 @@ const { data: userConsultations, refetch: refetchConsultations, error: consultat
                                         <FormLabel>Phone Number *</FormLabel>
                                         <FormControl>
                                           <div className="flex">
-                                            <span className="inline-flex items-center px-3 rounded-l-md border border-r-0 border-neutral-300 bg-neutral-100 text-neutral-500">
+                                            <span className="inline-flex items-center px-3 rounded-l-md border border-r-0 border-neutral-300 bg-neutral-100 text-black0">
                                               <Phone className="h-4 w-4" />
                                             </span>
                                             <Input
                                               placeholder="Enter your phone number"
-                                              className="rounded-l-none"
+                                              className="bg-transparent text-white border border-white placeholder-gray-400"
                                               {...field}
                                             />
                                           </div>
@@ -1314,7 +1408,7 @@ const { data: userConsultations, refetch: refetchConsultations, error: consultat
                             </CardContent>
                           </Card>
                         )}
-                        
+
                         <Form {...form}>
                           <div className="space-y-6">
                             <FormField
@@ -1353,16 +1447,19 @@ const { data: userConsultations, refetch: refetchConsultations, error: consultat
                               name="description"
                               render={({ field }) => (
                                 <FormItem>
-                                  <FormLabel>Additional Details (Optional)</FormLabel>
+                                  <FormLabel>
+                                    Additional Details (Optional)
+                                  </FormLabel>
                                   <FormControl>
                                     <Textarea
+                                      className="bg-transparent text-white border border-white placeholder-gray-400 min-h-[80px]"
                                       placeholder="Please provide any additional details about your consultation requirements..."
-                                      className="min-h-[80px]"
                                       {...field}
                                     />
                                   </FormControl>
                                   <FormDescription>
-                                    Share any specific questions or areas you'd like to focus on
+                                    Share any specific questions or areas you'd
+                                    like to focus on
                                   </FormDescription>
                                   <FormMessage />
                                 </FormItem>
@@ -1373,42 +1470,52 @@ const { data: userConsultations, refetch: refetchConsultations, error: consultat
                             {user && (
                               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                 <div>
-                                  <label className="text-sm font-medium text-gray-700">Your Name</label>
+                                  <label className="text-sm font-medium text-gray-700">
+                                    Your Name
+                                  </label>
                                   <div className="flex mt-1">
-                                    <span className="inline-flex items-center px-3 rounded-l-md border border-r-0 border-neutral-300 bg-neutral-50 text-neutral-500">
+                                    <span className="inline-flex items-center px-3 rounded-l-md border border-r-0 border-neutral-300 bg-transparent text-black0">
                                       <User className="h-4 w-4" />
                                     </span>
                                     <Input
-                                      value={user.fullName || user.name || 'Not provided'}
-                                      className="rounded-l-none bg-gray-50"
+                                      value={
+                                        user.fullName ||
+                                        user.name ||
+                                        "Not provided"
+                                      }
+                                      className="bg-transparent text-white border border-white placeholder-gray-400"
                                       disabled
                                     />
                                   </div>
                                 </div>
-                                
+
                                 <div>
-                                  <label className="text-sm font-medium text-gray-700">Email Address</label>
+                                  <label className="text-sm font-medium text-gray-700">
+                                    Email Address
+                                  </label>
                                   <div className="flex mt-1">
-                                    <span className="inline-flex items-center px-3 rounded-l-md border border-r-0 border-neutral-300 bg-neutral-50 text-neutral-500">
+                                    <span className="inline-flex items-center px-3 rounded-l-md border border-r-0 border-neutral-300 bg-transparent text-black0">
                                       <Mail className="h-4 w-4" />
                                     </span>
                                     <Input
-                                      value={user.email || 'Not provided'}
-                                      className="rounded-l-none bg-gray-50"
+                                      value={user.email || "Not provided"}
+                                      className="bg-transparent text-white border border-white placeholder-gray-400"
                                       disabled
                                     />
                                   </div>
                                 </div>
 
                                 <div className="md:col-span-2">
-                                  <label className="text-sm font-medium text-gray-700">Phone Number</label>
+                                  <label className="text-sm font-medium text-gray-700">
+                                    Phone Number
+                                  </label>
                                   <div className="flex mt-1">
-                                    <span className="inline-flex items-center px-3 rounded-l-md border border-r-0 border-neutral-300 bg-neutral-50 text-neutral-500">
+                                    <span className="inline-flex items-center px-3 rounded-l-md border border-r-0 border-neutral-300 bg-transparent text-black0">
                                       <Phone className="h-4 w-4" />
                                     </span>
                                     <Input
-                                      value={user.phone || 'Not provided'}
-                                      className="rounded-l-none bg-gray-50"
+                                      value={user.phone || "Not provided"}
+                                      className="bg-transparent text-white border border-white placeholder-gray-400"
                                       disabled
                                     />
                                   </div>
@@ -1422,41 +1529,67 @@ const { data: userConsultations, refetch: refetchConsultations, error: consultat
                               render={({ field }) => (
                                 <FormItem>
                                   <FormLabel>Preferred Language</FormLabel>
-                                  <Select value={field.value} onValueChange={field.onChange}>
+                                  <Select
+                                    className="bg-transparent text-white border border-white placeholder-gray-400"
+                                    value={field.value}
+                                    onValueChange={field.onChange}
+                                  >
                                     <FormControl>
                                       <SelectTrigger>
-                                        <SelectValue placeholder="Select your preferred language" />
+                                        <SelectValue
+                                          className="bg-transparent text-white border border-white placeholder-gray-400"
+                                          placeholder="Select your preferred language"
+                                        />
                                       </SelectTrigger>
                                     </FormControl>
                                     <SelectContent>
-                                      <SelectItem value="English">English</SelectItem>
-                                      <SelectItem value="Hindi">Hindi</SelectItem>
-                                      <SelectItem value="Gujarati">Gujarati</SelectItem>
-                                      <SelectItem value="Marathi">Marathi</SelectItem>
-                                      <SelectItem value="Bengali">Bengali</SelectItem>
-                                      <SelectItem value="Tamil">Tamil</SelectItem>
-                                      <SelectItem value="Telugu">Telugu</SelectItem>
-                                      <SelectItem value="Kannada">Kannada</SelectItem>
+                                      <SelectItem value="English">
+                                        English
+                                      </SelectItem>
+                                      <SelectItem value="Hindi">
+                                        Hindi
+                                      </SelectItem>
+                                      <SelectItem value="Gujarati">
+                                        Gujarati
+                                      </SelectItem>
+                                      <SelectItem value="Marathi">
+                                        Marathi
+                                      </SelectItem>
+                                      <SelectItem value="Bengali">
+                                        Bengali
+                                      </SelectItem>
+                                      <SelectItem value="Tamil">
+                                        Tamil
+                                      </SelectItem>
+                                      <SelectItem value="Telugu">
+                                        Telugu
+                                      </SelectItem>
+                                      <SelectItem value="Kannada">
+                                        Kannada
+                                      </SelectItem>
                                     </SelectContent>
                                   </Select>
                                   <FormDescription>
-                                    Choose the language you're most comfortable with
+                                    Choose the language you're most comfortable
+                                    with
                                   </FormDescription>
                                   <FormMessage />
                                 </FormItem>
                               )}
                             />
-                            
+
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                              <div className="flex flex-col">
-                                <label className="text-sm font-medium text-gray-700 mb-2">Preferred Date *</label>
+                              <div className="flex flex-col bg-transparent p-4 rounded-lg">
+                                <label className="text-sm font-medium text-white mb-2">
+                                  Preferred Date *
+                                </label>
                                 <Popover>
                                   <PopoverTrigger asChild>
                                     <Button
                                       variant={"outline"}
                                       className={cn(
-                                        "pl-3 text-left font-normal",
-                                        !selectedDate && "text-muted-foreground"
+                                        "pl-3 text-left font-normal bg-transparent text-white border-neutral-700 hover:bg-neutral-900 hover:text-white",
+                                        !selectedDate && "text-neutral-400"
                                       )}
                                     >
                                       {selectedDate ? (
@@ -1464,34 +1597,44 @@ const { data: userConsultations, refetch: refetchConsultations, error: consultat
                                       ) : (
                                         <span>Pick a date</span>
                                       )}
-                                      <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                                      <CalendarIcon className="ml-auto h-4 w-4 opacity-70 text-blue-400" />
                                     </Button>
                                   </PopoverTrigger>
-                                  <PopoverContent className="w-auto p-0" align="start">
+                                  <PopoverContent
+                                    className="w-auto p-0 bg-neutral-900 border border-neutral-700 text-white"
+                                    align="start"
+                                  >
                                     <CalendarComponent
                                       mode="single"
                                       selected={selectedDate}
                                       onSelect={setSelectedDate}
                                       disabled={(date) =>
-                                        date < new Date(new Date().setHours(0, 0, 0, 0)) ||
+                                        date <
+                                          new Date(
+                                            new Date().setHours(0, 0, 0, 0)
+                                          ) ||
                                         date.getDay() === 0 ||
                                         date.getDay() === 6
                                       }
                                       initialFocus
+                                      className="text-white"
                                     />
                                   </PopoverContent>
                                 </Popover>
-                                <p className="text-sm text-gray-500 mt-1">
-                                  Select a weekday (Monday to Friday) - Today's consultations available!
+                                <p className="text-sm text-neutral-400 mt-1">
+                                  Select a weekday (Monday to Friday) - Today's
+                                  consultations available!
                                 </p>
                               </div>
-                              
+
                               <FormField
                                 control={form.control}
                                 name="timeSlotId"
                                 render={({ field }) => (
                                   <FormItem>
-                                    <FormLabel>Available Time Slots *</FormLabel>
+                                    <FormLabel>
+                                      Available Time Slots *
+                                    </FormLabel>
                                     <Select
                                       value={field.value}
                                       onValueChange={field.onChange}
@@ -1499,13 +1642,15 @@ const { data: userConsultations, refetch: refetchConsultations, error: consultat
                                     >
                                       <FormControl>
                                         <SelectTrigger>
-                                          <SelectValue placeholder={
-                                            !selectedDate
-                                              ? "Select a date first"
-                                              : slotsLoading
+                                          <SelectValue
+                                            placeholder={
+                                              !selectedDate
+                                                ? "Select a date first"
+                                                : slotsLoading
                                                 ? "Loading slots..."
                                                 : "Select a time slot"
-                                          } />
+                                            }
+                                          />
                                         </SelectTrigger>
                                       </FormControl>
                                       <SelectContent>
@@ -1516,11 +1661,36 @@ const { data: userConsultations, refetch: refetchConsultations, error: consultat
                                               Loading slots...
                                             </div>
                                           </SelectItem>
-                                        ) : availableSlots && availableSlots.length > 0 ? (
+                                        ) : availableSlots &&
+                                          availableSlots.length > 0 ? (
                                           availableSlots.map((slot: any) => (
-                                            <SelectItem key={slot.timeSlotId || slot.id} value={slot.timeSlotId || slot.id}>
-                                              {format(new Date(slot.slotTime || slot.startTime), "HH:mm")} - {format(new Date(new Date(slot.slotTime || slot.startTime).getTime() + 60*60*1000), "HH:mm")}
-                                              {slot.isToday && <span className="ml-2 text-xs bg-green-100 text-green-800 px-1 rounded">Today</span>}
+                                            <SelectItem
+                                              key={slot.timeSlotId || slot.id}
+                                              value={slot.timeSlotId || slot.id}
+                                            >
+                                              {format(
+                                                new Date(
+                                                  slot.slotTime ||
+                                                    slot.startTime
+                                                ),
+                                                "HH:mm"
+                                              )}{" "}
+                                              -{" "}
+                                              {format(
+                                                new Date(
+                                                  new Date(
+                                                    slot.slotTime ||
+                                                      slot.startTime
+                                                  ).getTime() +
+                                                    60 * 60 * 1000
+                                                ),
+                                                "HH:mm"
+                                              )}
+                                              {slot.isToday && (
+                                                <span className="ml-2 text-xs bg-green-100 text-green-800 px-1 rounded">
+                                                  Today
+                                                </span>
+                                              )}
                                             </SelectItem>
                                           ))
                                         ) : selectedDate ? (
@@ -1531,24 +1701,33 @@ const { data: userConsultations, refetch: refetchConsultations, error: consultat
                                       </SelectContent>
                                     </Select>
                                     <FormDescription>
-                                      All times are in Indian Standard Time (IST)
+                                      All times are in Indian Standard Time
+                                      (IST)
                                     </FormDescription>
                                     <FormMessage />
                                     {slotsError && (
                                       <p className="text-sm text-red-600 mt-1">
-                                        Error loading slots: {slotsError instanceof Error ? slotsError.message : 'Unknown error'}
+                                        Error loading slots:{" "}
+                                        {slotsError instanceof Error
+                                          ? slotsError.message
+                                          : "Unknown error"}
                                       </p>
                                     )}
                                   </FormItem>
                                 )}
                               />
                             </div>
-                            
+
                             <Button
                               type="button"
                               onClick={form.handleSubmit(onSubmitConsultation)}
                               className="w-full"
-                              disabled={isSubmitting || !selectedDate || !form.watch('topic') || !form.watch('timeSlotId')}
+                              disabled={
+                                isSubmitting ||
+                                !selectedDate ||
+                                !form.watch("topic") ||
+                                !form.watch("timeSlotId")
+                              }
                             >
                               {isSubmitting ? (
                                 <>
@@ -1559,8 +1738,6 @@ const { data: userConsultations, refetch: refetchConsultations, error: consultat
                                 "Book My Free Consultation"
                               )}
                             </Button>
-
-                            
                           </div>
                         </Form>
                       </CardContent>
@@ -1574,61 +1751,90 @@ const { data: userConsultations, refetch: refetchConsultations, error: consultat
                       <Card>
                         <CardHeader>
                           <CardTitle>Your Consultations</CardTitle>
-                          <CardDescription>Manage your existing consultations</CardDescription>
+                          <CardDescription>
+                            Manage your existing consultations
+                          </CardDescription>
                         </CardHeader>
                         <CardContent className="space-y-3">
-                          {userConsultations.slice(0, 3).map((consultation: any) => (
-                            <div key={consultation.consultationId || consultation.id} className="p-4 bg-gray-50 rounded-lg">
-                              <div className="flex justify-between items-start mb-2">
-                                <div className="flex-1">
-                                  <p className="font-medium text-sm">{consultation.topic}</p>
-                                  <p className="text-xs text-gray-500">
-                                    {consultation.timeStamp ?
-                                      format(new Date(consultation.timeStamp), "PPp") :
-                                      consultation.scheduledAt ?
-                                      format(new Date(consultation.scheduledAt), "PPp") :
-                                      'Time not available'
-                                    }
-                                  </p>
+                          {userConsultations
+                            .slice(0, 3)
+                            .map((consultation: any) => (
+                              <div
+                                key={
+                                  consultation.consultationId || consultation.id
+                                }
+                                className="p-4 bg-gray-50 rounded-lg"
+                              >
+                                <div className="flex justify-between items-start mb-2">
+                                  <div className="flex-1">
+                                    <p className="font-medium text-sm">
+                                      {consultation.topic}
+                                    </p>
+                                    <p className="text-xs text-gray-500">
+                                      {consultation.timeStamp
+                                        ? format(
+                                            new Date(consultation.timeStamp),
+                                            "PPp"
+                                          )
+                                        : consultation.scheduledAt
+                                        ? format(
+                                            new Date(consultation.scheduledAt),
+                                            "PPp"
+                                          )
+                                        : "Time not available"}
+                                    </p>
+                                  </div>
+                                  <span
+                                    className={cn(
+                                      "px-2 py-1 text-xs rounded-full ml-2",
+                                      consultation.status === "CONFIRMED"
+                                        ? "bg-green-100 text-green-800"
+                                        : consultation.status === "PENDING"
+                                        ? "bg-yellow-100 text-yellow-800"
+                                        : consultation.status === "CANCELLED"
+                                        ? "bg-red-100 text-red-800"
+                                        : consultation.status === "COMPLETED"
+                                        ? "bg-blue-100 text-blue-800"
+                                        : "bg-gray-100 text-gray-800"
+                                    )}
+                                  >
+                                    {consultation.status || "UNKNOWN"}
+                                  </span>
                                 </div>
-                                <span className={cn(
-                                  "px-2 py-1 text-xs rounded-full ml-2",
-                                  consultation.status === 'CONFIRMED' ? "bg-green-100 text-green-800" :
-                                  consultation.status === 'PENDING' ? "bg-yellow-100 text-yellow-800" :
-                                  consultation.status === 'CANCELLED' ? "bg-red-100 text-red-800" :
-                                  consultation.status === 'COMPLETED' ? "bg-blue-100 text-blue-800" :
-                                  "bg-gray-100 text-gray-800"
-                                )}>
-                                  {consultation.status || 'UNKNOWN'}
-                                </span>
+
+                                {/* Action buttons for active consultations */}
+                                {(consultation.status === "CONFIRMED" ||
+                                  consultation.status === "PENDING") && (
+                                  <div className="flex space-x-2 mt-3">
+                                    <Button
+                                      size="sm"
+                                      variant="outline"
+                                      onClick={() =>
+                                        handleRescheduleConsultation(
+                                          consultation
+                                        )
+                                      }
+                                      className="flex-1"
+                                    >
+                                      <Calendar className="w-3 h-3 mr-1" />
+                                      Reschedule
+                                    </Button>
+                                    <Button
+                                      size="sm"
+                                      variant="destructive"
+                                      onClick={() =>
+                                        handleCancelConsultation(consultation)
+                                      }
+                                      className="flex-1"
+                                    >
+                                      <CalendarX className="w-3 h-3 mr-1" />
+                                      Cancel
+                                    </Button>
+                                  </div>
+                                )}
                               </div>
-                              
-                              {/* Action buttons for active consultations */}
-                              {(consultation.status === 'CONFIRMED' || consultation.status === 'PENDING') && (
-                                <div className="flex space-x-2 mt-3">
-                                  <Button
-                                    size="sm"
-                                    variant="outline"
-                                    onClick={() => handleRescheduleConsultation(consultation)}
-                                    className="flex-1"
-                                  >
-                                    <Calendar className="w-3 h-3 mr-1" />
-                                    Reschedule
-                                  </Button>
-                                  <Button
-                                    size="sm"
-                                    variant="destructive"
-                                    onClick={() => handleCancelConsultation(consultation)}
-                                    className="flex-1"
-                                  >
-                                    <CalendarX className="w-3 h-3 mr-1" />
-                                    Cancel
-                                  </Button>
-                                </div>
-                              )}
-                            </div>
-                          ))}
-                          
+                            ))}
+
                           {userConsultations.length > 3 && (
                             <Button
                               variant="outline"
@@ -1645,19 +1851,22 @@ const { data: userConsultations, refetch: refetchConsultations, error: consultat
 
                     {/* Error Display for Consultations */}
                     {consultationsError && (
-                      <Card className="border-red-200 bg-red-50">
+                      <Card className="border-red-200 bg-transparent">
                         <CardContent className="pt-6">
                           <div className="flex items-center">
                             <AlertCircle className="h-5 w-5 text-red-500 mr-2" />
                             <p className="text-red-700 text-sm">
-                              Failed to load consultations: {consultationsError instanceof Error ? consultationsError.message : 'Unknown error'}
+                              Failed to load consultations:{" "}
+                              {consultationsError instanceof Error
+                                ? consultationsError.message
+                                : "Unknown error"}
                             </p>
                           </div>
                           <Button
                             size="sm"
                             variant="outline"
                             onClick={() => refetchConsultations()}
-                            className="mt-2"
+                            className="mt-2 bg-transparent text-white hover:bg-transparent hover:text-white border-black"
                           >
                             Retry
                           </Button>
@@ -1680,11 +1889,12 @@ const { data: userConsultations, refetch: refetchConsultations, error: consultat
                           <div>
                             <h3 className="font-medium">Expert Advisors</h3>
                             <p className="text-sm text-primary-foreground/80">
-                              Our team consists of certified financial experts with years of experience
+                              Our team consists of certified financial experts
+                              with years of experience
                             </p>
                           </div>
                         </div>
-                        
+
                         <div className="flex items-start">
                           <div className="mr-3 bg-white/20 p-2 rounded-full">
                             <ClipboardList className="h-5 w-5" />
@@ -1692,11 +1902,12 @@ const { data: userConsultations, refetch: refetchConsultations, error: consultat
                           <div>
                             <h3 className="font-medium">Personalized Plans</h3>
                             <p className="text-sm text-primary-foreground/80">
-                              Get a customized financial roadmap tailored to your specific goals
+                              Get a customized financial roadmap tailored to
+                              your specific goals
                             </p>
                           </div>
                         </div>
-                        
+
                         <div className="flex items-start">
                           <div className="mr-3 bg-white/20 p-2 rounded-full">
                             <Clock className="h-5 w-5" />
@@ -1704,11 +1915,12 @@ const { data: userConsultations, refetch: refetchConsultations, error: consultat
                           <div>
                             <h3 className="font-medium">Flexible Scheduling</h3>
                             <p className="text-sm text-primary-foreground/80">
-                              Choose a time that works best for your busy schedule - including today!
+                              Choose a time that works best for your busy
+                              schedule - including today!
                             </p>
                           </div>
                         </div>
-                        
+
                         <div className="flex items-start">
                           <div className="mr-3 bg-white/20 p-2 rounded-full">
                             <CalendarCheck className="h-5 w-5" />
@@ -1716,13 +1928,14 @@ const { data: userConsultations, refetch: refetchConsultations, error: consultat
                           <div>
                             <h3 className="font-medium">First Session Free</h3>
                             <p className="text-sm text-primary-foreground/80">
-                              Your initial consultation is completely free with no obligations
+                              Your initial consultation is completely free with
+                              no obligations
                             </p>
                           </div>
                         </div>
                       </CardContent>
                     </Card>
-                    
+
                     <Card>
                       <CardHeader className="pb-3">
                         <CardTitle>What to Expect</CardTitle>
@@ -1730,28 +1943,44 @@ const { data: userConsultations, refetch: refetchConsultations, error: consultat
                       <CardContent className="space-y-4">
                         <div className="flex items-center">
                           <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center mr-3">
-                            <span className="text-primary font-semibold">1</span>
+                            <span className="text-primary font-semibold">
+                              1
+                            </span>
                           </div>
-                          <p className="text-sm">Review of your financial situation</p>
+                          <p className="text-sm">
+                            Review of your financial situation
+                          </p>
                         </div>
                         <div className="flex items-center">
                           <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center mr-3">
-                            <span className="text-primary font-semibold">2</span>
+                            <span className="text-primary font-semibold">
+                              2
+                            </span>
                           </div>
-                          <p className="text-sm">Discussion of your goals and challenges</p>
+                          <p className="text-sm">
+                            Discussion of your goals and challenges
+                          </p>
                         </div>
                         <div className="flex items-center">
                           <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center mr-3">
-                            <span className="text-primary font-semibold">3</span>
+                            <span className="text-primary font-semibold">
+                              3
+                            </span>
                           </div>
-                          <p className="text-sm">Explanation of suitable financial products</p>
+                          <p className="text-sm">
+                            Explanation of suitable financial products
+                          </p>
                         </div>
-                        
+
                         <div className="flex items-center">
                           <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center mr-3">
-                            <span className="text-primary font-semibold">4</span>
+                            <span className="text-primary font-semibold">
+                              4
+                            </span>
                           </div>
-                          <p className="text-sm">Recommendations and next steps</p>
+                          <p className="text-sm">
+                            Recommendations and next steps
+                          </p>
                         </div>
                       </CardContent>
                     </Card>

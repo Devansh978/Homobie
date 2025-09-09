@@ -497,7 +497,7 @@ const Properties = () => {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-black text-white flex items-center justify-center">
+      <div className="min-h-screen text-white  flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-white mx-auto"></div>
           <p className="mt-4">Loading properties...</p>
@@ -507,9 +507,9 @@ const Properties = () => {
   }
 
   return (
-    <div className="min-h-screen bg-black text-white">
+    <div className="min-h-screen text-white pt-[100px]">
       {/* Header */}
-      <div className="border-b border-white/10 bg-black/20 backdrop-blur-xl">
+      <div className="border-b border-white/10  backdrop-blur-xl">
         <div className="max-w-7xl mx-auto px-4 py-8">
           <div className="flex justify-between items-center mb-8">
             <div>
@@ -582,7 +582,7 @@ const Properties = () => {
 
       {/* Filters & Search */}
       {!error && currentView === "all" && (
-        <div className="border-b border-white/10 bg-black/10 backdrop-blur-xl">
+        <div className="border-b border-white/10  backdrop-blur-xl">
           <div className="max-w-7xl mx-auto px-4 py-6 flex flex-col gap-4">
             <div className="flex items-center gap-4">
               <div className="relative">

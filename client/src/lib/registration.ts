@@ -19,6 +19,7 @@ export interface UserRegistrationRequest {
   phoneNumber: string;
 }
 
+
 export interface UserWithRoleRegistrationRequest {
   user: UserRegistrationRequest;
   roleData: BuilderRegistrationRequest | null;

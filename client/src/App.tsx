@@ -21,8 +21,11 @@ import OurTeamPage from "@/pages/ourteam-page";
 import CompleteProfile from "@/pages/CompleteProfile";
 import Properties from "@/pages/properties/Properties";
 import PropertyDetails from "@/pages/properties/PropertyDetails";
-import  CallbackPage   from "@/hooks/CallbackPage";
+import CallbackPage from "@/hooks/CallbackPage";
 import { ProtectedRoute } from "./lib/protected-route";
+import SipCalculator from "@/pages/SipCalculator/SipCalculator";
+import EmiCalculator from "@/pages/EmiCalculator/EmiCalculator";
+import BudgetPlanningTool from "@/pages/BudgetPlanningTool/BudgetPlanningTool";
 
 import { ThemeProvider } from "next-themes";
 import { AuthProvider } from "@/hooks/use-auth";
@@ -48,21 +51,20 @@ function Router() {
 </Route>
 
       <Route path="/loan-application" component={LoanApplicationPage} />
-      <Route path="/loan-application?type=home-loan" component={LoanApplicationPage} />
-      <Route path="/loan-application?type=lap" component={LoanApplicationPage} />
-      <Route path="/loan-application?type=bt-topup" component={LoanApplicationPage} />
       <Route path="/consultation" component={ConsultationPage} />
       <Route path="/sip" component={SipPage} />
       <Route path="/blog" component={BlogPage} />
       <Route path="/about" component={AboutPage} />
       <Route path="/ourteam" component={OurTeamPage} />
-       <Route path="/properties" component={Properties} />
-      <Route path="/properties/:propertyId" component={PropertyDetails} />
+
       <Route path="/properties" component={Properties} />
-      <Route path="/properties/:id">
-        {params => <PropertyDetails id={params.id} />}
-      </Route>
+      <Route path="/properties/:propertyId" component={PropertyDetails} />
+
       <Route path="/auth/callback" component={CallbackPage} />
+
+      <Route path="/tools/sip-loan-calculator" component={SipCalculator} />
+      <Route path="/tools/emi-calculator" component={EmiCalculator} />
+      <Route path="/tools/budget-planner" component={BudgetPlanningTool} />
 
       <ProtectedRoute path="/dashboard" component={DashboardPage} />
       <ProtectedRoute path="/admin" component={AdminPage} />
@@ -76,13 +78,28 @@ function Router() {
 
 function App() {
   return (
-    <ThemeProvider attribute="class" defaultTheme="light">
+    <ThemeProvider>
       <TooltipProvider>
         <Toaster />
         <AuthProvider>
-          <div className="flex flex-col min-h-screen">
+          <div
+            className=""
+            style={{
+  background: `
+    linear-gradient(
+      90deg,
+      rgba(0, 0, 0, 0.9) 0%,       /* deep black start */
+      rgba(17, 24, 39, 0.8) 40%,   /* dark gray/black tint */
+      rgba(29, 78, 216, 0.1) 80%,  /* small hint of blue */
+      transparent 100%
+    ),
+    #000
+  `,
+}}
+
+          >
             <Header />
-            <main className="">
+            <main className="flex-1">
               <Router />
             </main>
             <Footer />

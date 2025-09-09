@@ -6,6 +6,7 @@ import { z } from "zod";
 import { useMutation } from "@tanstack/react-query";
 import { Toaster, toast } from "sonner";
 import axios from "axios";
+import { Country, State, City } from "country-state-city";
 
 import { authService, LoginCredentials } from "../lib/auth";
 
@@ -35,7 +36,7 @@ import {
 } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Shield } from "lucide-react";
-import OAuth from "./OAuth"
+import OAuth from "./OAuth";
 
 const registerSchema = z
   .object({
@@ -117,6 +118,10 @@ export default function AuthPage() {
   const [user, setUser] = useState(authService.getUser());
   const [userEmail, setUserEmail] = useState("");
 
+  const [selectedCountry, setSelectedCountry] = useState("");
+  const [selectedState, setSelectedState] = useState("");
+  const [selectedCity, setSelectedCity] = useState("");
+
   const loginMutation = useMutation({
     mutationFn: (credentials: LoginCredentials) =>
       authService.login(credentials),
@@ -194,7 +199,9 @@ export default function AuthPage() {
       source: string;
     }) => {
       const res = await axios.post(
+
         // `https://homobiebackend-railway-production.up.railway.app/reset-password?email=string&newPassword=string&source=string`,
+
         `http://homobie.ap-south-1.elasticbeanstalk.com/reset-password`,
         null,
         {
@@ -209,7 +216,7 @@ export default function AuthPage() {
     },
     onSuccess: () => {
       toast.success("Password has been reset successfully!");
-      setActiveTab("login"); 
+      setActiveTab("login");
       // Reset forms
       resetForm.reset();
       forgotForm.reset();
@@ -327,7 +334,7 @@ export default function AuthPage() {
   };
 
   return (
-    <div className="pt-20 bg-black">
+    <div className="pt-20 ">
       <Toaster position="top-right" richColors />
       <main className="py-12">
         <div className="container mx-auto px-4">
@@ -373,7 +380,7 @@ export default function AuthPage() {
                       <Form {...loginForm}>
                         <form
                           onSubmit={loginForm.handleSubmit(onLoginSubmit)}
-                          className="space-y-6 bg-black text-white p-6 rounded-lg"
+                          className="space-y-6  text-white p-6 rounded-lg"
                         >
                           <FormField
                             control={loginForm.control}
@@ -386,7 +393,7 @@ export default function AuthPage() {
                                 <FormControl>
                                   <Input
                                     placeholder="Your username"
-                                    className="bg-black text-white border border-white placeholder-gray-400 focus:ring-white focus:border-white"
+                                    className="bg-transparent text-white border border-white placeholder-gray-400 focus:ring-white focus:border-white"
                                     {...field}
                                   />
                                 </FormControl>
@@ -407,7 +414,7 @@ export default function AuthPage() {
                                   <Input
                                     type="password"
                                     placeholder="Your password"
-                                    className="bg-black text-white border border-white placeholder-gray-400 focus:ring-white focus:border-white"
+                                    className="bg-transparent text-white border border-white placeholder-gray-400 focus:ring-white focus:border-white"
                                     {...field}
                                   />
                                 </FormControl>
@@ -447,7 +454,7 @@ export default function AuthPage() {
                           onSubmit={forgotForm.handleSubmit((data) =>
                             forgotMutation.mutate(data)
                           )}
-                          className="space-y-6 bg-black text-white p-6 rounded-lg"
+                          className="space-y-6 bg-transparent text-white p-6 rounded-lg"
                         >
                           <FormField
                             control={forgotForm.control}
@@ -461,7 +468,7 @@ export default function AuthPage() {
                                   <Input
                                     type="email"
                                     placeholder="Enter your email address"
-                                    className="bg-black text-white border border-white placeholder-gray-400 focus:ring-white focus:border-white"
+                                    className="bg-transparent text-white border border-white placeholder-gray-400 focus:ring-white focus:border-white"
                                     {...field}
                                   />
                                 </FormControl>
@@ -493,14 +500,13 @@ export default function AuthPage() {
                     </TabsContent>
 
                     {/* OTP */}
-                    {/* OTP */}
                     <TabsContent value="otp">
                       <Form {...otpForm}>
                         <form
                           onSubmit={otpForm.handleSubmit((data) =>
                             otpMutation.mutate(data)
                           )}
-                          className="space-y-6 bg-black text-white p-6 rounded-lg"
+                          className="space-y-6 text-white p-6 rounded-lg"
                         >
                           <div className="text-center mb-4">
                             <p className="text-gray-300 text-sm">
@@ -536,7 +542,7 @@ export default function AuthPage() {
                                   <Input
                                     type="text"
                                     placeholder="Enter 6-digit OTP"
-                                    className="bg-black text-white border border-white placeholder-gray-400 focus:ring-white focus:border-white text-center text-lg tracking-widest"
+                                    className="bg-transparent text-white border border-white placeholder-gray-400 focus:ring-white focus:border-white text-center text-lg tracking-widest"
                                     maxLength={6}
                                     {...field}
                                   />
@@ -597,7 +603,7 @@ export default function AuthPage() {
                           onSubmit={resetForm.handleSubmit((data) =>
                             resetMutation.mutate(data)
                           )}
-                          className="space-y-6 bg-black text-white p-6 rounded-lg"
+                          className="space-y-6 bg-transparent text-white p-6 rounded-lg"
                         >
                           <FormField
                             control={resetForm.control}
@@ -611,7 +617,7 @@ export default function AuthPage() {
                                   <Input
                                     type="email"
                                     placeholder="Enter your email address"
-                                    className="bg-gray-800 text-white border border-white placeholder-gray-400 focus:ring-white focus:border-white"
+                                    className="bg-gtransparent text-white border border-white placeholder-gray-400 focus:ring-white focus:border-white"
                                     readOnly
                                     {...field}
                                   />
@@ -633,7 +639,7 @@ export default function AuthPage() {
                                   <Input
                                     type="password"
                                     placeholder="Enter your new password"
-                                    className="bg-black text-white border border-white placeholder-gray-400 focus:ring-white focus:border-white"
+                                    className="bg-transparent text-white border border-white placeholder-gray-400 focus:ring-white focus:border-white"
                                     {...field}
                                   />
                                 </FormControl>
@@ -654,7 +660,7 @@ export default function AuthPage() {
                                   <Input
                                     type="password"
                                     placeholder="Confirm your new password"
-                                    className="bg-black text-white border border-white placeholder-gray-400 focus:ring-white focus:border-white"
+                                    className="bg-transparent text-white border border-white placeholder-gray-400 focus:ring-white focus:border-white"
                                     {...field}
                                   />
                                 </FormControl>
@@ -702,7 +708,7 @@ export default function AuthPage() {
                       <Form {...registerForm}>
                         <form
                           onSubmit={registerForm.handleSubmit(onRegisterSubmit)}
-                          className="space-y-4 bg-black text-white border border-white p-6 rounded-md"
+                          className="space-y-4 text-white p-2 rounded-md "
                         >
                           {/* First + Last Name */}
                           <div className="grid grid-cols-2 gap-4">
@@ -717,7 +723,7 @@ export default function AuthPage() {
                                   <FormControl>
                                     <Input
                                       placeholder="John"
-                                      className="bg-black text-white border border-white placeholder-gray-400"
+                                      className="bg-transparent text-white border border-white placeholder-gray-400"
                                       {...field}
                                     />
                                   </FormControl>
@@ -736,7 +742,7 @@ export default function AuthPage() {
                                   <FormControl>
                                     <Input
                                       placeholder="Doe"
-                                      className="bg-black text-white border border-white placeholder-gray-400"
+                                      className="bg-transparent text-white border border-white placeholder-gray-400"
                                       {...field}
                                     />
                                   </FormControl>
@@ -759,7 +765,7 @@ export default function AuthPage() {
                                   <Input
                                     type="email"
                                     placeholder="john.doe@example.com"
-                                    className="bg-black text-white border border-white placeholder-gray-400"
+                                    className="bg-transparent text-white border border-white placeholder-gray-400"
                                     {...field}
                                   />
                                 </FormControl>
@@ -780,7 +786,7 @@ export default function AuthPage() {
                                 <FormControl>
                                   <Input
                                     placeholder="Your phone number"
-                                    className="bg-black text-white border border-white placeholder-gray-400"
+                                    className="bg-transparent text-white border border-white placeholder-gray-400"
                                     {...field}
                                   />
                                 </FormControl>
@@ -800,14 +806,14 @@ export default function AuthPage() {
                                 </FormLabel>
                                 <Select
                                   onValueChange={field.onChange}
-                                  defaultValue={field.value}
+                                  value={field.value}
                                 >
                                   <FormControl>
-                                    <SelectTrigger className="bg-black text-white border border-white">
+                                    <SelectTrigger className="text-white border border-white">
                                       <SelectValue placeholder="Select your role" />
                                     </SelectTrigger>
                                   </FormControl>
-                                  <SelectContent className="bg-black text-white border border-white">
+                                  <SelectContent className="bg-black text-white border border-white max-h-60 overflow-y-auto">
                                     <SelectItem
                                       value="USER"
                                       className="hover:bg-gray-800"
@@ -845,7 +851,7 @@ export default function AuthPage() {
                             )}
                           />
 
-                          {/* Company (only for Builder) */}
+                          {/* Company (only Builder) */}
                           {selectedRole === "BUILDER" && (
                             <FormField
                               control={registerForm.control}
@@ -858,7 +864,7 @@ export default function AuthPage() {
                                   <FormControl>
                                     <Input
                                       placeholder="Your company name"
-                                      className="bg-black text-white border border-white placeholder-gray-400"
+                                      className="bg-transparent text-white border border-white placeholder-gray-400"
                                       {...field}
                                     />
                                   </FormControl>
@@ -884,7 +890,7 @@ export default function AuthPage() {
                                 <FormControl>
                                   <Input
                                     placeholder="Street address, building..."
-                                    className="bg-black text-white border border-white placeholder-gray-400"
+                                    className="bg-transparent text-white border border-white placeholder-gray-400"
                                     {...field}
                                   />
                                 </FormControl>
@@ -893,67 +899,9 @@ export default function AuthPage() {
                             )}
                           />
 
-                          <div className="grid grid-cols-2 gap-4">
-                            <FormField
-                              control={registerForm.control}
-                              name="roleData.location.city"
-                              render={({ field }) => (
-                                <FormItem>
-                                  <FormLabel className="text-white">
-                                    City
-                                  </FormLabel>
-                                  <FormControl>
-                                    <Input
-                                      placeholder="City"
-                                      className="bg-black text-white border border-white placeholder-gray-400"
-                                      {...field}
-                                    />
-                                  </FormControl>
-                                  <FormMessage className="text-red-400" />
-                                </FormItem>
-                              )}
-                            />
-                            <FormField
-                              control={registerForm.control}
-                              name="roleData.location.state"
-                              render={({ field }) => (
-                                <FormItem>
-                                  <FormLabel className="text-white">
-                                    State
-                                  </FormLabel>
-                                  <FormControl>
-                                    <Input
-                                      placeholder="State"
-                                      className="bg-black text-white border border-white placeholder-gray-400"
-                                      {...field}
-                                    />
-                                  </FormControl>
-                                  <FormMessage className="text-red-400" />
-                                </FormItem>
-                              )}
-                            />
-                          </div>
-
-                          <div className="grid grid-cols-2 gap-4">
-                            <FormField
-                              control={registerForm.control}
-                              name="roleData.location.pincode"
-                              render={({ field }) => (
-                                <FormItem>
-                                  <FormLabel className="text-white">
-                                    Pincode
-                                  </FormLabel>
-                                  <FormControl>
-                                    <Input
-                                      placeholder="Pincode"
-                                      className="bg-black text-white border border-white placeholder-gray-400"
-                                      {...field}
-                                    />
-                                  </FormControl>
-                                  <FormMessage className="text-red-400" />
-                                </FormItem>
-                              )}
-                            />
+                          {/* Country / State / City */}
+                          <div className="grid grid-cols-3 gap-4">
+                            {/* Country */}
                             <FormField
                               control={registerForm.control}
                               name="roleData.location.country"
@@ -962,22 +910,144 @@ export default function AuthPage() {
                                   <FormLabel className="text-white">
                                     Country
                                   </FormLabel>
-                                  <FormControl>
-                                    <Input
-                                      placeholder="Country"
-                                      className="bg-black text-white border border-white placeholder-gray-400"
-                                      {...field}
-                                    />
-                                  </FormControl>
+                                  <Select
+                                    onValueChange={(value) => {
+                                      field.onChange(value);
+                                      setSelectedCountry(value);
+                                      setSelectedState("");
+                                      setSelectedCity("");
+                                    }}
+                                    value={field.value}
+                                  >
+                                    <FormControl>
+                                      <SelectTrigger className="text-white border border-white">
+                                        <SelectValue placeholder="Select Country" />
+                                      </SelectTrigger>
+                                    </FormControl>
+                                    <SelectContent className="bg-black text-white border border-white max-h-60 overflow-y-auto">
+                                      {Country.getAllCountries().map((c) => (
+                                        <SelectItem
+                                          key={c.isoCode}
+                                          value={c.isoCode}
+                                        >
+                                          {c.name}
+                                        </SelectItem>
+                                      ))}
+                                    </SelectContent>
+                                  </Select>
+                                  <FormMessage className="text-red-400" />
+                                </FormItem>
+                              )}
+                            />
+
+                            {/* State */}
+                            <FormField
+                              control={registerForm.control}
+                              name="roleData.location.state"
+                              render={({ field }) => (
+                                <FormItem>
+                                  <FormLabel className="text-white">
+                                    State
+                                  </FormLabel>
+                                  <Select
+                                    onValueChange={(value) => {
+                                      field.onChange(value);
+                                      setSelectedState(value);
+                                      setSelectedCity("");
+                                    }}
+                                    value={field.value}
+                                    disabled={!selectedCountry}
+                                  >
+                                    <FormControl>
+                                      <SelectTrigger className="text-white border border-white">
+                                        <SelectValue placeholder="Select State" />
+                                      </SelectTrigger>
+                                    </FormControl>
+                                    <SelectContent className="bg-black text-white border border-white max-h-60 overflow-y-auto">
+                                      {selectedCountry &&
+                                        State.getStatesOfCountry(
+                                          selectedCountry
+                                        ).map((s) => (
+                                          <SelectItem
+                                            key={s.isoCode}
+                                            value={s.isoCode}
+                                          >
+                                            {s.name}
+                                          </SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                  </Select>
+                                  <FormMessage className="text-red-400" />
+                                </FormItem>
+                              )}
+                            />
+
+                            {/* City */}
+                            <FormField
+                              control={registerForm.control}
+                              name="roleData.location.city"
+                              render={({ field }) => (
+                                <FormItem>
+                                  <FormLabel className="text-white">
+                                    City
+                                  </FormLabel>
+                                  <Select
+                                    onValueChange={field.onChange}
+                                    value={field.value}
+                                    disabled={!selectedState}
+                                  >
+                                    <FormControl>
+                                      <SelectTrigger className="text-white border border-white">
+                                        <SelectValue placeholder="Select City" />
+                                      </SelectTrigger>
+                                    </FormControl>
+                                    <SelectContent className="bg-black text-white border border-white max-h-60 overflow-y-auto">
+                                      {selectedCountry &&
+                                        selectedState &&
+                                        City.getCitiesOfState(
+                                          selectedCountry,
+                                          selectedState
+                                        ).map((city) => (
+                                          <SelectItem
+                                            key={city.name}
+                                            value={city.name}
+                                          >
+                                            {city.name}
+                                          </SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                  </Select>
                                   <FormMessage className="text-red-400" />
                                 </FormItem>
                               )}
                             />
                           </div>
 
+                          {/* Pincode */}
+                          <FormField
+                            control={registerForm.control}
+                            name="roleData.location.pincode"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel className="text-white">
+                                  Pincode
+                                </FormLabel>
+                                <FormControl>
+                                  <Input
+                                    placeholder="Pincode"
+                                    className="bg-transparent text-white border border-white placeholder-gray-400"
+                                    {...field}
+                                  />
+                                </FormControl>
+                                <FormMessage className="text-red-400" />
+                              </FormItem>
+                            )}
+                          />
+
+                          {/* Submit */}
                           <Button
                             type="submit"
-                            className="w-full"
+                            className="w-full bg-white text-black hover:bg-gray-200"
                             disabled={registerMutation.isPending}
                           >
                             {registerMutation.isPending

@@ -279,7 +279,7 @@ const SipCalculator = () => {
 
   // Subcomponents
   const MainNav = () => (
-    <nav className="flex overflow-x-auto py-2 mb-4 scrollbar-hide sticky top-0 bg-black z-10">
+    <nav className="flex overflow-x-auto py-2 mb-4 scrollbar-hide sticky top-0  z-10">
       <button
         onClick={() => setActiveSection("calculator")}
         className={`px-4 py-2 mx-1 rounded-full whitespace-nowrap font-medium text-sm sm:text-base ${
@@ -404,13 +404,13 @@ const SipCalculator = () => {
   };
 
   const CalculatorView = () => (
-  <div className="bg-black p-4 rounded-lg shadow-lg border border-gray-800">
+  <div className=" p-4 rounded-lg shadow-lg border border-gray-800">
     {isMobile && <CalculatorNav />}
 
     <div className={isMobile ? "" : "flex gap-6"}>
       {/* SIP Calculator */}
       <div
-        className={`bg-black rounded-lg w-full lg:w-1/2 ${
+        className={` rounded-lg w-full lg:w-1/2 ${
           !isMobile || activeCalculator === "sip" ? "block" : "hidden"
         }`}
       >
@@ -488,7 +488,7 @@ const SipCalculator = () => {
 
       {/* Loan Calculator */}
       <div
-        className={`bg-black rounded-lg w-full lg:w-1/2 ${
+        className={` rounded-lg w-full lg:w-1/2 ${
           isMobile
             ? activeCalculator === "loan"
               ? "block"
@@ -570,7 +570,7 @@ const SipCalculator = () => {
 
 
   const TablesView = () => (
-    <div className="bg-black p-4 rounded-lg shadow-lg border border-gray-800 w-full overflow-hidden">
+    <div className=" p-4 rounded-lg shadow-lg border border-gray-800 w-full overflow-hidden">
       {activeSection === "sip-table" && (
         <div className="w-full overflow-x-auto">
           <h2 className="text-lg sm:text-xl font-bold mb-4 flex items-center text-white">
@@ -595,11 +595,11 @@ const SipCalculator = () => {
                   </th>
                 </tr>
               </thead>
-              <tbody className="bg-black divide-y divide-gray-700">
+              <tbody className=" divide-y divide-gray-700">
                 {sipResults.map((result, index) => (
                   <tr
                     key={index}
-                    className={index % 2 === 0 ? "bg-black" : "bg-gray-900"}
+                    className={index % 2 === 0 ? "" : "bg-gray-900"}
                   >
                     <td className="px-3 py-2 sm:px-4 sm:py-3 whitespace-nowrap text-xs sm:text-sm font-medium text-white">
                       {result.year}
@@ -649,11 +649,11 @@ const SipCalculator = () => {
                   </th>
                 </tr>
               </thead>
-              <tbody className="bg-black divide-y divide-gray-700">
+              <tbody className=" divide-y divide-gray-700">
                 {loanResults.map((result, index) => (
                   <tr
                     key={index}
-                    className={index % 2 === 0 ? "bg-black" : "bg-gray-900"}
+                    className={index % 2 === 0 ? "" : "bg-gray-900"}
                   >
                     <td className="px-3 py-2 sm:px-4 sm:py-3 whitespace-nowrap text-xs sm:text-sm font-medium text-white">
                       {Math.ceil(result.month / 12)}
@@ -680,7 +680,7 @@ const SipCalculator = () => {
   return (
     <div
       ref={containerRef}
-      className={`min-h-screen bg-black py-4 sm:py-8 px-2 sm:px-4 ${
+      className={`min-h-screen  md:pt-[100px] sm:py-8 px-2 sm:px-4 ${
         isFullscreen ? "fixed inset-0 z-50 overflow-auto" : ""
       }`}
     >

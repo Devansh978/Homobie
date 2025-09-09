@@ -115,7 +115,7 @@ const PropertyFilters = ({
   const dropdownContent = (
     <div
       id="property-filters-dropdown"
-      className="bg-black/90 backdrop-blur-md border border-white/10 rounded-2xl p-4 space-y-3"
+      className="bg-transparent/90 backdrop-blur-md border border-white/10 rounded-2xl p-4 space-y-3"
       style={{
         position: 'fixed',
         top: buttonPosition.top,
@@ -142,7 +142,7 @@ const PropertyFilters = ({
         <select
           value={filters.type}
           onChange={(e) => handleFilterChange("type", e.target.value)}
-          className="bg-black text-white border border-white/10 rounded-xl px-3 py-2 w-full"
+          className="bg-transparent text-white border border-white/10 rounded-xl px-3 py-2 w-full"
         >
           <option value="">All Types</option>
           {propertyTypes.map(type => (
@@ -159,7 +159,7 @@ const PropertyFilters = ({
         <select
           value={filters.constructionStatus}
           onChange={(e) => handleFilterChange("constructionStatus", e.target.value)}
-          className="bg-black text-white border border-white/10 rounded-xl px-3 py-2 w-full"
+          className="bg-transparent text-white border border-white/10 rounded-xl px-3 py-2 w-full"
         >
           <option value="">All Statuses</option>
           {constructionStatuses.map(status => (
@@ -176,7 +176,7 @@ const PropertyFilters = ({
         <select
           value={filters.propertyStatus}
           onChange={(e) => handleFilterChange("propertyStatus", e.target.value)}
-          className="bg-black text-white border border-white/10 rounded-xl px-3 py-2 w-full"
+          className="bg-transparent text-white border border-white/10 rounded-xl px-3 py-2 w-full"
         >
           <option value="">All Availabilities</option>
           {propertyStatuses.map(status => (
@@ -193,7 +193,7 @@ const PropertyFilters = ({
         <select
           value={filters.bedrooms}
           onChange={(e) => handleFilterChange("bedrooms", e.target.value)}
-          className="bg-black text-white border border-white/10 rounded-xl px-3 py-2 w-full"
+          className="bg-transparent text-white border border-white/10 rounded-xl px-3 py-2 w-full"
         >
           <option value="">Any</option>
           <option value="1">1 BHK</option>
@@ -211,7 +211,7 @@ const PropertyFilters = ({
             type="number"
             value={filters.minPrice}
             onChange={(e) => handleFilterChange("minPrice", e.target.value)}
-            className="bg-black text-white border border-white/10 rounded-xl px-3 py-2 w-full"
+            className="bg-transparent text-white border border-white/10 rounded-xl px-3 py-2 w-full"
             min="0"
             step="0.01"
             placeholder="0"
@@ -223,7 +223,7 @@ const PropertyFilters = ({
             type="number"
             value={filters.maxPrice}
             onChange={(e) => handleFilterChange("maxPrice", e.target.value)}
-            className="bg-black text-white border border-white/10 rounded-xl px-3 py-2 w-full"
+            className="bg-transparent text-white border border-white/10 rounded-xl px-3 py-2 w-full"
             min="0"
             step="0.01"
             placeholder="Any"
@@ -238,7 +238,7 @@ const PropertyFilters = ({
           type="text"
           value={filters.location}
           onChange={(e) => handleFilterChange("location", e.target.value)}
-          className="bg-black text-white border border-white/10 rounded-xl px-3 py-2 w-full"
+          className="bg-transparent text-white border border-white/10 rounded-xl px-3 py-2 w-full"
           placeholder="Area or Locality"
         />
       </div>
@@ -250,7 +250,7 @@ const PropertyFilters = ({
           type="text"
           value={filters.city}
           onChange={(e) => handleFilterChange("city", e.target.value)}
-          className="bg-black text-white border border-white/10 rounded-xl px-3 py-2 w-full"
+          className="bg-transparent text-white border border-white/10 rounded-xl px-3 py-2 w-full"
           placeholder="City"
         />
       </div>
@@ -262,7 +262,7 @@ const PropertyFilters = ({
           type="text"
           value={filters.pincode}
           onChange={(e) => handleFilterChange("pincode", e.target.value)}
-          className="bg-black text-white border border-white/10 rounded-xl px-3 py-2 w-full"
+          className="bg-transparent text-white border border-white/10 rounded-xl px-3 py-2 w-full"
           placeholder="Pincode"
         />
       </div>
@@ -273,7 +273,7 @@ const PropertyFilters = ({
         <select
           value={filters.furnishing}
           onChange={(e) => handleFilterChange("furnishing", e.target.value)}
-          className="bg-black text-white border border-white/10 rounded-xl px-3 py-2 w-full"
+          className="bg-transparent text-white border border-white/10 rounded-xl px-3 py-2 w-full"
         >
           <option value="">Any</option>
           {furnishingTypes.map(type => (
