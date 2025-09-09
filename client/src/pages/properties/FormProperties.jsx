@@ -17,7 +17,7 @@ const FormProperties = ({ onAddProperty }) => {
       furnishing: '',
       ownerId: '',
       propertyFeatures: [],
-      status: '',
+      // status: '',
       title: '',
       type: '',
       discountPrice: '',
@@ -129,7 +129,7 @@ const FormProperties = ({ onAddProperty }) => {
     const requiredFields = [
       'title',  'category', 'type', 'description',
       'bedrooms', 'bathrooms', 'areaSqft', 'constructionStatus',
-      'furnishing', 'status', 'actualPrice'
+      'furnishing', 'actualPrice'
     ];
     
     for (const field of requiredFields) {
@@ -185,7 +185,7 @@ const FormProperties = ({ onAddProperty }) => {
             furnishing: '',
             ownerId: '',
             propertyFeatures: [],
-            status: '',
+            // status: '',
             title: '',
             type: '',
             discountPrice: '',
@@ -393,7 +393,7 @@ const FormProperties = ({ onAddProperty }) => {
                         <option value="UNFURNISHED">Unfurnished</option>
                       </select>
                     </div>
-                    <div>
+                    {/* <div>
                       <label className="block text-sm font-medium text-white mb-1">Status*</label>
                       <select
                         name="status"
@@ -407,7 +407,7 @@ const FormProperties = ({ onAddProperty }) => {
                         <option value="SOLD">Sold</option>
                         <option value="PENDING">Pending</option>
                       </select>
-                    </div>
+                    </div> */}
                   </div>
                 </div>
 

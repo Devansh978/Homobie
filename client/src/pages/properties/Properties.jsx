@@ -16,8 +16,6 @@ import FormProperties from "./FormProperties";
 
 const baseUrl = "http://homobie.ap-south-1.elasticbeanstalk.com";
 
-
-
 // Helper function to convert byte array to image URL
 // Updated helper functions for better image handling
 const convertByteArrayToImageUrl = (byteArray) => {
@@ -88,7 +86,6 @@ const convertImagesToUrls = (images) => {
   }).filter(url => url !== "/placeholder.jpg"); // Remove failed conversions
 };
 
-
 const savePropertyToList = (newProperty) => {
   const existingProperties = JSON.parse(localStorage.getItem('userProperties') || '[]');
   const updatedProperties = [...existingProperties, newProperty];
@@ -103,7 +100,6 @@ const handleAddProperty = async (propertyData) => {
     savePropertyToList(response);
   }
 };
- 
 
 // Auth helper functions
 const getAuthTokens = () => {
@@ -131,7 +127,7 @@ const api = axios.create({
   },
 });
 
-// Request interceptor
+// Request interceptor - only add token if it exists
 api.interceptors.request.use(
   (config) => {
     const { token } = getAuthTokens();
@@ -143,17 +139,18 @@ api.interceptors.request.use(
   (error) => Promise.reject(error)
 );
 
-// Response interceptor
+// Response interceptor - only handle token refresh if user is authenticated
 api.interceptors.response.use(
   (response) => response,
   async (error) => {
     const originalRequest = error.config;
     
-    if (error.response?.status === 401 && !originalRequest._retry) {
+    // Only handle token refresh if user was previously authenticated
+    const { token, refreshToken } = getAuthTokens();
+    if (error.response?.status === 401 && !originalRequest._retry && token) {
       originalRequest._retry = true;
       
       try {
-        const { refreshToken } = getAuthTokens();
         if (refreshToken) {
           const response = await axios.post(`${baseUrl}/auth/refresh`, {
             refresh_token: refreshToken
@@ -196,8 +193,9 @@ const Properties = () => {
   const [allProperties, setAllProperties] = useState([]);
   const [isSliding, setIsSliding] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [isAuthChecking, setIsAuthChecking] = useState(true);
+  const [isAuthChecking, setIsAuthChecking] = useState(false); // Set to false since we don't need auth check
   const [error, setError] = useState(null);
+  const [showAuthRedirect, setShowAuthRedirect] = useState(false);
   const scrollContainerRef = useRef(null);
 
   const cardWidth = 374;
@@ -206,20 +204,19 @@ const Properties = () => {
     const { token, userId, userData } = getAuthTokens();
     
     if (!token) {
-      if (showError) setError("Please login to access properties");
+      if (showError) setShowAuthRedirect(true);
       return false;
     }
     
     if (!userId || !userData?.userId) {
-      if (showError) setError("Authentication incomplete. Please login again.");
+      if (showError) setShowAuthRedirect(true);
       return false;
     }
     
     return true;
   };
- const fetchIndividualProperty = async (propertyId) => {
-    if (!checkAuth()) return null;
-    
+
+  const fetchIndividualProperty = async (propertyId) => {
     setIsLoading(true);
     setError(null);
     
@@ -253,8 +250,6 @@ const Properties = () => {
           files: convertImagesToUrls(response.data.images)
         };
         
-        setIndividualProperty(transformedProperty);
-        
         // Update localStorage with the fetched property
         localStorage.setItem('currentProperty', JSON.stringify(transformedProperty));
         
@@ -286,7 +281,6 @@ const Properties = () => {
       try {
         const parsedProperty = JSON.parse(storedProperty);
         if (parsedProperty.propertyId === targetPropertyId) {
-          setIndividualProperty(parsedProperty);
           return parsedProperty;
         }
       } catch (e) {
@@ -297,9 +291,8 @@ const Properties = () => {
     // If not found in localStorage or different property, fetch from API
     return await fetchIndividualProperty(targetPropertyId);
   };
+
   const fetchAllProperties = async (pincode = "") => {
-    if (!checkAuth()) return;
-    
     setIsLoading(true);
     setError(null);
     
@@ -347,24 +340,54 @@ const Properties = () => {
   };
 
   const addProperty = async (newProperty) => {
-    if (!checkAuth()) return null;
+    // Check authentication before adding property
+    if (!checkAuth()) {
+      setShowAuthRedirect(true);
+      return null;
+    }
     
     setIsLoading(true);
     setError(null);
     
     try {
-      const { userId, userData } = getAuthTokens();
-      const ownerId = userId || userData?.userId;
-      
-      if (!ownerId) throw new Error("Authentication required");
+    const { userId, userData } = getAuthTokens();
+    const ownerId = userId || userData?.userId;
+    
+    if (!ownerId) throw new Error("Authentication required");
+
+    // Extract the property data from the form
+    const propertyData = newProperty.property;
+    
+    // Transform the property data with proper type conversion
+    const transformedProperty = {
+      ...propertyData,
+      ownerId: ownerId,
+      // Convert numeric fields from strings to numbers
+      actualPrice: parseFloat(propertyData.actualPrice) || 0,
+      discountPrice: parseFloat(propertyData.discountPrice) || 0,
+      bedrooms: parseInt(propertyData.bedrooms, 10) || 0,
+      bathrooms: parseInt(propertyData.bathrooms, 10) || 0,
+      areaSqft: parseInt(propertyData.areaSqft, 10) || 0,
+      // Handle the location object (ensure it's properly structured)
+      location: {
+        addressLine1: propertyData.location?.addressLine1 || '',
+        addressLine2: propertyData.location?.addressLine2 || '',
+        city: propertyData.location?.city || '',
+        country: propertyData.location?.country || '',
+        landmark: propertyData.location?.landmark || '',
+        pincode: propertyData.location?.pincode || '',
+        state: propertyData.location?.state || '',
+      },
+      // Ensure arrays are properly formatted
+      amenities: Array.isArray(propertyData.amenities) ? propertyData.amenities : [],
+      propertyFeatures: Array.isArray(propertyData.propertyFeatures) ? propertyData.propertyFeatures : [],
+    };
+
 
       const formData = new FormData();
       formData.append(
         "property",
-        new Blob([JSON.stringify({
-          ...newProperty.property,
-          ownerId: ownerId
-        })], { type: "application/json" })
+        new Blob([JSON.stringify(transformedProperty)], { type: "application/json" })
       );
 
       if (newProperty.files?.length > 0) {
@@ -375,6 +398,7 @@ const Properties = () => {
         throw new Error("At least one image is required");
       }
 
+      // FIX: Remove the redundant headers. The Axios interceptor handles them.
       const res = await api.post("/properties/add", formData, {
         headers: {
           "Content-Type": "multipart/form-data",
@@ -383,7 +407,6 @@ const Properties = () => {
       
       console.log("Add property response:", res.data);
       
-      // Handle the new DTO response structure
       if (res.data && res.data.propertyId) {
         const propertyId = res.data.propertyId;
         localStorage.setItem('currentPropertyId', propertyId);
@@ -462,43 +485,8 @@ const Properties = () => {
         });
 
   useEffect(() => {
-    const verifyAndFetch = async () => {
-  setIsAuthChecking(true);
-  try {
-    const { token } = getAuthTokens();
-    
-    if (!token) {
-      setError("Please login to view properties");
-      return;
-    }
-    
-    // Verify token by calling protected endpoint
-    await api.get("/auth/verify", {
-      headers: {
-        Authorization: `Bearer ${token}`
-      }
-    });
-    
-    await fetchAllProperties();
-  } catch (err) {
-    console.error("Initialization error:", err);
-    
-    if (err.response?.status === 401) {
-      setError("Session expired. Please login again.");
-      clearAuthTokens();
-      window.location.href = "/auth";
-    } else if (err.response?.status === 404) {
-      setError("Authentication service unavailable.");
-      console.error("Verify endpoint not found");
-    } else {
-      setError("Failed to load properties. Please try again.");
-    }
-  } finally {
-    setIsAuthChecking(false);
-  }
-};
-    
-    verifyAndFetch();
+    // No need to verify auth for viewing properties
+    fetchAllProperties();
   }, []);
 
   useEffect(() => {
@@ -507,7 +495,7 @@ const Properties = () => {
     }
   }, [filters.pincode]);
 
-  if (isLoading || isAuthChecking) {
+  if (isLoading) {
     return (
       <div className="min-h-screen bg-black text-white flex items-center justify-center">
         <div className="text-center">
@@ -538,6 +526,18 @@ const Properties = () => {
               </p>
             </div>
           </div>
+          
+          {/* Show auth redirect message if user tries to add property without authentication */}
+          {showAuthRedirect && (
+            <div className="bg-yellow-900/50 border border-yellow-700 rounded-lg p-4 mb-6 text-center">
+              <p className="text-yellow-200">Please login to add properties</p>
+              <Link href="/auth">
+                <a className="mt-2 px-4 py-2 bg-white/10 hover:bg-white/20 rounded-lg transition-colors block">
+                  Go to Login
+                </a>
+              </Link>
+            </div>
+          )}
           
           <FormProperties onAddProperty={addProperty} />
           
@@ -570,20 +570,12 @@ const Properties = () => {
         <div className="max-w-7xl mx-auto px-4 py-12">
           <div className="bg-red-900/50 border border-red-700 rounded-lg p-4 text-center">
             <p className="text-red-200">Error: {error}</p>
-            {error.includes("login") || error.includes("Session expired") || error.includes("Please login") ? (
-              <Link href="/auth">
-                <a className="mt-2 px-4 py-2 bg-white/10 hover:bg-white/20 rounded-lg transition-colors block">
-                  Go to Login
-                </a>
-              </Link>
-            ) : (
-              <button
-                onClick={() => fetchAllProperties(filters.pincode)}
-                className="mt-2 px-4 py-2 bg-white/10 hover:bg-white/20 rounded-lg transition-colors"
-              >
-                Retry
-              </button>
-            )}
+            <button
+              onClick={() => fetchAllProperties(filters.pincode)}
+              className="mt-2 px-4 py-2 bg-white/10 hover:bg-white/20 rounded-lg transition-colors"
+            >
+              Retry
+            </button>
           </div>
         </div>
       )}
