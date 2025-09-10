@@ -102,10 +102,8 @@ const getToken = (): string => {
   return localStorage.getItem("auth_token") || localStorage.getItem("token") || "";
 };
 
-/**
- * A centralized function for making API requests.
- */
-const apiClient = async <T>(
+// Alternative syntax - move generic after async
+const apiClient = async (
   endpoint: string,
   method: 'POST',
   body?: any
