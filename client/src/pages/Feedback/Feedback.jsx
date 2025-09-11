@@ -8,6 +8,7 @@ import {
   AlertCircle,
   Plus,
   Edit3,
+  LogIn,
 } from "lucide-react";
 import FeedbackForm from "./FeedbackForm";
 
@@ -17,6 +18,7 @@ const Feedback = () => {
   const [feedbacks, setFeedbacks] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [isNotLoggedIn, setIsNotLoggedIn] = useState(false);
   const [formMode, setFormMode] = useState("create");
   const [showForm, setShowForm] = useState(false);
   const [editingFeedback, setEditingFeedback] = useState(null);
@@ -34,54 +36,65 @@ const Feedback = () => {
   };
 
   const capitalize = (str) => {
-  if (!str) return "";
-  return str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
-};
+    if (!str) return "";
+    return str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
+  };
 
-const getUserName = () => {
-  try {
-    const authUser = localStorage.getItem("auth_user");
-    if (authUser) {
-      const userData = JSON.parse(authUser);
-      const firstName = capitalize(userData.firstName || "");
-      const lastName = capitalize(userData.lastName || "");
+  const getUserName = () => {
+    try {
+      const authUser = localStorage.getItem("auth_user");
+      if (authUser) {
+        const userData = JSON.parse(authUser);
+        const firstName = capitalize(userData.firstName || "");
+        const lastName = capitalize(userData.lastName || "");
 
-      if (firstName && lastName) {
-        return `${firstName} ${lastName}`;
-      } else if (firstName) {
-        return firstName;
+        if (firstName && lastName) {
+          return `${firstName} ${lastName}`;
+        } else if (firstName) {
+          return firstName;
+        }
+
+        const email = userData?.email;
+        if (email) {
+          return email.split("@")[0];
+        }
       }
 
-      const email = userData?.email;
-      if (email) {
-        return email.split("@")[0];
-      }
+      return "Anonymous User";
+    } catch (error) {
+      console.error("Error parsing auth_user from localStorage:", error);
+      return "Anonymous User";
     }
+  };
 
-    return "Anonymous User";
-  } catch (error) {
-    console.error("Error parsing auth_user from localStorage:", error);
-    return "Anonymous User";
-  }
-};
-
+  const checkAuthStatus = () => {
+    const userId = localStorage.getItem("userId");
+    const token = localStorage.getItem("auth_token");
+    
+    if (!userId || !token) {
+      setIsNotLoggedIn(true);
+      setLoading(false);
+      return false;
+    }
+    
+    setIsNotLoggedIn(false);
+    return true;
+  };
 
   const fetchFeedbacks = async () => {
     setLoading(true);
     setError(null);
+    setIsNotLoggedIn(false);
+
+    // Check if user is logged in first
+    if (!checkAuthStatus()) {
+      return;
+    }
 
     try {
       const BASE_URL = "http://homobie.ap-south-1.elasticbeanstalk.com";
       const userId = localStorage.getItem("userId");
       const token = localStorage.getItem("auth_token");
-
-      if (!userId) {
-        throw new Error("User ID not found. Please log in.");
-      }
-
-      if (!token) {
-        throw new Error("Token not found. Please log in.");
-      }
 
       const API_ENDPOINT = `${BASE_URL}/feedback/getAllUserFeedbacks?userId=${encodeURIComponent(userId)}`;
 
@@ -204,30 +217,42 @@ const getUserName = () => {
     );
   }
 
-  // Error state
+  // Not logged in state
+  if (isNotLoggedIn) {
+    return (
+      <div className="min-h-screen flex items-center justify-center p-6">
+        <div className="text-center">
+          <LogIn className="w-12 h-12 text-blue-400 mx-auto mb-4" />
+          <h2 className="text-2xl font-semibold text-white mb-2">Please Login</h2>
+          <p className="text-blue-200 opacity-80 mb-6">
+            You need to log in to view and manage your feedbacks
+          </p>
+          <button
+            onClick={() => window.location.href = '/login'} // Adjust this path as needed
+            className="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors duration-300 flex items-center gap-2 mx-auto"
+          >
+            <LogIn className="w-4 h-4" />
+            Go to Login
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  // Error state (for other errors, not login issues)
   if (error) {
     return (
       <div className="min-h-screen flex items-center justify-center p-6">
         <div className="text-center">
           <AlertCircle className="w-12 h-12 text-red-400 mx-auto mb-4" />
           <h2 className="text-2xl font-semibold text-white mb-2">Something went wrong</h2>
-          <p className="text-red-200 opacity-80 mb-6">{error}</p>
-          <div className="flex gap-4 justify-center">
-            <button
-              onClick={fetchFeedbacks}
-              className="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors duration-300 flex items-center gap-2"
-            >
-              <Loader2 className="w-4 h-4" />
-              Try Again
-            </button>
-            <button
-              onClick={handleCreateNew}
-              className="px-6 py-3 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-colors duration-300 flex items-center gap-2"
-            >
-              <Plus className="w-4 h-4" />
-              Add Feedback
-            </button>
-          </div>
+          <button
+            onClick={handleCreateNew}
+            className="px-6 py-3 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-colors duration-300 flex items-center gap-2 mx-auto"
+          >
+            <Plus className="w-4 h-4" />
+            Add Feedback
+          </button>
         </div>
       </div>
     );
