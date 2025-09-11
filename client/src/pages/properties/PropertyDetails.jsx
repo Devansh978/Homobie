@@ -463,7 +463,7 @@ const PropertyDetail = () => {
 
   if (!property?.title) {
     return (
-      <div className="min-h-screen bg-transparent text-white flex items-center justify-center p-4">
+      <div className="bg-black min-h-screen bg-transparent text-white flex items-center justify-center p-4">
         <div className="text-center">
           <div className="text-6xl mb-4">🏠</div>
           <h2 className="text-2xl font-bold mb-4">Property Not Found</h2>
@@ -480,7 +480,7 @@ const PropertyDetail = () => {
   }
   
   return (
-    <div className="min-h-screen text-white pt-[80px]">
+    <div className="bg-black min-h-screen text-white pt-[80px]">
       {/* Header */}
       <div className="border-b border-white/10 bg-transparent/20 backdrop-blur-xl sticky top-0 z-40">
         <div className="max-w-7xl mx-auto px-4 py-4">

@@ -84,18 +84,18 @@ function App() {
         <AuthProvider>
           <div
             className=""
-            style={{
-  background: `
-    linear-gradient(
-      90deg,
-      rgba(0, 0, 0, 0.9) 0%,       /* deep black start */
-      rgba(17, 24, 39, 0.8) 40%,   /* dark gray/black tint */
-      rgba(29, 78, 216, 0.1) 80%,  /* small hint of blue */
-      transparent 100%
-    ),
-    #000
-  `,
-}}
+//             style={{
+//   background: `
+//     linear-gradient(
+//       90deg,
+//       rgba(0, 0, 0, 0.9) 0%,       /* deep black start */
+//       rgba(17, 24, 39, 0.8) 40%,   /* dark gray/black tint */
+//       rgba(29, 78, 216, 0.1) 80%,  /* small hint of blue */
+//       transparent 100%
+//     ),
+//     #000
+//   `,
+// }}
 
           >
             <Header />

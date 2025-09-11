@@ -266,7 +266,7 @@ export default function SipPage() {
   );
 
   return (
-    <div>
+    <div className='bg-black'>
       <main className="py-12 pt-24">
         <div className="container mx-auto px-4">
           {isSuccess ? (
@@ -826,11 +826,11 @@ export default function SipPage() {
                                         onValueChange={field.onChange}
                                       >
                                         <FormControl>
-                                          <SelectTrigger className="bg-transparent text-white border border-white">
+                                          <SelectTrigger className="bg-black text-white border border-white">
                                             <SelectValue placeholder="Select a SIP plan" />
                                           </SelectTrigger>
                                         </FormControl>
-                                        <SelectContent className="bg-transparent text-white border border-white">
+                                        <SelectContent className="bg-black text-white border border-white">
                                           {SIP_PLANS.map((plan) => (
                                             <SelectItem
                                               key={plan.id}

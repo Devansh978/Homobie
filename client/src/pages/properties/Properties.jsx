@@ -507,7 +507,7 @@ const Properties = () => {
   }
 
   return (
-    <div className="min-h-screen text-white pt-[100px]">
+    <div className="min-h-screen text-white pt-[100px] bg-black">
       {/* Header */}
       <div className="border-b border-white/10  backdrop-blur-xl">
         <div className="max-w-7xl mx-auto px-4 py-8">

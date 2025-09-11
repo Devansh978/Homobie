@@ -69,7 +69,7 @@ import { getQueryParam, getLoanTypeLabel, calculateEMI } from "../lib/utils";
 // 1. CONSTANTS & API LOGIC (Centralized in this file)
 // ============================================================================
 
-const BASE_URL = "http://homobie.ap-south-1.elasticbeanstalk.com";
+// const BASE_URL = "http://homobie.ap-south-1.elasticbeanstalk.com";
 
 const BASE_URL = "http://homobie.ap-south-1.elasticbeanstalk.com/register/user";
 
@@ -115,12 +115,6 @@ const apiClient = async (
   method = "POST",
   body
 ) => {
-=======
-const apiClient = async function<T>(
-  endpoint: string,
-  method: 'POST',
-  body?: any
-): Promise<T> {
 
   const controller = new AbortController();
   const timeoutId = setTimeout(() => controller.abort(), 30000); // 30-second timeout
@@ -358,7 +352,7 @@ const LoanApplicationForm = ({ form, onSubmit, isSubmitting }: LoanApplicationFo
   const emiAmount = calculateEMI(Number(watchAmount), Number(watchInterestRate), Number(watchTenure));
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+    <div className="grid grid-cols-1 md:grid-cols-3 gap-8 bg-black">
       <Card className="md:col-span-2">
         <CardHeader>
           <CardTitle>Loan Application Form</CardTitle>
@@ -701,7 +695,7 @@ const LoanApplicationForm = ({ form, onSubmit, isSubmitting }: LoanApplicationFo
         </CardContent>
       </Card>
       <div className="space-y-6">
-        <Card className="bg-transparent border-primary/20">
+        <Card className="bg-transparent border-white">
             <CardHeader className="pb-2"><CardTitle className="text-lg flex items-center"><IndianRupee className="h-5 w-5 mr-2" />Loan Summary</CardTitle></CardHeader>
             <CardContent>
                 <div className="space-y-3">
@@ -848,7 +842,7 @@ export default function LoanApplicationPage() {
   };
 
   return (
-    <div>
+    <div className="bg-black">
       <main className="py-12 pt-20">
         <div className="container mx-auto px-4">
           <div className="max-w-4xl mx-auto">

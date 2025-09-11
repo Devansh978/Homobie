@@ -722,7 +722,7 @@ const { data: userConsultations, refetch: refetchConsultations, error: consultat
   }, [selectedDate, form, rescheduleForm]);
 
   return (
-    <div>
+    <div className='bg-black'>
       <main className=" pt-20">
         <div className="container mx-auto px-4">
           <div className="max-w-6xl mx-auto">
