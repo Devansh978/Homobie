@@ -81,7 +81,7 @@ export function LoanCalculator({ onApply }: LoanCalculatorProps) {
   };
 
   return (
-    <Card className="bg-black text-white rounded-xl shadow-lg border border-gray-800 ">
+    <Card className=" text-white rounded-xl shadow-lg border border-gray-800 ">
       <CardContent className="p-6">
         <h2 className="text-primary text-xl font-semibold mb-4">
           EMI Calculator
@@ -214,7 +214,7 @@ export function LoanCalculator({ onApply }: LoanCalculatorProps) {
           {/* Apply Button */}
           <Button
             onClick={handleApply}
-            className="w-full py-3 bg-primary text-white font-medium rounded-lg hover:bg-primary-dark transition-colors"
+            className="w-[25%] ml-[300px] py-3 bg-primary text-white font-medium rounded-lg hover:bg-primary-dark transition-colors"
           >
             Apply Now
           </Button>

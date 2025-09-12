@@ -52,7 +52,7 @@ const PropertyCard = ({ property, files, ownerName, isSlider }) => {
         />
         
         {/* Photo Count Badge */}
-        <div className="absolute top-3 right-3 bg-black/50 backdrop-blur-md text-white px-2 py-1 rounded-full text-xs flex items-center gap-1 border border-white/10">
+        <div className="absolute top-3 right-3 bg-transparent/50 backdrop-blur-md text-white px-2 py-1 rounded-full text-xs flex items-center gap-1 border border-white/10">
           <Camera className="w-3 h-3" />
           {files?.length || 0}
         </div>
@@ -111,7 +111,7 @@ const PropertyCard = ({ property, files, ownerName, isSlider }) => {
         <div className="flex items-center justify-between mb-4">
           <div className="text-white">
             <span className="text-2xl font-bold">
-              ₹{property.actualPrice ? parseFloat(property.actualPrice).toFixed(2) : "0.00"} Cr
+              ₹{property.actualPrice ? parseFloat(property.actualPrice).toFixed(2) : "0.00"}
             </span>
             
             {/* Show discount if discount price is different from actual price */}
@@ -119,10 +119,10 @@ const PropertyCard = ({ property, files, ownerName, isSlider }) => {
              parseFloat(property.discountPrice) !== parseFloat(property.actualPrice) && (
               <div className="flex flex-col">
                 <span className="text-white/40 text-sm line-through">
-                  ₹{parseFloat(property.discountPrice).toFixed(2)} Cr
+                  ₹{parseFloat(property.discountPrice).toFixed(2)}
                 </span>
                 <span className="text-green-400 text-xs">
-                  Save ₹{(parseFloat(property.discountPrice) - parseFloat(property.actualPrice)).toFixed(2)} Cr
+                  Save ₹{(parseFloat(property.discountPrice) - parseFloat(property.actualPrice)).toFixed(2)} 
                 </span>
               </div>
             )}

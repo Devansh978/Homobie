@@ -78,7 +78,7 @@ export class AuthService {
 
     this.token = localStorage.getItem("auth_token");
     this.refreshToken = localStorage.getItem("auth_refresh_token");
-    this.propertyId = localStorage.getItem('${propertyId}');
+     this.propertyId = localStorage.getItem('${propertyId}');
     this.userId = localStorage.getItem("userId");
     this.ownerId = localStorage.getItem("ownerId");
     this.timeSlotId = localStorage.getItem("timeSlotId");
@@ -126,6 +126,14 @@ export class AuthService {
       localStorage.removeItem("timeSlotId");
     }
   }
+
+    // === NEW PUBLIC METHOD ===
+  public setAuthData(user: AuthUser, tokens: { token: string; refreshToken: string }) {
+    this.saveToStorage(tokens.token, tokens.refreshToken, user);
+    this.setupTokenRefresh();
+  }
+
+  // === Auth API Calls ===
 
   // Clear token method for external use
   clearToken() {
@@ -320,8 +328,8 @@ export class AuthService {
   public getTimeSlotId(): string | null {
     return this.timeSlotId;
   }
-  // Check if user is authenticated
-  isAuthenticated(): boolean {
+
+  public isAuthenticated(): boolean {
     return !!this.token && !!this.user;
   }
 

@@ -71,8 +71,8 @@ export function EmiCalculator({ onApply }) {
   };
 
   return (
-    <div className='bg-black pt-24 pb-10'>
-    <Card className="bg-black text-white rounded-xl shadow-lg mx-36">
+    <div className=' pt-24 pb-10'>
+    <Card className=" text-white rounded-xl shadow-lg mx-36">
       <CardContent className="p-6">
         <h2 className="text-white text-2xl font-semibold mb-4">
           EMI Calculator
@@ -85,10 +85,10 @@ export function EmiCalculator({ onApply }) {
               Loan Type
             </Label>
             <Select value={loanType} onValueChange={handleLoanTypeChange}>
-              <SelectTrigger className="w-full p-3 border border-white/30 rounded-lg bg-black text-white">
+              <SelectTrigger className="w-full p-3 border border-white/30 rounded-lg  text-white">
                 <SelectValue placeholder="Select Loan Type" />
               </SelectTrigger>
-              <SelectContent className="bg-black text-white border border-white/30">
+              <SelectContent className=" text-white border border-white/30">
                 {LOAN_TYPES.map((type) => (
                   <SelectItem
                     key={type.id}
@@ -173,7 +173,7 @@ export function EmiCalculator({ onApply }) {
           </div>
 
           {/* Results */}
-          <div className="p-4 bg-black border border-white/30 rounded-lg">
+          <div className="p-4  border border-white/30 rounded-lg">
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <p className="text-md text-white/70">Monthly EMI</p>

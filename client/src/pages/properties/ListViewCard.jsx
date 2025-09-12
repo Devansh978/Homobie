@@ -26,7 +26,7 @@ const ListViewCard = ({ property, files, ownerName }) => {
             />
             <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent"></div>
           </div>
-          <div className="absolute top-2 left-2 bg-black/30 backdrop-blur-md text-white px-2 py-1 rounded-full text-xs flex items-center gap-1 border border-white/10">
+          <div className="absolute top-2 left-2 bg-transparent/30 backdrop-blur-md text-white px-2 py-1 rounded-full text-xs flex items-center gap-1 border border-white/10">
             <Camera className="w-2.5 h-2.5" />
             {files?.length || 0}
           </div>

@@ -1,106 +1,86 @@
 import React, { useState } from "react";
+import { TrendingUp } from "lucide-react";
 
-const CtaButton = ({ href = "#", children, styles }) => {
+const CtaButton = ({ href = "#", children }) => {
   const [isHovered, setIsHovered] = useState(false);
   return (
     <a
       href={href}
-      style={{
-        ...styles.ctaButton,
-        ...(isHovered ? styles.ctaButtonHover : null),
-      }}
+      className={`
+        inline-flex items-center px-8 py-4 bg-gradient-to-r from-blue-600 to-blue-700
+        text-white font-semibold rounded-lg shadow-lg transform transition-all duration-300
+        hover:from-blue-700 hover:to-blue-800 hover:shadow-xl hover:scale-105
+        focus:outline-none focus:ring-4 focus:ring-blue-300
+      `}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
       {children}
+      <TrendingUp className={`ml-2 w-5 h-5 transition-transform duration-300 ${isHovered ? "translate-x-1" : ""}`} />
     </a>
   );
 };
 
-const Blog3 = ({ styles }) => (
-  <div className="max-w-4xl mx-auto px-6 py-12 text-white">
-    <h1 className="text-4xl font-bold text-[#fff] mb-8 leading-tight">
-      Prepay Your Home Loan or Invest in SIP? A Dilemma Solved
-    </h1>
+const Blog3 = () => (
+  <div className="min-h-screen text-gray-200">
+    <div className="max-w-4xl mx-auto px-6 py-12">
+      
+      {/* Header */}
+      <div className="text-center mb-12">
+        <h1 className="text-4xl md:text-5xl font-bold text-white mb-6 leading-tight">
+          Prepay Your Home Loan or Invest in SIP? A Dilemma Solved
+        </h1>
+        <div className="w-24 h-1 bg-gradient-to-r from-blue-500 to-blue-600 mx-auto"></div>
+      </div>
 
-    <h2 className="text-2xl font-semibold text-[#fff] mb-4">
-      Introduction: A Common Crossroads
-    </h2>
-    <p className="mb-6 leading-relaxed text-white">
-      With surplus cash, should you{" "}
-      <strong className="text-[#e74c3c] font-semibold">
-        prepay your home loan
-      </strong>{" "}
-      or{" "}
-      <strong className="text-[#27ae60] font-semibold">
-        invest in SIP
-      </strong>
-      ? This is a question that many financially-conscious individuals face,
-      especially in a time when loan interest rates and market returns are
-      dynamic.
-    </p>
+      {/* Introduction */}
+      <section className="bg-gray-800 rounded-xl shadow-lg p-8 mb-10">
+        <h2 className="text-2xl font-semibold text-white mb-4">Introduction: A Common Crossroads</h2>
+        <p className="text-gray-300 leading-relaxed mb-4">
+          With surplus cash, should you{" "}
+          <strong className="text-red-500 font-semibold">prepay your home loan</strong> or{" "}
+          <strong className="text-green-500 font-semibold">invest in SIP</strong>? This is a common dilemma many face, especially
+          in a dynamic market where loan rates and investment returns fluctuate.
+        </p>
+      </section>
 
-    <h2 className="text-2xl font-semibold text-[#fff] mb-4">
-      Understanding the Basics
-    </h2>
-    <p className="mb-6 leading-relaxed text-white">
-      Prepaying your{" "}
-      <strong className="text-[#e74c3c] font-semibold">home loan</strong>{" "}
-      reduces your interest burden and shortens the loan tenure. On the other
-      hand, investing in{" "}
-      <strong className="text-[#27ae60] font-semibold">SIP</strong> allows
-      your money to grow through the power of compounding, provided the
-      investment return is higher than your loan interest rate.
-    </p>
+      {/* Basics */}
+      <section className="bg-gray-800 rounded-xl shadow-lg p-8 mb-10">
+        <h2 className="text-2xl font-semibold text-white mb-4">Understanding the Basics</h2>
+        <p className="text-gray-300 leading-relaxed mb-4">
+          Prepaying your <strong className="text-red-500 font-semibold">home loan</strong> reduces interest burden and tenure, while investing in{" "}
+          <strong className="text-green-500 font-semibold">SIP</strong> allows compounding growth, if returns exceed your loan rate.
+        </p>
+      </section>
 
-    <h2 className="text-2xl font-semibold text-[#fff] mb-4">
-      Key Factors to Consider
-    </h2>
-    <ul className="list-disc list-inside space-y-2 mb-6 text-white">
-      <li>
-        Loan interest rate vs. expected SIP returns – Compare both to make a
-        sound decision.
-      </li>
-      <li>
-        Financial security – Prepaying reduces debt risk, while SIP provides
-        growth potential.
-      </li>
-      <li>
-        Tax benefits – Consider the deductions you receive under{" "}
-        <strong className="text-[#8e44ad] font-semibold">Section 24</strong>{" "}
-        and{" "}
-        <strong className="text-[#8e44ad] font-semibold">
-          Section 80C
-        </strong>
-        .
-      </li>
-    </ul>
+      {/* Key Factors */}
+      <section className="bg-gray-800 rounded-xl shadow-lg p-8 mb-10">
+        <h2 className="text-2xl font-semibold text-white mb-4">Key Factors to Consider</h2>
+        <ul className="list-disc list-inside space-y-2 text-gray-300">
+          <li>Loan interest rate vs. expected SIP returns – Compare both to make a sound decision.</li>
+          <li>Financial security – Prepaying reduces debt risk, SIP provides growth potential.</li>
+          <li>Tax benefits – Consider deductions under <strong className="text-purple-500 font-semibold">Section 24</strong> and <strong className="text-purple-500 font-semibold">Section 80C</strong>.</li>
+        </ul>
+      </section>
 
-    <h2 className="text-2xl font-semibold text-[#fff] mb-4">
-      The Verdict
-    </h2>
-    <p className="mb-6 leading-relaxed text-white">
-      If your loan interest rate is higher than the average{" "}
-      <strong className="text-[#27ae60] font-semibold">
-        SIP returns
-      </strong>{" "}
-      (post-tax), prepaying your home loan might be the wiser choice.
-      Otherwise, investing in SIP could yield better long-term results.
-    </p>
+      {/* Verdict */}
+      <section className="bg-gray-800 rounded-xl shadow-lg p-8 mb-10">
+        <h2 className="text-2xl font-semibold text-white mb-4">The Verdict</h2>
+        <p className="text-gray-300 leading-relaxed mb-4">
+          If loan interest exceeds average <strong className="text-green-500 font-semibold">SIP returns</strong> (post-tax), prepaying might be wiser. Otherwise, SIP may yield better long-term growth.
+        </p>
+        <blockquote className="border-l-4 border-yellow-500 pl-4 italic text-gray-100 mb-4">
+          “A balanced approach — partially prepaying your home loan while investing in SIP — can give the best of both worlds.”
+        </blockquote>
+        <p className="text-gray-300 font-medium">Assess your risk tolerance, financial goals, and market conditions before deciding.</p>
+      </section>
 
-    <blockquote className="border-l-4 border-[#f39c12] pl-4 italic text-[#fff] mb-8">
-      “A balanced approach — partially prepaying your home loan and
-      simultaneously investing in SIP — can give you the best of both worlds.”
-    </blockquote>
-
-    <p className="text-white font-medium">
-      Make sure to assess your risk tolerance, financial goals, and current
-      market conditions before making the decision.
-    </p>
-    <div className="text-center mt-8">
-      <CtaButton styles={styles} href="#">
-        Assess your goals and make the right move with Homobie
-      </CtaButton>
+      {/* CTA */}
+      <div className="text-center mt-8">
+        <CtaButton href="/loan-application?type=home-loan">
+          Assess your goals and make the right move with Homobie
+        </CtaButton>
+      </div>
     </div>
   </div>
 );
