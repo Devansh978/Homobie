@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Link } from "wouter";
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
-import Feedback from "./Feedback";
+import Feedback from "./Feedback/Feedback";
 import EmiCalculator from "./EmiCalculator/EmiCalculator";
 import {
   ArrowRight,
