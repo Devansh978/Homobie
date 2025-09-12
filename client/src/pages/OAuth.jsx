@@ -25,7 +25,7 @@ const OAuth = () => {
 
   const handleOAuthCallback = async (code) => {
     try {
-      const response = await fetch('http://homobie.ap-south-1.elasticbeanstalk.com/auth/oauth/callback', {
+      const response = await fetch('https://homobie.ap-south-1.elasticbeanstalk.com/auth/oauth/callback', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -63,7 +63,7 @@ const OAuth = () => {
   const handleGoogleLogin = () => {
     try {
       // Redirect to your backend OAuth2 endpoint
-      window.location.href = 'http://homobie.ap-south-1.elasticbeanstalk.com/oauth2/authorization/google';
+      window.location.href = 'https://homobie.ap-south-1.elasticbeanstalk.com/oauth2/authorization/google';
     } catch (error) {
       console.error("OAuth redirect failed:", error);
       toast.error("Failed to initiate Google login. Please try again.");

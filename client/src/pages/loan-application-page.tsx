@@ -68,7 +68,7 @@ import { getQueryParam, getLoanTypeLabel, calculateEMI } from "../lib/utils";
 // ============================================================================
 // 1. CONSTANTS & API LOGIC (Centralized in this file)
 // ============================================================================
-const BASE_URL = "http://homobie.ap-south-1.elasticbeanstalk.com/register/user";
+const BASE_URL = "https://homobie.ap-south-1.elasticbeanstalk.com/register/user";
 
 /**
  * A custom error class for handling API errors in a structured way.
@@ -166,6 +166,14 @@ const apiClient = async (
   }
 };
 
+// Helper function to get loan type from parameter
+const getLoanTypeFromParam = (param: string): string => {
+  switch (param.toLowerCase()) {
+    case "lap": return "LAP";
+    case "bt-topup": return "BT_TOPUP";
+    default: return "HOME_LOAN";
+  }
+};
 
 // ============================================================================
 // 2. ZOD SCHEMA & TYPES
