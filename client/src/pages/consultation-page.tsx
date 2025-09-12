@@ -105,7 +105,7 @@ type EmailVerifyValues = z.infer<typeof emailVerifySchema>;
 type CancelFormValues = z.infer<typeof cancelFormSchema>;
 type RescheduleFormValues = z.infer<typeof rescheduleFormSchema>;
 
-const BASE_URL = 'http://homobie.ap-south-1.elasticbeanstalk.com';
+const BASE_URL = 'https://homobie.ap-south-1.elasticbeanstalk.com';
 
 export default function ConsultationPage() {
   const [location, navigate] = useLocation();

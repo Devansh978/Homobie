@@ -3,7 +3,7 @@ import { Link } from "wouter";
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import Feedback from "./Feedback";
-import InterestFreeLoans from "./InterestFreeLoans";
+import EmiCalculator from "./EmiCalculator/EmiCalculator";
 import {
   ArrowRight,
   Calculator,
@@ -21,6 +21,7 @@ import {
   Circle,
   MoveRight,
 } from "lucide-react";
+import Bricks from "./Bricks";
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -43,6 +44,34 @@ const itemVariants = {
     },
   },
 };
+
+// Updated partner banks array with working URLs
+const partnerBanks = [
+  { 
+    name: "HDFC Bank", 
+    logoUrl: "https://upload.wikimedia.org/wikipedia/commons/thumb/2/28/HDFC_Bank_Logo.svg/2560px-HDFC_Bank_Logo.svg.png" 
+  },
+  { 
+    name: "ICICI Bank", 
+    logoUrl: "https://www.icicibank.com/content/dam/icicibank-revamp/images/icici-logo/icici-header-logo.png"
+  },
+  { 
+    name: "State Bank of India", 
+    logoUrl: "https://sbi.bank.in/o/SBI-Theme/images/custom/logo.png" 
+  },
+  { 
+    name: "Axis Bank", 
+    logoUrl: "https://www.axisbank.com/assets/images/logo-white.png"
+  },
+  { 
+    name: "Kotak Mahindra Bank", 
+    logoUrl: "https://www.kotak811.com/open-zero-balance-savings-account/images/logo-new.svg"
+  },
+  { 
+    name: "Bajaj Finserv", 
+    logoUrl: "https://cms-assets.bajajfinserv.in/is/image/bajajfinance/bajaj-logo-sep-15?scl=1&fmt=png-alpha"
+  },
+];
 
 export default function HomePage() {
   const [hoveredCard, setHoveredCard] = useState(null);
@@ -69,7 +98,7 @@ export default function HomePage() {
 
   const Particle = ({ size, x, y, delay }) => (
     <motion.div
-      className="absolute rounded-full bg-white/3"
+      className="absolute rounded-full bg-white/30"
       initial={{ opacity: 0, scale: 0 }}
       animate={{
         opacity: [0, 0.4, 0],
@@ -98,44 +127,17 @@ export default function HomePage() {
       {children}
     </span>
   );
+  
   const handleCalculate = () => {
     if (amount > 0 && months > 0) {
       setShowResult(true);
     }
   };
+  
   return (
     <div className="relative min-h-screen overflow-hidden">
       <div className="fixed inset-0 z-0">
         <div className="absolute inset-0 bg-black" />
-
-        <div
-          className="absolute pointer-events-none transition-all duration-200 ease-out"
-          style={{
-            left: `${mousePosition.x}%`,
-            top: `${mousePosition.y}%`,
-            transform: "translate(-50%, -50%)",
-            width: "800px",
-            height: "800px",
-            background:
-              "radial-gradient(circle, rgba(99, 102, 241, 0.4) 0%, rgba(59, 130, 246, 0.3) 25%, rgba(147, 51, 234, 0.2) 50%, rgba(99, 102, 241, 0.1) 75%, transparent 100%)",
-            filter: "blur(120px)",
-          }}
-        />
-        <div
-          className="absolute pointer-events-none transition-all duration-300 ease-out"
-          style={{
-            left: `${mousePosition.x + 10}%`,
-            top: `${mousePosition.y + 10}%`,
-            transform: "translate(-50%, -50%)",
-            width: "500px",
-            height: "500px",
-            background:
-              "radial-gradient(circle, rgba(139, 92, 246, 0.3) 0%, rgba(99, 102, 241, 0.2) 40%, rgba(59, 130, 246, 0.15) 70%, transparent 90%)",
-            filter: "blur(100px)",
-          }}
-        />
-
-        {/* Floating particles */}
         <div className="absolute inset-0 overflow-hidden">
           {[...Array(30)].map((_, i) => (
             <Particle
@@ -149,43 +151,78 @@ export default function HomePage() {
         </div>
       </div>
 
-      {/* Glass Content Container */}
       <div className="relative z-10">
-        {/* Hero Section */}
         <section
           id="hero-section"
           className="relative min-h-screen flex items-center justify-center overflow-hidden mt-12 bg-gradient-to-br from-black via-gray-900 to-gray-800 opacity-90"
         >
-          <div
-            className="absolute pointer-events-none transition-all duration-100 ease-out"
-            style={{
-              left: `${mousePosition.x}%`,
-              top: `${mousePosition.y}%`,
-              transform: "translate(-50%, -50%)",
-              width: "600px",
-              height: "600px",
-              background:
-                "radial-gradient(circle, #4f46e5 0%, #1f2937  30%, #111827  55%, rgba(0,0,128,0.2) 75%, transparent 100%)",
-              filter: "blur(100px)",
-              zIndex: 1,
-            }}
-          />
+          <div className="container mx-auto px-4 z-10 relative flex items-center justify-between">
+            <div className="w-[75%]  flex-1 flex flex-col items-center text-center md:items-start md:text-center">
+              <motion.div
+                variants={containerVariants}
+                initial="hidden"
+                animate="visible"
+                className="max-w-4xl mx-auto"
+              >
+                <motion.div className="mb-12" variants={containerVariants}>
+                  <motion.p
+                    variants={itemVariants}
+                    className="text-5xl md:text-[75px] font-bold mb-6 tracking-tight text-white mt-4"
+                  >
+                    the home loan experience,
+                  </motion.p>
+                  <motion.p
+                    variants={itemVariants}
+                    className="text-6xl md:text-8xl font-bold mb-8 tracking-tighter"
+                  >
+                    <GradientText>REIMAGINED.</GradientText>
+                  </motion.p>
+                </motion.div>
 
-          <div
-            className="absolute pointer-events-none transition-all duration-100 ease-out"
-            style={{
-              left: `${mousePosition.x + 5}%`,
-              top: `${mousePosition.y + 5}%`,
-              transform: "translate(-50%, -50%)",
-              width: "400px",
-              height: "400px",
-              background:
-                "radial-gradient(circle, 4f46e5 0%, #1f2937 45%, rgba(0,0,128,0.25) 65%, transparent 90%)",
-              filter: "blur(80px)",
-              zIndex: 1,
-            }}
-          />
+                <motion.div
+                  initial={{ opacity: 0, y: 50 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.8, delay: 0.4 }}
+                  className="backdrop-blur-2xl bg-white/5 rounded-3xl p-8 md:p-12 shadow-2xl mb-12 border border-white/10"
+                  whileHover={{
+                    y: -5,
+                    boxShadow:
+                      "0 20px 25px -5px rgba(255, 255, 255, 0.1), 0 10px 10px -5px rgba(255, 255, 255, 0.04)",
+                  }}
+                >
+                  <motion.h1
+                    initial={{ opacity: 0.8 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ delay: 0.6 }}
+                    className="text-xl md:text-2xl font-medium mb-3 leading-relaxed p-1 text-center tracking-tight text-white"
+                  >
+                    Home loans, mortgage loans, SIP plans? — we speak fluent
+                    finance, so you don't have to
+                  </motion.h1>
 
+                  <motion.div
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ delay: 0.8 }}
+                    className="flex flex-wrap justify-center gap-2"
+                  >
+                    <Link href="/loan-application?type=home-loan">
+                      <Button className="px-2 py-4 bg-white hover:bg-white/90 text-black text-lg font-bold rounded-xl backdrop-blur-md border border-white/20 shadow-lg hover:shadow-white/30 transition-all duration-300 group">
+                        Smarter Loans start here
+                        <MoveRight className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" />
+                      </Button>
+                    </Link>
+                    <Link href="/consultation">
+                      <Button className="px-2 py-4 bg-white hover:bg-white/90 text-black text-lg font-bold rounded-xl backdrop-blur-md border border-white/20 shadow-lg hover:shadow-white/30 transition-all duration-300 group">
+                        Book Free Consultation
+                        <MoveRight className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" />
+                      </Button>
+                    </Link>
+                  </motion.div>
+                </motion.div>
+              </motion.div>
+            </div>
+          </div>
           <motion.div
             className="absolute inset-0 z-0"
             initial={{ opacity: 0 }}
@@ -194,94 +231,9 @@ export default function HomePage() {
           >
             <div className="absolute inset-0 bg-gradient-to-br from-black via-gray-900 to-gray-800 opacity-90" />
           </motion.div>
-
-          <div className="container mx-auto px-4 z-10 relative">
-            <motion.div
-              variants={containerVariants}
-              initial="hidden"
-              animate="visible"
-              className="max-w-4xl mx-auto text-center"
-            >
-              <motion.div className="mb-12" variants={containerVariants}>
-                <motion.p
-                  variants={itemVariants}
-                  className="text-5xl md:text-[75px] font-bold mb-6 tracking-tight text-white"
-                >
-                  the home loan experience,
-                </motion.p>
-                <motion.p
-                  variants={itemVariants}
-                  className="text-6xl md:text-8xl font-bold mb-8 tracking-tighter"
-                >
-                  <GradientText>REIMAGINED.</GradientText>
-                </motion.p>
-              </motion.div>
-
-              {/* Glass card with hover effect */}
-              <motion.div
-                initial={{ opacity: 0, y: 50 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.8, delay: 0.4 }}
-                className="backdrop-blur-2xl bg-white/5 rounded-3xl p-8 md:p-12 shadow-2xl mb-12 border border-white/10"
-                whileHover={{
-                  y: -5,
-                  boxShadow:
-                    "0 20px 25px -5px rgba(255, 255, 255, 0.1), 0 10px 10px -5px rgba(255, 255, 255, 0.04)",
-                }}
-              >
-                <motion.h1
-                  initial={{ opacity: 0.8 }}
-                  animate={{ opacity: 1 }}
-                  transition={{ delay: 0.6 }}
-                  className="text-xl md:text-2xl font-medium mb-3 leading-relaxed p-1 text-center tracking-tight text-white"
-                >
-                  Home loans, mortgage loans, SIP plans? — we speak fluent
-                  finance, so you don't have to
-                </motion.h1>
-
-                <motion.div
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  transition={{ delay: 0.8 }}
-                  className="flex flex-wrap justify-center gap-4"
-                >
-                  <Link href="/loan-application?type=home-loan">
-                    <Button
-                      variant="outline"
-                      className="px-8 py-4 bg-white hover:bg-white/90 text-black text-lg font-bold rounded-xl backdrop-blur-md border border-white/20 shadow-lg hover:shadow-white/30 transition-all duration-300 group"
-                    >
-                      Smarter Loans start here
-                      <MoveRight className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" />
-                    </Button>
-                  </Link>
-                  <Link href="/consultation">
-                    <Button
-                      variant="outline"
-                      className="px-8 py-4 bg-white hover:bg-white/90 text-black text-lg font-bold rounded-xl backdrop-blur-md border border-white/20 shadow-lg hover:shadow-white/30 transition-all duration-300 group"
-                    >
-                      Book Free Consultation
-                      <MoveRight className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" />
-                    </Button>
-                  </Link>
-                </motion.div>
-              </motion.div>
-            </motion.div>
-          </div>
-
-          {/* Custom cursor indicator */}
-          <div
-            className="absolute pointer-events-none w-4 h-4 border border-white/40 rounded-full transition-all duration-100 ease-out z-20"
-            style={{
-              left: `${mousePosition.x}%`,
-              top: `${mousePosition.y}%`,
-              transform: "translate(-50%, -50%)",
-            }}
-          >
-            <div className="absolute inset-0.5 bg-white/60 rounded-full" />
-          </div>
         </section>
-        <InterestFreeLoans />
-        {/* Value Proposition Section */}
+
+        <EmiCalculator background="transparent" />
         <section className="py-24 px-4">
           <div className="max-w-6xl mx-auto">
             <motion.div
@@ -355,8 +307,6 @@ export default function HomePage() {
                         {item.title}
                       </h3>
                       <p className="text-white/80">{item.description}</p>
-
-                      {/* Hover gradient overlay */}
                       <motion.div
                         className="absolute inset-0 bg-gradient-to-br from-white/5 to-transparent rounded-2xl"
                         animate={{
@@ -372,7 +322,6 @@ export default function HomePage() {
           </div>
         </section>
 
-        {/* Product Offerings Section */}
         <section className="py-24 px-4">
           <div className="max-w-6xl mx-auto">
             <motion.div
@@ -469,8 +418,54 @@ export default function HomePage() {
             </motion.div>
           </div>
         </section>
-<Feedback />
-        {/* SIP Feature Section */}
+        
+        {/* ========= PARTNER BANKS SECTION START ========= */}
+        <section className="py-24 px-4">
+          <div className="max-w-6xl mx-auto text-center">
+            <motion.h2 
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5 }}
+                viewport={{ once: true }}
+                className="text-3xl md:text-4xl font-bold mb-4 text-white"
+            >
+                Our Partner Banks & NBFCs
+            </motion.h2>
+            <motion.p 
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, delay: 0.1 }}
+                viewport={{ once: true }}
+                className="text-lg text-white/70 mb-12 max-w-2xl mx-auto"
+            >
+                We've partnered with India's leading financial institutions to bring you the best loan offers.
+            </motion.p>
+            
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-8 items-center">
+                {partnerBanks.map((bank, index) => (
+                  <motion.div
+                    key={bank.name}
+                    initial={{ opacity: 0, y: 20 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.5, delay: index * 0.1 }}
+                    viewport={{ once: true }}
+                    whileHover={{ y: -5, scale: 1.05 }}
+                    className="flex justify-center p-4 bg-white/5 rounded-xl backdrop-blur-sm border border-white/10 hover:border-white/20 transition-all duration-300"
+                  >
+                    <img 
+                        src={bank.logoUrl} 
+                        alt={bank.name} 
+                        className="h-10 lg:h-12 w-auto object-contain opacity-80 hover:opacity-100 transition-all duration-300"
+                    />
+                  </motion.div>
+                ))}
+            </div>
+          </div>
+        </section>
+        {/* ========= PARTNER BANKS SECTION END ========= */}
+
+        <Feedback />
+
         <section className="py-24 px-4">
           <div className="max-w-6xl mx-auto">
             <motion.div
@@ -480,7 +475,6 @@ export default function HomePage() {
               viewport={{ once: true, margin: "-100px" }}
               className="backdrop-blur-xl bg-white/5 rounded-3xl p-8 md:p-12 shadow-2xl overflow-hidden border border-white/20 relative"
             >
-              {/* Animated gradient border */}
               <motion.div
                 initial={{ x: "-100%" }}
                 whileInView={{ x: "100%" }}
@@ -579,7 +573,6 @@ export default function HomePage() {
           </div>
         </section>
 
-        {/* Final CTA */}
         <section className="py-24 px-4">
           <div className="max-w-4xl mx-auto">
             <motion.div
@@ -589,7 +582,6 @@ export default function HomePage() {
               viewport={{ once: true }}
               className="text-center backdrop-blur-xl bg-white/10 rounded-3xl p-12 shadow-2xl overflow-hidden border border-white/20 relative"
             >
-              {/* Floating elements */}
               <motion.div
                 className="absolute -top-10 -right-10 w-20 h-20 rounded-full bg-white/10"
                 animate={{ scale: [1, 1.2, 1] }}

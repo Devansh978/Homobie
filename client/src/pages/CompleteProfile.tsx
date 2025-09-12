@@ -76,7 +76,7 @@ const CompleteProfile: React.FC<CompleteProfileProps> = ({
         roleData: roleData,
       };
 
-      const response = await fetch('http://homobie.ap-south-1.elasticbeanstalk.com/register/update', {
+      const response = await fetch('https://homobie.ap-south-1.elasticbeanstalk.com/register/update', {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(requestPayload),

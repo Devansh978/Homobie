@@ -1,7 +1,7 @@
 import { normalizePropertyData } from './AllPropertiesData';
 
 // Inside an async function in your component...
-const response = await fetch('http://homobie.ap-south-1.elasticbeanstalk.com/properties/allProperties?pincode=string');
+const response = await fetch('https://homobie.ap-south-1.elasticbeanstalk.com/properties/allProperties?pincode=string');
 const apiData = await response.json();
 
 // Normalize the messy API data into a clean format
