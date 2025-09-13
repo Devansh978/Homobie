@@ -103,7 +103,7 @@ const getToken = (): string => {
 };
 
 // Alternative syntax - move generic after async
-const apiClient = async (
+const apiClient = async <T,>(
   endpoint: string,
   method: 'POST',
   body?: any
@@ -251,10 +251,10 @@ const FormError = ({ error, onRetry, isRetrying }: { error: ApiError | null; onR
   const isEligibilityError = error.eligibility === "ineligible";
 
   return (
-    <Alert variant="destructive" className="mb-6">
+    <Alert variant="destructive" className="mb-6 bg-red-900/30 border-red-700">
       <XCircle className="h-4 w-4" />
-      <AlertTitle>{isEligibilityError ? "Application Ineligible" : "Submission Failed"}</AlertTitle>
-      <AlertDescription className="space-y-2">
+      <AlertTitle className="text-red-200">{isEligibilityError ? "Application Ineligible" : "Submission Failed"}</AlertTitle>
+      <AlertDescription className="space-y-2 text-red-100">
         <p>{error.message}</p>
         {isEligibilityError && error.inEligibleResponse && (
           <ul className="list-disc pl-5 mt-2 text-xs">
@@ -263,7 +263,7 @@ const FormError = ({ error, onRetry, isRetrying }: { error: ApiError | null; onR
         )}
         {isRetryable && (
           <div className="mt-4">
-            <Button variant="outline" size="sm" onClick={onRetry} disabled={isRetrying}>
+            <Button variant="outline" size="sm" onClick={onRetry} disabled={isRetrying} className="bg-red-800/50 border-red-600 text-white hover:bg-red-700">
               {isRetrying ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <RefreshCw className="mr-2 h-4 w-4" />}
               {isRetrying ? "Retrying..." : "Retry"}
             </Button>
@@ -280,21 +280,21 @@ const SubmissionSuccess = ({ submittedData }: { submittedData: any }) => {
 
   return (
     <div className="space-y-8">
-      <Card>
+      <Card className="bg-gray-800 border-gray-700">
         <CardContent className="pt-8 text-center">
-          <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
-            <Check className="h-8 w-8 text-green-600" />
+          <div className="w-16 h-16 bg-green-900/30 rounded-full flex items-center justify-center mx-auto mb-4">
+            <Check className="h-8 w-8 text-green-400" />
           </div>
-          <h2 className="text-2xl font-bold mb-2">Application Submitted!</h2>
-          <p className="text-gray-600 mb-6">
-            Your application (ID: <span className="font-medium">{submittedData?.id || 'N/A'}</span>) has been received.
+          <h2 className="text-2xl font-bold mb-2 text-white">Application Submitted!</h2>
+          <p className="text-gray-300 mb-6">
+            Your application (ID: <span className="font-medium text-white">{submittedData?.id || 'N/A'}</span>) has been received.
           </p>
         </CardContent>
       </Card>
-      <Card>
+      <Card className="bg-gray-800 border-gray-700">
         <CardHeader>
-          <CardTitle></CardTitle>
-          <CardDescription className="font-bold mb-3 text-center">our team will get in touch with you soon</CardDescription>
+          <CardTitle className="text-white"></CardTitle>
+          <CardDescription className="font-bold mb-3 text-center text-gray-300">Our team will get in touch with you soon</CardDescription>
         </CardHeader>
         <CardContent>
           {/* <PaymentGateway
@@ -307,8 +307,8 @@ const SubmissionSuccess = ({ submittedData }: { submittedData: any }) => {
           /> */}
         </CardContent>
         <CardFooter className="flex justify-between">
-          <Button variant="outline" onClick={() => navigate("/")}>Back to Home</Button>
-          <Button onClick={() => navigate("/dashboard")}>Go to Dashboard</Button>
+          <Button variant="outline" onClick={() => navigate("/")} className="bg-transparent text-white border-gray-600 hover:bg-gray-700">Back to Home</Button>
+          <Button onClick={() => navigate("/dashboard")} className="bg-blue-600 hover:bg-blue-700">Go to Dashboard</Button>
         </CardFooter>
       </Card>
     </div>
@@ -333,16 +333,26 @@ const LoanApplicationForm = ({ form, onSubmit, isSubmitting }: LoanApplicationFo
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-      <Card className="md:col-span-2">
+      <Card className="md:col-span-2 bg-gray-800 border-gray-700">
         <CardHeader>
-          <CardTitle>Loan Application Form</CardTitle>
-          <CardDescription>Fill in all required information to submit your application.</CardDescription>
+          <CardTitle className="text-white">Loan Application Form</CardTitle>
+          <CardDescription className="text-gray-400">Fill in all required information to submit your application.</CardDescription>
         </CardHeader>
         <CardContent>
           <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-            <TabsList className="grid w-full grid-cols-2">
-              <TabsTrigger value="loan-details">Loan Details</TabsTrigger>
-              <TabsTrigger value="personal-details">Personal & Financial</TabsTrigger>
+            <TabsList className="grid w-full grid-cols-2 bg-gray-900 p-1">
+              <TabsTrigger 
+                value="loan-details" 
+                className="data-[state=active]:bg-blue-600 data-[state=active]:text-white text-gray-300"
+              >
+                Loan Details
+              </TabsTrigger>
+              <TabsTrigger 
+                value="personal-details" 
+                className="data-[state=active]:bg-blue-600 data-[state=active]:text-white text-gray-300"
+              >
+                Personal & Financial
+              </TabsTrigger>
             </TabsList>
             <Form {...form}>
               <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6 mt-6">
@@ -352,23 +362,23 @@ const LoanApplicationForm = ({ form, onSubmit, isSubmitting }: LoanApplicationFo
                     name="loanType"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Loan Type</FormLabel>
+                        <FormLabel className="text-white">Loan Type</FormLabel>
                         <Select
                           value={field.value}
                           onValueChange={field.onChange}
                         >
                           <FormControl>
-                            <SelectTrigger>
+                            <SelectTrigger className="bg-gray-700 border-gray-600 text-white">
                               <SelectValue placeholder="Select loan type" />
                             </SelectTrigger>
                           </FormControl>
-                          <SelectContent>
+                          <SelectContent className="bg-gray-800 border-gray-700 text-white">
                             <SelectItem value="HOME_LOAN">Home Loan</SelectItem>
                             <SelectItem value="LAP">Loan Against Property</SelectItem>
                             <SelectItem value="BT_TOPUP">Balance Transfer Top-Up</SelectItem>
                           </SelectContent>
                         </Select>
-                        <FormDescription>
+                        <FormDescription className="text-gray-400">
                           Select the type of loan you wish to apply for
                         </FormDescription>
                         <FormMessage />
@@ -382,15 +392,16 @@ const LoanApplicationForm = ({ form, onSubmit, isSubmitting }: LoanApplicationFo
                       name="amount"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Loan Amount (₹)</FormLabel>
+                          <FormLabel className="text-white">Loan Amount (₹)</FormLabel>
                           <FormControl>
                             <Input
                               type="number"
                               placeholder="Enter loan amount"
+                              className="bg-gray-700 border-gray-600 text-white placeholder:text-gray-400 focus:ring-blue-500"
                               {...field}
                             />
                           </FormControl>
-                          <FormDescription>
+                          <FormDescription className="text-gray-400">
                             Minimum: ₹1,00,000 | Maximum: ₹1,00,00,000
                           </FormDescription>
                           <FormMessage />
@@ -403,17 +414,18 @@ const LoanApplicationForm = ({ form, onSubmit, isSubmitting }: LoanApplicationFo
                       name="tenure"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Loan Tenure (Years)</FormLabel>
+                          <FormLabel className="text-white">Loan Tenure (Years)</FormLabel>
                           <FormControl>
                             <Input
                               type="number"
                               min="1"
                               max="30"
                               placeholder="Enter loan tenure in years"
+                              className="bg-gray-700 border-gray-600 text-white placeholder:text-gray-400 focus:ring-blue-500"
                               {...field}
                             />
                           </FormControl>
-                          <FormDescription>
+                          <FormDescription className="text-gray-400">
                             Duration in years (1-30 years)
                           </FormDescription>
                           <FormMessage />
@@ -427,7 +439,7 @@ const LoanApplicationForm = ({ form, onSubmit, isSubmitting }: LoanApplicationFo
                     name="interestRate"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Interest Rate (% per annum)</FormLabel>
+                        <FormLabel className="text-white">Interest Rate (% per annum)</FormLabel>
                         <FormControl>
                           <Input
                             type="number"
@@ -435,10 +447,11 @@ const LoanApplicationForm = ({ form, onSubmit, isSubmitting }: LoanApplicationFo
                             min="5"
                             max="20"
                             placeholder="Enter interest rate"
+                            className="bg-gray-700 border-gray-600 text-white placeholder:text-gray-400 focus:ring-blue-500"
                             {...field}
                           />
                         </FormControl>
-                        <FormDescription>
+                        <FormDescription className="text-gray-400">
                           Current rate for {getLoanTypeLabel(loanTypeParam)}. Final rate subject to eligibility.
                         </FormDescription>
                         <FormMessage />
@@ -451,15 +464,15 @@ const LoanApplicationForm = ({ form, onSubmit, isSubmitting }: LoanApplicationFo
                     name="purpose"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Loan Purpose <span className="text-destructive">*</span></FormLabel>
+                        <FormLabel className="text-white">Loan Purpose <span className="text-destructive">*</span></FormLabel>
                         <FormControl>
                           <Textarea
                             placeholder="Please provide a detailed description of your purpose for taking this loan (minimum 10 characters)"
-                            className="min-h-[100px]"
+                            className="min-h-[100px] bg-gray-700 border-gray-600 text-white placeholder:text-gray-400 focus:ring-blue-500"
                             {...field}
                           />
                         </FormControl>
-                        <FormDescription>
+                        <FormDescription className="text-gray-400">
                           Be specific about how you plan to use the loan amount
                         </FormDescription>
                         <FormMessage />
@@ -469,9 +482,9 @@ const LoanApplicationForm = ({ form, onSubmit, isSubmitting }: LoanApplicationFo
 
                   {(form.watch("loanType") === "HOME_LOAN" || form.watch("loanType") === "LAP") && (
                     <>
-                      <Separator />
-                      <h3 className="text-lg font-medium flex items-center pt-2">
-                        <Building className="h-5 w-5 mr-2" />
+                      <Separator className="bg-gray-700" />
+                      <h3 className="text-lg font-medium flex items-center pt-2 text-white">
+                        <Building className="h-5 w-5 mr-2 text-blue-400" />
                         Property Details
                       </h3>
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -480,11 +493,12 @@ const LoanApplicationForm = ({ form, onSubmit, isSubmitting }: LoanApplicationFo
                           name="propertyValue"
                           render={({ field }) => (
                             <FormItem>
-                              <FormLabel>Property Value (₹) <span className="text-destructive">*</span></FormLabel>
+                              <FormLabel className="text-white">Property Value (₹) <span className="text-destructive">*</span></FormLabel>
                               <FormControl>
                                 <Input
                                   type="number"
                                   placeholder="Enter estimated property value"
+                                  className="bg-gray-700 border-gray-600 text-white placeholder:text-gray-400 focus:ring-blue-500"
                                   {...field}
                                   value={field.value ?? ""}
                                 />
@@ -499,9 +513,13 @@ const LoanApplicationForm = ({ form, onSubmit, isSubmitting }: LoanApplicationFo
                           name="propertyAddressLine1"
                           render={({ field }) => (
                             <FormItem>
-                              <FormLabel>Address Line 1</FormLabel>
+                              <FormLabel className="text-white">Address Line 1</FormLabel>
                               <FormControl>
-                                <Input placeholder="House/Flat number, Street name, Area" {...field} />
+                                <Input 
+                                  placeholder="House/Flat number, Street name, Area" 
+                                  className="bg-gray-700 border-gray-600 text-white placeholder:text-gray-400 focus:ring-blue-500"
+                                  {...field} 
+                                />
                               </FormControl>
                               <FormMessage />
                             </FormItem>
@@ -512,45 +530,179 @@ const LoanApplicationForm = ({ form, onSubmit, isSubmitting }: LoanApplicationFo
                           name="propertyAddressLine2"
                           render={({ field }) => (
                             <FormItem>
-                              <FormLabel>Address Line 2 (Optional)</FormLabel>
+                              <FormLabel className="text-white">Address Line 2 (Optional)</FormLabel>
                               <FormControl>
-                                <Input placeholder="Apartment, suite, unit, building, floor" {...field} />
+                                <Input 
+                                  placeholder="Apartment, suite, unit, building, floor" 
+                                  className="bg-gray-700 border-gray-600 text-white placeholder:text-gray-400 focus:ring-blue-500"
+                                  {...field} 
+                                />
                               </FormControl>
                               <FormMessage />
                             </FormItem>
                           )}
                         />
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <FormField control={form.control} name="propertyLandmark" render={({ field }) => (<FormItem><FormLabel>Landmark</FormLabel><FormControl><Input placeholder="Nearby prominent location" {...field} /></FormControl><FormMessage /></FormItem>)} />
-                        <FormField control={form.control} name="propertyCity" render={({ field }) => (<FormItem><FormLabel>City</FormLabel><FormControl><Input placeholder="City name" {...field} /></FormControl><FormMessage /></FormItem>)} />
+                        <FormField control={form.control} name="propertyLandmark" render={({ field }) => (
+                          <FormItem>
+                            <FormLabel className="text-white">Landmark</FormLabel>
+                            <FormControl>
+                              <Input 
+                                placeholder="Nearby prominent location" 
+                                className="bg-gray-700 border-gray-600 text-white placeholder:text-gray-400 focus:ring-blue-500"
+                                {...field} 
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )} />
+                        <FormField control={form.control} name="propertyCity" render={({ field }) => (
+                          <FormItem>
+                            <FormLabel className="text-white">City</FormLabel>
+                            <FormControl>
+                              <Input 
+                                placeholder="City name" 
+                                className="bg-gray-700 border-gray-600 text-white placeholder:text-gray-400 focus:ring-blue-500"
+                                {...field} 
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )} />
                       </div>
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <FormField control={form.control} name="propertyState" render={({ field }) => (<FormItem><FormLabel>State</FormLabel><FormControl><Input placeholder="State name" {...field} /></FormControl><FormMessage /></FormItem>)} />
-                        <FormField control={form.control} name="propertyPincode" render={({ field }) => (<FormItem><FormLabel>Pincode</FormLabel><FormControl><Input placeholder="6-digit postal code" maxLength={6} {...field} /></FormControl><FormMessage /></FormItem>)} />
+                        <FormField control={form.control} name="propertyState" render={({ field }) => (
+                          <FormItem>
+                            <FormLabel className="text-white">State</FormLabel>
+                            <FormControl>
+                              <Input 
+                                placeholder="State name" 
+                                className="bg-gray-700 border-gray-600 text-white placeholder:text-gray-400 focus:ring-blue-500"
+                                {...field} 
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )} />
+                        <FormField control={form.control} name="propertyPincode" render={({ field }) => (
+                          <FormItem>
+                            <FormLabel className="text-white">Pincode</FormLabel>
+                            <FormControl>
+                              <Input 
+                                placeholder="6-digit postal code" 
+                                maxLength={6} 
+                                className="bg-gray-700 border-gray-600 text-white placeholder:text-gray-400 focus:ring-blue-500"
+                                {...field} 
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )} />
                       </div>
                     </>
                   )}
 
                   {form.watch("loanType") === "BT_TOPUP" && (
                     <>
-                      <Separator />
-                      <h3 className="text-lg font-medium flex items-center pt-2">
-                        <ArrowRightLeft className="h-5 w-5 mr-2" />
+                      <Separator className="bg-gray-700" />
+                      <h3 className="text-lg font-medium flex items-center pt-2 text-white">
+                        <ArrowRightLeft className="h-5 w-5 mr-2 text-blue-400" />
                         Existing Loan Details
                       </h3>
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <FormField control={form.control} name="existingLoanDetails.currentLender" render={({ field }) => (<FormItem><FormLabel>Current Lender Name <span className="text-destructive">*</span></FormLabel><FormControl><Input placeholder="Enter your current bank/lender name" {...field} /></FormControl><FormMessage /></FormItem>)} />
-                        <FormField control={form.control} name="existingLoanDetails.accountNumber" render={({ field }) => (<FormItem><FormLabel>Loan Account Number <span className="text-destructive">*</span></FormLabel><FormControl><Input placeholder="Enter your loan account number" {...field} /></FormControl><FormMessage /></FormItem>)} />
-                        <FormField control={form.control} name="existingLoanDetails.outstandingAmount" render={({ field }) => (<FormItem><FormLabel>Outstanding Amount (₹) <span className="text-destructive">*</span></FormLabel><FormControl><Input type="number" placeholder="Enter current outstanding amount" {...field} /></FormControl><FormMessage /></FormItem>)} />
-                        <FormField control={form.control} name="existingLoanDetails.currentInterestRate" render={({ field }) => (<FormItem><FormLabel>Current Interest Rate (%) <span className="text-destructive">*</span></FormLabel><FormControl><Input type="number" step="0.1" placeholder="Enter current interest rate" {...field} /></FormControl><FormMessage /></FormItem>)} />
-                        <FormField control={form.control} name="existingLoanDetails.remainingTenure" render={({ field }) => (<FormItem><FormLabel>Remaining Tenure (Months) <span className="text-destructive">*</span></FormLabel><FormControl><Input type="number" placeholder="Enter remaining tenure" {...field} /></FormControl><FormMessage /></FormItem>)} />
-                        <FormField control={form.control} name="existingLoanDetails.emiAmount" render={({ field }) => (<FormItem><FormLabel>Current EMI Amount (₹) <span className="text-destructive">*</span></FormLabel><FormControl><Input type="number" placeholder="Enter current EMI amount" {...field} /></FormControl><FormMessage /></FormItem>)} />
+                        <FormField control={form.control} name="existingLoanDetails.currentLender" render={({ field }) => (
+                          <FormItem>
+                            <FormLabel className="text-white">Current Lender Name <span className="text-destructive">*</span></FormLabel>
+                            <FormControl>
+                              <Input 
+                                placeholder="Enter your current bank/lender name" 
+                                className="bg-gray-700 border-gray-600 text-white placeholder:text-gray-400 focus:ring-blue-500"
+                                {...field} 
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )} />
+                        <FormField control={form.control} name="existingLoanDetails.accountNumber" render={({ field }) => (
+                          <FormItem>
+                            <FormLabel className="text-white">Loan Account Number <span className="text-destructive">*</span></FormLabel>
+                            <FormControl>
+                              <Input 
+                                placeholder="Enter your loan account number" 
+                                className="bg-gray-700 border-gray-600 text-white placeholder:text-gray-400 focus:ring-blue-500"
+                                {...field} 
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )} />
+                        <FormField control={form.control} name="existingLoanDetails.outstandingAmount" render={({ field }) => (
+                          <FormItem>
+                            <FormLabel className="text-white">Outstanding Amount (₹) <span className="text-destructive">*</span></FormLabel>
+                            <FormControl>
+                              <Input 
+                                type="number" 
+                                placeholder="Enter current outstanding amount" 
+                                className="bg-gray-700 border-gray-600 text-white placeholder:text-gray-400 focus:ring-blue-500"
+                                {...field} 
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )} />
+                        <FormField control={form.control} name="existingLoanDetails.currentInterestRate" render={({ field }) => (
+                          <FormItem>
+                            <FormLabel className="text-white">Current Interest Rate (%) <span className="text-destructive">*</span></FormLabel>
+                            <FormControl>
+                              <Input 
+                                type="number" 
+                                step="0.1" 
+                                placeholder="Enter current interest rate" 
+                                className="bg-gray-700 border-gray-600 text-white placeholder:text-gray-400 focus:ring-blue-500"
+                                {...field} 
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )} />
+                        <FormField control={form.control} name="existingLoanDetails.remainingTenure" render={({ field }) => (
+                          <FormItem>
+                            <FormLabel className="text-white">Remaining Tenure (Months) <span className="text-destructive">*</span></FormLabel>
+                            <FormControl>
+                              <Input 
+                                type="number" 
+                                placeholder="Enter remaining tenure" 
+                                className="bg-gray-700 border-gray-600 text-white placeholder:text-gray-400 focus:ring-blue-500"
+                                {...field} 
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )} />
+                        <FormField control={form.control} name="existingLoanDetails.emiAmount" render={({ field }) => (
+                          <FormItem>
+                            <FormLabel className="text-white">Current EMI Amount (₹) <span className="text-destructive">*</span></FormLabel>
+                            <FormControl>
+                              <Input 
+                                type="number" 
+                                placeholder="Enter current EMI amount" 
+                                className="bg-gray-700 border-gray-600 text-white placeholder:text-gray-400 focus:ring-blue-500"
+                                {...field} 
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )} />
                       </div>
                     </>
                   )}
 
                   <div className="flex justify-end pt-4">
-                    <Button type="button" onClick={() => setActiveTab('personal-details')}>
+                    <Button 
+                      type="button" 
+                      onClick={() => setActiveTab('personal-details')}
+                      className="bg-blue-600 hover:bg-blue-700"
+                    >
                       Next: Personal Details
                       <ArrowRightLeft className="ml-2 h-4 w-4" />
                     </Button>
@@ -564,17 +716,17 @@ const LoanApplicationForm = ({ form, onSubmit, isSubmitting }: LoanApplicationFo
                       name="employmentType"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Employment Type</FormLabel>
+                          <FormLabel className="text-white">Employment Type</FormLabel>
                           <Select
                             value={field.value}
                             onValueChange={field.onChange}
                           >
                             <FormControl>
-                              <SelectTrigger>
+                              <SelectTrigger className="bg-gray-700 border-gray-600 text-white">
                                 <SelectValue placeholder="Select employment type" />
                               </SelectTrigger>
                             </FormControl>
-                            <SelectContent>
+                            <SelectContent className="bg-gray-800 border-gray-700 text-white">
                               <SelectItem value="salaried">Salaried Employee</SelectItem>
                               <SelectItem value="self-employed">Self-Employed</SelectItem>
                             </SelectContent>
@@ -583,33 +735,109 @@ const LoanApplicationForm = ({ form, onSubmit, isSubmitting }: LoanApplicationFo
                         </FormItem>
                       )}
                     />
-                    <FormField control={form.control} name="monthlyIncome" render={({ field }) => (<FormItem><FormLabel>Monthly Income (₹)</FormLabel><FormControl><Input type="number" placeholder="Enter your monthly income" {...field} /></FormControl><FormMessage /></FormItem>)} />
+                    <FormField control={form.control} name="monthlyIncome" render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="text-white">Monthly Income (₹)</FormLabel>
+                        <FormControl>
+                          <Input 
+                            type="number" 
+                            placeholder="Enter your monthly income" 
+                            className="bg-gray-700 border-gray-600 text-white placeholder:text-gray-400 focus:ring-blue-500"
+                            {...field} 
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )} />
                   </div>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <FormField control={form.control} name="cibilScore" render={({ field }) => (<FormItem><FormLabel>CIBIL Score</FormLabel><FormControl><Input type="number" min="300" max="900" placeholder="Enter your CIBIL score (300-900)" {...field} /></FormControl><FormMessage /></FormItem>)} />
-                    <FormField control={form.control} name="age" render={({ field }) => (<FormItem><FormLabel>Age (Years)</FormLabel><FormControl><Input type="number" min="21" max="65" placeholder="Enter your age" {...field} /></FormControl><FormMessage /></FormItem>)} />
+                    <FormField control={form.control} name="cibilScore" render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="text-white">CIBIL Score</FormLabel>
+                        <FormControl>
+                          <Input 
+                            type="number" 
+                            min="300" 
+                            max="900" 
+                            placeholder="Enter your CIBIL score (300-900)" 
+                            className="bg-gray-700 border-gray-600 text-white placeholder:text-gray-400 focus:ring-blue-500"
+                            {...field} 
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )} />
+                    <FormField control={form.control} name="age" render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="text-white">Age (Years)</FormLabel>
+                        <FormControl>
+                          <Input 
+                            type="number" 
+                            min="21" 
+                            max="65" 
+                            placeholder="Enter your age" 
+                            className="bg-gray-700 border-gray-600 text-white placeholder:text-gray-400 focus:ring-blue-500"
+                            {...field} 
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )} />
                   </div>
 
-                  <Separator />
+                  <Separator className="bg-gray-700" />
                   <div className="space-y-4">
-                    <h3 className="text-lg font-medium flex items-center">
-                      <FileText className="h-5 w-5 mr-2" />
+                    <h3 className="text-lg font-medium flex items-center text-white">
+                      <FileText className="h-5 w-5 mr-2 text-blue-400" />
                       Required Documents (For Reference)
                     </h3>
-                     <p className="text-sm text-neutral-600">Please ensure you have the following documents ready when our representative contacts you.</p>
+                     <p className="text-sm text-gray-400">Please ensure you have the following documents ready when our representative contacts you.</p>
                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                       <div className="flex items-start p-3 border rounded-md bg-blue-50/50"><FileText className="h-5 w-5 text-primary mt-0.5 mr-2 flex-shrink-0" /><div><p className="font-medium">Identity Proof</p><p className="text-sm text-neutral-600">Aadhaar Card, PAN Card</p></div></div>
-                       <div className="flex items-start p-3 border rounded-md bg-green-50/50"><FileText className="h-5 w-5 text-green-700 mt-0.5 mr-2 flex-shrink-0" /><div><p className="font-medium">Address Proof</p><p className="text-sm text-neutral-600">Utility Bills, Bank Statement</p></div></div>
-                       <div className="flex items-start p-3 border rounded-md bg-yellow-50/50"><FileText className="h-5 w-5 text-yellow-700 mt-0.5 mr-2 flex-shrink-0" /><div><p className="font-medium">Income Proof</p><p className="text-sm text-neutral-600">Salary Slips, IT Returns</p></div></div>
-                       <div className="flex items-start p-3 border rounded-md bg-purple-50/50"><FileText className="h-5 w-5 text-purple-700 mt-0.5 mr-2 flex-shrink-0" /><div><p className="font-medium">Property Documents</p><p className="text-sm text-neutral-600">Sale Deed, Property Papers</p></div></div>
+                       <div className="flex items-start p-3 border rounded-md bg-blue-900/20 border-blue-700/30">
+                         <FileText className="h-5 w-5 text-blue-400 mt-0.5 mr-2 flex-shrink-0" />
+                         <div>
+                           <p className="font-medium text-white">Identity Proof</p>
+                           <p className="text-sm text-gray-400">Aadhaar Card, PAN Card</p>
+                         </div>
+                       </div>
+                       <div className="flex items-start p-3 border rounded-md bg-green-900/20 border-green-700/30">
+                         <FileText className="h-5 w-5 text-green-400 mt-0.5 mr-2 flex-shrink-0" />
+                         <div>
+                           <p className="font-medium text-white">Address Proof</p>
+                           <p className="text-sm text-gray-400">Utility Bills, Bank Statement</p>
+                         </div>
+                       </div>
+                       <div className="flex items-start p-3 border rounded-md bg-yellow-900/20 border-yellow-700/30">
+                         <FileText className="h-5 w-5 text-yellow-400 mt-0.5 mr-2 flex-shrink-0" />
+                         <div>
+                           <p className="font-medium text-white">Income Proof</p>
+                           <p className="text-sm text-gray-400">Salary Slips, IT Returns</p>
+                         </div>
+                       </div>
+                       <div className="flex items-start p-3 border rounded-md bg-purple-900/20 border-purple-700/30">
+                         <FileText className="h-5 w-5 text-purple-400 mt-0.5 mr-2 flex-shrink-0" />
+                         <div>
+                           <p className="font-medium text-white">Property Documents</p>
+                           <p className="text-sm text-gray-400">Sale Deed, Property Papers</p>
+                         </div>
+                       </div>
                      </div>
                   </div>
 
                   <div className="flex justify-between items-center pt-4">
-                    <Button type="button" variant="outline" onClick={() => setActiveTab("loan-details")}>
+                    <Button 
+                      type="button" 
+                      variant="outline" 
+                      onClick={() => setActiveTab("loan-details")}
+                      className="bg-transparent text-white border-gray-600 hover:bg-gray-700"
+                    >
                       Back to Loan Details
                     </Button>
-                    <Button type="submit" disabled={isSubmitting} className="min-w-[180px]">
+                    <Button 
+                      type="submit" 
+                      disabled={isSubmitting} 
+                      className="min-w-[180px] bg-blue-600 hover:bg-blue-700"
+                    >
                       {isSubmitting ? (
                         <>
                           <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Submitting...
@@ -624,26 +852,69 @@ const LoanApplicationForm = ({ form, onSubmit, isSubmitting }: LoanApplicationFo
         </CardContent>
       </Card>
       <div className="space-y-6">
-        <Card className="bg-primary/5 border-primary/20">
-            <CardHeader className="pb-2"><CardTitle className="text-lg flex items-center"><IndianRupee className="h-5 w-5 mr-2" />Loan Summary</CardTitle></CardHeader>
+        <Card className="bg-blue-900/20 border-blue-700/30">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-lg flex items-center text-white">
+                <IndianRupee className="h-5 w-5 mr-2 text-blue-400" />
+                Loan Summary
+              </CardTitle>
+            </CardHeader>
             <CardContent>
                 <div className="space-y-3">
-                    <div className="flex justify-between"><span className="text-sm text-neutral-600">Loan Type</span><span className="font-medium">{getLoanTypeLabel(loanTypeParam)}</span></div>
-                    <div className="flex justify-between"><span className="text-sm text-neutral-600">Loan Amount</span><span className="font-medium">₹{watchAmount.toLocaleString()}</span></div>
-                    <div className="flex justify-between"><span className="text-sm text-neutral-600">Tenure</span><span className="font-medium">{watchTenure} years</span></div>
-                    <div className="flex justify-between"><span className="text-sm text-neutral-600">Interest Rate</span><span className="font-medium">{watchInterestRate}% p.a.</span></div>
-                    <Separator />
-                    <div className="flex justify-between"><span className="text-sm text-neutral-600">Estimated Monthly EMI</span><span className="font-semibold text-primary text-lg">₹{emiAmount.toLocaleString()}</span></div>
+                    <div className="flex justify-between">
+                      <span className="text-sm text-gray-400">Loan Type</span>
+                      <span className="font-medium text-white">{getLoanTypeLabel(loanTypeParam)}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-sm text-gray-400">Loan Amount</span>
+                      <span className="font-medium text-white">₹{watchAmount.toLocaleString()}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-sm text-gray-400">Tenure</span>
+                      <span className="font-medium text-white">{watchTenure} years</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-sm text-gray-400">Interest Rate</span>
+                      <span className="font-medium text-white">{watchInterestRate}% p.a.</span>
+                    </div>
+                    <Separator className="bg-gray-700" />
+                    <div className="flex justify-between">
+                      <span className="text-sm text-gray-400">Estimated Monthly EMI</span>
+                      <span className="font-semibold text-blue-400 text-lg">₹{emiAmount.toLocaleString()}</span>
+                    </div>
                 </div>
             </CardContent>
         </Card>
-        <Card>
-            <CardHeader><CardTitle className="text-lg">Eligibility Criteria</CardTitle></CardHeader>
+        <Card className="bg-gray-800 border-gray-700">
+            <CardHeader>
+              <CardTitle className="text-lg text-white">Eligibility Criteria</CardTitle>
+            </CardHeader>
             <CardContent>
-                <Accordion type="single" collapsible>
-                    <AccordionItem value="age"><AccordionTrigger className="text-sm font-medium">Age Criteria</AccordionTrigger><AccordionContent className="text-sm text-neutral-600">Applicant must be between 21 and 65 years old.</AccordionContent></AccordionItem>
-                    <AccordionItem value="income"><AccordionTrigger className="text-sm font-medium">Income Requirements</AccordionTrigger><AccordionContent className="text-sm text-neutral-600">Minimum monthly income of ₹25,000 for salaried and ₹3 lakhs annual for self-employed.</AccordionContent></AccordionItem>
-                    <AccordionItem value="credit"><AccordionTrigger className="text-sm font-medium">Credit Score</AccordionTrigger><AccordionContent className="text-sm text-neutral-600">A minimum credit score of 700 is recommended.</AccordionContent></AccordionItem>
+                <Accordion type="single" collapsible className="w-full">
+                    <AccordionItem value="age" className="border-b border-gray-700">
+                      <AccordionTrigger className="text-sm font-medium text-white hover:text-gray-300 py-2">
+                        Age Criteria
+                      </AccordionTrigger>
+                      <AccordionContent className="text-sm text-gray-400 pt-1">
+                        Applicant must be between 21 and 65 years old.
+                      </AccordionContent>
+                    </AccordionItem>
+                    <AccordionItem value="income" className="border-b border-gray-700">
+                      <AccordionTrigger className="text-sm font-medium text-white hover:text-gray-300 py-2">
+                        Income Requirements
+                      </AccordionTrigger>
+                      <AccordionContent className="text-sm text-gray-400 pt-1">
+                        Minimum monthly income of ₹25,000 for salaried and ₹3 lakhs annual for self-employed.
+                      </AccordionContent>
+                    </AccordionItem>
+                    <AccordionItem value="credit">
+                      <AccordionTrigger className="text-sm font-medium text-white hover:text-gray-300 py-2">
+                        Credit Score
+                      </AccordionTrigger>
+                      <AccordionContent className="text-sm text-gray-400 pt-1">
+                        A minimum credit score of 700 is recommended.
+                      </AccordionContent>
+                    </AccordionItem>
                 </Accordion>
             </CardContent>
         </Card>
@@ -771,8 +1042,8 @@ export default function LoanApplicationPage() {
   };
 
   return (
-    <div>
-      <main className="bg-neutral-50 py-12">
+    <div className="min-h-screen bg-gray-900 text-white font-sans">
+      <main className="py-12">
         <div className="container mx-auto px-4">
           <div className="max-w-4xl mx-auto">
             {isSuccess ? (
@@ -780,10 +1051,10 @@ export default function LoanApplicationPage() {
             ) : (
               <div className="space-y-8">
                 <div className="mb-8">
-                  <h1 className="text-3xl font-bold text-neutral-800 mb-2">
+                  <h1 className="text-3xl font-bold text-white mb-2">
                     {getLoanTypeLabel(loanTypeParam)} Application
                   </h1>
-                  <p className="text-neutral-600">
+                  <p className="text-gray-400">
                     Complete the form below to apply for your {getLoanTypeLabel(loanTypeParam.toLowerCase())}
                   </p>
                 </div>
@@ -799,44 +1070,44 @@ export default function LoanApplicationPage() {
                   onSubmit={onSubmit}
                   isSubmitting={loanApplicationMutation.isPending}
                 />
-                <Card className="mb-8">
+                <Card className="mb-8 bg-gray-800 border-gray-700">
                   <CardHeader>
-                    <CardTitle>Not sure about your loan amount?</CardTitle>
-                    <CardDescription>Use our calculator to find the perfect loan for your needs</CardDescription>
+                    <CardTitle className="text-white">Not sure about your loan amount?</CardTitle>
+                    <CardDescription className="text-gray-400">Use our calculator to find the perfect loan for your needs</CardDescription>
                   </CardHeader>
                   <CardContent>
                     <LoanCalculator onApply={(loanDetails) => {
-                      form.setValue("loanType", getLoanTypeFromParam(loanDetails.loanType));
+                      form.setValue("loanType", loanDetails.loanType);
                       form.setValue("amount", loanDetails.amount);
                       form.setValue("interestRate", loanDetails.interestRate);
-                      form.setValue("tenure", loanDetails.tenure * 12);
+                      form.setValue("tenure", loanDetails.tenure);
                     }} />
                   </CardContent>
                 </Card>
                 
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                  <div className="p-6 rounded-xl border border-neutral-100 bg-neutral-50 hover:shadow-md transition-shadow">
-                    <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center mb-4">
-                      <Home className="text-primary text-xl" />
+                  <div className="p-6 rounded-xl border border-gray-700 bg-gray-800 hover:shadow-lg transition-shadow hover:border-blue-500/30">
+                    <div className="w-12 h-12 rounded-full bg-blue-900/30 flex items-center justify-center mb-4">
+                      <Home className="text-blue-400 text-xl" />
                     </div>
-                    <h3 className="text-xl font-semibold mb-2">Home Loans</h3>
-                    <p className="text-neutral-600 mb-4">Make your dream home a reality with our competitive interest rates starting from 7.5% p.a.</p>
+                    <h3 className="text-xl font-semibold mb-2 text-white">Home Loans</h3>
+                    <p className="text-gray-400 mb-4">Make your dream home a reality with our competitive interest rates starting from 7.5% p.a.</p>
                   </div>
                   
-                  <div className="p-6 rounded-xl border border-neutral-100 bg-neutral-50 hover:shadow-md transition-shadow">
-                    <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center mb-4">
-                      <Building className="text-primary text-xl" />
+                  <div className="p-6 rounded-xl border border-gray-700 bg-gray-800 hover:shadow-lg transition-shadow hover:border-blue-500/30">
+                    <div className="w-12 h-12 rounded-full bg-blue-900/30 flex items-center justify-center mb-4">
+                      <Building className="text-blue-400 text-xl" />
                     </div>
-                    <h3 className="text-xl font-semibold mb-2">Loan Against Property</h3>
-                    <p className="text-neutral-600 mb-4">Leverage your property to secure funds for business expansion or other major expenses.</p>
+                    <h3 className="text-xl font-semibold mb-2 text-white">Loan Against Property</h3>
+                    <p className="text-gray-400 mb-4">Leverage your property to secure funds for business expansion or other major expenses.</p>
                   </div>
                   
-                  <div className="p-6 rounded-xl border border-neutral-100 bg-neutral-50 hover:shadow-md transition-shadow">
-                    <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center mb-4">
-                      <ArrowRightLeft className="text-primary text-xl" />
+                  <div className="p-6 rounded-xl border border-gray-700 bg-gray-800 hover:shadow-lg transition-shadow hover:border-blue-500/30">
+                    <div className="w-12 h-12 rounded-full bg-blue-900/30 flex items-center justify-center mb-4">
+                      <ArrowRightLeft className="text-blue-400 text-xl" />
                     </div>
-                    <h3 className="text-xl font-semibold mb-2">Balance Transfer</h3>
-                    <p className="text-neutral-600 mb-4">Transfer your existing loan and get additional funds at lower interest rates.</p>
+                    <h3 className="text-xl font-semibold mb-2 text-white">Balance Transfer</h3>
+                    <p className="text-gray-400 mb-4">Transfer your existing loan and get additional funds at lower interest rates.</p>
                   </div>
                 </div>
               </div>
