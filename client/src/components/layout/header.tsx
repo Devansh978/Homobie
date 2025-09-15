@@ -45,7 +45,6 @@ const navData = [
 const partnerLoginUrl = "https://homobie-frontend-portal-bco8.vercel.app/";
 const partnerRoles = ["Builder", "Broker", "User", "Telecaller"];
 
-// Glassmorphism DesktopNavDropdown component
 const DesktopNavDropdown = ({ item, isActive, onHover, onLeave }) => {
   const hasChildren = item.children && item.children.length > 0;
 
@@ -150,7 +149,6 @@ export const Header = () => {
   const dropdownTimeoutRef = useRef(null);
   const loginTimeoutRef = useRef(null);
 
-  // Mock auth state - replace with your actual auth hook
   const user = null;
 
   useEffect(() => {
@@ -160,8 +158,7 @@ export const Header = () => {
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
-
-  // Close mobile menu on escape key
+//escape key
   useEffect(() => {
     const handleEscape = (e) => {
       if (e.key === "Escape" && isMobileMenuOpen) {
@@ -222,13 +219,14 @@ export const Header = () => {
 
   return (
     <>
-      <nav
-        className={`fixed top-0 left-0 right-0 z-40 transition-all duration-500 font-bold${
-          scrolled
-            ? "bg-slate-900/95 backdrop-blur-2xl border-b border-white/10 shadow-2xl"
-            : "bg-slate-900/50 backdrop-blur-xl"
-        } ${activeDropdown !== null ? "pb-6" : ""}`}
-      >
+     <nav
+  className={`fixed top-0 left-0 right-0 z-40 transition-all duration-500 font-bold
+    ${scrolled
+      ? "bg-black/60 backdrop-blur-xl border-b border-white/10 shadow-lg"
+      : "bg-black/40 backdrop-blur-xl border-b border-white/5"
+    } ${activeDropdown !== null ? "pb-6" : ""}`}
+>
+
         <div className="max-w-8xl mx-auto px-2 sm:px-4 lg:px-6 relative">
           <div className="flex items-center justify-between h-20">
             {/* Logo */}
@@ -394,11 +392,10 @@ export const Header = () => {
             </div>
           </div>
 
-          {/* Dropdown Container - Expands the nav height */}
           {/* Dropdown */}
           <div
             className={`transition-all duration-500 overflow-hidden ${
-              activeDropdown !== null ? "h-screen opacity-100" : "h-0 opacity-0"
+              activeDropdown !== null ? "h-[70%] opacity-100" : "h-0 opacity-0"
             }`}
             onMouseEnter={handleDropdownContentEnter}
             onMouseLeave={handleDropdownLeave}

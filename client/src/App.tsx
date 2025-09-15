@@ -26,6 +26,7 @@ import { ProtectedRoute } from "./lib/protected-route";
 import SipCalculator from "@/pages/SipCalculator/SipCalculator";
 import EmiCalculator from "@/pages/EmiCalculator/EmiCalculator";
 import BudgetPlanningTool from "@/pages/BudgetPlanningTool/BudgetPlanningTool";
+import CompareLoans from "@/pages/Compareloans/CompareLoans";
 
 import { ThemeProvider } from "next-themes";
 import { AuthProvider } from "@/hooks/use-auth";
@@ -56,6 +57,7 @@ function Router() {
       <Route path="/blog" component={BlogPage} />
       <Route path="/about" component={AboutPage} />
       <Route path="/ourteam" component={OurTeamPage} />
+      <Route path="/compare-loans" component={CompareLoans} />
 
       <Route path="/properties" component={Properties} />
       <Route path="/properties/:propertyId" component={PropertyDetails} />

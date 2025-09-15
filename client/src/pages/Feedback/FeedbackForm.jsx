@@ -24,7 +24,7 @@ const FeedbackForm = ({
   const [copied, setCopied] = useState(false);
 
   const serviceTypes = ["Consultation", "Loan"];
-  const API_BASE_URL = "http://homobie.ap-south-1.elasticbeanstalk.com";
+  const API_BASE_URL = "https://api.homobie.com";
 
   // Load user data for create mode
   useEffect(() => {

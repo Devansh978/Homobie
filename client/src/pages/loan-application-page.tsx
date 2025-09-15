@@ -9,6 +9,7 @@ import { useToast } from "../hooks/use-toast";
 import { PaymentGateway } from "../components/ui/payment-gateway";
 import { ChatbotButton } from "../components/layout/chatbot-button";
 import { LoanCalculator } from "../components/ui/calculator";
+import { Country, State, City } from "country-state-city";
 import {
   Form,
   FormControl,
@@ -69,10 +70,7 @@ import { getQueryParam, getLoanTypeLabel, calculateEMI } from "../lib/utils";
 // 1. CONSTANTS & API LOGIC (Centralized in this file)
 // ============================================================================
 
-// const BASE_URL = "http://homobie.ap-south-1.elasticbeanstalk.com";
-
-const BASE_URL = "http://homobie.ap-south-1.elasticbeanstalk.com/register/user";
-
+const BASE_URL = "https://api.homobie.com/register/user";
 
 /**
  * A custom error class for handling API errors in a structured way.
@@ -317,14 +315,7 @@ const SubmissionSuccess = ({ submittedData }: { submittedData: any }) => {
           <CardDescription className="font-bold mb-3 text-center">our team will get in touch with you soon</CardDescription>
         </CardHeader>
         <CardContent>
-          {/* <PaymentGateway
-            paymentType="loan-processing-fee"
-            itemId={submittedData?.id}
-            buttonText="Pay Processing Fee"
-            description="Pay to complete your loan application"
-            onSuccess={() => toast({ title: "Payment Successful!", description: "Your application is now being processed." })}
-            onFailure={(err) => toast({ title: "Payment Failed", description: err?.message || "An unknown error occurred.", variant: "destructive" })}
-          /> */}
+          {/* Payment gateway can be uncommented when needed */}
         </CardContent>
         <CardFooter className="flex justify-between">
           <Button variant="outline" onClick={() => navigate("/")}>Back to Home</Button>
@@ -344,6 +335,8 @@ interface LoanApplicationFormProps {
 
 const LoanApplicationForm = ({ form, onSubmit, isSubmitting }: LoanApplicationFormProps) => {
   const [activeTab, setActiveTab] = useState("loan-details");
+  const [selectedPropertyCountry, setSelectedPropertyCountry] = useState("");
+  const [selectedPropertyState, setSelectedPropertyState] = useState("");
   const loanTypeParam = getQueryParam("type") || "home-loan";
 
   const watchAmount = form.watch("amount");
@@ -549,13 +542,147 @@ const LoanApplicationForm = ({ form, onSubmit, isSubmitting }: LoanApplicationFo
                             </FormItem>
                           )}
                         />
+                      
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <FormField control={form.control} name="propertyLandmark" render={({ field }) => (<FormItem><FormLabel>Landmark</FormLabel><FormControl><Input className="bg-transparent text-white border border-white placeholder-gray-400" placeholder="Nearby prominent location" {...field} /></FormControl><FormMessage /></FormItem>)} />
-                        <FormField control={form.control} name="propertyCity" render={({ field }) => (<FormItem><FormLabel>City</FormLabel><FormControl><Input className="bg-transparent text-white border border-white placeholder-gray-400" placeholder="City name" {...field} /></FormControl><FormMessage /></FormItem>)} />
+                        <FormField
+                          control={form.control}
+                          name="propertyPincode"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Pincode</FormLabel>
+                              <FormControl>
+                                <Input
+                                  className="bg-transparent text-white border border-white placeholder-gray-400"
+                                  placeholder="6-digit postal code"
+                                  maxLength={6}
+                                  {...field}
+                                />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
                       </div>
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <FormField control={form.control} name="propertyState" render={({ field }) => (<FormItem><FormLabel>State</FormLabel><FormControl><Input className="bg-transparent text-white border border-white placeholder-gray-400" placeholder="State name" {...field} /></FormControl><FormMessage /></FormItem>)} />
-                        <FormField control={form.control} name="propertyPincode" render={({ field }) => (<FormItem><FormLabel>Pincode</FormLabel><FormControl><Input className="bg-transparent text-white border border-white placeholder-gray-400" placeholder="6-digit postal code" maxLength={6} {...field} /></FormControl><FormMessage /></FormItem>)} />
+
+                      {/* Property Location Dropdowns */}
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        {/* Property Country */}
+                        <FormField
+                          control={form.control}
+                          name="country"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Country</FormLabel>
+                              <Select
+                                onValueChange={(value) => {
+                                  field.onChange(value);
+                                  setSelectedPropertyCountry(value);
+                                  setSelectedPropertyState("");
+                                  form.setValue("propertyState", "");
+                                  form.setValue("propertyCity", "");
+                                }}
+                                value={field.value}
+                              >
+                                <FormControl>
+                                  <SelectTrigger className="bg-transparent text-white border border-white">
+                                    <SelectValue placeholder="Select Country" />
+                                  </SelectTrigger>
+                                </FormControl>
+                                <SelectContent className="bg-black text-white border border-white max-h-60 overflow-y-auto">
+                                  {Country.getAllCountries().map((c) => (
+                                    <SelectItem
+                                      key={c.isoCode}
+                                      value={c.isoCode}
+                                      className="hover:bg-gray-800"
+                                    >
+                                      {c.name}
+                                    </SelectItem>
+                                  ))}
+                                </SelectContent>
+                              </Select>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+
+                        {/* Property State */}
+                        <FormField
+                          control={form.control}
+                          name="propertyState"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>State</FormLabel>
+                              <Select
+                                onValueChange={(value) => {
+                                  field.onChange(value);
+                                  setSelectedPropertyState(value);
+                                  form.setValue("propertyCity", "");
+                                }}
+                                value={field.value}
+                                disabled={!selectedPropertyCountry}
+                              >
+                                <FormControl>
+                                  <SelectTrigger className="bg-transparent text-white border border-white">
+                                    <SelectValue placeholder="Select State" />
+                                  </SelectTrigger>
+                                </FormControl>
+                                <SelectContent className="bg-black text-white border border-white max-h-60 overflow-y-auto">
+                                  {selectedPropertyCountry &&
+                                    State.getStatesOfCountry(selectedPropertyCountry).map((s) => (
+                                      <SelectItem
+                                        key={s.isoCode}
+                                        value={s.isoCode}
+                                        className="hover:bg-gray-800"
+                                      >
+                                        {s.name}
+                                      </SelectItem>
+                                    ))}
+                                </SelectContent>
+                              </Select>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+
+                        {/* Property City */}
+                        <FormField
+                          control={form.control}
+                          name="propertyCity"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>City</FormLabel>
+                              <Select
+                                onValueChange={field.onChange}
+                                value={field.value}
+                                disabled={!selectedPropertyState}
+                              >
+                                <FormControl>
+                                  <SelectTrigger className="bg-transparent text-white border border-white">
+                                    <SelectValue placeholder="Select City" />
+                                  </SelectTrigger>
+                                </FormControl>
+                                <SelectContent className="bg-black text-white border border-white max-h-60 overflow-y-auto">
+                                  {selectedPropertyCountry &&
+                                    selectedPropertyState &&
+                                    City.getCitiesOfState(
+                                      selectedPropertyCountry,
+                                      selectedPropertyState
+                                    ).map((city) => (
+                                      <SelectItem
+                                        key={city.name}
+                                        value={city.name}
+                                        className="hover:bg-gray-800"
+                                      >
+                                        {city.name}
+                                      </SelectItem>
+                                    ))}
+                                </SelectContent>
+                              </Select>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
                       </div>
                     </>
                   )}

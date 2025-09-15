@@ -14,7 +14,7 @@ import ListViewCard from "./ListViewCard";
 import PropertyFilters from "./PropertyFilters";
 import FormProperties from "./FormProperties";
 
-const baseUrl = "http://homobie.ap-south-1.elasticbeanstalk.com";
+const baseUrl = "https://api.homobie.com";
 
 // Helper function to convert byte array to image URL
 // Updated helper functions for better image handling
@@ -517,17 +517,16 @@ const Properties = () => {
                 {currentView === "featured"
                   ? "Exclusive Owner Properties"
                   : "All Properties"}
-                <span className="text-white/50"> in Bangalore</span>
+                <span className="text-white/50"> in your Area</span>
               </h1>
               <p className="text-white/60 text-lg">
                 {currentView === "featured"
                   ? "Handpicked premium properties directly from owners"
-                  : `${allProperties.length} results | Flats for Sale in Bangalore`}
+                  : `${allProperties.length} results | Flats for Sale in your Area`}
               </p>
             </div>
           </div>
           
-          {/* Show auth redirect message if user tries to add property without authentication */}
           {showAuthRedirect && (
             <div className="bg-yellow-900/50 border border-yellow-700 rounded-lg p-4 mb-6 text-center">
               <p className="text-yellow-200">Please login to add properties</p>

@@ -92,10 +92,9 @@ const Feedback = () => {
     }
 
     try {
-      const BASE_URL = "http://homobie.ap-south-1.elasticbeanstalk.com";
+      const BASE_URL = "https://api.homobie.com";
       const userId = localStorage.getItem("userId");
       const token = localStorage.getItem("auth_token");
-
       const API_ENDPOINT = `${BASE_URL}/feedback/getAllUserFeedbacks?userId=${encodeURIComponent(userId)}`;
 
       const response = await fetch(API_ENDPOINT, {
@@ -228,7 +227,7 @@ const Feedback = () => {
             You need to log in to view and manage your feedbacks
           </p>
           <button
-            onClick={() => window.location.href = '/login'} // Adjust this path as needed
+            onClick={() => window.location.href = '/auth'} 
             className="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors duration-300 flex items-center gap-2 mx-auto"
           >
             <LogIn className="w-4 h-4" />
@@ -283,10 +282,10 @@ const Feedback = () => {
   return (
     <div className="min-h-screen">
       {/* Action Buttons */}
-      <div className="relative top-10 right-2 z-50 flex gap-6">
+      <div className="relative top-12 right-2 z-50 flex gap-6">
         <button
           onClick={handleCreateNew}
-          className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-all duration-300 flex items-center gap-2 shadow-lg backdrop-blur-md border border-blue-500/30"
+          className="px-4 py-2 bg-black text-white rounded-lg transition-all duration-300 flex items-center gap-2 shadow-lg backdrop-blur-md border border-blue-500/30"
         >
           <Plus className="w-4 h-4" />
           Add Feedback
@@ -294,7 +293,7 @@ const Feedback = () => {
         {feedbacks.length > 0 && (
           <button
             onClick={() => handleEdit(feedbacks[currentIndex])}
-            className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg flex items-center gap-2"
+            className="px-4 py-2 bg-black text-white rounded-lg flex items-center gap-2"
           >
             <Edit3 className="w-4 h-4" />
             Edit Feedback

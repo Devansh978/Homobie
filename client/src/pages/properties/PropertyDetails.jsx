@@ -2,7 +2,7 @@ import React, { useState, useEffect, useMemo } from "react";
 import { ArrowLeft, MapPin, Bed, Bath, Ruler, Car, X, ChevronLeft, ChevronRight, Phone, Mail, Heart, Share2, Calendar, Shield, Eye } from "lucide-react";
 
 // API Configuration
-const BASE_URL = 'http://homobie.ap-south-1.elasticbeanstalk.com';
+const BASE_URL = 'https://api.homobie.com';
 
 // This function should ONLY return an actual authentication token (JWT).
 const getAuthToken = () => {

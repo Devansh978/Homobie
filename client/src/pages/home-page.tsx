@@ -3,7 +3,7 @@ import { Link } from "wouter";
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import Feedback from "./Feedback/Feedback";
-import EmiCalculator from "./EmiCalculator/EmiCalculator";
+import SipCalculator from "./SipCalculator/SipCalculator";
 import {
   ArrowRight,
   Calculator,
@@ -21,7 +21,6 @@ import {
   Circle,
   MoveRight,
 } from "lucide-react";
-import Bricks from "./Bricks";
 
 
 const containerVariants = {
@@ -159,7 +158,7 @@ export default function HomePage() {
           className="relative min-h-screen flex items-center justify-center overflow-hidden mt-12 bg-gradient-to-br from-black via-gray-900 to-gray-800 opacity-90"
         >
           <div className="container mx-auto px-4 z-10 relative flex items-center justify-between">
-            {/* Left: Hero text (unchanged) */}
+            {/* Left*/}
             <div className="w-[75%]  flex-1 flex flex-col items-center text-center md:items-start md:text-center">
               <motion.div
                 variants={containerVariants}
@@ -169,11 +168,37 @@ export default function HomePage() {
               >
                 <motion.div className="mb-12" variants={containerVariants}>
                   <motion.p
-                    variants={itemVariants}
-                    className="text-5xl md:text-[75px] font-bold mb-6 tracking-tight text-white mt-4"
-                  >
-                    the home loan experience,
-                  </motion.p>
+  variants={itemVariants}
+  className="text-5xl md:text-[75px] font-bold mb-6 tracking-tight text-white mt-4 flex items-center justify-center flex-wrap gap-4"
+>
+  <span className="flex items-center gap-4">
+    <div className="relative w-16 h-16 md:w-20 md:h-20 rounded-full overflow-hidden border-4 border-white shadow-lg flex-shrink-0">
+      {/* Saffron stripe */}
+      <div className="w-full h-1/3 bg-[#FF9933]"></div>
+      {/* White stripe with chakra */}
+      <div className="w-full h-1/3 bg-white flex items-center justify-center">
+        <div className="w-6 h-6 md:w-7 md:h-7 rounded-full border-2 border-[#000080] relative">
+          {/* Chakra spokes */}
+          <div className="absolute inset-0">
+            {[...Array(24)].map((_, i) => (
+              <div
+                key={i}
+                className="absolute w-px h-3 md:h-3.5 bg-[#000080] left-1/2 top-1/2 origin-bottom"
+                style={{
+                  transform: `translate(-50%, -100%) rotate(${i * 15}deg)`
+                }}
+              />
+            ))}
+          </div>
+        </div>
+      </div>
+      {/* Green stripe */}
+      <div className="w-full h-1/3 bg-[#138808]"></div>
+    </div>
+    India's
+  </span>
+  home loan experience,
+</motion.p>
                   <motion.p
                     variants={itemVariants}
                     className="text-6xl md:text-8xl font-bold mb-8 tracking-tighter"
@@ -194,20 +219,20 @@ export default function HomePage() {
                   }}
                 >
                   <motion.h1
-                    initial={{ opacity: 0.8 }}
-                    animate={{ opacity: 1 }}
-                    transition={{ delay: 0.6 }}
-                    className="text-xl md:text-2xl font-medium mb-3 leading-relaxed p-1 text-center tracking-tight text-white"
-                  >
-                    Home loans, mortgage loans, SIP plans? — we speak fluent
-                    finance, so we can assist you
-                  </motion.h1>
+  initial={{ opacity: 0.8 }}
+  animate={{ opacity: 1 }}
+  transition={{ delay: 0.6 }}
+  className="text-xl md:text-2xl font-medium mb-3 leading-relaxed p-1 text-center tracking-tight text-white"
+>
+  <div>Home loans, mortgage loans, SIP plans?</div>
+  <div>We speak fluent finance, so we can assist you</div>
+</motion.h1>
 
                   <motion.div
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     transition={{ delay: 0.8 }}
-                    className="flex flex-wrap justify-center gap-2"
+                    className="flex flex-wrap justify-center gap-6"
                   >
                     <Link href="/loan-application?type=home-loan">
                       <Button className="px-2 py-4 bg-white hover:bg-white/90 text-black text-lg font-bold rounded-xl backdrop-blur-md border border-white/20 shadow-lg hover:shadow-white/30 transition-all duration-300 group">
@@ -225,11 +250,6 @@ export default function HomePage() {
                 </motion.div>
               </motion.div>
             </div>
-
-            {/* Right: Bricks */}
-            {/* <div className="w-[25%]  flex-1 flex justify-end items-center">
-              <Bricks />
-            </div> */}
           </div>
 
           {/* Background gradient */}
@@ -255,7 +275,7 @@ export default function HomePage() {
           </div> */}
         </section>
 
-        <EmiCalculator background="transparent" />
+        <SipCalculator />
         {/* Value Proposition Section */}
         <section className="py-24 px-4">
           <div className="max-w-6xl mx-auto">
