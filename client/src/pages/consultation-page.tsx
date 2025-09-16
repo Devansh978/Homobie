@@ -186,7 +186,7 @@ const removeTimeSlotId = () => {
 
   // Consultation topics
   const consultationTopics = [
-    "HOME_LOAN",
+    "Home Loan",
     
   ];
 
@@ -1849,30 +1849,6 @@ const { data: userConsultations, refetch: refetchConsultations, error: consultat
                       </Card>
                     )}
 
-                    {/* Error Display for Consultations */}
-                    {consultationsError && (
-                      <Card className="border-red-200 bg-transparent">
-                        <CardContent className="pt-6">
-                          <div className="flex items-center">
-                            <AlertCircle className="h-5 w-5 text-red-500 mr-2" />
-                            <p className="text-red-700 text-sm">
-                              Failed to load consultations:{" "}
-                              {consultationsError instanceof Error
-                                ? consultationsError.message
-                                : "Unknown error"}
-                            </p>
-                          </div>
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            onClick={() => refetchConsultations()}
-                            className="mt-2 bg-transparent text-white hover:bg-transparent hover:text-white border-black"
-                          >
-                            Retry
-                          </Button>
-                        </CardContent>
-                      </Card>
-                    )}
 
                     <Card className="bg-primary text-white">
                       <CardHeader>

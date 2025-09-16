@@ -78,7 +78,7 @@ const CallbackPage: React.FC = () => {
 
           setTimeout(() => {
             window.history.replaceState({}, document.title, "/");
-            setLocation('/');
+            setLocation('/dashboard');
           }, 2000);
           return;
         }
@@ -113,7 +113,7 @@ const CallbackPage: React.FC = () => {
 
               setTimeout(() => {
                 window.history.replaceState({}, document.title, "/");
-                setLocation('/');
+                setLocation('/dashboard');
               }, 2000);
               return;
             }

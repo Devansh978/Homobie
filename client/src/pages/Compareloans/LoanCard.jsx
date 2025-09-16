@@ -10,7 +10,7 @@ const LoanCard = ({ loan, isSelected, onSelect }) => {
   return (
     <div
       onClick={() => onSelect(loan)}
-      className={`bg-gray-800 border-2 rounded-xl p-6 cursor-pointer transition-all duration-300 transform hover:scale-102 hover:shadow-xl ${
+      className={`text-left backdrop-blur-md bg-white/5 border border-white/10 rounded-xl p-6 hover:bg-white/10 transition-all duration-300 ${
         isSelected 
           ? 'border-[#4f46e5] bg-blue-400/30' 
           : 'border-gray-600 hover:border-[#4f46e5]'

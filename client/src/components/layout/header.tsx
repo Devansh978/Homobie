@@ -3,7 +3,6 @@ import { ChevronDown, Menu, X, User, LogOut } from "lucide-react";
 
 // --- Data definitions ---
 const navData = [
-
   {
     label: "Loans",
     children: [
@@ -42,8 +41,34 @@ const navData = [
   },
 ];
 
-const partnerLoginUrl = "https://homobie-frontend-portal-bco8.vercel.app/";
+const basePartnerUrl = "https://homobie-frontend-portal-bco8.vercel.app";
 const partnerRoles = ["Builder", "Broker", "User", "Telecaller"];
+
+const getPartnerLoginUrl = (role = null) => {
+  try {
+    const userRole = role || localStorage.getItem('userRole') || localStorage.getItem('role') || localStorage.getItem('user_role');
+    
+    if (!userRole) {
+      return `${basePartnerUrl}/user`;
+    }
+    
+    const normalizedRole = userRole.toLowerCase();
+    
+    switch (normalizedRole) {
+      case 'builder':
+        return `${basePartnerUrl}/builder`;
+      case 'user':
+        return `${basePartnerUrl}/user`;
+      case 'broker':
+      case 'telecaller':
+      default:
+        return `${basePartnerUrl}/builder`;
+    }
+  } catch (error) {
+    console.error('Error accessing localStorage:', error);
+    return `${basePartnerUrl}/user`;
+  }
+};
 
 const DesktopNavDropdown = ({ item, isActive, onHover, onLeave }) => {
   const hasChildren = item.children && item.children.length > 0;
@@ -146,6 +171,7 @@ export const Header = () => {
   const [activeDropdown, setActiveDropdown] = useState(null);
   const [scrolled, setScrolled] = useState(false);
   const [loginDropdownOpen, setLoginDropdownOpen] = useState(false);
+  const [loginToggle, setLoginToggle] = useState("user"); // "user" or "partner"
   const dropdownTimeoutRef = useRef(null);
   const loginTimeoutRef = useRef(null);
 
@@ -158,7 +184,7 @@ export const Header = () => {
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
-//escape key
+
   useEffect(() => {
     const handleEscape = (e) => {
       if (e.key === "Escape" && isMobileMenuOpen) {
@@ -169,7 +195,6 @@ export const Header = () => {
     return () => document.removeEventListener("keydown", handleEscape);
   }, [isMobileMenuOpen]);
 
-  // Prevent body scroll when mobile menu is open
   useEffect(() => {
     if (isMobileMenuOpen) {
       document.body.style.overflow = "hidden";
@@ -191,7 +216,7 @@ export const Header = () => {
   const handleDropdownLeave = () => {
     dropdownTimeoutRef.current = setTimeout(() => {
       setActiveDropdown(null);
-    }, 300); // 300ms delay
+    }, 300);
   };
 
   const handleDropdownContentEnter = () => {
@@ -210,23 +235,31 @@ export const Header = () => {
   const handleLoginDropdownLeave = () => {
     loginTimeoutRef.current = setTimeout(() => {
       setLoginDropdownOpen(false);
-    }, 300); // 300ms delay
+    }, 300);
   };
 
   const closeMobileMenu = () => {
     setIsMobileMenuOpen(false);
   };
 
+  const handlePartnerLogin = (role) => {
+    const dynamicUrl = getPartnerLoginUrl(role);
+    window.open(dynamicUrl, '_blank', 'noopener,noreferrer');
+  };
+
+  const handleUserLogin = () => {
+    window.location.href = "/auth";
+  };
+
   return (
     <>
-     <nav
-  className={`fixed top-0 left-0 right-0 z-40 transition-all duration-500 font-bold
-    ${scrolled
-      ? "bg-black/60 backdrop-blur-xl border-b border-white/10 shadow-lg"
-      : "bg-black/40 backdrop-blur-xl border-b border-white/5"
-    } ${activeDropdown !== null ? "pb-6" : ""}`}
->
-
+      <nav
+        className={`fixed top-0 left-0 right-0 z-40 transition-all duration-500 font-bold
+          ${scrolled
+            ? "bg-black/60 backdrop-blur-xl border-b border-white/10 shadow-lg"
+            : "bg-black/40 backdrop-blur-xl border-b border-white/5"
+          } ${activeDropdown !== null ? "pb-6" : ""}`}
+      >
         <div className="max-w-8xl mx-auto px-2 sm:px-4 lg:px-6 relative">
           <div className="flex items-center justify-between h-20">
             {/* Logo */}
@@ -258,7 +291,7 @@ export const Header = () => {
               </ul>
             </div>
 
-            {/* Desktop User Menu / Auth Buttons */}
+            {/* Desktop Auth Section */}
             <div className="hidden lg:flex items-center space-x-2">
               {user ? (
                 <div className="relative">
@@ -323,9 +356,9 @@ export const Header = () => {
                       />
                     </button>
 
-                    {/* Login Options Dropdown */}
+                    {/* Login Dropdown */}
                     <div
-                      className={`absolute right-0 top-full mt-2 w-56 bg-black backdrop-blur-xl border border-white/20 rounded-2xl shadow-2xl transition-all duration-300 ${
+                      className={`absolute right-0 top-full mt-2 w-64 bg-black backdrop-blur-xl border border-white/20 rounded-2xl shadow-2xl transition-all duration-300 ${
                         loginDropdownOpen
                           ? "opacity-100 pointer-events-auto"
                           : "opacity-0 pointer-events-none"
@@ -333,35 +366,57 @@ export const Header = () => {
                       onMouseEnter={handleLoginDropdownEnter}
                       onMouseLeave={handleLoginDropdownLeave}
                     >
-                      <div className="p-2">
-                        {/* User Login */}
-                        <a
-                          href="/auth"
-                          className="block px-4 py-3 text-white/90 hover:text-white hover:bg-white/20 rounded-lg transition-all duration-200 font-medium"
-                        >
-                          User Login
-                        </a>
-
-                        {/* Divider */}
-                        <div className="border-t border-white/20 my-2"></div>
-
-                        {/* Partner Login Header */}
-                        <div className="px-4 py-2 text-white/70 text-[16px] font-medium">
-                          Partner Login
+                      <div className="p-4">
+                        {/* Toggle Switch */}
+                        <div className="flex items-center justify-center mb-4">
+                          <div className="relative bg-white/10 rounded-full p-1 flex">
+                            <button
+                              onClick={() => setLoginToggle("user")}
+                              className={`px-4 py-2 text-sm font-medium rounded-full transition-all duration-300 ${
+                                loginToggle === "user"
+                                  ? "bg-[#292579] text-white shadow-lg"
+                                  : "text-white/70 hover:text-white"
+                              }`}
+                            >
+                              User
+                            </button>
+                            <button
+                              onClick={() => setLoginToggle("partner")}
+                              className={`px-4 py-2 text-sm font-medium rounded-full transition-all duration-300 ${
+                                loginToggle === "partner"
+                                  ? "bg-[#292579] text-white shadow-lg"
+                                  : "text-white/70 hover:text-white"
+                              }`}
+                            >
+                              Partner
+                            </button>
+                          </div>
                         </div>
 
-                        {/* Partner Login Options */}
-                        {partnerRoles.map((role, index) => (
-                          <a
-                            key={index}
-                            href={partnerLoginUrl}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="block px-4 py-2 text-white/80 hover:text-white hover:bg-white/20 rounded-lg transition-all duration-200 ml-2"
+                        {/* Login Options */}
+                        {loginToggle === "user" ? (
+                          <button
+                            onClick={handleUserLogin}
+                            className="w-full px-4 py-3 text-white/90 hover:text-white hover:bg-white/20 rounded-lg transition-all duration-200 font-medium text-center"
                           >
-                            {role}
-                          </a>
-                        ))}
+                            User Login
+                          </button>
+                        ) : (
+                          <div className="space-y-2">
+                            <div className="text-white/70 text-sm font-medium mb-2 text-center">
+                               Partner Login
+                            </div>
+                            {partnerRoles.map((role, index) => (
+                              <button
+                                key={index}
+                                onClick={() => handlePartnerLogin(role)}
+                                className="block w-full text-left px-4 py-2 text-white/80 hover:text-white hover:bg-white/20 rounded-lg transition-all duration-200"
+                              >
+                                {role}
+                              </button>
+                            ))}
+                          </div>
+                        )}
                       </div>
                     </div>
                   </div>
@@ -392,7 +447,7 @@ export const Header = () => {
             </div>
           </div>
 
-          {/* Dropdown */}
+          {/* Desktop Dropdown Content */}
           <div
             className={`transition-all duration-500 overflow-hidden ${
               activeDropdown !== null ? "h-[70%] opacity-100" : "h-0 opacity-0"
@@ -405,14 +460,11 @@ export const Header = () => {
                 {activeDropdown !== null &&
                   navData[activeDropdown]?.children && (
                     <>
-                      {/* Left Heading */}
                       <div className="w-1/4">
                         <h3 className="text-white font-semibold text-2xl border-b border-white/20 pb-4">
                           {navData[activeDropdown].label}
                         </h3>
                       </div>
-
-                      {/* Right Options */}
                       <div className="flex-1 grid grid-row-2 md:grid-row-3 lg:grid-row-4 gap-6">
                         {navData[activeDropdown].children.map(
                           (child, index) => (
@@ -434,7 +486,7 @@ export const Header = () => {
         </div>
       </nav>
 
-      {/* Mobile Glass Drawer */}
+      {/* Mobile Menu */}
       <div
         className={`fixed inset-0 z-50 lg:hidden transition-all duration-300 ${
           isMobileMenuOpen
@@ -442,20 +494,17 @@ export const Header = () => {
             : "opacity-0 pointer-events-none"
         }`}
       >
-        {/* Backdrop */}
         <div
           className="absolute inset-0 backdrop-blur-sm"
           onClick={closeMobileMenu}
         />
 
-        {/* Glass Drawer */}
         <div
           className={`absolute right-0 top-0 h-full w-full max-w-sm backdrop-blur-2xl border-l border-white/20 shadow-2xl transition-all duration-300 ${
             isMobileMenuOpen ? "translate-x-0" : "translate-x-full"
           }`}
         >
           <div className="flex flex-col h-full">
-            {/* Mobile Header */}
             <div className="flex items-center justify-between p-6 border-b border-white/20">
               <img
                 src="/assets/wmremove-transformed - Edited.jpg"
@@ -471,7 +520,6 @@ export const Header = () => {
               </button>
             </div>
 
-            {/* Mobile Nav Items */}
             <div className="flex-1 overflow-y-auto p-6">
               <div className="space-y-2">
                 {navData.map((item, index) => (
@@ -499,57 +547,70 @@ export const Header = () => {
                       <div className="text-white/70 text-[16px]">{user.role}</div>
                     </div>
                   </div>
-                  <div className="space-y-2">
-                    <a
-                      href="/dashboard"
-                      onClick={closeMobileMenu}
-                      className="block w-full px-4 py-3 text-center text-white bg-white/10 hover:bg-white/20 rounded-lg transition-all duration-300"
-                    >
-                      Dashboard
-                    </a>
-                    {user.role === "admin" && (
-                      <a
-                        href="/admin"
-                        onClick={closeMobileMenu}
-                        className="block w-full px-4 py-3 text-center text-white bg-white/10 hover:bg-white/20 rounded-lg transition-all duration-300"
-                      >
-                        Admin Dashboard
-                      </a>
-                    )}
-                  </div>
                 </div>
               ) : (
                 <>
-                  <a
-                    href="/auth"
-                    onClick={closeMobileMenu}
-                    className="block w-full px-4 py-3 text-center text-white bg-white/10 hover:bg-white/20 rounded-lg transition-all duration-300 backdrop-blur-sm"
-                  >
-                    User Login
-                  </a>
-
-                  <div className="space-y-2 mt-2">
-                    <div className="text-white/70 text-[16px] font-medium px-2">
-                      Partner Login
-                    </div>
-                    {partnerRoles.map((role, index) => (
-                      <a
-                        key={index}
-                        href={partnerLoginUrl}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        onClick={closeMobileMenu}
-                        className="block w-full px-4 py-2 text-center text-white/80 bg-white/5 hover:bg-white/10 rounded-lg transition-all duration-300 text-[16px]"
+                  {/* Mobile Toggle */}
+                  <div className="flex items-center justify-center mb-4">
+                    <div className="relative bg-white/10 rounded-full p-1 flex">
+                      <button
+                        onClick={() => setLoginToggle("user")}
+                        className={`px-4 py-2 text-sm font-medium rounded-full transition-all duration-300 ${
+                          loginToggle === "user"
+                            ? "bg-[#292579] text-white shadow-lg"
+                            : "text-white/70 hover:text-white"
+                        }`}
                       >
-                        {role}
-                      </a>
-                    ))}
+                        User
+                      </button>
+                      <button
+                        onClick={() => setLoginToggle("partner")}
+                        className={`px-4 py-2 text-sm font-medium rounded-full transition-all duration-300 ${
+                          loginToggle === "partner"
+                            ? "bg-[#292579] text-white shadow-lg"
+                            : "text-white/70 hover:text-white"
+                        }`}
+                      >
+                        Partner
+                      </button>
+                    </div>
                   </div>
+
+                  {/* Mobile Login Options */}
+                  {loginToggle === "user" ? (
+                    <button
+                      onClick={() => {
+                        handleUserLogin();
+                        closeMobileMenu();
+                      }}
+                      className="block w-full px-4 py-3 text-center text-white bg-white/10 hover:bg-white/20 rounded-lg transition-all duration-300 backdrop-blur-sm"
+                    >
+                      User Login 
+                    </button>
+                  ) : (
+                    <div className="space-y-2">
+                      <div className="text-white/70 text-sm font-medium px-2 mb-2">
+                         Partner Login
+                      </div>
+                      {partnerRoles.map((role, index) => (
+                        <button
+                          key={index}
+                          onClick={() => {
+                            handlePartnerLogin(role);
+                            closeMobileMenu();
+                          }}
+                          className="block w-full px-4 py-2 text-center text-white/80 bg-white/5 hover:bg-white/10 rounded-lg transition-all duration-300 text-sm"
+                        >
+                          {role}
+                        </button>
+                      ))}
+                    </div>
+                  )}
 
                   <a
                     href="/register"
                     onClick={closeMobileMenu}
-                    className="block w-full px-4 py-3 text-center text-white bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 rounded-lg transition-all duration-300"
+                    className="block w-full px-4 py-3 text-center text-white bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 rounded-lg transition-all duration-300 mt-4"
                   >
                     Sign Up
                   </a>

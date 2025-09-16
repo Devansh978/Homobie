@@ -82,9 +82,11 @@ const loginSchema = z.object({
   username: z.string().min(1, "Username is required"),
   password: z.string().min(1, "Password is required"),
 });
+
 export const forgotSchema = z.object({
   email: z.string().email("Invalid email address"),
 });
+
 export const otpSchema = z.object({
   email: z.string().email("Invalid email address"),
   otp: z.string().min(6, "OTP must be 6 digits").max(6, "OTP must be 6 digits"),
@@ -103,11 +105,6 @@ export const resetSchema = z
     message: "Passwords do not match",
     path: ["confirmNewPassword"],
   });
-
-// Forgot Password
-const onForgotSubmit = (data: any) => {
-  forgotMutation.mutate({ email: data.email });
-};
 
 type RegisterFormData = z.infer<typeof registerSchema>;
 type LoginFormData = z.infer<typeof loginSchema>;
@@ -138,11 +135,84 @@ export default function AuthPage() {
   });
 
   const registerMutation = useMutation({
-    mutationFn: (data: Omit<RegisterFormData, "confirmPassword">) => {
-      return axios.post(
-        "https://api.homobie.com/register/user",
-        data
-      );
+    mutationFn: async (data: Omit<RegisterFormData, "confirmPassword">) => {
+      try {
+        console.log('=== REGISTRATION DEBUG ===');
+        console.log('Raw form data:', data);
+        
+        // Check for any undefined or null values
+        const checkForIssues = (obj: any, path: string = ''): string[] => {
+          const issues: string[] = [];
+          for (const [key, value] of Object.entries(obj)) {
+            const currentPath = path ? `${path}.${key}` : key;
+            if (value === null || value === undefined) {
+              issues.push(`${currentPath}: ${value}`);
+            } else if (typeof value === 'object' && value !== null) {
+              issues.push(...checkForIssues(value, currentPath));
+            } else if (typeof value === 'string' && value.trim() === '') {
+              issues.push(`${currentPath}: empty string`);
+            }
+          }
+          return issues;
+        };
+        
+        const issues = checkForIssues(data);
+        if (issues.length > 0) {
+          console.log('Potential issues found:', issues);
+        }
+        
+        // Create a clean payload
+        const cleanPayload = {
+          user: {
+            firstName: String(data.user.firstName || '').trim(),
+            lastName: String(data.user.lastName || '').trim(),
+            email: String(data.user.email || '').trim(),
+            phoneNumber: String(data.user.phoneNumber || '').trim(),
+          },
+          roleData: {
+            roleType: data.roleData.roleType,
+            ...(data.roleData.companyName && { 
+              companyName: String(data.roleData.companyName).trim() 
+            }),
+            location: {
+              country: String(data.roleData.location.country || '').trim(),
+              state: String(data.roleData.location.state || '').trim(),
+              city: String(data.roleData.location.city || '').trim(),
+              pincode: String(data.roleData.location.pincode || '').trim(),
+              addressLine1: String(data.roleData.location.addressLine1 || '').trim(),
+            },
+          },
+        };
+        
+        console.log('Clean payload:', JSON.stringify(cleanPayload, null, 2));
+        console.log('Payload size:', JSON.stringify(cleanPayload).length, 'bytes');
+        
+        const response = await axios.post(
+          "https://api.homobie.com/register/user",
+          cleanPayload,
+          {
+            headers: {
+              'Content-Type': 'application/json',
+              'Accept': 'application/json',
+            },
+            timeout: 30000, // 30 second timeout
+          }
+        );
+        
+        console.log('Registration successful:', response.data);
+        return response;
+        
+      } catch (error) {
+        console.error('=== REGISTRATION ERROR ===');
+        if (axios.isAxiosError(error)) {
+          console.error('Request config:', error.config);
+          console.error('Response status:', error.response?.status);
+          console.error('Response headers:', error.response?.headers);
+          console.error('Response data:', error.response?.data);
+          console.error('Request data sent:', error.config?.data);
+        }
+        throw error;
+      }
     },
     onSuccess: () => {
       toast.success("Account created successfully! Please log in.");
@@ -150,12 +220,15 @@ export default function AuthPage() {
       registerForm.reset();
     },
     onError: (error: unknown) => {
+      console.error('Registration mutation error:', error);
       let errorMessage = "An unexpected error occurred.";
 
       if (axios.isAxiosError(error) && error.response?.data) {
         const responseData = error.response.data;
         if (responseData.message) {
           errorMessage = responseData.message;
+        } else if (responseData.detail) {
+          errorMessage = responseData.detail;
         }
       } else if (error instanceof Error) {
         errorMessage = error.message;
@@ -199,9 +272,6 @@ export default function AuthPage() {
       source: string;
     }) => {
       const res = await axios.post(
-
-        // `https://homobiebackend-railway-production.up.railway.app/reset-password?email=string&newPassword=string&source=string`,
-
         `https://api.homobie.com/reset-password`,
         null,
         {
@@ -227,6 +297,32 @@ export default function AuthPage() {
       toast.error(
         err.response?.data?.message ||
           "Something went wrong while resetting password"
+      );
+    },
+  });
+
+  const otpMutation = useMutation({
+    mutationFn: async (data: { email: string; otp: string }) => {
+      const res = await axios.post(
+        `https://api.homobie.com/verify-Otp`,
+        null,
+        {
+          params: {
+            email: data.email,
+            otp: data.otp,
+          },
+        }
+      );
+      return res.data;
+    },
+    onSuccess: () => {
+      toast.success("OTP verified successfully!");
+      setActiveTab("reset");
+      resetForm.setValue("email", userEmail);
+    },
+    onError: (err: any) => {
+      toast.error(
+        err.response?.data?.message || "Invalid OTP. Please try again."
       );
     },
   });
@@ -258,35 +354,12 @@ export default function AuthPage() {
       },
     },
   });
-  const otpMutation = useMutation({
-    mutationFn: async (data: { email: string; otp: string }) => {
-      const res = await axios.post(
-        `https://api.homobie.com/verify-Otp`,
-        null,
-        {
-          params: {
-            email: data.email,
-            otp: data.otp,
-          },
-        }
-      );
-      return res.data;
-    },
-    onSuccess: () => {
-      toast.success("OTP verified successfully!");
-      setActiveTab("reset");
-      resetForm.setValue("email", userEmail);
-    },
-    onError: (err: any) => {
-      toast.error(
-        err.response?.data?.message || "Invalid OTP. Please try again."
-      );
-    },
-  });
+
   const forgotForm = useForm({
     resolver: zodResolver(forgotSchema),
     defaultValues: { email: "" },
   });
+
   const otpForm = useForm({
     resolver: zodResolver(otpSchema),
     defaultValues: {
@@ -294,6 +367,17 @@ export default function AuthPage() {
       otp: "",
     },
   });
+
+  const resetForm = useForm({
+    resolver: zodResolver(resetSchema),
+    defaultValues: {
+      email: "",
+      newPassword: "",
+      confirmNewPassword: "",
+      source: "WEB", 
+    },
+  });
+
   const selectedRole = registerForm.watch("roleData.roleType");
 
   useEffect(() => {
@@ -301,23 +385,27 @@ export default function AuthPage() {
       navigate("/auth");
     }
   }, [user, navigate]);
+
   const onLoginSubmit = (data: LoginFormData) => {
     loginMutation.mutate(data);
   };
 
   const onRegisterSubmit = (data: RegisterFormData) => {
-    const { ...payload } = data;
-    registerMutation.mutate(payload);
+    // Validate required fields before submission
+    console.log('Form data received:', data);
+    
+    if (!data.roleData.location.country || !data.roleData.location.state || !data.roleData.location.city) {
+      toast.error("Please select country, state, and city");
+      return;
+    }
+    
+    if (data.roleData.roleType === "BUILDER" && !data.roleData.companyName?.trim()) {
+      toast.error("Company name is required for Builder role");
+      return;
+    }
+    
+    registerMutation.mutate(data);
   };
-  const resetForm = useForm({
-    resolver: zodResolver(resetSchema),
-    defaultValues: {
-      email: "",
-      newPassword: "",
-      confirmNewPassword: "",
-      source: "WEB", // default (can be dynamic e.g. "APP")
-    },
-  });
 
   const onResetSubmit = (data: any) => {
     resetMutation.mutate({
@@ -326,6 +414,7 @@ export default function AuthPage() {
       source: data.source,
     });
   };
+
   const onOtpSubmit = (data: any) => {
     otpMutation.mutate({
       email: data.email,
@@ -912,12 +1001,20 @@ export default function AuthPage() {
                                   </FormLabel>
                                   <Select
                                     onValueChange={(value) => {
-                                      field.onChange(value);
-                                      setSelectedCountry(value);
+                                      // Find the country object to get the name
+                                      const country = Country.getAllCountries().find(c => c.isoCode === value);
+                                      field.onChange(country?.name || value); // Store country name, not ISO code
+                                      setSelectedCountry(value); // Keep ISO code for state filtering
                                       setSelectedState("");
                                       setSelectedCity("");
+                                      // Clear dependent fields in form
+                                      registerForm.setValue("roleData.location.state", "");
+                                      registerForm.setValue("roleData.location.city", "");
                                     }}
-                                    value={field.value}
+                                    value={
+                                      // Find ISO code for current country name
+                                      Country.getAllCountries().find(c => c.name === field.value)?.isoCode || ""
+                                    }
                                   >
                                     <FormControl>
                                       <SelectTrigger className="text-white border border-white">
@@ -951,11 +1048,17 @@ export default function AuthPage() {
                                   </FormLabel>
                                   <Select
                                     onValueChange={(value) => {
-                                      field.onChange(value);
-                                      setSelectedState(value);
+                                      // Find the state object to get the name
+                                      const state = State.getStatesOfCountry(selectedCountry).find(s => s.isoCode === value);
+                                      field.onChange(state?.name || value); // Store state name, not ISO code
+                                      setSelectedState(value); // Keep ISO code for city filtering
                                       setSelectedCity("");
+                                      registerForm.setValue("roleData.location.city", "");
                                     }}
-                                    value={field.value}
+                                    value={
+                                      // Find ISO code for current state name
+                                      State.getStatesOfCountry(selectedCountry).find(s => s.name === field.value)?.isoCode || ""
+                                    }
                                     disabled={!selectedCountry}
                                   >
                                     <FormControl>
@@ -992,7 +1095,10 @@ export default function AuthPage() {
                                     City
                                   </FormLabel>
                                   <Select
-                                    onValueChange={field.onChange}
+                                    onValueChange={(value) => {
+                                      field.onChange(value); // City name is stored directly
+                                      setSelectedCity(value);
+                                    }}
                                     value={field.value}
                                     disabled={!selectedState}
                                   >
