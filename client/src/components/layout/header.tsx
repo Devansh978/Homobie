@@ -42,7 +42,7 @@ const navData = [
   },
 ];
 
-const partnerLoginUrl = "https://homobie-frontend-portal-bco8-devansh978s-projects.vercel.app/";
+const partnerLoginUrl = "https://homobie-frontend-portal-bco8-devansh978s-projects.vercel.app";
 const partnerRoles = ["Builder", "Broker", "User", "Telecaller"];
 
 // Glassmorphism DesktopNavDropdown component
