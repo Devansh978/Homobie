@@ -140,7 +140,7 @@ export default function AuthPage() {
   const registerMutation = useMutation({
     mutationFn: (data: Omit<RegisterFormData, "confirmPassword">) => {
       return axios.post(
-        "http://homobie.ap-south-1.elasticbeanstalk.com/register/user",
+        "https://api.homobie.com/register/user",
         data
       );
     },
@@ -168,7 +168,7 @@ export default function AuthPage() {
   const forgotMutation = useMutation({
     mutationFn: async (data: { email: string }) => {
       const res = await axios.post(
-        `http://homobie.ap-south-1.elasticbeanstalk.com/request-forgotPassword`,
+        `https://api.homobie.com/request-forgotPassword`,
         null,
         {
           params: {
@@ -202,7 +202,7 @@ export default function AuthPage() {
 
         // `https://homobiebackend-railway-production.up.railway.app/reset-password?email=string&newPassword=string&source=string`,
 
-        `http://homobie.ap-south-1.elasticbeanstalk.com/reset-password`,
+        `https://api.homobie.com/reset-password`,
         null,
         {
           params: {
@@ -261,7 +261,7 @@ export default function AuthPage() {
   const otpMutation = useMutation({
     mutationFn: async (data: { email: string; otp: string }) => {
       const res = await axios.post(
-        `http://homobie.ap-south-1.elasticbeanstalk.com/verify-Otp`,
+        `https://api.homobie.com/verify-Otp`,
         null,
         {
           params: {

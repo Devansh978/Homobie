@@ -87,7 +87,7 @@ const CallbackPage: React.FC = () => {
         if (authCode) {
           console.log("Using OAuth code approach");
           
-          const response = await fetch('http://homobie.ap-south-1.elasticbeanstalk.com/auth/oauth/callback', {
+          const response = await fetch('https://api.homobie.com/auth/oauth/callback', {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',

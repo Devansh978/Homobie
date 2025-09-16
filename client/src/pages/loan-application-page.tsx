@@ -68,7 +68,7 @@ import { getQueryParam, getLoanTypeLabel, calculateEMI } from "../lib/utils";
 // ============================================================================
 // 1. CONSTANTS & API LOGIC (Centralized in this file)
 // ============================================================================
-const BASE_URL = "http://homobie.ap-south-1.elasticbeanstalk.com/register/user";
+const BASE_URL = "https://api.homobie.com/register/user";
 
 /**
  * A custom error class for handling API errors in a structured way.

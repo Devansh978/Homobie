@@ -14,7 +14,7 @@ import ListViewCard from "./ListViewCard";
 import PropertyFilters from "./PropertyFilters";
 import FormProperties from "./FormProperties";
 
-const baseUrl = "http://homobie.ap-south-1.elasticbeanstalk.com";
+const baseUrl = "https://api.homobie.com";
 
 // Helper function to convert byte array to image URL
 // Updated helper functions for better image handling

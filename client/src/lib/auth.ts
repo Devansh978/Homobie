@@ -62,7 +62,7 @@ export class AuthService {
   private refreshToken: string | null = null;
   private user: AuthUser | null = null;
   private readonly baseUrl =
-    "http://homobie.ap-south-1.elasticbeanstalk.com";
+    "https://api.homobie.com";
   private tokenRefreshPromise: Promise<void> | null = null;
   private propertyId: string | null = null;
   private userId: string | null = null;

@@ -71,7 +71,7 @@ const getUserName = () => {
     setError(null);
 
     try {
-      const BASE_URL = "http://homobie.ap-south-1.elasticbeanstalk.com";
+      const BASE_URL = "https://api.homobie.com";
       const userId = localStorage.getItem("userId");
       const token = localStorage.getItem("auth_token");
 
