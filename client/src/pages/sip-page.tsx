@@ -266,7 +266,7 @@ export default function SipPage() {
   );
 
   return (
-    <div>
+    <div className='bg-black'>
       <main className="py-12 pt-24">
         <div className="container mx-auto px-4">
           {isSuccess ? (
@@ -567,7 +567,7 @@ export default function SipPage() {
                             className="w-full"
                           >
                             <AccordionItem value="item-1">
-                              <AccordionTrigger>
+                              <AccordionTrigger className="text-left">
                                 What is a Systematic Investment Plan (SIP)?
                               </AccordionTrigger>
                               <AccordionContent>
@@ -618,8 +618,8 @@ export default function SipPage() {
                               </AccordionContent>
                             </AccordionItem>
 
-                            <AccordionItem value="item-5">
-                              <AccordionTrigger>
+                            <AccordionItem value="item-5" >
+                              <AccordionTrigger className="text-left">
                                 Is SIP suitable for long-term or short-term
                                 goals?
                               </AccordionTrigger>
@@ -826,11 +826,11 @@ export default function SipPage() {
                                         onValueChange={field.onChange}
                                       >
                                         <FormControl>
-                                          <SelectTrigger className="bg-transparent text-white border border-white">
+                                          <SelectTrigger className="bg-black text-white border border-white">
                                             <SelectValue placeholder="Select a SIP plan" />
                                           </SelectTrigger>
                                         </FormControl>
-                                        <SelectContent className="bg-transparent text-white border border-white">
+                                        <SelectContent className="bg-black text-white border border-white">
                                           {SIP_PLANS.map((plan) => (
                                             <SelectItem
                                               key={plan.id}

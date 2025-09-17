@@ -18,7 +18,7 @@ const LOAN_TYPES = [
   { id: "bt-topup", label: "Balance Transfer Top-Up", baseRate: 8.0 },
 ];
 
-export function EmiCalculator({ onApply }) {
+export function EmiCalculator({ onApply,background = "black"}) {
   const [loanType, setLoanType] = useState(LOAN_TYPES[0].id);
   const [amount, setAmount] = useState(2500000);
   const [interestRate, setInterestRate] = useState(8.5);
@@ -58,21 +58,37 @@ export function EmiCalculator({ onApply }) {
     }
   };
 
-  const handleApply = () => {
-    if (onApply) {
-      onApply({
-        loanType,
-        amount,
-        interestRate,
-        tenure,
-        emi,
-      });
-    }
-  };
+ const handleApply = () => {
+  if (onApply) {
+    onApply({
+      loanType,
+      amount,
+      interestRate,
+      tenure,
+      emi,
+    });
+  }
+
+  // Redirect based on loanType
+  switch (loanType) {
+    case "home-loan":
+      window.location.href="/loan-application?type=home-loan";
+      break;
+    case "lap":
+      window.location.href="/loan-application?type=lap";
+      break;
+    case "bt-topup":
+      window.location.href="/loan-application?type=bt-topup";
+      break;
+    default:
+      window.location.href="/loan-application?type=home-loan";
+  }
+};
+
 
   return (
-    <div className=' pt-24 pb-10'>
-    <Card className=" text-white rounded-xl shadow-lg mx-36">
+    <div className='pt-24 pb-10' style={{ backgroundColor: background }}>
+    <Card className=" text-white rounded-xl shadow-lg mx-8 md:mx-36">
       <CardContent className="p-6">
         <h2 className="text-white text-2xl font-semibold mb-4">
           EMI Calculator
@@ -204,7 +220,7 @@ export function EmiCalculator({ onApply }) {
 
           <Button
             onClick={handleApply}
-            className="w-[25%] py-3 relative left-[38%] text-white font-medium rounded-lg hover:bg-white/90 hover:text-black transition-colors text-[18px]"
+            className="md:w-[25%] py-3 relative md:left-[38%] text-white font-medium rounded-lg hover:bg-white/90 hover:text-black transition-colors md:text-[18px]"
           >
             Apply Now
           </Button>

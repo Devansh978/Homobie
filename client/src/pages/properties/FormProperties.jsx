@@ -1,8 +1,13 @@
 import React, { useState } from 'react';
 import { X, Plus, Upload, MapPin, Home, DollarSign, Bed, Bath, Square } from 'lucide-react';
+import { Country, State, City } from "country-state-city";
 
 const FormProperties = ({ onAddProperty }) => {
   const [isFormOpen, setIsFormOpen] = useState(false);
+  const [selectedCountry, setSelectedCountry] = useState('');
+  const [selectedState, setSelectedState] = useState('');
+  const [selectedCity, setSelectedCity] = useState('');
+  
   const [formData, setFormData] = useState({
     files: [],
     property: {
@@ -17,7 +22,6 @@ const FormProperties = ({ onAddProperty }) => {
       furnishing: '',
       ownerId: '',
       propertyFeatures: [],
-      // status: '',
       title: '',
       type: '',
       discountPrice: '',
@@ -79,6 +83,54 @@ const FormProperties = ({ onAddProperty }) => {
     }
   };
 
+  const handleCountryChange = (value) => {
+    setSelectedCountry(value);
+    setSelectedState('');
+    setSelectedCity('');
+    setFormData(prev => ({
+      ...prev,
+      property: {
+        ...prev.property,
+        location: {
+          ...prev.property.location,
+          country: value,
+          state: '',
+          city: ''
+        }
+      }
+    }));
+  };
+
+  const handleStateChange = (value) => {
+    setSelectedState(value);
+    setSelectedCity('');
+    setFormData(prev => ({
+      ...prev,
+      property: {
+        ...prev.property,
+        location: {
+          ...prev.property.location,
+          state: value,
+          city: ''
+        }
+      }
+    }));
+  };
+
+  const handleCityChange = (value) => {
+    setSelectedCity(value);
+    setFormData(prev => ({
+      ...prev,
+      property: {
+        ...prev.property,
+        location: {
+          ...prev.property.location,
+          city: value
+        }
+      }
+    }));
+  };
+
   const addAmenity = () => {
     if (currentAmenity.trim()) {
       setFormData(prev => ({
@@ -127,7 +179,7 @@ const FormProperties = ({ onAddProperty }) => {
 
   const validateForm = () => {
     const requiredFields = [
-      'title',  'category', 'type', 'description',
+      'title', 'category', 'type', 'description',
       'bedrooms', 'bathrooms', 'areaSqft', 'constructionStatus',
       'furnishing', 'actualPrice'
     ];
@@ -154,6 +206,40 @@ const FormProperties = ({ onAddProperty }) => {
     return null;
   };
 
+  const resetForm = () => {
+    setFormData({
+      files: [],
+      property: {
+        actualPrice: '',
+        amenities: [],
+        areaSqft: '',
+        bathrooms: '',
+        bedrooms: '',
+        category: '',
+        constructionStatus: '',
+        description: '',
+        furnishing: '',
+        ownerId: '',
+        propertyFeatures: [],
+        title: '',
+        type: '',
+        discountPrice: '',
+        location: {
+          addressLine1: '',
+          addressLine2: '',
+          city: '',
+          country: '',
+          landmark: '',
+          pincode: '',
+          state: '',
+        },
+      },
+    });
+    setSelectedCountry('');
+    setSelectedState('');
+    setSelectedCity('');
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setSubmitError(null);
@@ -170,36 +256,7 @@ const FormProperties = ({ onAddProperty }) => {
       const success = await onAddProperty(formData);
       if (success) {
         setIsFormOpen(false);
-        // Reset form
-        setFormData({
-          files: [],
-          property: {
-            actualPrice: '',
-            amenities: [],
-            areaSqft: '',
-            bathrooms: '',
-            bedrooms: '',
-            category: '',
-            constructionStatus: '',
-            description: '',
-            furnishing: '',
-            ownerId: '',
-            propertyFeatures: [],
-            // status: '',
-            title: '',
-            type: '',
-            discountPrice: '',
-            location: {
-              addressLine1: '',
-              addressLine2: '',
-              city: '',
-              country: '',
-              landmark: '',
-              pincode: '',
-              state: '',
-            },
-          },
-        });
+        resetForm();
       }
     } catch (error) {
       setSubmitError(error.message || 'Failed to add property');
@@ -257,17 +314,6 @@ const FormProperties = ({ onAddProperty }) => {
                         required
                       />
                     </div>
-                    {/* <div>
-                      <label className="block text-sm font-medium text-white mb-1">Owner ID*</label>
-                      <input
-                        type="text"
-                        name="ownerId"
-                        value={formData.property.ownerId}
-                        onChange={handleInputChange}
-                        className="w-full px-3 py-2 border border-white bg-black text-white rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                        required
-                      />
-                    </div> */}
                     <div>
                       <label className="block text-sm font-medium text-white mb-1">Category*</label>
                       <select
@@ -280,7 +326,6 @@ const FormProperties = ({ onAddProperty }) => {
                         <option value="">Select Category</option>
                         <option value="SELL">Sell</option>
                         <option value="RENT">Rent</option>
-                        
                       </select>
                     </div>
                     <div>
@@ -296,7 +341,6 @@ const FormProperties = ({ onAddProperty }) => {
                         <option value="RESIDENTIAL">Residential</option>
                         <option value="COMMERCIAL">Commercial</option>
                         <option value="VILLA">Villa</option>
-                        
                         <option value="PLOT">Plot</option>
                       </select>
                     </div>
@@ -375,7 +419,6 @@ const FormProperties = ({ onAddProperty }) => {
                         <option value="">Select Status</option>
                         <option value="UNDER_CONSTRUCTION">Under Construction</option>
                         <option value="READY_TO_MOVE">Ready to Move</option>
-                        
                       </select>
                     </div>
                     <div>
@@ -393,21 +436,6 @@ const FormProperties = ({ onAddProperty }) => {
                         <option value="UNFURNISHED">Unfurnished</option>
                       </select>
                     </div>
-                    {/* <div>
-                      <label className="block text-sm font-medium text-white mb-1">Status*</label>
-                      <select
-                        name="status"
-                        value={formData.property.status}
-                        onChange={handleInputChange}
-                        className="w-full px-3 py-2 border border-white bg-black text-white rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                        required
-                      >
-                        <option value="">Select Status</option>
-                        <option value="AVAILABLE">Available</option>
-                        <option value="SOLD">Sold</option>
-                        <option value="PENDING">Pending</option>
-                      </select>
-                    </div> */}
                   </div>
                 </div>
 
@@ -472,39 +500,63 @@ const FormProperties = ({ onAddProperty }) => {
                         className="w-full px-3 py-2 border border-white bg-black text-white rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                       />
                     </div>
-                    <div>
-                      <label className="block text-sm font-medium text-white mb-1">City*</label>
-                      <input
-                        type="text"
-                        name="location.city"
-                        value={formData.property.location.city}
-                        onChange={handleInputChange}
-                        className="w-full px-3 py-2 border border-white bg-black text-white rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                        required
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-white mb-1">State*</label>
-                      <input
-                        type="text"
-                        name="location.state"
-                        value={formData.property.location.state}
-                        onChange={handleInputChange}
-                        className="w-full px-3 py-2 border border-white bg-black text-white rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                        required
-                      />
-                    </div>
+                    
+                    {/* Country Dropdown */}
                     <div>
                       <label className="block text-sm font-medium text-white mb-1">Country*</label>
-                      <input
-                        type="text"
-                        name="location.country"
-                        value={formData.property.location.country}
-                        onChange={handleInputChange}
+                      <select
+                        value={selectedCountry}
+                        onChange={(e) => handleCountryChange(e.target.value)}
                         className="w-full px-3 py-2 border border-white bg-black text-white rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                         required
-                      />
+                      >
+                        <option value="">Select Country</option>
+                        {Country.getAllCountries().map((country) => (
+                          <option key={country.isoCode} value={country.isoCode}>
+                            {country.name}
+                          </option>
+                        ))}
+                      </select>
                     </div>
+
+                    {/* State Dropdown */}
+                    <div>
+                      <label className="block text-sm font-medium text-white mb-1">State*</label>
+                      <select
+                        value={selectedState}
+                        onChange={(e) => handleStateChange(e.target.value)}
+                        className="w-full px-3 py-2 border border-white bg-black text-white rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        disabled={!selectedCountry}
+                        required
+                      >
+                        <option value="">Select State</option>
+                        {selectedCountry && State.getStatesOfCountry(selectedCountry).map((state) => (
+                          <option key={state.isoCode} value={state.isoCode}>
+                            {state.name}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+
+                    {/* City Dropdown */}
+                    <div>
+                      <label className="block text-sm font-medium text-white mb-1">City*</label>
+                      <select
+                        value={selectedCity}
+                        onChange={(e) => handleCityChange(e.target.value)}
+                        className="w-full px-3 py-2 border border-white bg-black text-white rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        disabled={!selectedState}
+                        required
+                      >
+                        <option value="">Select City</option>
+                        {selectedCountry && selectedState && City.getCitiesOfState(selectedCountry, selectedState).map((city) => (
+                          <option key={city.name} value={city.name}>
+                            {city.name}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+
                     <div>
                       <label className="block text-sm font-medium text-white mb-1">Pincode*</label>
                       <input

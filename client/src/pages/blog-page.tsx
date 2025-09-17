@@ -13,7 +13,7 @@ import Blog10 from "./blog/Blog10";
 // --- STYLES (CSS-in-JS) ---
 const styles = {
   body: {
-    backgroundColor: "#121212",
+    backgroundColor: "#000",
     color: "#e0e0e0",
     fontFamily: "'Segoe UI', 'Helvetica Neue', Arial, sans-serif",
     lineHeight: 1.7,

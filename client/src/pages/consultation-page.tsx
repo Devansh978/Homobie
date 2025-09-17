@@ -186,7 +186,7 @@ const removeTimeSlotId = () => {
 
   // Consultation topics
   const consultationTopics = [
-    "HOME_LOAN",
+    "Home Loan",
     
   ];
 
@@ -722,7 +722,7 @@ const { data: userConsultations, refetch: refetchConsultations, error: consultat
   }, [selectedDate, form, rescheduleForm]);
 
   return (
-    <div>
+    <div className='bg-black'>
       <main className=" pt-20">
         <div className="container mx-auto px-4">
           <div className="max-w-6xl mx-auto">
@@ -831,7 +831,7 @@ const { data: userConsultations, refetch: refetchConsultations, error: consultat
                               <FormLabel>Email Address</FormLabel>
                               <FormControl>
                                 <div className="flex">
-                                  <span className="inline-flex items-center px-3 rounded-l-md border border-r-0 border-neutral-300 bg-neutral-100 text-black0">
+                                  <span className="inline-flex items-center px-3 rounded-l-md border border-r-0 border-neutral-300 bg-black text-black0">
                                     <Mail className="h-4 w-4" />
                                   </span>
                                   <Input
@@ -855,7 +855,7 @@ const { data: userConsultations, refetch: refetchConsultations, error: consultat
                               <FormLabel>Verification Code</FormLabel>
                               <FormControl>
                                 <div className="flex">
-                                  <span className="inline-flex items-center px-3 rounded-l-md border border-r-0 border-neutral-300 bg-neutral-100 text-black0">
+                                  <span className="inline-flex items-center px-3 rounded-l-md border border-r-0 border-neutral-300 bg-black text-black0">
                                     <Shield className="h-4 w-4" />
                                   </span>
                                   <Input
@@ -1322,7 +1322,7 @@ const { data: userConsultations, refetch: refetchConsultations, error: consultat
                       <CardContent>
                         {/* Guest User Information Form */}
                         {!user && (
-                          <Card className="mb-6 bg-gray-50">
+                          <Card className="mb-6 bg-black">
                             <CardHeader className="pb-3">
                               <CardTitle className="text-lg">
                                 Your Information
@@ -1342,7 +1342,7 @@ const { data: userConsultations, refetch: refetchConsultations, error: consultat
                                         <FormLabel>Full Name *</FormLabel>
                                         <FormControl>
                                           <div className="flex">
-                                            <span className="inline-flex items-center px-3 rounded-l-md border border-r-0 border-neutral-300 bg-neutral-100 text-black0">
+                                            <span className="inline-flex items-center px-3 rounded-md border border-neutral-300 mr-2 bg-black text-white">
                                               <User className="h-4 w-4" />
                                             </span>
                                             <Input
@@ -1365,7 +1365,7 @@ const { data: userConsultations, refetch: refetchConsultations, error: consultat
                                         <FormLabel>Email Address *</FormLabel>
                                         <FormControl>
                                           <div className="flex">
-                                            <span className="inline-flex items-center px-3 rounded-l-md border border-r-0 border-neutral-300 bg-neutral-100 text-black0">
+                                            <span className="inline-flex items-center px-3 rounded-md border border-neutral-300 mr-2 bg-black text-white">
                                               <Mail className="h-4 w-4" />
                                             </span>
                                             <Input
@@ -1389,7 +1389,7 @@ const { data: userConsultations, refetch: refetchConsultations, error: consultat
                                         <FormLabel>Phone Number *</FormLabel>
                                         <FormControl>
                                           <div className="flex">
-                                            <span className="inline-flex items-center px-3 rounded-l-md border border-r-0 border-neutral-300 bg-neutral-100 text-black0">
+                                            <span className="inline-flex items-center px-3 rounded-md border border-neutral-300 mr-2 bg-black text-white">
                                               <Phone className="h-4 w-4" />
                                             </span>
                                             <Input
@@ -1849,30 +1849,6 @@ const { data: userConsultations, refetch: refetchConsultations, error: consultat
                       </Card>
                     )}
 
-                    {/* Error Display for Consultations */}
-                    {consultationsError && (
-                      <Card className="border-red-200 bg-transparent">
-                        <CardContent className="pt-6">
-                          <div className="flex items-center">
-                            <AlertCircle className="h-5 w-5 text-red-500 mr-2" />
-                            <p className="text-red-700 text-sm">
-                              Failed to load consultations:{" "}
-                              {consultationsError instanceof Error
-                                ? consultationsError.message
-                                : "Unknown error"}
-                            </p>
-                          </div>
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            onClick={() => refetchConsultations()}
-                            className="mt-2 bg-transparent text-white hover:bg-transparent hover:text-white border-black"
-                          >
-                            Retry
-                          </Button>
-                        </CardContent>
-                      </Card>
-                    )}
 
                     <Card className="bg-primary text-white">
                       <CardHeader>

@@ -680,7 +680,7 @@ const SipCalculator = () => {
   return (
     <div
       ref={containerRef}
-      className={`min-h-screen  md:pt-[100px] sm:py-8 px-2 sm:px-4 ${
+      className={`min-h-screen pt-[100px] md:pt-[100px] sm:py-8 px-2 sm:px-4 bg-black${
         isFullscreen ? "fixed inset-0 z-50 overflow-auto" : ""
       }`}
     >

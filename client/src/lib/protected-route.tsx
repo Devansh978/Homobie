@@ -25,17 +25,17 @@ export function ProtectedRoute({
   component: () => React.JSX.Element;
 }) {
   try {
-    const { user, isLoading } = useAuth();
+    const { user, isLoading, loginMutation } = useAuth();
 
-    if (isLoading) {
-      return (
-        <Route path={path}>
-          <div className="flex items-center justify-center min-h-screen">
-            <Loader2 className="h-8 w-8 animate-spin text-primary" />
-          </div>
-        </Route>
-      );
-    }
+if (isLoading || loginMutation.isPending) {
+  return (
+    <Route path={path}>
+      <div className="flex items-center justify-center min-h-screen">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    </Route>
+  );
+}
 
     if (!user) {
       return (

@@ -507,7 +507,7 @@ const Properties = () => {
   }
 
   return (
-    <div className="min-h-screen text-white pt-[100px]">
+    <div className="min-h-screen text-white pt-[100px] bg-black">
       {/* Header */}
       <div className="border-b border-white/10  backdrop-blur-xl">
         <div className="max-w-7xl mx-auto px-4 py-8">
@@ -517,17 +517,16 @@ const Properties = () => {
                 {currentView === "featured"
                   ? "Exclusive Owner Properties"
                   : "All Properties"}
-                <span className="text-white/50"> in Bangalore</span>
+                <span className="text-white/50"> in your Area</span>
               </h1>
               <p className="text-white/60 text-lg">
                 {currentView === "featured"
                   ? "Handpicked premium properties directly from owners"
-                  : `${allProperties.length} results | Flats for Sale in Bangalore`}
+                  : `${allProperties.length} results | Flats for Sale in your Area`}
               </p>
             </div>
           </div>
           
-          {/* Show auth redirect message if user tries to add property without authentication */}
           {showAuthRedirect && (
             <div className="bg-yellow-900/50 border border-yellow-700 rounded-lg p-4 mb-6 text-center">
               <p className="text-yellow-200">Please login to add properties</p>

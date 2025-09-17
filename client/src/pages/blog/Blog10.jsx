@@ -1,11 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState } from "react";
 
 const CtaButton = ({ href = "#", children, styles }) => {
   const [isHovered, setIsHovered] = useState(false);
   return (
     <a
       href={href}
-      className={`inline-block px-6 py-3 rounded-lg font-semibold text-white transition-transform transform ${
+      className={`inline-block px-4 sm:px-6 py-2 sm:py-3 rounded-lg font-semibold text-white transition-transform transform ${
         isHovered ? "bg-blue-500 scale-105" : "bg-blue-600"
       }`}
       onMouseEnter={() => setIsHovered(true)}
@@ -19,17 +19,23 @@ const CtaButton = ({ href = "#", children, styles }) => {
 
 const Blog10 = ({ styles }) => {
   return (
-   <div className="min-h-screen  text-gray-100 px-6 py-12 max-w-4xl mx-auto">
-      <h1 className="text-3xl md:text-4xl font-bold mb-8 text-center">
+    <div className="min-h-screen text-gray-100 max-w-4xl mx-auto">
+      {/* Title */}
+      <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-6 sm:mb-8 text-center">
         How to Pay Off Your Home Loan in 10 Years: Smart Strategies for Indian Borrowers
       </h1>
-      <div className="w-24 h-1 bg-gradient-to-r from-blue-500 to-blue-600 mx-auto mb-5"></div>
+      <div className="w-20 sm:w-24 h-1 bg-gradient-to-r from-blue-500 to-blue-600 mx-auto mb-6 sm:mb-8"></div>
 
-      <p className="text-lg leading-relaxed mb-8">
+      {/* Intro paragraph */}
+      <p className="text-base sm:text-lg leading-relaxed mb-6 sm:mb-8">
         Want to finish your home loan in just 10 years? Combine a shorter or adjustable tenure,
-        regular prepayments, EMI increases, and SIP investment plans. <strong className="text-blue-400">Homobie</strong> offers tools like the{" "}
+        regular prepayments, EMI increases, and SIP investment plans.{" "}
+        <strong className="text-blue-400">Homobie</strong> offers tools like the{" "}
         <strong className="text-blue-400">EMI calculator online</strong> and tailored{" "}
-        <strong className="text-blue-400">SIP reinvestment plans for home loans and loan against property</strong> to help you plan and repay faster with less stress.
+        <strong className="text-blue-400">
+          SIP reinvestment plans for home loans and loan against property
+        </strong>{" "}
+        to help you plan and repay faster with less stress.
       </p>
 
       {/* Sections */}
@@ -56,11 +62,20 @@ const Blog10 = ({ styles }) => {
         },
         {
           title: "6. Refinance When Rates Drop via Balance Transfer",
-          text: "Keep an eye on RBI’s rate decisions. Even a 0.5% drop in rates can yield big savings. Use an <strong className='text-blue-400'>EMI calculator online</strong> to compare lender offers."
+          text: "Keep an eye on RBI’s rate decisions. Even a 0.5% drop in rates can yield big savings. Use an EMI calculator online to compare lender offers."
         },
         {
           title: "7. Use an SIP Investment Plan to Fuel Prepayments",
-          text: <>Invest ~10% of your EMI monthly in a mutual fund SIP. After 3–5 years, redeem it for a lump-sum prepayment—reducing tenure and interest. <strong className="text-blue-400">Homobie</strong> offers <a href="/sip" className="text-blue-500 underline">SIP reinvestment plans</a> aligned with EMI timelines.</>
+          text: (
+            <>
+              Invest ~10% of your EMI monthly in a mutual fund SIP. After 3–5 years, redeem it for a lump-sum prepayment—reducing tenure and interest.{" "}
+              <strong className="text-blue-400">Homobie</strong> offers{" "}
+              <a href="/sip" className="text-blue-500 underline">
+                SIP reinvestment plans
+              </a>{" "}
+              aligned with EMI timelines.
+            </>
+          )
         },
         {
           title: "8. Combine SIP Strategy with Loan Prepayments",
@@ -79,39 +94,51 @@ const Blog10 = ({ styles }) => {
           text: "Life changes—bonuses, promotions, rate cuts. Review yearly and adjust SIP, EMIs, or prepayments."
         }
       ].map((section, idx) => (
-        <div key={idx} className="mb-6">
-          <h2 className="text-2xl font-semibold mb-2 text-blue-400">{section.title}</h2>
-          <p className="leading-relaxed text-gray-200">{section.text}</p>
+        <div key={idx} className="mb-5 sm:mb-6">
+          <h2 className="text-xl sm:text-2xl font-semibold mb-2 text-blue-400">
+            {section.title}
+          </h2>
+          <p className="text-sm sm:text-base leading-relaxed text-gray-200">
+            {section.text}
+          </p>
         </div>
       ))}
 
-      <h2 className="text-2xl font-semibold mt-6 mb-2 text-blue-400">Real User Insight from Reddit</h2>
-      <blockquote className="border-l-4 border-blue-500 pl-4 italic text-gray-300 mb-6">
+      {/* Reddit Insight */}
+      <h2 className="text-xl sm:text-2xl font-semibold mt-6 mb-3 text-blue-400">
+        Real User Insight from Reddit
+      </h2>
+      <blockquote className="border-l-4 border-blue-500 pl-3 sm:pl-4 italic text-gray-300 mb-6">
         “Invest ₹1.5 lakh in a diversified aggressive fund while paying loan simultaneously…and finish the loan early.” — Reddit user
       </blockquote>
 
-      <h2 className="text-2xl font-semibold mt-6 mb-2 text-blue-400">How Homobie Supports Your 10-Year Repayment Plan</h2>
-      <ul className="list-disc pl-6 mb-6 text-gray-200 space-y-2">
-        <li><strong className="text-blue-400">EMI calculator online</strong> to project scenarios like tenure cuts, prepayments, balance transfers, and EMI hikes.</li>
+      {/* Homobie Support */}
+      <h2 className="text-xl sm:text-2xl font-semibold mt-6 mb-3 text-blue-400">
+        How Homobie Supports Your 10-Year Repayment Plan
+      </h2>
+      <ul className="list-disc pl-5 sm:pl-6 mb-6 text-gray-200 space-y-2 text-sm sm:text-base">
+        <li>
+          <strong className="text-blue-400">EMI calculator online</strong> to project scenarios like tenure cuts, prepayments, balance transfers, and EMI hikes.
+        </li>
         <li>Guides on investment vs prepayment decisions using SIP analysis.</li>
         <li>Personalized SIP reinvestment plans aligned with debt reduction goals.</li>
         <li>Realtime alerts for rate drops to refinance faster.</li>
       </ul>
 
-      <p className="text-gray-200 mb-6">
-        With Homobie, repayment becomes smarter, visual, and stress-free—while keeping ownership and clarity intact.
-      </p>
-
-      <h2 className="text-2xl font-semibold mt-6 mb-2 text-blue-400">Conclusion</h2>
-      <p className="text-gray-200 mb-4">
+      {/* Conclusion */}
+      <h2 className="text-xl sm:text-2xl font-semibold mt-6 mb-3 text-blue-400">Conclusion</h2>
+      <p className="text-sm sm:text-base text-gray-200 mb-4">
         Clearing your home loan in 10 years is possible with deliberate planning: right tenure, smart prepayments, EMI hikes, SIPs, and discipline. The mix reduces interest and builds wealth.
       </p>
-      <p className="text-gray-200 mb-6">
+      <p className="text-sm sm:text-base text-gray-200 mb-6">
         <strong className="text-blue-400">Homobie</strong> helps you execute—matching you to the right loan, simulating plans, and guiding SIP reinvestments.
       </p>
 
+      {/* CTA */}
       <div className="text-center mb-8">
-        <strong className="text-lg text-white">Start your journey to debt freedom with clarity, tools, and a plan—with Homobie.</strong>
+        <strong className="text-base sm:text-lg text-white">
+          Start your journey to debt freedom with clarity, tools, and a plan—with Homobie.
+        </strong>
       </div>
 
       <div className="text-center">

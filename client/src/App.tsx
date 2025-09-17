@@ -26,6 +26,7 @@ import { ProtectedRoute } from "./lib/protected-route";
 import SipCalculator from "@/pages/SipCalculator/SipCalculator";
 import EmiCalculator from "@/pages/EmiCalculator/EmiCalculator";
 import BudgetPlanningTool from "@/pages/BudgetPlanningTool/BudgetPlanningTool";
+import CompareLoans from "@/pages/Compareloans/CompareLoans";
 
 import { ThemeProvider } from "next-themes";
 import { AuthProvider } from "@/hooks/use-auth";
@@ -56,6 +57,7 @@ function Router() {
       <Route path="/blog" component={BlogPage} />
       <Route path="/about" component={AboutPage} />
       <Route path="/ourteam" component={OurTeamPage} />
+      <Route path="/compare-loans" component={CompareLoans} />
 
       <Route path="/properties" component={Properties} />
       <Route path="/properties/:propertyId" component={PropertyDetails} />
@@ -84,18 +86,18 @@ function App() {
         <AuthProvider>
           <div
             className=""
-            style={{
-  background: `
-    linear-gradient(
-      90deg,
-      rgba(0, 0, 0, 0.9) 0%,       /* deep black start */
-      rgba(17, 24, 39, 0.8) 40%,   /* dark gray/black tint */
-      rgba(29, 78, 216, 0.1) 80%,  /* small hint of blue */
-      transparent 100%
-    ),
-    #000
-  `,
-}}
+//             style={{
+//   background: `
+//     linear-gradient(
+//       90deg,
+//       rgba(0, 0, 0, 0.9) 0%,       /* deep black start */
+//       rgba(17, 24, 39, 0.8) 40%,   /* dark gray/black tint */
+//       rgba(29, 78, 216, 0.1) 80%,  /* small hint of blue */
+//       transparent 100%
+//     ),
+//     #000
+//   `,
+// }}
 
           >
             <Header />
