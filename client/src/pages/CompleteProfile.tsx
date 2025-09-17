@@ -14,12 +14,12 @@ import {
   LocationRequest,
   BuilderRegistrationRequest,
 } from "../lib/registration";
-
+ 
 interface CompleteProfileProps {
   email?: string;
   firstName?: string;
 }
-
+ 
 const CompleteProfile: React.FC<CompleteProfileProps> = ({
   email = "",
   firstName = "",
@@ -38,12 +38,12 @@ const CompleteProfile: React.FC<CompleteProfileProps> = ({
     state: "",
     pincode: "",
   });
-
+ 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string>("");
-
+ 
   const isBuilder = formData.role === "BUILDER";
-
+ 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
   ) => {
@@ -53,12 +53,12 @@ const CompleteProfile: React.FC<CompleteProfileProps> = ({
       [name]: value,
     }));
   };
-
+ 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
     setError("");
-
+ 
     try {
       const userRequest = {
         firstName: formData.firstName,
@@ -66,9 +66,9 @@ const CompleteProfile: React.FC<CompleteProfileProps> = ({
         email: email,
         phoneNumber: formData.phoneNumber,
       };
-
+ 
       let roleData = null;
-
+ 
       if (formData.role === "BUILDER") {
         const location: LocationRequest = {
           addressLine1: formData.addressLine1,
@@ -78,19 +78,19 @@ const CompleteProfile: React.FC<CompleteProfileProps> = ({
           state: formData.state,
           pincode: formData.pincode,
         };
-
+ 
         roleData = {
           roleType: "BUILDER",
           companyName: formData.companyName,
           location,
         } as BuilderRegistrationRequest;
       }
-
+ 
       const requestPayload: UserWithRoleRegistrationRequest = {
         user: userRequest,
         roleData: roleData, // null for USER, object for BUILDER
       };
-
+ 
       const response = await fetch(
         "https://api.homobie.com/register/update",
         {
@@ -99,7 +99,7 @@ const CompleteProfile: React.FC<CompleteProfileProps> = ({
           body: JSON.stringify(requestPayload),
         }
       );
-
+ 
       if (response.ok) {
         alert(
           "Profile completed successfully! Please log in again to continue."
@@ -116,7 +116,7 @@ const CompleteProfile: React.FC<CompleteProfileProps> = ({
       setIsSubmitting(false);
     }
   };
-
+ 
   return (
     <div className="min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8 bg-gray-950 text-gray-100 pt-10">
       <div className="max-w-2xl w-full space-y-8">
@@ -131,7 +131,7 @@ const CompleteProfile: React.FC<CompleteProfileProps> = ({
             Just a few more details to get started
           </p>
         </div>
-
+ 
         <div className="bg-gray-900/80 backdrop-blur-sm rounded-xl shadow-lg p-8 border border-gray-800">
           {error && (
             <div className="mb-6 bg-red-950/60 border border-red-700 rounded-lg p-4 flex items-center">
@@ -139,7 +139,7 @@ const CompleteProfile: React.FC<CompleteProfileProps> = ({
               <p className="text-red-300 text-sm">{error}</p>
             </div>
           )}
-
+ 
           <form onSubmit={handleSubmit} className="space-y-6">
             {/* Basic Information */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -161,7 +161,7 @@ const CompleteProfile: React.FC<CompleteProfileProps> = ({
                   />
                 </div>
               </div>
-
+ 
               <div>
                 <label
                   htmlFor="role"
@@ -182,7 +182,7 @@ const CompleteProfile: React.FC<CompleteProfileProps> = ({
                 </select>
               </div>
             </div>
-
+ 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
                 <label
@@ -201,7 +201,7 @@ const CompleteProfile: React.FC<CompleteProfileProps> = ({
                   className="w-full px-4 py-3 border border-gray-700 rounded-lg bg-gray-800 text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors duration-200"
                 />
               </div>
-
+ 
               <div>
                 <label
                   htmlFor="lastName"
@@ -220,7 +220,7 @@ const CompleteProfile: React.FC<CompleteProfileProps> = ({
                 />
               </div>
             </div>
-
+ 
             <div>
               <label
                 htmlFor="phoneNumber"
@@ -243,7 +243,7 @@ const CompleteProfile: React.FC<CompleteProfileProps> = ({
                 />
               </div>
             </div>
-
+ 
             {/* Builder Fields */}
             {isBuilder && (
               <div className="space-y-6 pt-6 border-t border-gray-800">
@@ -253,7 +253,7 @@ const CompleteProfile: React.FC<CompleteProfileProps> = ({
                     Builder Information
                   </h3>
                 </div>
-
+ 
                 <div>
                   <label
                     htmlFor="companyName"
@@ -271,14 +271,14 @@ const CompleteProfile: React.FC<CompleteProfileProps> = ({
                     className="w-full px-4 py-3 border border-gray-700 rounded-lg bg-gray-800 text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors duration-200"
                   />
                 </div>
-
+ 
                 <div className="flex items-center mb-4">
                   <MapPin className="h-5 w-5 text-green-400 mr-2" />
                   <h4 className="text-md font-semibold text-gray-100">
                     Company Address
                   </h4>
                 </div>
-
+ 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <input
                     type="text"
@@ -299,7 +299,7 @@ const CompleteProfile: React.FC<CompleteProfileProps> = ({
                     className="w-full px-4 py-3 border border-gray-700 rounded-lg bg-gray-800 text-gray-100 placeholder-gray-500 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                   />
                 </div>
-
+ 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <input
                     type="text"
@@ -320,7 +320,7 @@ const CompleteProfile: React.FC<CompleteProfileProps> = ({
                     className="w-full px-4 py-3 border border-gray-700 rounded-lg bg-gray-800 text-gray-100 placeholder-gray-500 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                   />
                 </div>
-
+ 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <input
                     type="text"
@@ -343,7 +343,7 @@ const CompleteProfile: React.FC<CompleteProfileProps> = ({
                 </div>
               </div>
             )}
-
+ 
             <button
               type="submit"
               disabled={isSubmitting}
@@ -364,5 +364,5 @@ const CompleteProfile: React.FC<CompleteProfileProps> = ({
     </div>
   );
 };
-
+ 
 export default CompleteProfile;

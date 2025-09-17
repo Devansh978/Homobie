@@ -41,7 +41,9 @@ const navData = [
   },
 ];
 
-const basePartnerUrl = "https://homobie-frontend-portal-bco8.vercel.app";
+
+const partnerLoginUrl = "https://homobie-frontend-portal-bco8-devansh978s-projects.vercel.app";
+
 const partnerRoles = ["Builder", "Broker", "User", "Telecaller"];
 
 const getPartnerLoginUrl = (role = null) => {
