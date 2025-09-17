@@ -422,7 +422,7 @@ export const Header = () => {
                   </div>
 
                   <a
-                    href="/register"
+                    href="/auth"
                     className="px-3 py-2 bg-gradient-to-r from-blue-500 to-purple-600 text-white font-medium rounded-lg hover:from-blue-600 hover:to-purple-700 transition-all duration-300 shadow-lg hover:shadow-xl backdrop-blur-sm border border-white/20 text-[16px]"
                   >
                     Sign Up
