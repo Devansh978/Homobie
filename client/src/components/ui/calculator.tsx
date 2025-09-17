@@ -214,7 +214,7 @@ export function LoanCalculator({ onApply }: LoanCalculatorProps) {
           {/* Apply Button */}
           <Button
             onClick={handleApply}
-            className="w-[25%] ml-[300px] py-3 bg-primary text-white font-medium rounded-lg hover:bg-primary-dark transition-colors"
+            className="md:w-[25%] md:ml-[300px] py-3 bg-primary text-white font-medium rounded-lg hover:bg-primary-dark transition-colors"
           >
             Apply Now
           </Button>

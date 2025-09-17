@@ -7,8 +7,10 @@ const CtaButton = ({ href = "#", children }) => {
     <a
       href={href}
       className={`
-        inline-flex items-center px-8 py-4 bg-gradient-to-r from-blue-600 to-blue-700
-        text-white font-semibold rounded-lg shadow-lg transform transition-all duration-300
+        inline-flex items-center px-4 py-2 sm:px-6 sm:py-3 md:px-8 md:py-4
+        bg-gradient-to-r from-blue-600 to-blue-700
+        text-sm sm:text-base md:text-lg text-white font-semibold rounded-lg 
+        shadow-lg transform transition-all duration-300
         hover:from-blue-700 hover:to-blue-800 hover:shadow-xl hover:scale-105
         focus:outline-none focus:ring-4 focus:ring-blue-300
       `}
@@ -16,21 +18,25 @@ const CtaButton = ({ href = "#", children }) => {
       onMouseLeave={() => setIsHovered(false)}
     >
       {children}
-      <TrendingUp className={`ml-2 w-5 h-5 transition-transform duration-300 ${isHovered ? "translate-x-1" : ""}`} />
+      <TrendingUp
+        className={`ml-2 w-4 h-4 sm:w-5 sm:h-5 transition-transform duration-300 ${
+          isHovered ? "translate-x-1" : ""
+        }`}
+      />
     </a>
   );
 };
 
 const Blog2 = () => (
   <div className="min-h-screen text-gray-200">
-    <div className="max-w-4xl mx-auto px-6 py-12">
+    <div className="max-w-4xl mx-auto">
       
       {/* Header */}
-      <div className="text-center mb-12">
-        <h1 className="text-4xl md:text-5xl font-bold text-white mb-6 leading-tight">
+      <div className="text-center mb-8 sm:mb-10 md:mb-12">
+        <h1 className="text-2xl sm:text-3xl md:text-5xl font-bold text-white mb-3 sm:mb-4 md:mb-6 leading-snug md:leading-tight">
           What is the Best CIBIL Score for a Loan Approval? A Complete Guide for 2025
         </h1>
-        <div className="w-24 h-1 bg-gradient-to-r from-blue-500 to-blue-600 mx-auto"></div>
+        <div className="w-16 sm:w-20 md:w-24 h-1 bg-gradient-to-r from-blue-500 to-blue-600 mx-auto"></div>
       </div>
 
       {/* Section Component */}
@@ -113,17 +119,23 @@ const Blog2 = () => (
           ),
         },
       ].map((section, idx) => (
-        <section key={idx} className="bg-gray-800 rounded-xl shadow-lg p-8 mb-10">
-          <h2 className="text-2xl font-semibold mb-4 text-white">{section.title}</h2>
+        <section key={idx} className="bg-gray-800 rounded-xl shadow-lg p-4 sm:p-5 md:p-8 mb-6 sm:mb-8 md:mb-10">
+          <h2 className="text-lg sm:text-xl md:text-2xl font-semibold mb-2 sm:mb-3 md:mb-4 text-white">
+            {section.title}
+          </h2>
           {section.content}
         </section>
       ))}
 
       {/* CTA Section */}
-      <div className="text-center mt-8">
-        <div className="bg-gray-800 rounded-xl shadow-lg p-8 inline-block">
-          <h3 className="text-2xl font-bold text-white mb-4">Ready to Apply for Your Home Loan?</h3>
-          <p className="text-gray-300 mb-6">Get pre-approval offers and expert guidance instantly</p>
+      <div className="text-center mt-6 md:mt-8">
+        <div className="bg-gray-800 rounded-xl shadow-lg p-5 sm:p-6 md:p-8 inline-block">
+          <h3 className="text-lg sm:text-xl md:text-2xl font-bold text-white mb-3 sm:mb-4">
+            Ready to Apply for Your Home Loan?
+          </h3>
+          <p className="text-gray-300 mb-4 sm:mb-5 md:mb-6">
+            Get pre-approval offers and expert guidance instantly
+          </p>
           <CtaButton href="/loan-application?type=home-loan">
             Check Your Eligibility & Apply Now
           </CtaButton>

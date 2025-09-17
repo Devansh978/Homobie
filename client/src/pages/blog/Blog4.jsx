@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState } from "react";
 
 const CtaButton = ({ href = "#", children, styles }) => {
   const [isHovered, setIsHovered] = useState(false);
@@ -18,8 +18,8 @@ const CtaButton = ({ href = "#", children, styles }) => {
 };
 
 const Blog4 = ({ styles }) => (
-  <div className="max-w-4xl mx-auto px-6 py-12 text-white">
-    <h1 className="text-4xl font-bold mb-8 leading-tight">
+  <div className="max-w-4xl mx-auto text-white">
+    <h1 className="text-3xl sm:text-4xl font-bold mb-8 leading-tight">
       Home Loan Takeover Explained: RBI Guidelines Every Borrower Should Know
     </h1>
     <div className="w-24 h-1 mb-5 bg-gradient-to-r from-blue-500 to-blue-600 mx-auto"></div>
@@ -39,28 +39,27 @@ const Blog4 = ({ styles }) => (
 
     <h2 className="text-2xl font-semibold mb-4">Introduction</h2>
     <p className="mb-4 leading-relaxed">
-      Buying a home is one of life’s biggest investments. But what happens
-      when your current home loan starts to feel like a financial burden
-      instead of a smart decision? That’s where{" "}
-      <strong className="font-semibold">home loan takeovers</strong>, also
-      known as <strong className="font-semibold">balance transfers</strong>,
-      come into play.
+      Buying a home is one of life’s biggest investments. But what happens when
+      your current home loan starts to feel like a financial burden instead of a
+      smart decision? That’s where{" "}
+      <strong className="font-semibold">home loan takeovers</strong>, also known
+      as <strong className="font-semibold">balance transfers</strong>, come into
+      play.
     </p>
     <p className="mb-6 leading-relaxed">
       To protect borrowers and promote financial transparency, the{" "}
-      <strong className="font-semibold">RBI (Reserve Bank of India)</strong>{" "}
-      has laid down specific guidelines for such takeovers. These rules
-      empower homeowners to switch lenders efficiently—without penalty in many
-      cases—and reduce their EMIs or interest outgo.
+      <strong className="font-semibold">RBI (Reserve Bank of India)</strong> has
+      laid down specific guidelines for such takeovers. These rules empower
+      homeowners to switch lenders efficiently—without penalty in many cases—and
+      reduce their EMIs or interest outgo.
     </p>
 
-    <h2 className="text-2xl font-semibold mb-4">
-      What Is a Home Loan Takeover?
-    </h2>
+    <h2 className="text-2xl font-semibold mb-4">What Is a Home Loan Takeover?</h2>
     <p className="mb-4 leading-relaxed">
       A home loan takeover is the process of shifting your existing home loan
       from one bank or lender to another. It’s often used to take advantage of
-      better <strong className="font-semibold">loan against property interest rates</strong>, reduce
+      better{" "}
+      <strong className="font-semibold">loan against property interest rates</strong>, reduce
       your monthly <strong className="font-semibold">EMIs</strong>, or restructure repayment terms.
     </p>
     <p className="mb-6 leading-relaxed">
@@ -81,8 +80,9 @@ const Blog4 = ({ styles }) => (
       </h3>
       <p className="leading-relaxed">
         According to RBI directives, lenders cannot charge foreclosure or
-        prepayment fees on <strong className="font-semibold">floating-rate home loans</strong>.
-        This allows borrowers to switch or repay early without being penalized.
+        prepayment fees on{" "}
+        <strong className="font-semibold">floating-rate home loans</strong>. This
+        allows borrowers to switch or repay early without being penalized.
       </p>
     </div>
 

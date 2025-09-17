@@ -791,7 +791,7 @@ const LoanApplicationForm = ({ form, onSubmit, isSubmitting }: LoanApplicationFo
                     </div>
                   </div>
 
-                  <div className="flex justify-center items-center pt-4 space-x-[140px]">
+                  <div className="flex justify-center items-center pt-4 md:space-x-[140px]">
                     <Button
                       type="button"
                       variant="secondary"

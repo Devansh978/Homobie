@@ -567,7 +567,7 @@ export default function SipPage() {
                             className="w-full"
                           >
                             <AccordionItem value="item-1">
-                              <AccordionTrigger>
+                              <AccordionTrigger className="text-left">
                                 What is a Systematic Investment Plan (SIP)?
                               </AccordionTrigger>
                               <AccordionContent>
@@ -618,8 +618,8 @@ export default function SipPage() {
                               </AccordionContent>
                             </AccordionItem>
 
-                            <AccordionItem value="item-5">
-                              <AccordionTrigger>
+                            <AccordionItem value="item-5" >
+                              <AccordionTrigger className="text-left">
                                 Is SIP suitable for long-term or short-term
                                 goals?
                               </AccordionTrigger>

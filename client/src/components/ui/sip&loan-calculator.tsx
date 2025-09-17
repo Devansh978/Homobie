@@ -622,7 +622,7 @@ const FinanceCalculator = () => {
   return (
     <div 
       ref={containerRef}
-      className={`min-h-screen bg-gray-50 py-4 sm:py-8 px-2 sm:px-4 ${isFullscreen ? 'fixed inset-0 z-50 overflow-auto' : ''}`}
+      className={`min-h-screen bg-gray-50 ${isFullscreen ? 'fixed inset-0 z-50 overflow-auto' : ''}`}
     >
       <div className="max-w-6xl mx-auto relative">
         <div className="flex justify-between items-center mb-4">

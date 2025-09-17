@@ -282,7 +282,7 @@ const Feedback = () => {
   return (
     <div className="min-h-screen">
       {/* Action Buttons */}
-      <div className="relative top-12 right-2 z-50 flex gap-6">
+      <div className="relative right-4 z-50 flex gap-1">
         <button
           onClick={handleCreateNew}
           className="px-4 py-2 bg-black text-white rounded-lg transition-all duration-300 flex items-center gap-2 shadow-lg backdrop-blur-md border border-blue-500/30"
@@ -293,7 +293,7 @@ const Feedback = () => {
         {feedbacks.length > 0 && (
           <button
             onClick={() => handleEdit(feedbacks[currentIndex])}
-            className="px-4 py-2 bg-black text-white rounded-lg flex items-center gap-2"
+            className="px-4 py-2 bg-black border border-blue-500/30 text-white rounded-lg flex items-center gap-2"
           >
             <Edit3 className="w-4 h-4" />
             Edit Feedback
