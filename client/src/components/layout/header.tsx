@@ -42,7 +42,7 @@ const navData = [
 ];
 
 
-const basePartnerUrl = "https://homobie-frontend-portal-ijtw.vercel.app";
+const basePartnerUrl = "https://homobie-partner-portal.vercel.app";
 
 const partnerRoles = ["Builder", "Broker", "User", "Telecaller"];
 
