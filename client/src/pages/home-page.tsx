@@ -1,9 +1,12 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, memo } from "react";
 import { Link } from "wouter";
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import Feedback from "./Feedback/Feedback";
 import SipCalculator from "./SipCalculator/SipCalculator";
+
+// Memoize SipCalculator to prevent unnecessary re-renders
+const MemoizedSipCalculator = memo(SipCalculator);
 import {
   ArrowRight,
   Calculator,
@@ -98,42 +101,17 @@ export default function HomePage() {
       {children}
     </span>
   );
+  
   const handleCalculate = () => {
     if (amount > 0 && months > 0) {
       setShowResult(true);
     }
   };
+
   return (
     <div className="relative min-h-screen overflow-hidden">
       <div className="fixed inset-0 z-0">
         <div className="absolute inset-0 bg-black" />
-
-        {/* <div
-          className="absolute pointer-events-none transition-all duration-200 ease-out"
-          style={{
-            left: `${mousePosition.x}%`,
-            top: `${mousePosition.y}%`,
-            transform: "translate(-50%, -50%)",
-            width: "800px",
-            height: "800px",
-            background:
-              "radial-gradient(circle, rgba(99, 102, 241, 0.4) 0%, rgba(59, 130, 246, 0.3) 25%, rgba(147, 51, 234, 0.2) 50%, rgba(99, 102, 241, 0.1) 75%, transparent 100%)",
-            filter: "blur(120px)",
-          }}
-        />
-        <div
-          className="absolute pointer-events-none transition-all duration-300 ease-out"
-          style={{
-            left: `${mousePosition.x + 10}%`,
-            top: `${mousePosition.y + 10}%`,
-            transform: "translate(-50%, -50%)",
-            width: "500px",
-            height: "500px",
-            background:
-              "radial-gradient(circle, rgba(139, 92, 246, 0.3) 0%, rgba(99, 102, 241, 0.2) 40%, rgba(59, 130, 246, 0.15) 70%, transparent 90%)",
-            filter: "blur(100px)",
-          }}
-        /> */}
 
         {/* Floating particles */}
         <div className="absolute inset-0 overflow-hidden">
@@ -252,7 +230,6 @@ export default function HomePage() {
               </motion.div>
             </div>
           </div>
-
           {/* Background gradient */}
           <motion.div
             className="absolute inset-0 z-0"
@@ -262,21 +239,13 @@ export default function HomePage() {
           >
             <div className="absolute inset-0 bg-black opacity-90" />
           </motion.div>
-
-          {/* Mouse cursor indicator */}
-          {/* <div
-            className="absolute pointer-events-none w-4 h-4 border border-white/40 rounded-full transition-all duration-100 ease-out z-20"
-            style={{
-              left: `${mousePosition.x}%`,
-              top: `${mousePosition.y}%`,
-              transform: "translate(-50%, -50%)",
-            }}
-          >
-            <div className="absolute inset-0.5 bg-white/60 rounded-full" />
-          </div> */}
         </section>
-
-        <SipCalculator />
+        
+        {/* SIP Calculator - Isolated from parent state */}
+        <div key="sip-calculator-stable" className="relative z-20">
+          <MemoizedSipCalculator />
+        </div>
+   
         {/* Value Proposition Section */}
         <section className="py-24 px-4">
           <div className="max-w-6xl mx-auto">
@@ -465,7 +434,9 @@ export default function HomePage() {
             </motion.div>
           </div>
         </section>
+        
         <Feedback />
+        
         {/* SIP Feature Section */}
         <section className="py-24 px-4">
           <div className="max-w-6xl mx-auto">

@@ -5,6 +5,7 @@ import {
 } from "@tanstack/react-query";
 import { queryClient } from "../lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
+import { useLocation } from "wouter";
 
 // Add type definitions if not already present
 type SelectUser = {
@@ -38,6 +39,7 @@ export const AuthContext = createContext<AuthContextType | null>(null);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const { toast } = useToast();
+  const [, setLocation] = useLocation();
   const [user, setUser] = useState<SelectUser | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
@@ -100,10 +102,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setError(null);
       
       queryClient.setQueryData(["/auth/user"], userData);
+      
       toast({
         title: "Login successful",
         description: `Welcome back, ${userData.fullName}!`,
       });
+
+      // Navigate to dashboard after successful login
+      setTimeout(() => {
+        setLocation('/dashboard');
+      }, 100); // Small delay to ensure state is updated
     },
     onError: (error: Error) => {
       setError(error);
@@ -147,10 +155,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setError(null);
       
       queryClient.setQueryData(["/auth/user"], userData);
+      
       toast({
         title: "Registration successful",
         description: `Welcome to Homobie, ${userData.fullName}!`,
       });
+
+      // Navigate to dashboard after successful registration
+      setTimeout(() => {
+        setLocation('/dashboard');
+      }, 100);
     },
     onError: (error: Error) => {
       setError(error);
@@ -193,10 +207,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setError(null);
       
       queryClient.setQueryData(["/auth/user"], null);
+      
       toast({
         title: "Logged out",
         description: "You have been successfully logged out.",
       });
+
+      // Navigate to auth page after logout
+      setTimeout(() => {
+        setLocation('/auth');
+      }, 100);
     },
     onError: (error: Error) => {
       // Even if logout API fails, clear local data
@@ -209,6 +229,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         title: "Logout completed",
         description: "You have been logged out locally.",
       });
+
+      // Navigate to auth page
+      setTimeout(() => {
+        setLocation('/auth');
+      }, 100);
     },
   });
 

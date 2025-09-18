@@ -59,6 +59,7 @@ const SipCalculator = () => {
       document.removeEventListener("fullscreenchange", handleFullscreenChange);
     };
   }, []);
+  
 
   const [activeSection, setActiveSection] = useState("calculator");
   const [activeCalculator, setActiveCalculator] = useState("sip");

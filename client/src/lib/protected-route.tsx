@@ -31,6 +31,7 @@ export function ProtectedRoute({
 }) {
   const { user, isLoading } = useAuth();
 
+  // Show loader while auth state is loading
   if (isLoading) {
     return (
       <Route path={path}>
@@ -41,6 +42,7 @@ export function ProtectedRoute({
     );
   }
 
+  // Redirect to auth page if user is not logged in
   if (!user) {
     return (
       <Route path={path}>
@@ -49,11 +51,8 @@ export function ProtectedRoute({
     );
   }
 
-  if (
-    path.includes("admin") &&
-    user.role !== "admin" &&
-    user.role !== "superadmin"
-  ) {
+  // Redirect to dashboard if user tries to access admin page without permission
+  if (path.includes("admin") && user.role !== "admin" && user.role !== "superadmin") {
     return (
       <Route path={path}>
         <Redirect to="/dashboard" />
@@ -61,6 +60,7 @@ export function ProtectedRoute({
     );
   }
 
+  // Redirect to dashboard if user tries to access super-admin page without permission
   if (path.includes("super-admin") && user.role !== "superadmin") {
     return (
       <Route path={path}>
@@ -69,5 +69,6 @@ export function ProtectedRoute({
     );
   }
 
+  // Render the protected component
   return <Route path={path} component={Component} />;
 }
