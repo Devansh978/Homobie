@@ -44,7 +44,7 @@ const OAuth = () => {
           toast.success("Login successful!");
           
           window.history.replaceState({}, document.title, "/");
-          setLocation('/');
+          setLocation('/dashboard');
         } else {
           throw new Error('Invalid response format from server');
         }
@@ -119,37 +119,3 @@ const OAuth = () => {
 };
 
 export default OAuth;
-
-
-// import React from "react";
-// import { GoogleLogin } from "@react-oauth/google";
-// import { jwtDecode } from "jwt-decode";
-// import { useLocation } from "wouter";
-
-// const OAuth = () => {
-//   const [, setLocation] = useLocation(); 
-
-//   return (
-//     <div className="h-10 flex items-center justify-center p-4">
-//       <div className="w-full max-w-md space-y-4">
-//         <GoogleLogin
-//           onSuccess={(credentialResponse) => {
-//             const token = credentialResponse.credential;
-//             const user = jwtDecode(token); 
-//             console.log("Google User:", user);
-            
-//             localStorage.setItem('user', JSON.stringify(user));
-            
-//             setLocation('/'); 
-//           }}
-//           onError={() => {
-//             console.log("Google Login Failed");
-//           }}
-//           useOneTap
-//         />
-//       </div>
-//     </div>
-//   );
-// };
-
-// export default OAuth;

@@ -39,17 +39,17 @@ function Router() {
       <Route path="/" component={HomePage} />
       <Route path="/auth" component={AuthPage} />
 
-     <Route path="/complete-profile">
-  {() => {
-    console.log("Complete profile route matched!");
-    const search = window.location.search;
-    const searchParams = new URLSearchParams(search);
-    const email = searchParams.get('email') || '';
-    const firstName = searchParams.get('firstName') || '';
-    console.log("Email:", email, "FirstName:", firstName);
-    return <CompleteProfile email={email} firstName={firstName} />;
-  }}
-</Route>
+      <Route path="/complete-profile">
+        {() => {
+          console.log("Complete profile route matched!");
+          const search = window.location.search;
+          const searchParams = new URLSearchParams(search);
+          const email = searchParams.get("email") || "";
+          const firstName = searchParams.get("firstName") || "";
+          console.log("Email:", email, "FirstName:", firstName);
+          return <CompleteProfile email={email} firstName={firstName} />;
+        }}
+      </Route>
 
       <Route path="/loan-application" component={LoanApplicationPage} />
       <Route path="/consultation" component={ConsultationPage} />
@@ -84,22 +84,7 @@ function App() {
       <TooltipProvider>
         <Toaster />
         <AuthProvider>
-          <div
-            className=""
-//             style={{
-//   background: `
-//     linear-gradient(
-//       90deg,
-//       rgba(0, 0, 0, 0.9) 0%,       /* deep black start */
-//       rgba(17, 24, 39, 0.8) 40%,   /* dark gray/black tint */
-//       rgba(29, 78, 216, 0.1) 80%,  /* small hint of blue */
-//       transparent 100%
-//     ),
-//     #000
-//   `,
-// }}
-
-          >
+          <div>
             <Header />
             <main className="flex-1">
               <Router />

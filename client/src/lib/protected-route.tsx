@@ -2,7 +2,9 @@ import { useAuth } from "@/hooks/use-auth";
 import { Loader2 } from "lucide-react";
 import { Redirect, Route } from "wouter";
 
-// A wrapper component for all routes
+/**
+ * A wrapper for public routes
+ */
 export function RouteComponent({
   path,
   component: Component,
@@ -17,6 +19,9 @@ export function RouteComponent({
   );
 }
 
+/**
+ * A wrapper for protected routes
+ */
 export function ProtectedRoute({
   path,
   component: Component,
@@ -24,53 +29,45 @@ export function ProtectedRoute({
   path: string;
   component: () => React.JSX.Element;
 }) {
-  try {
-    const { user, isLoading, loginMutation } = useAuth();
+  const { user, isLoading } = useAuth();
 
-if (isLoading || loginMutation.isPending) {
-  return (
-    <Route path={path}>
-      <div className="flex items-center justify-center min-h-screen">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
-      </div>
-    </Route>
-  );
-}
+  if (isLoading) {
+    return (
+      <Route path={path}>
+        <div className="flex items-center justify-center min-h-screen">
+          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        </div>
+      </Route>
+    );
+  }
 
-    if (!user) {
-      return (
-        <Route path={path}>
-          <Redirect to="/auth" />
-        </Route>
-      );
-    }
-
-    // Check if the user is trying to access admin pages
-    if (path.includes("admin") && user.role !== "admin" && user.role !== "superadmin") {
-      return (
-        <Route path={path}>
-          <Redirect to="/dashboard" />
-        </Route>
-      );
-    }
-
-    // Check if the user is trying to access super admin pages
-    if (path.includes("super-admin") && user.role !== "superadmin") {
-      return (
-        <Route path={path}>
-          <Redirect to="/dashboard" />
-        </Route>
-      );
-    }
-
-    return <Route path={path} component={Component} />;
-  } catch (error) {
-    console.error("Error in ProtectedRoute:", error);
-    // Fallback to redirect to auth page in case of context error
+  if (!user) {
     return (
       <Route path={path}>
         <Redirect to="/auth" />
       </Route>
     );
   }
+
+  if (
+    path.includes("admin") &&
+    user.role !== "admin" &&
+    user.role !== "superadmin"
+  ) {
+    return (
+      <Route path={path}>
+        <Redirect to="/dashboard" />
+      </Route>
+    );
+  }
+
+  if (path.includes("super-admin") && user.role !== "superadmin") {
+    return (
+      <Route path={path}>
+        <Redirect to="/dashboard" />
+      </Route>
+    );
+  }
+
+  return <Route path={path} component={Component} />;
 }
