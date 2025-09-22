@@ -4,10 +4,7 @@ import { ArrowLeft, MapPin, Bed, Bath, Ruler, Car, X, ChevronLeft, ChevronRight,
 // API Configuration
 const BASE_URL = 'https://api.homobie.com';
 
-// This function should ONLY return an actual authentication token (JWT).
-const getAuthToken = () => {
-  return localStorage.getItem('auth_token') || sessionStorage.getItem('auth_token');
-};
+
 
 // Function to get propertyId from localStorage
 const getPropertyIdFromLocalStorage = () => {
@@ -122,11 +119,8 @@ const convertImageArrayToUrls = (imageArray) => {
 
 // API function to fetch individual property
 const fetchIndividualProperty = async (propertyId) => {
-  const token = getAuthToken();
+
   
-  if (!token) {
-    throw new Error('Authentication token not found. Please log in again.');
-  }
 
   try {
     console.log(`Fetching property: ${propertyId}`);
@@ -135,7 +129,6 @@ const fetchIndividualProperty = async (propertyId) => {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`,
       },
     });
 
@@ -434,9 +427,9 @@ const PropertyDetail = () => {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-transparent text-white flex items-center justify-center">
+      <div className="bg-black min-h-screen text-white  flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-white mx-auto mb-4"></div>
+          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-white mx-auto"></div>
           <p className="text-lg">Loading property details...</p>
         </div>
       </div>

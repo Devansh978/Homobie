@@ -2,9 +2,8 @@ import { useAuth } from "@/hooks/use-auth";
 import { Loader2 } from "lucide-react";
 import { Redirect, Route } from "wouter";
 
-/**
- * A wrapper for public routes
- */
+  // A wrapper for public routes
+
 export function RouteComponent({
   path,
   component: Component,
@@ -19,9 +18,7 @@ export function RouteComponent({
   );
 }
 
-/**
- * A wrapper for protected routes
- */
+//protected routes
 export function ProtectedRoute({
   path,
   component: Component,
@@ -31,7 +28,6 @@ export function ProtectedRoute({
 }) {
   const { user, isLoading } = useAuth();
 
-  // Show loader while auth state is loading
   if (isLoading) {
     return (
       <Route path={path}>
@@ -42,7 +38,6 @@ export function ProtectedRoute({
     );
   }
 
-  // Redirect to auth page if user is not logged in
   if (!user) {
     return (
       <Route path={path}>
@@ -60,7 +55,7 @@ export function ProtectedRoute({
     );
   }
 
-  // Redirect to dashboard if user tries to access super-admin page without permission
+  // Redirect to dashboard if user tries to access super-admin page
   if (path.includes("super-admin") && user.role !== "superadmin") {
     return (
       <Route path={path}>
@@ -69,6 +64,5 @@ export function ProtectedRoute({
     );
   }
 
-  // Render the protected component
   return <Route path={path} component={Component} />;
 }

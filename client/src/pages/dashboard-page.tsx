@@ -38,6 +38,7 @@ import {
   X,
 } from "lucide-react";
 import { formatCurrency, formatDate, getStatusColor } from "@/lib/utils";
+import { getDisplayName } from "@/lib/auth";
 import KycSection from "./KycSection";
 
 // Helper functions for time slot storage
@@ -642,16 +643,10 @@ const RescheduleConsultationDialog = ({
 };
 
 export default function DashboardPage() {
-  const { user: authUser } = useAuth();
+  const displayName = getDisplayName();
   const [actionErrors, setActionErrors] = useState<{ [key: string]: string }>(
     {}
   );
-
-  // Get user data from multiple sources
-  const userData = getUserData();
-  const user = authUser || userData;
-
-  const displayName = user?.name;
 
   // Fetch consultations with updated API call
   const {

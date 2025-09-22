@@ -101,7 +101,7 @@ export default function HomePage() {
       {children}
     </span>
   );
-  
+
   const handleCalculate = () => {
     if (amount > 0 && months > 0) {
       setShowResult(true);
@@ -136,7 +136,7 @@ export default function HomePage() {
         >
           <div className="container mx-auto px-4 z-10 relative flex items-center justify-between">
             {/* Left*/}
-            <div className="w-[75%]  flex-1 flex flex-col items-center text-center md:items-start md:text-center">
+            <div className="w-[75%] flex-1 flex flex-col items-center text-center md:items-start md:text-center">
               <motion.div
                 variants={containerVariants}
                 initial="hidden"
@@ -144,23 +144,24 @@ export default function HomePage() {
                 className="max-w-4xl mx-auto"
               >
                 <motion.div className="mb-12" variants={containerVariants}>
-                  <motion.p
-                    variants={itemVariants}
-                    className="text-5xl md:text-[75px] font-bold mb-6 tracking-tight text-white mt-4 flex items-center justify-center flex-wrap gap-4"
-                  >
-                    <span className="flex items-center gap-4">
-                      <div className="relative w-16 h-16 md:w-20 md:h-20 rounded-full overflow-hidden border-4 border-white shadow-lg flex-shrink-0">
+                  {/* Mobile Layout */}
+                  <div className="block md:hidden">
+                    <motion.div
+                      variants={itemVariants}
+                      className="flex items-center justify-center mb-4"
+                    >
+                      <div className="relative w-16 h-16 rounded-full overflow-hidden border-4 border-white shadow-lg flex-shrink-0">
                         {/* Saffron stripe */}
                         <div className="w-full h-1/3 bg-[#FF9933]"></div>
                         {/* White stripe with chakra */}
                         <div className="w-full h-1/3 bg-white flex items-center justify-center">
-                          <div className="w-6 h-6 md:w-7 md:h-7 rounded-full border-2 border-[#000080] relative">
+                          <div className="w-6 h-6 rounded-full border-2 border-[#000080] relative">
                             {/* Chakra spokes */}
                             <div className="absolute inset-0">
                               {[...Array(24)].map((_, i) => (
                                 <div
                                   key={i}
-                                  className="absolute w-px h-3 md:h-3.5 bg-[#000080] left-1/2 top-1/2 origin-bottom"
+                                  className="absolute w-px h-3 bg-[#000080] left-1/2 top-1/2 origin-bottom"
                                   style={{
                                     transform: `translate(-50%, -100%) rotate(${
                                       i * 15
@@ -174,16 +175,65 @@ export default function HomePage() {
                         {/* Green stripe */}
                         <div className="w-full h-1/3 bg-[#138808]"></div>
                       </div>
-                      India's
-                    </span>
-                    home loan experience,
-                  </motion.p>
-                  <motion.p
-                    variants={itemVariants}
-                    className="text-6xl md:text-8xl font-bold mb-8 tracking-tighter"
-                  >
-                    <GradientText>REIMAGINED.</GradientText>
-                  </motion.p>
+                    </motion.div>
+
+                    <motion.p
+                      variants={itemVariants}
+                      className="text-4xl font-bold mb-4 tracking-tight text-white"
+                    >
+                      India's home loan experience,
+                    </motion.p>
+                    <motion.p
+                      variants={itemVariants}
+                      className="text-5xl font-bold mb-8 tracking-tighter"
+                    >
+                      <GradientText>REIMAGINED.</GradientText>
+                    </motion.p>
+                  </div>
+
+                  {/* Desktop Layout */}
+                  <div className="hidden md:block">
+                    <motion.p
+                      variants={itemVariants}
+                      className="text-5xl md:text-[75px] font-bold mb-6 tracking-tight text-white mt-4 flex items-center justify-center flex-wrap gap-4"
+                    >
+                      <span className="flex items-center gap-4">
+                        <div className="relative w-16 h-16 md:w-20 md:h-20 rounded-full overflow-hidden border-4 border-white shadow-lg flex-shrink-0">
+                          {/* orange */}
+                          <div className="w-full h-1/3 bg-[#FF9933]"></div>
+                          {/* White */}
+                          <div className="w-full h-1/3 bg-white flex items-center justify-center">
+                            <div className="w-6 h-6 md:w-7 md:h-7 rounded-full border-2 border-[#000080] relative">
+                              {/* Chakra */}
+                              <div className="absolute inset-0">
+                                {[...Array(24)].map((_, i) => (
+                                  <div
+                                    key={i}
+                                    className="absolute w-px h-3 md:h-3.5 bg-[#000080] left-1/2 top-1/2 origin-bottom"
+                                    style={{
+                                      transform: `translate(-50%, -100%) rotate(${
+                                        i * 15
+                                      }deg)`,
+                                    }}
+                                  />
+                                ))}
+                              </div>
+                            </div>
+                          </div>
+                          {/* Green */}
+                          <div className="w-full h-1/3 bg-[#138808]"></div>
+                        </div>
+                        India's
+                      </span>
+                      home loan experience,
+                    </motion.p>
+                    <motion.p
+                      variants={itemVariants}
+                      className="text-6xl md:text-8xl font-bold mb-8 tracking-tighter"
+                    >
+                      <GradientText>REIMAGINED.</GradientText>
+                    </motion.p>
+                  </div>
                 </motion.div>
 
                 <motion.div
@@ -240,12 +290,12 @@ export default function HomePage() {
             <div className="absolute inset-0 bg-black opacity-90" />
           </motion.div>
         </section>
-        
-        {/* SIP Calculator - Isolated from parent state */}
+
+        {/* SIP Calculator - Isolated */}
         <div key="sip-calculator-stable" className="relative z-20">
           <MemoizedSipCalculator />
         </div>
-   
+
         {/* Value Proposition Section */}
         <section className="py-24 px-4">
           <div className="max-w-6xl mx-auto">
@@ -434,9 +484,9 @@ export default function HomePage() {
             </motion.div>
           </div>
         </section>
-        
+
         <Feedback />
-        
+
         {/* SIP Feature Section */}
         <section className="py-24 px-4">
           <div className="max-w-6xl mx-auto">

@@ -1,4 +1,3 @@
-// src/lib/auth.ts
 import { apiRequest } from "./queryClient";
 
 export interface AuthUser {
@@ -40,7 +39,7 @@ export interface RegisterData {
 
 export interface AuthResponse {
   email: string;
-  role: string; // backend sends string
+  role: string; 
   token: string;
   refreshToken: string;
   message?: string;
@@ -72,6 +71,39 @@ export class AuthService {
     this.setupTokenRefresh();
   }
 
+  public getDisplayName(): string {
+  if (this.user) {
+    if (this.user.firstName && this.user.lastName) {
+      return `${this.user.firstName} ${this.user.lastName}`;
+    }
+    if (this.user.firstName) {
+      return this.user.firstName;
+    }
+    return this.user.email; 
+  }
+
+  if (typeof window !== "undefined") {
+    const stored = localStorage.getItem("auth_user");
+    if (stored) {
+      try {
+        const parsed = JSON.parse(stored);
+        if (parsed.firstName && parsed.lastName) {
+          return `${parsed.firstName} ${parsed.lastName}`;
+        }
+        if (parsed.firstName) {
+          return parsed.firstName;
+        }
+        return parsed.email || "User";
+      } catch {
+        return "User";
+      }
+    }
+  }
+
+  return "User";
+}
+
+
   // === Storage Management ===
   private loadFromStorage() {
     if (typeof window === "undefined") return;
@@ -92,6 +124,7 @@ export class AuthService {
       localStorage.removeItem("auth_user");
     }
   }
+  
 
   // Save auth data to storage
   private saveToStorage(token: string, refreshToken: string, user: AuthUser , propertyId?: string, timeSlotId?: string) {
@@ -378,3 +411,4 @@ export async function authenticatedFetch(
     throw new Error("Network request failed");
   }
 }
+export const getDisplayName = () => authService.getDisplayName();

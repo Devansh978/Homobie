@@ -27,7 +27,7 @@ import SipCalculator from "@/pages/SipCalculator/SipCalculator";
 import EmiCalculator from "@/pages/EmiCalculator/EmiCalculator";
 import BudgetPlanningTool from "@/pages/BudgetPlanningTool/BudgetPlanningTool";
 import CompareLoans from "@/pages/Compareloans/CompareLoans";
-
+import RetirementPlanning from "./components/ui/retirementplanning";
 import { ThemeProvider } from "next-themes";
 import { AuthProvider } from "@/hooks/use-auth";
 import { Header } from "@/components/layout/header";
@@ -67,8 +67,9 @@ function Router() {
       <Route path="/tools/sip-loan-calculator" component={SipCalculator} />
       <Route path="/tools/emi-calculator" component={EmiCalculator} />
       <Route path="/tools/budget-planner" component={BudgetPlanningTool} />
+      <Route path="/tools/retirement-planner" component={RetirementPlanning} />
 
-      <ProtectedRoute path="/dashboard" component={DashboardPage} />
+      <Route path="/dashboard" component={DashboardPage} />
       <ProtectedRoute path="/admin" component={AdminPage} />
       <ProtectedRoute path="/super-admin" component={SuperAdminPage} />
       <ProtectedRoute path="/audit-logs" component={AuditLogsPage} />

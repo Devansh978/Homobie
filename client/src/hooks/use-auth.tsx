@@ -7,13 +7,11 @@ import { queryClient } from "../lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { useLocation } from "wouter";
 
-// Add type definitions if not already present
 type SelectUser = {
   id: string;
   email: string;
   fullName: string;
   role?: string;
-  // Add other user properties as needed
 };
 
 type InsertUser = {
@@ -21,7 +19,6 @@ type InsertUser = {
   password: string;
   email: string;
   fullName: string;
-  // Add other required registration fields
 };
 
 type AuthContextType = {
@@ -44,7 +41,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
 
-  // Load user from localStorage on mount
+  // Load user from localStorage
   useEffect(() => {
     const loadUserFromStorage = () => {
       try {
@@ -72,7 +69,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const loginMutation = useMutation({
     mutationFn: async (credentials: LoginData) => {
-      // Update this URL to match your actual login endpoint
       const response = await fetch('https://api.homobie.com/auth/login', {
         method: 'POST',
         headers: {
@@ -89,7 +85,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       return await response.json();
     },
     onSuccess: (data) => {
-      // Assuming your API returns { user: {...}, token: "..." }
       const { user: userData, token } = data;
       
       // Store in localStorage
@@ -108,10 +103,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         description: `Welcome back, ${userData.fullName}!`,
       });
 
-      // Navigate to dashboard after successful login
-      setTimeout(() => {
         setLocation('/dashboard');
-      }, 100); // Small delay to ensure state is updated
+ 
     },
     onError: (error: Error) => {
       setError(error);
@@ -125,7 +118,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const registerMutation = useMutation({
     mutationFn: async (credentials: InsertUser) => {
-      // Update this URL to match your actual register endpoint
       const response = await fetch('https://api.homobie.com/auth/register', {
         method: 'POST',
         headers: {
@@ -142,7 +134,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       return await response.json();
     },
     onSuccess: (data) => {
-      // Assuming your API returns { user: {...}, token: "..." }
       const { user: userData, token } = data;
       
       // Store in localStorage
@@ -161,10 +152,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         description: `Welcome to Homobie, ${userData.fullName}!`,
       });
 
-      // Navigate to dashboard after successful registration
-      setTimeout(() => {
         setLocation('/dashboard');
-      }, 100);
+     
     },
     onError: (error: Error) => {
       setError(error);
@@ -176,11 +165,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     },
   });
 
+  
   const logoutMutation = useMutation({
     mutationFn: async () => {
       const token = localStorage.getItem('auth_token');
       
-      // Call logout endpoint if you have one
+      //  logout
       if (token) {
         try {
           await fetch('https://api.homobie.com/auth/logout', {
@@ -192,7 +182,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           });
         } catch (err) {
           console.warn('Logout API call failed:', err);
-          // Continue with local logout even if API call fails
         }
       }
     },
@@ -213,13 +202,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         description: "You have been successfully logged out.",
       });
 
-      // Navigate to auth page after logout
+      // Navigate to auth
       setTimeout(() => {
         setLocation('/auth');
       }, 100);
     },
     onError: (error: Error) => {
-      // Even if logout API fails, clear local data
       localStorage.removeItem('auth_token');
       localStorage.removeItem('user');
       localStorage.removeItem('userId');
@@ -230,7 +218,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         description: "You have been logged out locally.",
       });
 
-      // Navigate to auth page
+      // Navigate to auth
       setTimeout(() => {
         setLocation('/auth');
       }, 100);
