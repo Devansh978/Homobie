@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react"; 
+import React, { useState, useEffect } from "react";
 import { useLocation } from "wouter";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -38,7 +38,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Shield } from "lucide-react";
 import OAuth from "./OAuth";
 
-
+// Update to include BUILDER in allowed roles for login
 const registerSchema = z
   .object({
     user: z.object({
@@ -50,7 +50,7 @@ const registerSchema = z
         .min(10, "Phone number must be at least 10 digits"),
     }),
     roleData: z.object({
-      roleType: z.enum(["USER", "BROKER", "CA", "ADMIN"], {
+      roleType: z.enum(["USER", "BROKER", "CA", "ADMIN", "BUILDER"], {
         required_error: "You need to select a role.",
       }),
       companyName: z.string().optional(),
@@ -67,7 +67,7 @@ const registerSchema = z
     }),
   })
   .superRefine(({ roleData }, ctx) => {
-    // Remove BUILDER-specific validation since it's no longer an option
+    // Remove BUILDER-specific validation since it's no longer an option in registration
     if (roleData.roleType === "BROKER" && (!roleData.companyName || roleData.companyName.trim().length === 0)) {
       ctx.addIssue({
         code: "custom",
@@ -151,8 +151,15 @@ export default function AuthPage() {
       authService.login(credentials),
     onSuccess: (response) => {
       toast.success(response.message || "Login successful!");
-      setUser(authService.getUser());
-      navigate("/dashboard");
+      const user = authService.getUser();
+      setUser(user);
+      
+      // Check if user is a builder and redirect accordingly
+      if (user && user.roleType === "BUILDER") {
+        window.location.href = "https://homobie-partner-portal.vercel.app/";
+      } else {
+        navigate("/dashboard");
+      }
     },
     onError: (error: Error) => {
       toast.error(getErrorMessage(error));
@@ -842,7 +849,7 @@ export default function AuthPage() {
                             )}
                           />
 
-                          {/* Role - BUILDER removed */}
+                          {/* Role - BUILDER removed from registration options */}
                           <FormField
                             control={registerForm.control}
                             name="roleData.roleType"
