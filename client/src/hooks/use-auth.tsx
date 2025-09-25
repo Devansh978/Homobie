@@ -1,8 +1,11 @@
-import { createContext, ReactNode, useContext, useState, useEffect } from "react";
 import {
-  useMutation,
-  UseMutationResult,
-} from "@tanstack/react-query";
+  createContext,
+  ReactNode,
+  useContext,
+  useState,
+  useEffect,
+} from "react";
+import { useMutation, UseMutationResult } from "@tanstack/react-query";
 import { queryClient } from "../lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { useLocation } from "wouter";
@@ -45,20 +48,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     const loadUserFromStorage = () => {
       try {
-        const token = localStorage.getItem('auth_token');
-        const userData = localStorage.getItem('user');
-        
+        const token = localStorage.getItem("auth_token");
+        const userData = localStorage.getItem("user");
+
         if (token && userData) {
           const parsedUser = JSON.parse(userData);
           setUser(parsedUser);
         }
       } catch (err) {
-        console.error('Error loading user from localStorage:', err);
-        setError(new Error('Failed to load user data'));
+        console.error("Error loading user from localStorage:", err);
+        setError(new Error("Failed to load user data"));
         // Clear corrupted data
-        localStorage.removeItem('auth_token');
-        localStorage.removeItem('user');
-        localStorage.removeItem('userId');
+        localStorage.removeItem("auth_token");
+        localStorage.removeItem("user");
+        localStorage.removeItem("userId");
       } finally {
         setIsLoading(false);
       }
@@ -69,42 +72,41 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const loginMutation = useMutation({
     mutationFn: async (credentials: LoginData) => {
-      const response = await fetch('https://api.homobie.com/auth/login', {
-        method: 'POST',
+      const response = await fetch("https://api.homobie.com/auth/login", {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify(credentials),
       });
 
       if (!response.ok) {
         const errorData = await response.text();
-        throw new Error(errorData || 'Login failed');
+        throw new Error(errorData || "Login failed");
       }
 
       return await response.json();
     },
     onSuccess: (data) => {
       const { user: userData, token } = data;
-      
-      // Store in localStorage
-      localStorage.setItem('auth_token', token);
-      localStorage.setItem('user', JSON.stringify(userData));
-      localStorage.setItem('userId', userData.id);
-      
-      // Update state
+
+      localStorage.setItem("auth_token", token);
+      localStorage.setItem("user", JSON.stringify(userData));
+      localStorage.setItem("userId", userData.id);
+
       setUser(userData);
       setError(null);
-      
+
       queryClient.setQueryData(["/auth/user"], userData);
-      
+
       toast({
         title: "Login successful",
         description: `Welcome back, ${userData.fullName}!`,
       });
 
-        setLocation('/dashboard');
- 
+      setTimeout(() => {
+        setLocation("/dashboard");
+      }, 50);
     },
     onError: (error: Error) => {
       setError(error);
@@ -118,42 +120,41 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const registerMutation = useMutation({
     mutationFn: async (credentials: InsertUser) => {
-      const response = await fetch('https://api.homobie.com/auth/register', {
-        method: 'POST',
+      const response = await fetch("https://api.homobie.com/auth/register", {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify(credentials),
       });
 
       if (!response.ok) {
         const errorData = await response.text();
-        throw new Error(errorData || 'Registration failed');
+        throw new Error(errorData || "Registration failed");
       }
 
       return await response.json();
     },
     onSuccess: (data) => {
       const { user: userData, token } = data;
-      
+
       // Store in localStorage
-      localStorage.setItem('auth_token', token);
-      localStorage.setItem('user', JSON.stringify(userData));
-      localStorage.setItem('userId', userData.id);
-      
+      localStorage.setItem("auth_token", token);
+      localStorage.setItem("user", JSON.stringify(userData));
+      localStorage.setItem("userId", userData.id);
+
       // Update state
       setUser(userData);
       setError(null);
-      
+
       queryClient.setQueryData(["/auth/user"], userData);
-      
+
       toast({
         title: "Registration successful",
         description: `Welcome to Homobie, ${userData.fullName}!`,
       });
 
-        setLocation('/dashboard');
-     
+      setLocation("/dashboard");
     },
     onError: (error: Error) => {
       setError(error);
@@ -165,65 +166,51 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     },
   });
 
-  
   const logoutMutation = useMutation({
-    mutationFn: async () => {
-      const token = localStorage.getItem('auth_token');
-      
-      //  logout
-      if (token) {
-        try {
-          await fetch('https://api.homobie.com/auth/logout', {
-            method: 'POST',
-            headers: {
-              'Authorization': `Bearer ${token}`,
-              'Content-Type': 'application/json',
-            },
-          });
-        } catch (err) {
-          console.warn('Logout API call failed:', err);
-        }
-      }
-    },
-    onSuccess: () => {
-      // Clear localStorage
-      localStorage.removeItem('auth_token');
-      localStorage.removeItem('user');
-      localStorage.removeItem('userId');
-      
-      // Update state
-      setUser(null);
-      setError(null);
-      
-      queryClient.setQueryData(["/auth/user"], null);
-      
-      toast({
-        title: "Logged out",
-        description: "You have been successfully logged out.",
-      });
+  mutationFn: async () => {
+    const token = localStorage.getItem("auth_token");
 
-      // Navigate to auth
-      setTimeout(() => {
-        setLocation('/auth');
-      }, 100);
-    },
-    onError: (error: Error) => {
-      localStorage.removeItem('auth_token');
-      localStorage.removeItem('user');
-      localStorage.removeItem('userId');
-      setUser(null);
-      
-      toast({
-        title: "Logout completed",
-        description: "You have been logged out locally.",
-      });
+    if (!token) return;
 
-      // Navigate to auth
-      setTimeout(() => {
-        setLocation('/auth');
-      }, 100);
-    },
-  });
+    const response = await fetch("https://api.homobie.com/auth/logout", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error(`Logout failed with status ${response.status}`);
+    }
+
+    return response.json();
+  },
+  onSuccess: () => {
+    queryClient.setQueryData(["/auth/user"], null);
+
+    toast({
+      title: "Logged out",
+      description: "You have been successfully logged out.",
+    });
+
+    setTimeout(() => setLocation("/auth"), 100);
+  },
+  onError: (error: Error) => {
+    localStorage.removeItem("auth_token");
+    localStorage.removeItem("user");
+    localStorage.removeItem("userId");
+    setUser(null);
+
+    toast({
+      title: "Logout failed",
+      description: "You have been logged out locally.",
+    });
+
+    setTimeout(() => setLocation("/auth"), 100);
+  },
+});
+
 
   return (
     <AuthContext.Provider

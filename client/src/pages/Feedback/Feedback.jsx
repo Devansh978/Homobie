@@ -324,14 +324,6 @@ const Feedback = () => {
               Discover how we've helped thousands achieve their financial dreams
               with personalized loan solutions and expert consultancy
             </p>
-            {isNotLoggedIn && (
-              <div className="mt-4 p-3 bg-blue-900/30 border border-blue-400/30 rounded-lg backdrop-blur-sm">
-                <p className="text-blue-200 text-sm flex items-center justify-center gap-2">
-                  <LogIn className="w-4 h-4" />
-                  Viewing sample testimonials. Log in to see and manage your own feedbacks.
-                </p>
-              </div>
-            )}
           </div>
 
           {/* Carousel */}

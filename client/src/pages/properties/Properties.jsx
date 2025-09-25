@@ -391,11 +391,9 @@ const Properties = () => {
         areaSqft: parseInt(propertyData.areaSqft, 10) || 0,
         // Handle the location object
         location: {
-          addressLine1: propertyData.location?.addressLine1 || "",
           addressLine2: propertyData.location?.addressLine2 || "",
           city: propertyData.location?.city || "",
           country: propertyData.location?.country || "",
-          landmark: propertyData.location?.landmark || "",
           pincode: propertyData.location?.pincode || "",
           state: propertyData.location?.state || "",
         },

@@ -4,8 +4,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import Feedback from "./Feedback/Feedback";
 import SipCalculator from "./SipCalculator/SipCalculator";
-
-// Memoize SipCalculator to prevent unnecessary re-renders
+import { useAuth } from "../hooks/use-auth";
 const MemoizedSipCalculator = memo(SipCalculator);
 import {
   ArrowRight,
@@ -23,6 +22,7 @@ import {
   ChevronDown,
   Circle,
   MoveRight,
+  LogOut,
 } from "lucide-react";
 
 const containerVariants = {
@@ -53,6 +53,8 @@ export default function HomePage() {
   const [amount, setAmount] = useState(250000);
   const [months, setMonths] = useState(12);
   const [showResult, setShowResult] = useState(false);
+  const { logoutMutation, user } = useAuth();
+
 
   useEffect(() => {
     const handleMouseMove = (e) => {
@@ -69,6 +71,9 @@ export default function HomePage() {
     window.addEventListener("mousemove", handleMouseMove);
     return () => window.removeEventListener("mousemove", handleMouseMove);
   }, []);
+  const handleLogout = () => {
+    logoutMutation.mutate();
+  };
 
   const Particle = ({ size, x, y, delay }) => (
     <motion.div
@@ -190,7 +195,14 @@ export default function HomePage() {
                       <GradientText>REIMAGINED.</GradientText>
                     </motion.p>
                   </div>
-
+                  {/* <button
+                    onClick={handleLogout}
+                    disabled={logoutMutation.isPending}
+                    className="w-full text-left px-4 py-3 text-red-400 hover:text-red-300 hover:bg-red-500/20 rounded-lg transition-all duration-200 flex items-center disabled:opacity-50 justify-end md:ml-40"
+                  >
+                    <LogOut className="h-4 w-4 mr-2" />
+                    {logoutMutation.isPending ? "Logging out..." : "Logout"}
+                  </button> */}
                   {/* Desktop Layout */}
                   <div className="hidden md:block">
                     <motion.p

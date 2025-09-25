@@ -209,7 +209,7 @@ const processPropertyData = (rawData) => {
 
     // Location
     location: {
-      address: rawData.location?.address || rawData.location?.addressLine1 || "Address not available",
+      address: rawData.location?.address,
       city: rawData.location?.city || "",
       state: rawData.location?.state || "",
       pincode: rawData.location?.pincode || "",
@@ -584,7 +584,7 @@ const PropertyDetail = () => {
             <div className="flex items-center gap-4 mb-6 text-white/60">
               <MapPin className="w-5 h-5 flex-shrink-0" />
               <span>
-                {property.location?.address}, {property.location?.city}, {property.location?.state} - {property.location?.pincode}
+                 {property.location?.city}, {property.location?.state} - {property.location?.pincode}
               </span>
             </div>
 
