@@ -168,7 +168,7 @@ const MobileNavItem = ({ item, onClose }) => {
 
 // Main Navigation Component
 export const Header = () => {
-   const { logoutMutation, user } = useAuth();
+  const { logoutMutation, user, isLoading } = useAuth(); // Get user from auth context
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [activeDropdown, setActiveDropdown] = useState(null);
   const [scrolled, setScrolled] = useState(false);
@@ -205,12 +205,6 @@ export const Header = () => {
       document.body.style.overflow = "unset";
     };
   }, [isMobileMenuOpen]);
-  useEffect(() => {
-  const storedUser = localStorage.getItem("user");
-  if (storedUser) {
-    setUser(JSON.parse(storedUser));
-  }
-}, []);
 
   const handleLogout = () => {
     setLoginDropdownOpen(false);
@@ -261,6 +255,31 @@ export const Header = () => {
   const handleUserLogin = () => {
     window.location.href = "/auth";
   };
+
+  // Show loading state if auth is still loading
+  if (isLoading) {
+    return (
+      <nav className="fixed top-0 left-0 right-0 z-40 bg-black/40 backdrop-blur-xl border-b border-white/5">
+        <div className="max-w-8xl mx-auto px-2 sm:px-4 lg:px-6">
+          <div className="flex items-center justify-between h-20">
+            <div className="flex-shrink-0">
+              <a href="/" className="flex items-center">
+                <img
+                  src="/assets/homobie-logo.png"
+                  alt="Homobie Logo"
+                  className="h-12 w-auto object-contain"
+                />
+              </a>
+            </div>
+            <div className="flex items-center space-x-4">
+              <div className="animate-pulse bg-white/20 rounded-lg w-20 h-10"></div>
+              <div className="animate-pulse bg-white/20 rounded-lg w-20 h-10"></div>
+            </div>
+          </div>
+        </div>
+      </nav>
+    );
+  }
 
   return (
     <>
@@ -419,7 +438,7 @@ export const Header = () => {
                         ) : (
                           <div className="space-y-2">
                             <div className="text-white/70 text-sm font-medium mb-2 text-center">
-                               Partner Login
+                              Partner Login
                             </div>
                             {partnerRoles.map((role, index) => (
                               <button
@@ -570,7 +589,7 @@ export const Header = () => {
                       closeMobileMenu();
                     }}
                     disabled={logoutMutation.isPending}
-                    className="block w-full px-4 py-3 text-center text-red-400 bg-white/5 hover:bg-red-500/20 rounded-lg transition-all duration-300 items-center justify-center disabled:opacity-50"
+                    className="flex w-full px-4 py-3 text-center text-red-400 bg-white/5 hover:bg-red-500/20 rounded-lg transition-all duration-300 items-center justify-center disabled:opacity-50"
                   >
                     <LogOut className="h-4 w-4 mr-2" />
                     {logoutMutation.isPending ? "Logging out..." : "Logout"}
@@ -618,7 +637,7 @@ export const Header = () => {
                   ) : (
                     <div className="space-y-2">
                       <div className="text-white/70 text-sm font-medium px-2 mb-2">
-                         Partner Login
+                        Partner Login
                       </div>
                       {partnerRoles.map((role, index) => (
                         <button
@@ -636,7 +655,7 @@ export const Header = () => {
                   )}
 
                   <a
-                    href="/register"
+                    href="/auth"
                     onClick={closeMobileMenu}
                     className="block w-full px-4 py-3 text-center text-white bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 rounded-lg transition-all duration-300 mt-4"
                   >

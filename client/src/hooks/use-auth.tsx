@@ -69,6 +69,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     loadUserFromStorage();
   }, []);
+   
 
   const loginMutation = useMutation({
     mutationFn: async (credentials: LoginData) => {
@@ -104,9 +105,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         description: `Welcome back, ${userData.fullName}!`,
       });
 
-      setTimeout(() => {
         setLocation("/dashboard");
-      }, 50);
+     
     },
     onError: (error: Error) => {
       setError(error);
@@ -167,51 +167,31 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   });
 
   const logoutMutation = useMutation({
-  mutationFn: async () => {
-    const token = localStorage.getItem("auth_token");
+    mutationFn: async () => {
+      localStorage.removeItem("auth_token");
+      localStorage.removeItem("user");
+      localStorage.removeItem("userId");
+      setUser(null);
 
-    if (!token) return;
+      return true;
+    },
+    onSuccess: () => {
+      queryClient.setQueryData(["/auth/user"], null);
 
-    const response = await fetch("https://api.homobie.com/auth/logout", {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${token}`,
-        "Content-Type": "application/json",
-      },
-    });
+      toast({
+        title: "Logged out",
+        description: "You have been successfully logged out.",
+      });
 
-    if (!response.ok) {
-      throw new Error(`Logout failed with status ${response.status}`);
-    }
-
-    return response.json();
-  },
-  onSuccess: () => {
-    queryClient.setQueryData(["/auth/user"], null);
-
-    toast({
-      title: "Logged out",
-      description: "You have been successfully logged out.",
-    });
-
-    setTimeout(() => setLocation("/auth"), 100);
-  },
-  onError: (error: Error) => {
-    localStorage.removeItem("auth_token");
-    localStorage.removeItem("user");
-    localStorage.removeItem("userId");
-    setUser(null);
-
-    toast({
-      title: "Logout failed",
-      description: "You have been logged out locally.",
-    });
-
-    setTimeout(() => setLocation("/auth"), 100);
-  },
-});
-
-
+      setTimeout(() => setLocation("/auth"), 100);
+    },
+    onError: () => {
+      toast({
+        title: "Logout failed",
+        description: "Something went wrong while logging out.",
+      });
+    },
+  });
   return (
     <AuthContext.Provider
       value={{
