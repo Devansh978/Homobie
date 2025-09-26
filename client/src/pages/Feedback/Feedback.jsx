@@ -23,13 +23,57 @@ const Feedback = () => {
   const [showForm, setShowForm] = useState(false);
   const [editingFeedback, setEditingFeedback] = useState(null);
 
+  // Mock feedbacks for when user is not logged in
+  const mockFeedbacks = [
+    {
+      id: 1,
+      name: "Sanjay Kumar",
+      rating: 5,
+      comments: "Absolutely fantastic service! The team helped me secure a loan for my dream home with incredible rates. Their personalized approach made all the difference."
+    },
+    {
+      id: 2,
+      name: "Manoj Patel",
+      rating: 5,
+      comments: "Professional, efficient, and trustworthy. They guided me through the entire process and made what seemed impossible, possible. Highly recommend their services!"
+    },
+    {
+      id: 3,
+      name: "Eshita Sharma",
+      rating: 4,
+      comments: "Great experience from start to finish. The consultancy was thorough and they found solutions I didn't even know existed. Thank you for making my business expansion dream come true."
+    },
+    {
+      id: 4,
+      name: "Deepak Singh",
+      rating: 5,
+      comments: "Outstanding customer service and expertise. They took the time to understand my unique situation and delivered results beyond my expectations. Five stars all the way!"
+    },
+    {
+      id: 5,
+      name: "Lakshmi Nair",
+      rating: 4,
+      comments: "Very impressed with their knowledge and dedication. The team worked tirelessly to get me the best possible terms. I couldn't have asked for better support throughout the process."
+    }
+  ];
+
   const handleCreateNew = () => {
+    if (isNotLoggedIn) {
+      // Redirect to login if trying to create feedback while not logged in
+      window.location.href = '/auth';
+      return;
+    }
     setFormMode("create");
     setEditingFeedback(null);
     setShowForm(true);
   };
 
   const handleEdit = (feedback) => {
+    if (isNotLoggedIn) {
+      // Redirect to login if trying to edit feedback while not logged in
+      window.location.href = '/auth';
+      return;
+    }
     setFormMode("update");
     setEditingFeedback(feedback);
     setShowForm(true);
@@ -73,7 +117,6 @@ const Feedback = () => {
     
     if (!userId || !token) {
       setIsNotLoggedIn(true);
-      setLoading(false);
       return false;
     }
     
@@ -84,10 +127,16 @@ const Feedback = () => {
   const fetchFeedbacks = async () => {
     setLoading(true);
     setError(null);
-    setIsNotLoggedIn(false);
 
     // Check if user is logged in first
-    if (!checkAuthStatus()) {
+    const isLoggedIn = checkAuthStatus();
+    
+    if (!isLoggedIn) {
+      // If not logged in, use mock feedbacks
+      setTimeout(() => {
+        setFeedbacks(mockFeedbacks);
+        setLoading(false);
+      }, 1000); // Simulate loading time
       return;
     }
 
@@ -139,9 +188,16 @@ const Feedback = () => {
         )
         .slice(0, 6);
 
-      setFeedbacks(filteredFeedbacks);
+      // If no user feedbacks, fall back to mock feedbacks
+      if (filteredFeedbacks.length === 0) {
+        setFeedbacks(mockFeedbacks);
+      } else {
+        setFeedbacks(filteredFeedbacks);
+      }
     } catch (err) {
       setError(err.message);
+      // On error, show mock feedbacks as fallback
+      setFeedbacks(mockFeedbacks);
     } finally {
       setLoading(false);
     }
@@ -216,63 +272,19 @@ const Feedback = () => {
     );
   }
 
-  // Not logged in state
-  if (isNotLoggedIn) {
-    return (
-      <div className="min-h-screen flex items-center justify-center p-6">
-        <div className="text-center">
-          <LogIn className="w-12 h-12 text-blue-400 mx-auto mb-4" />
-          <h2 className="text-2xl font-semibold text-white mb-2">Please Login</h2>
-          <p className="text-blue-200 opacity-80 mb-6">
-            You need to log in to view and manage your feedbacks
-          </p>
-          <button
-            onClick={() => window.location.href = '/auth'} 
-            className="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors duration-300 flex items-center gap-2 mx-auto"
-          >
-            <LogIn className="w-4 h-4" />
-            Go to Login
-          </button>
-        </div>
-      </div>
-    );
-  }
-
-  // Error state (for other errors, not login issues)
-  if (error) {
+  // Error state (for serious errors only)
+  if (error && feedbacks.length === 0) {
     return (
       <div className="min-h-screen flex items-center justify-center p-6">
         <div className="text-center">
           <AlertCircle className="w-12 h-12 text-red-400 mx-auto mb-4" />
           <h2 className="text-2xl font-semibold text-white mb-2">Something went wrong</h2>
+          <p className="text-red-200 opacity-80 mb-6">{error}</p>
           <button
-            onClick={handleCreateNew}
-            className="px-6 py-3 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-colors duration-300 flex items-center gap-2 mx-auto"
+            onClick={fetchFeedbacks}
+            className="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors duration-300"
           >
-            <Plus className="w-4 h-4" />
-            Add Feedback
-          </button>
-        </div>
-      </div>
-    );
-  }
-
-  // No feedbacks state
-  if (feedbacks.length === 0) {
-    return (
-      <div className="min-h-screen flex items-center justify-center p-6">
-        <div className="text-center">
-          <User className="w-16 h-16 text-blue-400 mx-auto mb-4" />
-          <h2 className="text-2xl font-semibold text-white mb-2">No High-Rating Feedbacks Yet</h2>
-          <p className="text-blue-200 opacity-80 mb-6">
-            No feedbacks with 4+ stars found. Create your first feedback to get started!
-          </p>
-          <button
-            onClick={handleCreateNew}
-            className="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors duration-300 flex items-center gap-2 mx-auto"
-          >
-            <Plus className="w-4 h-4" />
-            Add Your First Feedback
+            Try Again
           </button>
         </div>
       </div>
@@ -288,7 +300,7 @@ const Feedback = () => {
           className="px-4 py-2 bg-black text-white rounded-lg transition-all duration-300 flex items-center gap-2 shadow-lg backdrop-blur-md border border-blue-500/30"
         >
           <Plus className="w-4 h-4" />
-          Add Feedback
+          {isNotLoggedIn ? "Login to Add Feedback" : "Add Feedback"}
         </button>
         {feedbacks.length > 0 && (
           <button
@@ -296,7 +308,7 @@ const Feedback = () => {
             className="px-4 py-2 bg-black border border-blue-500/30 text-white rounded-lg flex items-center gap-2"
           >
             <Edit3 className="w-4 h-4" />
-            Edit Feedback
+            {isNotLoggedIn ? "Login to Edit" : "Edit Feedback"}
           </button>
         )}
       </div>

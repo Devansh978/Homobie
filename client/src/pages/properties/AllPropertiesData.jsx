@@ -24,13 +24,11 @@ export const normalizePropertyData = (apiData) => {
       constructionStatus: item.constructionStatus,
       status: item.propertyStatus,
       location: {
-        addressLine1: item.location?.addressLine1 || "",
         addressLine2: item.location?.addressLine2 || "",
         city: item.location?.city || "",
         state: item.location?.state || "",
         pincode: item.location?.pincode || "",
         country: item.location?.country || "",
-        landmark: item.location?.landmark || ""
       },
       // Add default values for missing fields
       bedrooms: 0,

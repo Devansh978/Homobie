@@ -14,8 +14,30 @@ import {
   ChartOptions,
   ChartData,
 } from "chart.js";
-import { Fullscreen, FullscreenExit } from "react-bootstrap-icons";
 
+ChartJS.register(
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  LineElement,
+  Title,
+  Tooltip,
+  Legend,
+  Filler
+);
+
+// Fullscreen icons as SVG components
+const FullscreenIcon = () => (
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+    <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/>
+  </svg>
+);
+
+const FullscreenExitIcon = () => (
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+    <path d="M8 3v3a2 2 0 0 1-2 2H3m18 0h-3a2 2 0 0 1-2-2V3m0 18v-3a2 2 0 0 1 2-2h3M3 16h3a2 2 0 0 1 2 2v3"/>
+  </svg>
+);
 
 interface Projection {
   age: number;
@@ -168,8 +190,8 @@ const RetirementPlanner = () => {
         {
           label: "Total Savings",
           data: savingsData,
-          borderColor: "#4C51BF",
-          backgroundColor: "rgba(76, 81, 191, 0.2)",
+          borderColor: "#ffffff",
+          backgroundColor: "rgba(255, 255, 255, 0.1)",
           borderWidth: 3,
           fill: true,
           tension: 0.3,
@@ -177,7 +199,7 @@ const RetirementPlanner = () => {
         {
           label: "Desired Corpus",
           data: Array(labels.length).fill(desiredCorpus),
-          borderColor: "#38B2AC",
+          borderColor: "#888888",
           borderWidth: 2,
           borderDash: [5, 5],
           fill: false,
@@ -226,11 +248,13 @@ const RetirementPlanner = () => {
             weight: "bold",
           },
           padding: 20,
-          color: "#1F2937",
+          color: "#ffffff",
         },
       },
       tooltip: {
-        backgroundColor: "rgba(0,0,0,0.8)",
+        backgroundColor: "rgba(255,255,255,0.9)",
+        titleColor: "#000000",
+        bodyColor: "#000000",
         titleFont: {
           size: 14,
           weight: "bold",
@@ -256,10 +280,10 @@ const RetirementPlanner = () => {
       y: {
         beginAtZero: false,
         grid: {
-          color: "rgba(0,0,0,0.05)",
+          color: "rgba(255,255,255,0.1)",
         },
         ticks: {
-          color: "#1F2937",
+          color: "#ffffff",
           font: {
             weight: "bold",
           },
@@ -271,7 +295,7 @@ const RetirementPlanner = () => {
           display: false,
         },
         ticks: {
-          color: "#1F2937",
+          color: "#ffffff",
           font: {
             weight: "bold",
           },
@@ -304,13 +328,13 @@ const RetirementPlanner = () => {
       <div className="mb-4">
         <label
           htmlFor={id}
-          className="block text-sm font-bold text-gray-800 mb-1"
+          className="block text-sm font-bold text-white mb-1"
         >
           {label}
         </label>
-        <div className="flex items-center bg-white rounded-lg border-2 border-gray-200 focus-within:border-indigo-500 focus-within:ring-2 focus-within:ring-indigo-200">
+        <div className="flex items-center bg-gray-800 rounded-lg border-2 border-gray-600 focus-within:border-white focus-within:ring-2 focus-within:ring-white/20">
           {prefix && (
-            <span className="ml-3 text-indigo-700 font-bold">{prefix}</span>
+            <span className="ml-3 text-white font-bold">{prefix}</span>
           )}
           <input
             id={id}
@@ -320,10 +344,10 @@ const RetirementPlanner = () => {
             min={min}
             max={max}
             step={step}
-            className="flex-1 py-2 px-3 bg-transparent outline-none font-bold text-gray-800"
+            className="flex-1 py-2 px-3 bg-transparent outline-none font-bold text-white placeholder-gray-400"
           />
           {suffix && (
-            <span className="mr-3 text-indigo-700 font-bold">{suffix}</span>
+            <span className="mr-3 text-white font-bold">{suffix}</span>
           )}
         </div>
       </div>
@@ -331,13 +355,13 @@ const RetirementPlanner = () => {
   };
 
   const NavigationTabs = () => (
-    <nav className="flex overflow-x-auto py-2 mb-4 scrollbar-hide sticky top-0 bg-gray-50 z-10">
+    <nav className="flex overflow-x-auto py-2 mb-4 scrollbar-hide sticky top-0 bg-black z-10">
       <button
         onClick={() => setActiveTab("calculator")}
         className={`px-4 py-2 mx-1 rounded-full whitespace-nowrap font-medium text-sm sm:text-base ${
           activeTab === "calculator"
-            ? "bg-indigo-700 text-white shadow-md"
-            : "bg-gray-100 text-gray-800 hover:bg-gray-200"
+            ? "bg-white text-black shadow-md"
+            : "bg-gray-800 text-white hover:bg-gray-700"
         }`}
       >
         Calculator
@@ -346,8 +370,8 @@ const RetirementPlanner = () => {
         onClick={() => setActiveTab("projections")}
         className={`px-4 py-2 mx-1 rounded-full whitespace-nowrap font-medium text-sm sm:text-base ${
           activeTab === "projections"
-            ? "bg-indigo-700 text-white shadow-md"
-            : "bg-gray-100 text-gray-800 hover:bg-gray-200"
+            ? "bg-white text-black shadow-md"
+            : "bg-gray-800 text-white hover:bg-gray-700"
         }`}
       >
         Projections
@@ -356,8 +380,8 @@ const RetirementPlanner = () => {
         onClick={() => setActiveTab("table")}
         className={`px-4 py-2 mx-1 rounded-full whitespace-nowrap font-medium text-sm sm:text-base ${
           activeTab === "table"
-            ? "bg-indigo-700 text-white shadow-md"
-            : "bg-gray-100 text-gray-800 hover:bg-gray-200"
+            ? "bg-white text-black shadow-md"
+            : "bg-gray-800 text-white hover:bg-gray-700"
         }`}
       >
         Yearly Details
@@ -368,33 +392,29 @@ const RetirementPlanner = () => {
   return (
     <div
       ref={containerRef}
-      className={`min-h-screen bg-gray-50 py-4 sm:py-8 px-2 sm:px-4 ${
+      className={`min-h-screen bg-black pt-20 md:pt-20 sm:py-20 px-2 sm:px-4 ${
         isFullscreen ? "fixed inset-0 z-50 overflow-auto" : ""
       }`}
     >
       <div className="max-w-6xl mx-auto relative">
         <div className="flex justify-between items-center mb-4">
-          <h1 className="text-2xl sm:text-3xl font-extrabold text-gray-900">
+          <h1 className="text-2xl sm:text-3xl font-extrabold text-white">
             Retirement Planner
           </h1>
           <button
             onClick={toggleFullscreen}
-            className="p-2 rounded-full bg-gray-200 hover:bg-gray-300 transition-colors"
+            className="p-2 rounded-full bg-gray-800 hover:bg-gray-700 transition-colors text-white"
             aria-label={isFullscreen ? "Exit fullscreen" : "Enter fullscreen"}
           >
-            {isFullscreen ? (
-              <FullscreenExit className="w-5 h-5" />
-            ) : (
-              <Fullscreen className="w-5 h-5" />
-            )}
+            {isFullscreen ? <FullscreenExitIcon /> : <FullscreenIcon />}
           </button>
         </div>
 
         <NavigationTabs />
 
         {activeTab === "calculator" && (
-          <div className="bg-white p-4 sm:p-6 rounded-lg shadow-md mb-6">
-            <h2 className="text-xl sm:text-2xl font-bold text-indigo-800 mb-4">
+          <div className="bg-gray-900 p-4 sm:p-6 rounded-lg shadow-md mb-6 border border-gray-700">
+            <h2 className="text-xl sm:text-2xl font-bold text-white mb-4">
               Your Retirement Details
             </h2>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -452,8 +472,8 @@ const RetirementPlanner = () => {
         )}
 
         {activeTab === "projections" && (
-          <div className="bg-white p-4 sm:p-6 rounded-lg shadow-md mb-6">
-            <h2 className="text-xl sm:text-2xl font-bold text-indigo-800 mb-4">
+          <div className="bg-gray-900 p-4 sm:p-6 rounded-lg shadow-md mb-6 border border-gray-700">
+            <h2 className="text-xl sm:text-2xl font-bold text-white mb-4">
               Savings Projection
             </h2>
             <div className="h-80">
@@ -463,44 +483,44 @@ const RetirementPlanner = () => {
         )}
 
         {activeTab === "table" && (
-          <div className="bg-white p-4 sm:p-6 rounded-lg shadow-md mb-6 overflow-x-auto">
-            <h2 className="text-xl sm:text-2xl font-bold text-indigo-800 mb-4">
+          <div className="bg-gray-900 p-4 sm:p-6 rounded-lg shadow-md mb-6 overflow-x-auto border border-gray-700">
+            <h2 className="text-xl sm:text-2xl font-bold text-white mb-4">
               Yearly Projections
             </h2>
             <div className="min-w-full" style={{ minWidth: "600px" }}>
-              <table className="w-full divide-y divide-gray-200">
-                <thead className="bg-indigo-50">
+              <table className="w-full divide-y divide-gray-700">
+                <thead className="bg-gray-800">
                   <tr>
-                    <th className="px-4 py-3 text-left text-xs sm:text-sm font-bold text-indigo-800 uppercase tracking-wider">
+                    <th className="px-4 py-3 text-left text-xs sm:text-sm font-bold text-white uppercase tracking-wider">
                       Age
                     </th>
-                    <th className="px-4 py-3 text-left text-xs sm:text-sm font-bold text-indigo-800 uppercase tracking-wider">
+                    <th className="px-4 py-3 text-left text-xs sm:text-sm font-bold text-white uppercase tracking-wider">
                       Contribution
                     </th>
-                    <th className="px-4 py-3 text-left text-xs sm:text-sm font-bold text-indigo-800 uppercase tracking-wider">
+                    <th className="px-4 py-3 text-left text-xs sm:text-sm font-bold text-white uppercase tracking-wider">
                       Interest
                     </th>
-                    <th className="px-4 py-3 text-left text-xs sm:text-sm font-bold text-indigo-800 uppercase tracking-wider">
+                    <th className="px-4 py-3 text-left text-xs sm:text-sm font-bold text-white uppercase tracking-wider">
                       Total Savings
                     </th>
                   </tr>
                 </thead>
-                <tbody className="bg-white divide-y divide-gray-200">
+                <tbody className="bg-gray-900 divide-y divide-gray-700">
                   {projections.map((projection, index) => (
                     <tr
                       key={index}
-                      className={index % 2 === 0 ? "bg-white" : "bg-indigo-50"}
+                      className={index % 2 === 0 ? "bg-gray-900" : "bg-gray-800"}
                     >
-                      <td className="px-4 py-3 whitespace-nowrap text-sm sm:text-base font-medium text-gray-900">
+                      <td className="px-4 py-3 whitespace-nowrap text-sm sm:text-base font-medium text-white">
                         {projection.age}
                       </td>
-                      <td className="px-4 py-3 whitespace-nowrap text-sm sm:text-base text-indigo-700">
+                      <td className="px-4 py-3 whitespace-nowrap text-sm sm:text-base text-gray-300">
                         ₹{projection.contribution.toLocaleString("en-IN")}
                       </td>
-                      <td className="px-4 py-3 whitespace-nowrap text-sm sm:text-base text-teal-600">
+                      <td className="px-4 py-3 whitespace-nowrap text-sm sm:text-base text-gray-400">
                         ₹{projection.interest.toLocaleString("en-IN")}
                       </td>
-                      <td className="px-4 py-3 whitespace-nowrap text-sm sm:text-base font-bold text-indigo-800">
+                      <td className="px-4 py-3 whitespace-nowrap text-sm sm:text-base font-bold text-white">
                         ₹{projection.total.toLocaleString("en-IN")}
                       </td>
                     </tr>
@@ -513,19 +533,19 @@ const RetirementPlanner = () => {
 
         {/* Results Summary */}
         <div
-          className={`p-4 sm:p-6 rounded-lg shadow-md ${
+          className={`p-4 sm:p-6 rounded-lg shadow-md border-2 ${
             goalMet
-              ? "bg-green-50 border border-green-200"
-              : "bg-red-50 border border-red-200"
+              ? "bg-gray-900 border-white"
+              : "bg-gray-800 border-gray-600"
           }`}
         >
           <h2 className="text-xl font-bold mb-4">
             {goalMet ? (
-              <span className="text-green-800">
+              <span className="text-white">
                 🎉 Your Retirement Goal is Achievable!
               </span>
             ) : (
-              <span className="text-red-800">
+              <span className="text-white">
                 ⚠️ Your Retirement Goal Needs Adjustment
               </span>
             )}
@@ -533,10 +553,10 @@ const RetirementPlanner = () => {
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
             <div>
-              <p className="text-sm font-medium text-gray-700">
+              <p className="text-sm font-medium text-gray-300">
                 Projected Corpus at Retirement:
               </p>
-              <p className="text-2xl sm:text-3xl font-bold text-black">
+              <p className="text-2xl sm:text-3xl font-bold text-white">
                 ₹
                 {projections[projections.length - 1]?.total?.toLocaleString(
                   "en-IN"
@@ -545,10 +565,10 @@ const RetirementPlanner = () => {
             </div>
 
             <div>
-              <p className="text-sm font-medium text-gray-700">
+              <p className="text-sm font-medium text-gray-300">
                 Desired Corpus:
               </p>
-              <p className="text-2xl sm:text-3xl font-bold text-black">
+              <p className="text-2xl sm:text-3xl font-bold text-white">
                 ₹{desiredCorpus.toLocaleString("en-IN")}
               </p>
             </div>
@@ -556,8 +576,8 @@ const RetirementPlanner = () => {
 
           {!goalMet && (
             <div className="mb-4">
-              <p className="text-sm font-medium text-gray-700">Shortfall:</p>
-              <p className="text-xl font-bold text-red-700">
+              <p className="text-sm font-medium text-gray-300">Shortfall:</p>
+              <p className="text-xl font-bold text-white">
                 ₹{shortfall.toLocaleString("en-IN")}
               </p>
             </div>
@@ -565,12 +585,12 @@ const RetirementPlanner = () => {
 
           {suggestions.length > 0 && (
             <div>
-              <p className="text-sm font-bold text-gray-800 mb-2">
+              <p className="text-sm font-bold text-white mb-2">
                 Suggestions to Meet Your Goal:
               </p>
               <ul className="list-disc pl-5 space-y-1">
                 {suggestions.map((suggestion, index) => (
-                  <li key={index} className="text-sm font-medium text-gray-800">
+                  <li key={index} className="text-sm font-medium text-gray-300">
                     {suggestion}
                   </li>
                 ))}

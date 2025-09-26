@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import { ChevronDown, Menu, X, User, LogOut } from "lucide-react";
+import { useAuth } from "../../hooks/use-auth"; 
 
 // --- Data definitions ---
 const navData = [
@@ -41,9 +42,7 @@ const navData = [
   },
 ];
 
-
 const basePartnerUrl = "https://homobie-partner-portal.vercel.app";
-
 const partnerRoles = ["Builder", "Broker", "User", "Telecaller"];
 
 const getPartnerLoginUrl = (role = null) => {
@@ -169,15 +168,14 @@ const MobileNavItem = ({ item, onClose }) => {
 
 // Main Navigation Component
 export const Header = () => {
+  const { logoutMutation, user, isLoading } = useAuth(); // Get user from auth context
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [activeDropdown, setActiveDropdown] = useState(null);
   const [scrolled, setScrolled] = useState(false);
   const [loginDropdownOpen, setLoginDropdownOpen] = useState(false);
-  const [loginToggle, setLoginToggle] = useState("user"); // "user" or "partner"
+  const [loginToggle, setLoginToggle] = useState("user");
   const dropdownTimeoutRef = useRef(null);
   const loginTimeoutRef = useRef(null);
-
-  const user = null;
 
   useEffect(() => {
     const handleScroll = () => {
@@ -207,6 +205,11 @@ export const Header = () => {
       document.body.style.overflow = "unset";
     };
   }, [isMobileMenuOpen]);
+
+  const handleLogout = () => {
+    setLoginDropdownOpen(false);
+    logoutMutation.mutate(); 
+  };
 
   const handleDropdownHover = (index) => {
     if (dropdownTimeoutRef.current) {
@@ -252,6 +255,31 @@ export const Header = () => {
   const handleUserLogin = () => {
     window.location.href = "/auth";
   };
+
+  // Show loading state if auth is still loading
+  if (isLoading) {
+    return (
+      <nav className="fixed top-0 left-0 right-0 z-40 bg-black/40 backdrop-blur-xl border-b border-white/5">
+        <div className="max-w-8xl mx-auto px-2 sm:px-4 lg:px-6">
+          <div className="flex items-center justify-between h-20">
+            <div className="flex-shrink-0">
+              <a href="/" className="flex items-center">
+                <img
+                  src="/assets/homobie-logo.png"
+                  alt="Homobie Logo"
+                  className="h-12 w-auto object-contain"
+                />
+              </a>
+            </div>
+            <div className="flex items-center space-x-4">
+              <div className="animate-pulse bg-white/20 rounded-lg w-20 h-10"></div>
+              <div className="animate-pulse bg-white/20 rounded-lg w-20 h-10"></div>
+            </div>
+          </div>
+        </div>
+      </nav>
+    );
+  }
 
   return (
     <>
@@ -303,7 +331,7 @@ export const Header = () => {
                     onMouseLeave={handleLoginDropdownLeave}
                   >
                     <User className="h-4 w-4 mr-2" />
-                    <span className="font-medium">{user.name}</span>
+                    <span className="font-medium">{user.fullName}</span>
                     <ChevronDown
                       className={`ml-2 h-4 w-4 transition-transform duration-300 ${
                         loginDropdownOpen ? "rotate-180" : ""
@@ -313,7 +341,7 @@ export const Header = () => {
 
                   {/* User Dropdown */}
                   <div
-                    className={`absolute right-0 top-full mt-2 w-48 bg-white/10 backdrop-blur-xl border border-white/20 rounded-2xl shadow-2xl transition-all duration-300 ${
+                    className={`absolute right-0 top-full mt-2 w-48 bg-black/90 backdrop-blur-xl border border-white/20 rounded-2xl shadow-2xl transition-all duration-300 ${
                       loginDropdownOpen
                         ? "opacity-100 pointer-events-auto"
                         : "opacity-0 pointer-events-none"
@@ -334,9 +362,13 @@ export const Header = () => {
                       >
                         Settings
                       </a>
-                      <button className="w-full text-left px-4 py-3 text-white/90 hover:text-white hover:bg-white/20 rounded-lg transition-all duration-200 flex items-center">
+                      <button 
+                        onClick={handleLogout}
+                        disabled={logoutMutation.isPending}
+                        className="w-full text-left px-4 py-3 text-red-400 hover:text-red-300 hover:bg-red-500/20 rounded-lg transition-all duration-200 flex items-center disabled:opacity-50"
+                      >
                         <LogOut className="h-4 w-4 mr-2" />
-                        Logout
+                        {logoutMutation.isPending ? "Logging out..." : "Logout"}
                       </button>
                     </div>
                   </div>
@@ -406,7 +438,7 @@ export const Header = () => {
                         ) : (
                           <div className="space-y-2">
                             <div className="text-white/70 text-sm font-medium mb-2 text-center">
-                               Partner Login
+                              Partner Login
                             </div>
                             {partnerRoles.map((role, index) => (
                               <button
@@ -540,15 +572,28 @@ export const Header = () => {
                 <div className="space-y-4">
                   <div className="flex items-center space-x-3 p-4 bg-white/10 rounded-xl backdrop-blur-sm">
                     <div className="w-10 h-10 rounded-full bg-blue-600 flex items-center justify-center text-white font-bold">
-                      {`${user.firstName[0]}${user.lastName[0]}`}
+                      {user.fullName.split(' ').map(n => n[0]).join('')}
                     </div>
                     <div>
                       <div className="text-white font-medium">
-                        {user.firstName} {user.lastName}
+                        {user.fullName}
                       </div>
-                      <div className="text-white/70 text-[16px]">{user.role}</div>
+                      <div className="text-white/70 text-[14px]">{user.role || 'User'}</div>
                     </div>
                   </div>
+                  
+                  {/* Mobile Logout Button */}
+                  <button
+                    onClick={() => {
+                      handleLogout();
+                      closeMobileMenu();
+                    }}
+                    disabled={logoutMutation.isPending}
+                    className="flex w-full px-4 py-3 text-center text-red-400 bg-white/5 hover:bg-red-500/20 rounded-lg transition-all duration-300 items-center justify-center disabled:opacity-50"
+                  >
+                    <LogOut className="h-4 w-4 mr-2" />
+                    {logoutMutation.isPending ? "Logging out..." : "Logout"}
+                  </button>
                 </div>
               ) : (
                 <>
@@ -592,7 +637,7 @@ export const Header = () => {
                   ) : (
                     <div className="space-y-2">
                       <div className="text-white/70 text-sm font-medium px-2 mb-2">
-                         Partner Login
+                        Partner Login
                       </div>
                       {partnerRoles.map((role, index) => (
                         <button
@@ -610,7 +655,7 @@ export const Header = () => {
                   )}
 
                   <a
-                    href="/register"
+                    href="/auth"
                     onClick={closeMobileMenu}
                     className="block w-full px-4 py-3 text-center text-white bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 rounded-lg transition-all duration-300 mt-4"
                   >

@@ -107,34 +107,38 @@ const PropertyCard = ({ property, files, ownerName, isSlider }) => {
           </div>
         )}
         
-        {/* Price Section */}
-        <div className="flex items-center justify-between mb-4">
-          <div className="text-white">
-            <span className="text-2xl font-bold">
-              ₹{property.actualPrice ? parseFloat(property.actualPrice).toFixed(2) : "0.00"}
-            </span>
-            
-            {/* Show discount if discount price is different from actual price */}
-            {property.discountPrice && 
-             parseFloat(property.discountPrice) !== parseFloat(property.actualPrice) && (
-              <div className="flex flex-col">
-                <span className="text-white/40 text-sm line-through">
-                  ₹{parseFloat(property.discountPrice).toFixed(2)}
-                </span>
-                <span className="text-green-400 text-xs">
-                  Save ₹{(parseFloat(property.discountPrice) - parseFloat(property.actualPrice)).toFixed(2)} 
-                </span>
-              </div>
-            )}
-            
-            {/* Price per sqft */}
-            {property.actualPrice && (
-              <p className="text-white/60 text-xs mt-1">
-                Contact for area details
-              </p>
-            )}
-          </div>
-        </div>
+       {/* Price Section */}
+<div className="flex items-center justify-between mb-4">
+  <div className="text-white">
+    {/* Show discounted price first (if exists), otherwise actual */}
+    <span className="text-2xl font-bold">
+      ₹{property.discountPrice 
+        ? parseFloat(property.discountPrice).toFixed(2) 
+        : parseFloat(property.actualPrice || 0).toFixed(2)}
+    </span>
+
+    {/* Show actual price struck-through if it's higher than discount */}
+    {property.actualPrice && property.discountPrice && 
+     parseFloat(property.discountPrice) < parseFloat(property.actualPrice) && (
+      <div className="flex flex-col">
+        <span className="text-white/40 text-sm line-through">
+          ₹{parseFloat(property.actualPrice).toFixed(2)}
+        </span>
+        <span className="text-green-400 text-xs">
+          Save ₹{(parseFloat(property.actualPrice) - parseFloat(property.discountPrice)).toFixed(2)} 
+        </span>
+      </div>
+    )}
+
+    {/* Price per sqft / contact info */}
+    {(property.actualPrice || property.discountPrice) && (
+      <p className="text-white/60 text-xs mt-1">
+        Contact for area details
+      </p>
+    )}
+  </div>
+</div>
+
 
         {/* Action Buttons */}
         <div className="flex items-center justify-between">

@@ -361,12 +361,6 @@ export default function AuthPage() {
 
   const selectedRole = registerForm.watch("roleData.roleType");
 
-  useEffect(() => {
-    if (user) {
-      navigate("/auth");
-    }
-  }, [user, navigate]);
-
   const onLoginSubmit = (data: LoginFormData) => {
     loginMutation.mutate(data);
   };

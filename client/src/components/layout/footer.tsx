@@ -21,6 +21,7 @@ import homobieLogo from "/assets/homobie-logo.png";
 import SipCalculator from "../../pages/SipCalculator/SipCalculator";
 import EmiCalculator from "../../pages/EmiCalculator/EmiCalculator";
 import BudgetPlanningTool from "../../pages/BudgetPlanningTool/BudgetPlanningTool";
+import RetirementPlanning from "../ui/retirementplanning";
 
 
 const toolItems = [
@@ -50,7 +51,8 @@ const toolItems = [
     name: "Retirement Planner",
     icon: CalendarDays,
     path: "/tools/retirement-planner",
-    ariaLabel: "Navigate to Retirement Planner tool",
+     component: <RetirementPlanning />,
+      isModal: false,
   },
 ];
 
