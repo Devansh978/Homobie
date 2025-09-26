@@ -68,7 +68,10 @@ const registerSchema = z
   })
   .superRefine(({ roleData }, ctx) => {
     // Remove BUILDER-specific validation since it's no longer an option in registration
-    if (roleData.roleType === "BROKER" && (!roleData.companyName || roleData.companyName.trim().length === 0)) {
+    if (
+      roleData.roleType === "BROKER" &&
+      (!roleData.companyName || roleData.companyName.trim().length === 0)
+    ) {
       ctx.addIssue({
         code: "custom",
         message: "Company name is required for Brokers",
@@ -112,9 +115,9 @@ type LoginFormData = z.infer<typeof loginSchema>;
 const getErrorMessage = (error: unknown): string => {
   if (axios.isAxiosError(error)) {
     const responseData = error.response?.data;
-    
+
     // Handle different error response formats
-    if (typeof responseData === 'string') {
+    if (typeof responseData === "string") {
       return responseData;
     } else if (responseData?.message) {
       return responseData.message;
@@ -123,16 +126,18 @@ const getErrorMessage = (error: unknown): string => {
     } else if (responseData?.error) {
       return responseData.error;
     } else if (Array.isArray(responseData)) {
-      return responseData.map(err => err.message || err).join(', ');
+      return responseData.map((err) => err.message || err).join(", ");
     }
-    
-    return error.response?.statusText || error.message || "Network error occurred";
+
+    return (
+      error.response?.statusText || error.message || "Network error occurred"
+    );
   }
-  
+
   if (error instanceof Error) {
     return error.message;
   }
-  
+
   return "An unexpected error occurred. Please try again.";
 };
 
@@ -153,10 +158,11 @@ export default function AuthPage() {
       toast.success(response.message || "Login successful!");
       const user = authService.getUser();
       setUser(user);
-      
-      // Check if user is a builder and redirect accordingly
-      if (user && user.roleType === "BUILDER") {
-        window.location.href = "https://homobie-partner-portal.vercel.app/";
+      const role = user?.role?.toUpperCase();
+
+      if (role && role !== "USER") {
+        window.location.href =
+          "https://homobie-partner-portal.vercel.app/builder";
       } else {
         navigate("/dashboard");
       }
@@ -169,52 +175,57 @@ export default function AuthPage() {
   const registerMutation = useMutation({
     mutationFn: async (data: Omit<RegisterFormData, "confirmPassword">) => {
       try {
-        console.log('=== REGISTRATION DEBUG ===');
-        console.log('Raw form data:', data);
-        
+        console.log("=== REGISTRATION DEBUG ===");
+        console.log("Raw form data:", data);
+
         // Validate required fields
-        if (!data.roleData.location.country || !data.roleData.location.state || !data.roleData.location.city) {
+        if (
+          !data.roleData.location.country ||
+          !data.roleData.location.state ||
+          !data.roleData.location.city
+        ) {
           throw new Error("Please select country, state, and city");
         }
-        
+
         const cleanPayload = {
           user: {
-            firstName: String(data.user.firstName || '').trim(),
-            lastName: String(data.user.lastName || '').trim(),
-            email: String(data.user.email || '').trim(),
-            phoneNumber: String(data.user.phoneNumber || '').trim(),
+            firstName: String(data.user.firstName || "").trim(),
+            lastName: String(data.user.lastName || "").trim(),
+            email: String(data.user.email || "").trim(),
+            phoneNumber: String(data.user.phoneNumber || "").trim(),
           },
           roleData: {
             roleType: data.roleData.roleType,
-            ...(data.roleData.companyName && { 
-              companyName: String(data.roleData.companyName).trim() 
+            ...(data.roleData.companyName && {
+              companyName: String(data.roleData.companyName).trim(),
             }),
             location: {
-              country: String(data.roleData.location.country || '').trim(),
-              state: String(data.roleData.location.state || '').trim(),
-              city: String(data.roleData.location.city || '').trim(),
-              pincode: String(data.roleData.location.pincode || '').trim(),
-              addressLine1: String(data.roleData.location.addressLine1 || '').trim(),
+              country: String(data.roleData.location.country || "").trim(),
+              state: String(data.roleData.location.state || "").trim(),
+              city: String(data.roleData.location.city || "").trim(),
+              pincode: String(data.roleData.location.pincode || "").trim(),
+              addressLine1: String(
+                data.roleData.location.addressLine1 || ""
+              ).trim(),
             },
           },
         };
-        
+
         const response = await axios.post(
           "https://api.homobie.com/register/user",
           cleanPayload,
           {
             headers: {
-              'Content-Type': 'application/json',
-              'Accept': 'application/json',
+              "Content-Type": "application/json",
+              Accept: "application/json",
             },
             timeout: 30000,
           }
         );
-        
+
         return response;
-        
       } catch (error) {
-        console.error('Registration error:', error);
+        console.error("Registration error:", error);
         throw error;
       }
     },
@@ -286,16 +297,12 @@ export default function AuthPage() {
 
   const otpMutation = useMutation({
     mutationFn: async (data: { email: string; otp: string }) => {
-      const res = await axios.post(
-        `https://api.homobie.com/verify-Otp`,
-        null,
-        {
-          params: {
-            email: data.email,
-            otp: data.otp,
-          },
-        }
-      );
+      const res = await axios.post(`https://api.homobie.com/verify-Otp`, null, {
+        params: {
+          email: data.email,
+          otp: data.otp,
+        },
+      });
       return res.data;
     },
     onSuccess: () => {
@@ -355,7 +362,7 @@ export default function AuthPage() {
       email: "",
       newPassword: "",
       confirmNewPassword: "",
-      source: "WEB", 
+      source: "WEB",
     },
   });
 
@@ -954,16 +961,27 @@ export default function AuthPage() {
                                   </FormLabel>
                                   <Select
                                     onValueChange={(value) => {
-                                      const country = Country.getAllCountries().find(c => c.isoCode === value);
+                                      const country =
+                                        Country.getAllCountries().find(
+                                          (c) => c.isoCode === value
+                                        );
                                       field.onChange(country?.name || value);
                                       setSelectedCountry(value);
                                       setSelectedState("");
                                       setSelectedCity("");
-                                      registerForm.setValue("roleData.location.state", "");
-                                      registerForm.setValue("roleData.location.city", "");
+                                      registerForm.setValue(
+                                        "roleData.location.state",
+                                        ""
+                                      );
+                                      registerForm.setValue(
+                                        "roleData.location.city",
+                                        ""
+                                      );
                                     }}
                                     value={
-                                      Country.getAllCountries().find(c => c.name === field.value)?.isoCode || ""
+                                      Country.getAllCountries().find(
+                                        (c) => c.name === field.value
+                                      )?.isoCode || ""
                                     }
                                   >
                                     <FormControl>
@@ -998,14 +1016,22 @@ export default function AuthPage() {
                                   </FormLabel>
                                   <Select
                                     onValueChange={(value) => {
-                                      const state = State.getStatesOfCountry(selectedCountry).find(s => s.isoCode === value);
+                                      const state = State.getStatesOfCountry(
+                                        selectedCountry
+                                      ).find((s) => s.isoCode === value);
                                       field.onChange(state?.name || value);
                                       setSelectedState(value);
                                       setSelectedCity("");
-                                      registerForm.setValue("roleData.location.city", "");
+                                      registerForm.setValue(
+                                        "roleData.location.city",
+                                        ""
+                                      );
                                     }}
                                     value={
-                                      State.getStatesOfCountry(selectedCountry).find(s => s.name === field.value)?.isoCode || ""
+                                      State.getStatesOfCountry(
+                                        selectedCountry
+                                      ).find((s) => s.name === field.value)
+                                        ?.isoCode || ""
                                     }
                                     disabled={!selectedCountry}
                                   >
