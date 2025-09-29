@@ -296,7 +296,7 @@ export const Header = () => {
             <div className="flex-shrink-0">
               <a href="/" className="flex items-center">
                 <img
-                  src="/assets/homobie-logo.png"
+                  src="/assets/Screenshot_2024-10-31_005108-removebg-preview.png"
                   alt="Homobie Logo"
                   className="h-12 w-auto object-contain"
                 />
