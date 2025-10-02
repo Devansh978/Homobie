@@ -74,8 +74,7 @@ const SipCalculator = () => {
 
   const [sipResults, setSipResults] = useState([]);
   const [loanResults, setLoanResults] = useState([]);
-  const [sipChartData, setSipChartData] = useState(null);
-  const [loanChartData, setLoanChartData] = useState(null);
+  const [combinedChartData, setCombinedChartData] = useState(null);
   const [sipFutureValue, setSipFutureValue] = useState(0);
   const [loanEmi, setLoanEmi] = useState(0);
   const [totalLoanInterest, setTotalLoanInterest] = useState(0);
@@ -83,6 +82,7 @@ const SipCalculator = () => {
   useEffect(() => {
     calculateSip();
     calculateLoan();
+    createCombinedChart();
   }, [sipAmount, sipRate, sipDuration, loanAmount, loanRate, loanDuration]);
 
   const calculateSip = () => {
@@ -90,9 +90,6 @@ const SipCalculator = () => {
     const months = sipDuration * 12;
     const results = [];
     let futureValue = 0;
-    const chartLabels = [];
-    const chartData = [];
-    const investedData = [];
 
     for (let i = 1; i <= months; i++) {
       futureValue = (futureValue + sipAmount) * (1 + monthlyRate);
@@ -105,42 +102,10 @@ const SipCalculator = () => {
           invested: sipAmount * i,
         });
       }
-
-      if (i % (isMobile ? 12 : 6) === 0 || i === 1 || i === months) {
-        chartLabels.push(
-          isMobile ? `${Math.ceil(i / 12)}Y` : `Year ${Math.ceil(i / 12)}`
-        );
-        chartData.push(futureValue);
-        investedData.push(sipAmount * i);
-      }
     }
 
     setSipResults(results);
     setSipFutureValue(futureValue);
-
-    setSipChartData({
-      labels: chartLabels,
-      datasets: [
-        {
-          label: "Invested Amount",
-          data: investedData,
-          borderColor: "#4C51BF",
-          backgroundColor: "rgba(76, 81, 191, 0.2)",
-          borderWidth: 3,
-          fill: true,
-          tension: 0.3,
-        },
-        {
-          label: "Future Value",
-          data: chartData,
-          borderColor: "#38B2AC",
-          backgroundColor: "rgba(56, 178, 172, 0.2)",
-          borderWidth: 3,
-          fill: true,
-          tension: 0.4,
-        },
-      ],
-    });
   };
 
   const calculateLoan = () => {
@@ -152,9 +117,6 @@ const SipCalculator = () => {
 
     let balance = loanAmount;
     const results = [];
-    const chartLabels = [];
-    const balanceData = [];
-    const interestData = [];
 
     for (let i = 1; i <= months; i++) {
       const interest = balance * monthlyRate;
@@ -170,40 +132,108 @@ const SipCalculator = () => {
           balance: balance > 0 ? balance : 0,
         });
       }
-
-      if (i % (isMobile ? 12 : 6) === 0 || i === 1 || i === months) {
-        chartLabels.push(
-          isMobile ? `${Math.ceil(i / 12)}Y` : `Year ${Math.ceil(i / 12)}`
-        );
-        balanceData.push(balance > 0 ? balance : 0);
-        interestData.push(interest);
-      }
     }
 
     setLoanResults(results);
     setLoanEmi(emi);
     setTotalLoanInterest(emi * months - loanAmount);
+  };
 
-    setLoanChartData({
+  const createCombinedChart = () => {
+    const maxDuration = Math.max(sipDuration, loanDuration);
+    const chartLabels = [];
+    const sipInvestedData = [];
+    const sipFutureValueData = [];
+    const loanBalanceData = [];
+    const loanInterestData = [];
+
+    // Calculate SIP data
+    const sipMonthlyRate = sipRate / 12 / 100;
+    const sipMonths = sipDuration * 12;
+    let sipValue = 0;
+
+    // Calculate Loan data
+    const loanMonthlyRate = loanRate / 12 / 100;
+    const loanMonths = loanDuration * 12;
+    const emi = (loanAmount * loanMonthlyRate * Math.pow(1 + loanMonthlyRate, loanMonths)) /
+      (Math.pow(1 + loanMonthlyRate, loanMonths) - 1);
+    let loanBalance = loanAmount;
+
+    for (let year = 1; year <= maxDuration; year++) {
+      const month = year * 12;
+      
+      chartLabels.push(isMobile ? `${year}Y` : `Year ${year}`);
+
+      // SIP calculations
+      if (month <= sipMonths) {
+        for (let i = (year - 1) * 12 + 1; i <= month; i++) {
+          sipValue = (sipValue + sipAmount) * (1 + sipMonthlyRate);
+        }
+        sipInvestedData.push(sipAmount * month);
+        sipFutureValueData.push(sipValue);
+      } else {
+        sipInvestedData.push(sipAmount * sipMonths);
+        sipFutureValueData.push(sipValue);
+      }
+
+      // Loan calculations
+      if (month <= loanMonths && loanBalance > 0) {
+        for (let i = (year - 1) * 12 + 1; i <= month; i++) {
+          const interest = loanBalance * loanMonthlyRate;
+          const principal = emi - interest;
+          loanBalance -= principal;
+        }
+        loanBalanceData.push(loanBalance > 0 ? loanBalance : 0);
+        loanInterestData.push((emi * month) - (loanAmount - (loanBalance > 0 ? loanBalance : 0)));
+      } else {
+        loanBalanceData.push(0);
+        loanInterestData.push(loanMonths > 0 ? (emi * loanMonths) - loanAmount : 0);
+      }
+    }
+
+    setCombinedChartData({
       labels: chartLabels,
       datasets: [
         {
-          label: "Principal Balance",
-          data: balanceData,
+          label: "SIP Invested Amount",
+          data: sipInvestedData,
+          borderColor: "#4C51BF",
+          backgroundColor: "rgba(76, 81, 191, 0.2)",
+          borderWidth: 3,
+          fill: true,
+          tension: 0.3,
+          yAxisID: 'y',
+          hidden: true,
+        },
+        {
+          label: "SIP Future Value",
+          data: sipFutureValueData,
+          borderColor: "#38B2AC",
+          backgroundColor: "rgba(56, 178, 172, 0.2)",
+          borderWidth: 3,
+          fill: true,
+          tension: 0.4,
+          yAxisID: 'y',
+        },
+        {
+          label: "Loan Principal Balance",
+          data: loanBalanceData,
           borderColor: "#C53030",
           backgroundColor: "rgba(197, 48, 48, 0.2)",
           borderWidth: 3,
           fill: true,
           tension: 0.4,
+          yAxisID: 'y',
         },
         {
-          label: "Interest Paid",
-          data: interestData,
+          label: "Cumulative Interest Paid",
+          data: loanInterestData,
           borderColor: "#DD6B20",
           backgroundColor: "rgba(221, 107, 32, 0.2)",
           borderWidth: 3,
           fill: true,
           tension: 0.4,
+          yAxisID: 'y',
         },
       ],
     });
@@ -212,16 +242,20 @@ const SipCalculator = () => {
   const chartOptions = {
     responsive: true,
     maintainAspectRatio: false,
+    interaction: {
+      mode: 'index',
+      intersect: false,
+    },
     plugins: {
       legend: {
         position: isMobile ? "bottom" : "top",
         labels: {
           color: "#ffffff",
           font: {
-            size: isMobile ? 12 : 14,
+            size: isMobile ? 10 : 12,
             weight: "bold",
           },
-          padding: 20,
+          padding: isMobile ? 10 : 20,
           usePointStyle: true,
           pointStyle: "circle",
         },
@@ -240,12 +274,19 @@ const SipCalculator = () => {
           size: 12,
         },
         callbacks: {
-          label: (context) => `₹${context.raw.toLocaleString("en-IN")}`,
+          label: (context) => {
+            const label = context.dataset.label || '';
+            const value = `₹${context.raw.toLocaleString("en-IN")}`;
+            return `${label}: ${value}`;
+          },
         },
       },
     },
     scales: {
       y: {
+        type: 'linear',
+        display: true,
+        position: 'left',
         beginAtZero: true,
         grid: {
           color: "rgba(255,255,255,0.1)",
@@ -450,15 +491,6 @@ const SipCalculator = () => {
           />
         </div>
 
-        {sipChartData && (
-          <div
-            className="mt-6 bg-gradient-to-br from-gray-900 to-black p-4 rounded-xl border border-white shadow-lg"
-            style={{ height: isMobile ? "280px" : "350px" }}
-          >
-            <Line data={sipChartData} options={chartOptions} />
-          </div>
-        )}
-
         <div
           className={
             isMobile ? "grid grid-cols-2 gap-3 mt-4" : "flex gap-4 mt-6"
@@ -532,15 +564,6 @@ const SipCalculator = () => {
           />
         </div>
 
-        {loanChartData && (
-          <div
-            className="mt-6 bg-gradient-to-br from-gray-900 to-black p-4 rounded-xl border border-white shadow-lg"
-            style={{ height: isMobile ? "280px" : "350px" }}
-          >
-            <Line data={loanChartData} options={chartOptions} />
-          </div>
-        )}
-
         <div
           className={
             isMobile ? "grid grid-cols-2 gap-3 mt-4" : "flex gap-4 mt-6"
@@ -566,9 +589,24 @@ const SipCalculator = () => {
         </div>
       </div>
     </div>
+
+    {/* Combined Chart */}
+    {combinedChartData && (
+      <div className="mt-8">
+        <h2 className="text-lg sm:text-xl font-bold mb-4 flex items-center text-white">
+          <span className="w-3 h-3 bg-white rounded-full mr-2"></span>
+           Financial Overview
+        </h2>
+        <div
+          className="bg-gradient-to-br from-gray-900 to-black p-4 rounded-xl border border-white shadow-lg"
+          style={{ height: isMobile ? "350px" : "450px" }}
+        >
+          <Line data={combinedChartData} options={chartOptions} />
+        </div>
+      </div>
+    )}
   </div>
 );
-
 
   const TablesView = () => (
     <div className=" p-4 rounded-lg shadow-lg border border-gray-800 w-full overflow-hidden">

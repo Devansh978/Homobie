@@ -338,9 +338,14 @@ export default function SipPage() {
                   <Button variant="outline" onClick={() => navigate("/")}>
                     Back to Home
                   </Button>
-                  <Button onClick={() => navigate("/dashboard")}>
-                    Go to Dashboard
-                  </Button>
+                  <Button
+  onClick={() => {
+    window.location.href = "https://homobie-partner-portal.vercel.app";
+  }}
+>
+  Go to Dashboard
+</Button>
+
                 </CardFooter>
               </Card>
             </div>

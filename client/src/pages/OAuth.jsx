@@ -23,47 +23,57 @@ const OAuth = () => {
     }
   }, []);
 
-  const handleOAuthCallback = async (code) => {
-    try {
-      const response = await fetch('https://api.homobie.com/auth/oauth/callback', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          code: code,
-          source: 'WEB'
-        }),
-      });
+ const handleOAuthCallback = async (code) => {
+  try {
+    const response = await fetch( `${import.meta.env.VITE_BASE_URL}/auth/oauth/callback`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        code: code,
+        source: 'WEB'
+      }),
+    });
 
-      if (response.ok) {
-        const data = await response.json();
+    if (response.ok) {
+      const data = await response.json();
+      
+      if (data.user && data.tokens) {
+        authService.setAuthData(data.user, data.tokens);
+        toast.success("Login successful!");
         
-        if (data.user && data.tokens) {
-          authService.setAuthData(data.user, data.tokens);
-          toast.success("Login successful!");
-          
-          window.history.replaceState({}, document.title, "/");
-          setLocation('/dashboard');
+        window.history.replaceState({}, document.title, "/");
+
+        // --- Role-based redirect ---
+        const role = data.user.role;
+        if (role && role !== "USER") {
+          window.location.href =
+            "https://homobie-partner-portal.vercel.app/builder";
         } else {
-          throw new Error('Invalid response format from server');
+          window.location.href =
+            "https://homobie-partner-portal.vercel.app";
         }
       } else {
-        const errorData = await response.json();
-        throw new Error(errorData.message || 'Authentication failed');
+        throw new Error('Invalid response format from server');
       }
-    } catch (error) {
-      console.error("OAuth callback error:", error);
-      toast.error(error.message || "Authentication failed. Please try again.");
-      
-      window.history.replaceState({}, document.title, "/login");
+    } else {
+      const errorData = await response.json();
+      throw new Error(errorData.message || 'Authentication failed');
     }
-  };
+  } catch (error) {
+    console.error("OAuth callback error:", error);
+    toast.error(error.message || "Authentication failed. Please try again.");
+    
+    window.history.replaceState({}, document.title, "/login");
+  }
+};
+
 
   const handleGoogleLogin = () => {
     try {
       // Redirect to your backend OAuth2 endpoint
-      window.location.href = 'https://api.homobie.com/oauth2/authorization/google';
+      window.location.href =  `${import.meta.env.VITE_BASE_URL}/oauth2/authorization/google`;
     } catch (error) {
       console.error("OAuth redirect failed:", error);
       toast.error("Failed to initiate Google login. Please try again.");

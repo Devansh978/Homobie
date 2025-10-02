@@ -14,7 +14,7 @@ import ListViewCard from "./ListViewCard";
 import PropertyFilters from "./PropertyFilters";
 import FormProperties from "./FormProperties";
 
-const baseUrl = "https://api.homobie.com";
+const baseUrl =  `${import.meta.env.VITE_BASE_URL}`;
 
 // Helper function to convert byte array to image URL
 // Updated helper functions for better image handling
@@ -53,7 +53,7 @@ const convertByteArrayToImageUrl = (byteArray) => {
     }
 
     // Create blob with proper MIME type detection
-    let mimeType = "image/jpeg"; // default
+    let mimeType = "image/jpeg";
 
     // Simple MIME type detection based on file signature
     if (uint8Array.length > 4) {
@@ -204,12 +204,114 @@ const Properties = () => {
   const [allProperties, setAllProperties] = useState([]);
   const [isSliding, setIsSliding] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [isAuthChecking, setIsAuthChecking] = useState(false); // Set to false since we don't need auth check
+  const [isAuthChecking, setIsAuthChecking] = useState(false);
   const [error, setError] = useState(null);
   const [showAuthRedirect, setShowAuthRedirect] = useState(false);
   const scrollContainerRef = useRef(null);
 
+  // Pagination state
+  const [currentPage, setCurrentPage] = useState(1);
+  const [propertiesPerPage] = useState(6); 
+
   const cardWidth = 374;
+
+  // Pagination helper functions
+  const getPaginatedProperties = () => {
+    const startIndex = (currentPage - 1) * propertiesPerPage;
+    const endIndex = startIndex + propertiesPerPage;
+    return filteredProperties.slice(startIndex, endIndex);
+  };
+
+  const getTotalPages = () => {
+    return Math.ceil(filteredProperties.length / propertiesPerPage);
+  };
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm, filters]);
+
+  // Pagination
+  const Pagination = () => {
+    const totalPages = getTotalPages();
+    const startItem = (currentPage - 1) * propertiesPerPage + 1;
+    const endItem = Math.min(currentPage * propertiesPerPage, filteredProperties.length);
+
+    if (totalPages <= 1) return null;
+
+    return (
+      <div className="flex flex-col sm:flex-row items-center justify-between gap-4 mt-8 pt-6 border-t border-white/10">
+        <div className="text-white/60 text-sm">
+          Showing {startItem}-{endItem} of {filteredProperties.length} properties
+        </div>
+        
+        <div className="flex items-center gap-2">
+          {/* Previous button */}
+          <button
+            onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+            disabled={currentPage === 1}
+            className={`p-2 rounded-lg transition-all duration-300 ${
+              currentPage === 1
+                ? "bg-white/5 text-white/30 cursor-not-allowed"
+                : "bg-white/10 text-white hover:bg-white/20"
+            }`}
+          >
+            <ChevronLeft className="w-5 h-5" />
+          </button>
+
+          {/* Page numbers */}
+          <div className="flex items-center gap-1">
+            {Array.from({ length: totalPages }, (_, i) => i + 1).map(pageNumber => {
+              const shouldShow = 
+                pageNumber === 1 ||
+                pageNumber === totalPages ||
+                Math.abs(pageNumber - currentPage) <= 1;
+
+              const shouldShowEllipsis = 
+                (pageNumber === 2 && currentPage > 4) ||
+                (pageNumber === totalPages - 1 && currentPage < totalPages - 3);
+
+              if (!shouldShow && !shouldShowEllipsis) return null;
+
+              if (shouldShowEllipsis) {
+                return (
+                  <span key={pageNumber} className="px-2 py-1 text-white/60">
+                    ...
+                  </span>
+                );
+              }
+
+              return (
+                <button
+                  key={pageNumber}
+                  onClick={() => setCurrentPage(pageNumber)}
+                  className={`px-3 py-2 rounded-lg transition-all duration-300 text-sm font-medium ${
+                    currentPage === pageNumber
+                      ? "bg-white text-black"
+                      : "bg-white/10 text-white hover:bg-white/20"
+                  }`}
+                >
+                  {pageNumber}
+                </button>
+              );
+            })}
+          </div>
+
+          {/* Next button */}
+          <button
+            onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+            disabled={currentPage === totalPages}
+            className={`p-2 rounded-lg transition-all duration-300 ${
+              currentPage === totalPages
+                ? "bg-white/5 text-white/30 cursor-not-allowed"
+                : "bg-white/10 text-white hover:bg-white/20"
+            }`}
+          >
+            <ChevronRight className="w-5 h-5" />
+          </button>
+        </div>
+      </div>
+    );
+  };
 
   const checkAuth = (showError = true) => {
     const { token, userId, userData } = getAuthTokens();
@@ -644,7 +746,7 @@ const Properties = () => {
   }
 
   return (
-    <div className="min-h-screen text-white pt-[100px] bg-black">
+    <div className="min-h-screen text-white pt-[100px] bg-black z-10">
       {/* Header */}
       <div className="border-b border-white/10  backdrop-blur-xl">
         <div className="max-w-7xl mx-auto px-4 py-8">
@@ -786,27 +888,34 @@ const Properties = () => {
                 onFilterChange={handleFilterChange}
               />
             </div>
-            <div className="flex items-center gap-3">
-              <button
-                onClick={() => setViewMode("grid")}
-                className={`p-3 rounded-xl backdrop-blur-md border transition-all duration-300 ${
-                  viewMode === "grid"
-                    ? "bg-white/20 text-white border-white/30"
-                    : "bg-white/5 text-white/60 border-white/10 hover:bg-white/10 hover:text-white"
-                }`}
-              >
-                <Grid className="w-5 h-5" />
-              </button>
-              <button
-                onClick={() => setViewMode("list")}
-                className={`p-3 rounded-xl backdrop-blur-md border transition-all duration-300 ${
-                  viewMode === "list"
-                    ? "bg-white/20 text-white border-white/30"
-                    : "bg-white/5 text-white/60 border-white/10 hover:bg-white/10 hover:text-white"
-                }`}
-              >
-                <List className="w-5 h-5" />
-              </button>
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <button
+                  onClick={() => setViewMode("grid")}
+                  className={`p-3 rounded-xl backdrop-blur-md border transition-all duration-300 ${
+                    viewMode === "grid"
+                      ? "bg-white/20 text-white border-white/30"
+                      : "bg-white/5 text-white/60 border-white/10 hover:bg-white/10 hover:text-white"
+                  }`}
+                >
+                  <Grid className="w-5 h-5" />
+                </button>
+                <button
+                  onClick={() => setViewMode("list")}
+                  className={`p-3 rounded-xl backdrop-blur-md border transition-all duration-300 ${
+                    viewMode === "list"
+                      ? "bg-white/20 text-white border-white/30"
+                      : "bg-white/5 text-white/60 border-white/10 hover:bg-white/10 hover:text-white"
+                  }`}
+                >
+                  <List className="w-5 h-5" />
+                </button>
+              </div>
+              
+              {/* Results count */}
+              <div className="text-white/60 text-sm">
+                {filteredProperties.length} {filteredProperties.length === 1 ? 'property' : 'properties'} found
+              </div>
             </div>
           </div>
         </div>
@@ -871,7 +980,7 @@ const Properties = () => {
             </div>
           ) : viewMode === "list" ? (
             <div className="space-y-6">
-              {filteredProperties.map((item) => (
+              {getPaginatedProperties().map((item) => (
                 <Link
                   key={item.propertyId}
                   href={`/properties/${item.propertyId}`}
@@ -892,39 +1001,47 @@ const Properties = () => {
                   </a>
                 </Link>
               ))}
+              
+              {/* Pagination for List View */}
+              <Pagination />
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-              {filteredProperties.map((item) => (
-                <Link
-                  key={item.propertyId}
-                  href={`/properties/${item.propertyId}`}
-                  onClick={() => {
-                    localStorage.setItem("currentPropertyId", item.propertyId);
-                    localStorage.setItem(
-                      "currentProperty",
-                      JSON.stringify(item)
-                    );
-                  }}
-                >
-                  <a className="block">
-                    <PropertyCard
-                      property={item.property}
-                      files={item.files}
-                      ownerName={item.ownerName}
-                      isSlider={false}
-                    />
-                  </a>
-                </Link>
-              ))}
+            <div>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                {getPaginatedProperties().map((item) => (
+                  <Link
+                    key={item.propertyId}
+                    href={`/properties/${item.propertyId}`}
+                    onClick={() => {
+                      localStorage.setItem("currentPropertyId", item.propertyId);
+                      localStorage.setItem(
+                        "currentProperty",
+                        JSON.stringify(item)
+                      );
+                    }}
+                  >
+                    <a className="block">
+                      <PropertyCard
+                        property={item.property}
+                        files={item.files}
+                        ownerName={item.ownerName}
+                        isSlider={false}
+                      />
+                    </a>
+                  </Link>
+                ))}
+              </div>
+              
+              {/* Pagination for Grid View */}
+              <Pagination />
             </div>
           )}
 
           {filteredProperties.length === 0 && (
             <div className="text-center py-16">
               <Home className="w-20 h-20 mx-auto mb-6 text-white/60" />
-              <p className="text-2xl mb-2">No properties found</p>
-              <p className="text-sm">Try adjusting your search criteria</p>
+              <p className="text-2xl mb-2 text-white/80">No properties found</p>
+              <p className="text-white/60">Try adjusting your search criteria</p>
             </div>
           )}
         </div>

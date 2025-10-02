@@ -9,6 +9,7 @@ import {
   Bed,
   Bath,
   Square,
+  Loader2,
 } from "lucide-react";
 import { Country, State, City } from "country-state-city";
 
@@ -17,6 +18,8 @@ const FormProperties = ({ onAddProperty }) => {
   const [selectedCountry, setSelectedCountry] = useState("");
   const [selectedState, setSelectedState] = useState("");
   const [selectedCity, setSelectedCity] = useState("");
+  const [loadingLocation, setLoadingLocation] = useState(false);
+  const [locationError, setLocationError] = useState("");
 
   const [formData, setFormData] = useState({
     files: [],
@@ -51,6 +54,123 @@ const FormProperties = ({ onAddProperty }) => {
   const [currentFeature, setCurrentFeature] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState(null);
+
+  const getLocationAndPincode = async () => {
+    setLoadingLocation(true);
+    setLocationError("");
+
+    if (!navigator.geolocation) {
+      setLocationError("Geolocation is not supported by your browser");
+      setLoadingLocation(false);
+      return;
+    }
+
+    navigator.geolocation.getCurrentPosition(
+      async (position) => {
+        const { latitude, longitude } = position.coords;
+
+        try {
+          const response = await fetch(
+            `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}&addressdetails=1`,
+            {
+              headers: {
+                "User-Agent": "YourAppName/1.0 (your@email.com)",
+                "Accept-Language": "en",
+              },
+            }
+          );
+
+          const data = await response.json();
+
+          if (data.address) {
+            const postalCode =
+              data.address.postcode || data.address.postal_code;
+            const countryCode = data.address.country_code?.toUpperCase();
+            const stateName = data.address.state;
+            const cityName =
+              data.address.city || data.address.town || data.address.village;
+
+            // Find matching country
+            const countries = Country.getAllCountries();
+            const matchedCountry = countries.find(
+              (c) => c.isoCode === countryCode
+            );
+
+            if (matchedCountry) {
+              setSelectedCountry(matchedCountry.isoCode);
+
+              // Find matching state
+              const states = State.getStatesOfCountry(matchedCountry.isoCode);
+              const matchedState = states.find(
+                (s) => s.name.toLowerCase() === stateName?.toLowerCase()
+              );
+
+              if (matchedState) {
+                setSelectedState(matchedState.isoCode);
+              }
+
+              // Update form data
+              setFormData((prev) => ({
+                ...prev,
+                property: {
+                  ...prev.property,
+                  location: {
+                    ...prev.property.location,
+                    pincode: postalCode || "",
+                    country: matchedCountry.isoCode,
+                    state: matchedState
+                      ? matchedState.isoCode
+                      : stateName || "",
+                    city: cityName || "",
+                  },
+                },
+              }));
+
+              if (cityName) {
+                setSelectedCity(cityName);
+              }
+
+              if (postalCode) {
+                setLocationError("");
+              } else {
+                setLocationError(
+                  "Pincode found but some details may be incomplete"
+                );
+              }
+            } else {
+              setLocationError("Could not match country from location");
+            }
+          } else {
+            setLocationError("Unable to retrieve address information");
+          }
+        } catch (err) {
+          setLocationError(
+            "Failed to fetch location details. Please try again."
+          );
+        }
+
+        setLoadingLocation(false);
+      },
+      (err) => {
+        setLoadingLocation(false);
+        switch (err.code) {
+          case err.PERMISSION_DENIED:
+            setLocationError(
+              "Location permission denied. Please allow location access."
+            );
+            break;
+          case err.POSITION_UNAVAILABLE:
+            setLocationError("Location information is unavailable.");
+            break;
+          case err.TIMEOUT:
+            setLocationError("Location request timed out.");
+            break;
+          default:
+            setLocationError("An unknown error occurred.");
+        }
+      }
+    );
+  };
 
   const handleFileChange = (e) => {
     const selectedFiles = Array.from(e.target.files);
@@ -264,6 +384,7 @@ const FormProperties = ({ onAddProperty }) => {
     setSelectedCountry("");
     setSelectedState("");
     setSelectedCity("");
+    setLocationError("");
   };
 
   const handleSubmit = async (e) => {
@@ -303,8 +424,8 @@ const FormProperties = ({ onAddProperty }) => {
       </button>
 
       {isFormOpen && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-start justify-center z-50 p-4">
-          <div className="bg-black rounded-xl shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-y-auto border border-white">
+        <div className="relative inset-0 bg-black bg-opacity-50 flex items-start justify-center z-100 md:p-4 pt-1">
+          <div className="bg-black rounded-xl shadow-2xl w-full md:max-w-5xl max-h-[90vh] overflow-y-auto border border-white">
             <div className="sticky top-0 bg-black border-b border-white px-6 py-4 flex items-center justify-between rounded-t-xl">
               <h2 className="text-2xl font-bold text-white flex items-center gap-2">
                 <Home size={24} />
@@ -523,10 +644,37 @@ const FormProperties = ({ onAddProperty }) => {
 
                 {/* Location */}
                 <div className="space-y-4">
-                  <h3 className="text-lg font-semibold text-white border-b border-white pb-2 flex items-center gap-2">
-                    <MapPin size={20} />
-                    Location
-                  </h3>
+                  <div className="flex items-center justify-between">
+                    <h3 className="text-lg font-semibold text-white border-b border-white pb-2 flex items-center gap-2">
+                      <MapPin size={20} />
+                      Location
+                    </h3>
+                    <button
+                      type="button"
+                      onClick={getLocationAndPincode}
+                      disabled={loadingLocation}
+                      className="flex items-center gap-2 px-4 mt-2 py-2 bg-gray-600 hover:bg-gray-500 disabled:bg-blue-400 text-white text-sm rounded-lg transition-colors"
+                    >
+                      {loadingLocation ? (
+                        <>
+                          <Loader2 className="w-4 h-4 animate-spin" />
+                          Getting Location...
+                        </>
+                      ) : (
+                        <>
+                          <MapPin className="w-4 h-4" />
+                          Use My Location
+                        </>
+                      )}
+                    </button>
+                  </div>
+
+                  {locationError && (
+                    <div className="bg-yellow-900/50 border border-yellow-700 rounded-lg p-3">
+                      <p className="text-yellow-200 text-sm">{locationError}</p>
+                    </div>
+                  )}
+
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                       <label className="block text-sm font-medium text-white mb-1">

@@ -105,7 +105,7 @@ type EmailVerifyValues = z.infer<typeof emailVerifySchema>;
 type CancelFormValues = z.infer<typeof cancelFormSchema>;
 type RescheduleFormValues = z.infer<typeof rescheduleFormSchema>;
 
-const BASE_URL = 'https://api.homobie.com';
+const BASE_URL =  `${import.meta.env.VITE_BASE_URL}`;
 
 export default function ConsultationPage() {
   const [location, navigate] = useLocation();
@@ -592,16 +592,35 @@ const { data: userConsultations, refetch: refetchConsultations, error: consultat
     }
   });
 
-  // Handle payment success
-  const handlePaymentSuccess = (paymentData: any) => {
-    console.log("Payment successful:", paymentData);
-    setIsSuccess(true);
-    toast.success("Payment completed successfully!");
+ // Handle payment success
+const handlePaymentSuccess = (paymentData: any) => {
+  console.log("Payment successful:", paymentData);
+  setIsSuccess(true);
+  toast.success("Payment completed successfully!");
 
-    setTimeout(() => {
-      navigate("/dashboard");
-    }, 3000);
-  };
+  setTimeout(() => {
+    const storedUser = localStorage.getItem("user");
+    let role: string | null = null;
+
+    if (storedUser) {
+      try {
+        const parsedUser = JSON.parse(storedUser);
+        role = parsedUser.role || null;
+      } catch (err) {
+        console.error("Error parsing user from localStorage:", err);
+      }
+    }
+
+    if (role && role !== "USER") {
+      window.location.href =
+        "https://homobie-partner-portal.vercel.app/builder";
+    } else {
+      window.location.href =
+        "https://homobie-partner-portal.vercel.app";
+    }
+  }, 3000);
+};
+
 
   // Handle payment failure
   const handlePaymentFailure = (error: any) => {
@@ -765,9 +784,32 @@ const { data: userConsultations, refetch: refetchConsultations, error: consultat
                     Your consultation has been scheduled. You will receive a
                     confirmation email shortly.
                   </p>
-                  <Button onClick={() => navigate("/dashboard")}>
-                    Go to Dashboard
-                  </Button>
+                  <Button
+  onClick={() => {
+    const storedUser = localStorage.getItem("user");
+    let role: string | null = null;
+
+    if (storedUser) {
+      try {
+        const parsedUser = JSON.parse(storedUser);
+        role = parsedUser.role || null;
+      } catch (err) {
+        console.error("Error parsing user from localStorage:", err);
+      }
+    }
+
+    if (role && role !== "USER") {
+      window.location.href =
+        "https://homobie-partner-portal.vercel.app/builder";
+    } else {
+      window.location.href =
+        "https://homobie-partner-portal.vercel.app";
+    }
+  }}
+>
+  Go to Dashboard
+</Button>
+
                 </CardContent>
               </Card>
             ) : /* Payment State */
@@ -1836,14 +1878,35 @@ const { data: userConsultations, refetch: refetchConsultations, error: consultat
                             ))}
 
                           {userConsultations.length > 3 && (
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              className="w-full"
-                              onClick={() => navigate("/dashboard")}
-                            >
-                              View All ({userConsultations.length})
-                            </Button>
+                           <Button
+  variant="outline"
+  size="sm"
+  className="w-full"
+  onClick={() => {
+    const storedUser = localStorage.getItem("user");
+    let role: string | null = null;
+
+    if (storedUser) {
+      try {
+        const parsedUser = JSON.parse(storedUser);
+        role = parsedUser.role || null;
+      } catch (err) {
+        console.error("Error parsing user from localStorage:", err);
+      }
+    }
+
+    if (role && role !== "USER") {
+      window.location.href =
+        "https://homobie-partner-portal.vercel.app/builder";
+    } else {
+      window.location.href =
+        "https://homobie-partner-portal.vercel.app";
+    }
+  }}
+>
+  View All ({userConsultations.length})
+</Button>
+
                           )}
                         </CardContent>
                       </Card>

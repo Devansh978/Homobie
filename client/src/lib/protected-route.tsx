@@ -22,11 +22,11 @@ export function ProtectedRoute({
   if (!user) return <Redirect to="/auth" />;
 
   if (path.startsWith("/admin") && !["admin", "superadmin"].includes(user.role)) {
-    return <Redirect to="/dashboard" />;
+    return <Redirect to="/" />;
   }
 
   if (path.startsWith("/super-admin") && user.role !== "superadmin") {
-    return <Redirect to="/dashboard" />;
+    return <Redirect to="/" />;
   }
 
   return <Route path={path} component={Component} />;

@@ -141,7 +141,7 @@ const Feedback = () => {
     }
 
     try {
-      const BASE_URL = "https://api.homobie.com";
+      const BASE_URL =  `${import.meta.env.VITE_BASE_URL}`;
       const userId = localStorage.getItem("userId");
       const token = localStorage.getItem("auth_token");
       const API_ENDPOINT = `${BASE_URL}/feedback/getAllUserFeedbacks?userId=${encodeURIComponent(userId)}`;
@@ -294,7 +294,7 @@ const Feedback = () => {
   return (
     <div className="min-h-screen">
       {/* Action Buttons */}
-      <div className="relative right-4 z-50 flex gap-1">
+      {/* <div className="relative right-4 z-50 flex gap-1">
         <button
           onClick={handleCreateNew}
           className="px-4 py-2 bg-black text-white rounded-lg transition-all duration-300 flex items-center gap-2 shadow-lg backdrop-blur-md border border-blue-500/30"
@@ -311,7 +311,7 @@ const Feedback = () => {
             {isNotLoggedIn ? "Login to Edit" : "Edit Feedback"}
           </button>
         )}
-      </div>
+      </div> */}
 
       <div className="min-h-screen flex items-center justify-center p-6">
         <div className="w-full max-w-4xl mx-auto">

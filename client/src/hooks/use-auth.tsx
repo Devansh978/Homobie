@@ -69,17 +69,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     loadUserFromStorage();
   }, []);
-   
 
   const loginMutation = useMutation({
     mutationFn: async (credentials: LoginData) => {
-      const response = await fetch("https://api.homobie.com/auth/login", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(credentials),
-      });
+      const response = await fetch(
+        `${import.meta.env.VITE_BASE_URL}/auth/login`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(credentials),
+        }
+      );
 
       if (!response.ok) {
         const errorData = await response.text();
@@ -105,9 +107,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         description: `Welcome back, ${userData.fullName}!`,
       });
 
-        setLocation("/dashboard");
-     
+      // --- Role-based redirect ---
+      if (userData.role && userData.role !== "USER") {
+        window.location.href =
+          "https://homobie-partner-portal.vercel.app/builder";
+      } else {
+        window.location.href = "https://homobie-partner-portal.vercel.app/user";
+      }
     },
+
     onError: (error: Error) => {
       setError(error);
       toast({
@@ -120,13 +128,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const registerMutation = useMutation({
     mutationFn: async (credentials: InsertUser) => {
-      const response = await fetch("https://api.homobie.com/auth/register", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(credentials),
-      });
+      const response = await fetch(
+        `${import.meta.env.VITE_BASE_URL}/auth/register`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(credentials),
+        }
+      );
 
       if (!response.ok) {
         const errorData = await response.text();
@@ -138,12 +149,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     onSuccess: (data) => {
       const { user: userData, token } = data;
 
-      // Store in localStorage
       localStorage.setItem("auth_token", token);
       localStorage.setItem("user", JSON.stringify(userData));
       localStorage.setItem("userId", userData.id);
 
-      // Update state
       setUser(userData);
       setError(null);
 
@@ -154,8 +163,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         description: `Welcome to Homobie, ${userData.fullName}!`,
       });
 
-      setLocation("/dashboard");
+      // --- Role-based redirect ---
+      if (userData.role && userData.role !== "USER") {
+        window.location.href =
+          "https://homobie-partner-portal.vercel.app/builder";
+      } else {
+        window.location.href = "https://homobie-partner-portal.vercel.app/user";
+      }
     },
+
     onError: (error: Error) => {
       setError(error);
       toast({

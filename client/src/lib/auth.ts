@@ -61,7 +61,7 @@ export class AuthService {
   private refreshToken: string | null = null;
   private user: AuthUser | null = null;
   private readonly baseUrl =
-    "https://api.homobie.com";
+    `${import.meta.env.VITE_BASE_URL}`;
   private tokenRefreshPromise: Promise<void> | null = null;
   private propertyId: string | null = null;
   private userId: string | null = null;

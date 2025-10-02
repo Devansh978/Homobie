@@ -164,7 +164,8 @@ export default function AuthPage() {
         window.location.href =
           "https://homobie-partner-portal.vercel.app/builder";
       } else {
-        navigate("/dashboard");
+         window.location.href =
+          "https://homobie-partner-portal.vercel.app";
       }
     },
     onError: (error: Error) => {
@@ -212,7 +213,7 @@ export default function AuthPage() {
         };
 
         const response = await axios.post(
-          "https://api.homobie.com/register/user",
+           `${import.meta.env.VITE_BASE_URL}/register/user`,
           cleanPayload,
           {
             headers: {
@@ -242,7 +243,7 @@ export default function AuthPage() {
   const forgotMutation = useMutation({
     mutationFn: async (data: { email: string }) => {
       const res = await axios.post(
-        `https://api.homobie.com/request-forgotPassword`,
+         `${import.meta.env.VITE_BASE_URL}/request-forgotPassword`,
         null,
         {
           params: {
@@ -270,7 +271,7 @@ export default function AuthPage() {
       source: string;
     }) => {
       const res = await axios.post(
-        `https://api.homobie.com/reset-password`,
+         `${import.meta.env.VITE_BASE_URL}/reset-password`,
         null,
         {
           params: {
@@ -297,7 +298,7 @@ export default function AuthPage() {
 
   const otpMutation = useMutation({
     mutationFn: async (data: { email: string; otp: string }) => {
-      const res = await axios.post(`https://api.homobie.com/verify-Otp`, null, {
+      const res = await axios.post( `${import.meta.env.VITE_BASE_URL}/verify-Otp`, null, {
         params: {
           email: data.email,
           otp: data.otp,

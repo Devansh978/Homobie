@@ -92,7 +92,7 @@ const CompleteProfile: React.FC<CompleteProfileProps> = ({
       };
  
       const response = await fetch(
-        "https://api.homobie.com/register/update",
+         `${import.meta.env.VITE_BASE_URL}/register/update`,
         {
           method: "PUT",
           headers: { "Content-Type": "application/json" },

@@ -24,7 +24,7 @@ const FeedbackForm = ({
   const [copied, setCopied] = useState(false);
 
   const serviceTypes = ["Consultation", "Loan"];
-  const API_BASE_URL = "https://api.homobie.com";
+  const API_BASE_URL =  `${import.meta.env.VITE_BASE_URL}`;
 
   // Load user data for create mode
   useEffect(() => {

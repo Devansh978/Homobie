@@ -8,7 +8,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import NotFound from "@/pages/not-found";
 import HomePage from "@/pages/home-page";
 import AuthPage from "@/pages/auth-page";
-import DashboardPage from "@/pages/dashboard-page";
+// import DashboardPage from "@/pages/dashboard-page";
 import AdminPage from "@/pages/admin-page";
 import SuperAdminPage from "@/pages/super-admin-page";
 import AuditLogsPage from "@/pages/audit-logs-page";
@@ -16,6 +16,7 @@ import LoanApplicationPage from "@/pages/loan-application-page";
 import ConsultationPage from "@/pages/consultation-page";
 import SipPage from "@/pages/sip-page";
 import BlogPage from "@/pages/blog-page";
+import BankRecommendation  from "@/pages/BankRecommendation/BankRecommendation";
 import AboutPage from "@/pages/about-page";
 import OurTeamPage from "@/pages/ourteam-page";
 import CompleteProfile from "@/pages/CompleteProfile";
@@ -58,6 +59,7 @@ function Router() {
       <Route path="/about" component={AboutPage} />
       <Route path="/ourteam" component={OurTeamPage} />
       <Route path="/compare-loans" component={CompareLoans} />
+      <Route path="/bank-recommendation" component={BankRecommendation} />
 
       <Route path="/properties" component={Properties} />
       <Route path="/properties/:propertyId" component={PropertyDetails} />
@@ -69,7 +71,7 @@ function Router() {
       <Route path="/tools/budget-planner" component={BudgetPlanningTool} />
       <Route path="/tools/retirement-planner" component={RetirementPlanning} />
 
-      <Route path="/dashboard" component={DashboardPage} />
+      {/* <Route path="/dashboard" component={DashboardPage} /> */}
       <ProtectedRoute path="/admin" component={AdminPage} />
       <ProtectedRoute path="/super-admin" component={SuperAdminPage} />
       <ProtectedRoute path="/audit-logs" component={AuditLogsPage} />

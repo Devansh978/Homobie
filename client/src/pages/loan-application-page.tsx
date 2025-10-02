@@ -70,7 +70,7 @@ import { getQueryParam, getLoanTypeLabel, calculateEMI } from "../lib/utils";
 // 1. CONSTANTS & API LOGIC (Centralized in this file)
 // ============================================================================
 
-const BASE_URL = "https://api.homobie.com/register/user";
+const BASE_URL =  `${import.meta.env.VITE_BASE_URL}/register/user`;
 
 /**
  * A custom error class for handling API errors in a structured way.
@@ -319,7 +319,32 @@ const SubmissionSuccess = ({ submittedData }: { submittedData: any }) => {
         </CardContent>
         <CardFooter className="flex justify-between">
           <Button variant="outline" onClick={() => navigate("/")}>Back to Home</Button>
-          <Button onClick={() => navigate("/dashboard")}>Go to Dashboard</Button>
+          <Button
+  onClick={() => {
+    const storedUser = localStorage.getItem("user");
+    let role: string | null = null;
+
+    if (storedUser) {
+      try {
+        const parsedUser = JSON.parse(storedUser);
+        role = parsedUser.role || null;
+      } catch (err) {
+        console.error("Error parsing user from localStorage:", err);
+      }
+    }
+
+    if (role && role !== "USER") {
+      window.location.href =
+        "https://homobie-partner-portal.vercel.app/builder";
+    } else {
+      window.location.href =
+        "https://homobie-partner-portal.vercel.app";
+    }
+  }}
+>
+  Go to Dashboard
+</Button>
+
         </CardFooter>
       </Card>
     </div>
