@@ -540,10 +540,10 @@ const BankRecommendation = () => {
                   }
                   className="px-3 py-1 border border-white/20 rounded-lg text-sm bg-white/10 text-white backdrop-blur-sm transition hover:backdrop-brightness-125"
                 >
-                  <option value="bankName" className="bg-white/10 text-white">
+                  <option value="bankName" className="bg-white/10 text-black">
                     Bank Name
                   </option>
-                  <option value="bankType" className="bg-white/10 text-white">
+                  <option value="bankType" className="bg-white/10 text-black">
                     Bank Type
                   </option>
                 </select>
@@ -559,10 +559,10 @@ const BankRecommendation = () => {
                   }
                   className="px-3 py-1 border border-white/20 rounded-lg text-sm bg-white/10 text-white backdrop-blur-sm transition hover:backdrop-brightness-125"
                 >
-                  <option value="ASC" className="bg-white/10 text-white">
+                  <option value="ASC" className="bg-white/10 text-black">
                     Ascending
                   </option>
-                  <option value="DESC" className="bg-white/10 text-white">
+                  <option value="DESC" className="bg-white/10 text-black">
                     Descending
                   </option>
                 </select>
@@ -632,16 +632,16 @@ const BankRecommendation = () => {
                   }
                   className="px-3 py-1 border border-white/20 rounded-lg text-sm bg-white/10 text-white backdrop-blur-sm transition hover:backdrop-brightness-125"
                 >
-                  <option value={5} className="bg-white/10 text-white">
+                  <option value={5} className="bg-white/10 text-black">
                     5
                   </option>
-                  <option value={10} className="bg-white/10 text-white">
+                  <option value={10} className="bg-white/10 text-black">
                     10
                   </option>
-                  <option value={20} className="bg-white/10 text-white">
+                  <option value={20} className="bg-white/10 text-black">
                     20
                   </option>
-                  <option value={50} className="bg-white/10 text-white">
+                  <option value={50} className="bg-white/10 text-black">
                     50
                   </option>
                 </select>
