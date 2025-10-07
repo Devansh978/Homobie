@@ -4,7 +4,7 @@ import CategoryCard from "./CategoryCard";
 const CategorySelection = ({ categories, onCategorySelect }) => {
   return (
     <div className="min-h-screen bg-black text-white p-6 relative overflow-hidden">
-      {/* Background blur elements */}
+   
       <div className="absolute inset-0 overflow-hidden">
         <div className="absolute -top-40 -right-40 w-80 h-80 bg-white/5 rounded-full blur-3xl"></div>
         <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-white/3 rounded-full blur-3xl"></div>
@@ -23,7 +23,6 @@ const CategorySelection = ({ categories, onCategorySelect }) => {
           
         </div>
 
-        {/* Category Selection */}
         <div className="flex justify-center mb-8">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {categories.map((category) => (
@@ -47,7 +46,7 @@ const CategorySelection = ({ categories, onCategorySelect }) => {
                 Detailed Analysis
               </h3>
               <p className="text-white/60 text-sm">
-                Compare EMI, interest rates, processing fees, and total costs
+                Compare EMI, interest rates, and total costs
               </p>
             </div>
             <div className="text-center backdrop-blur-md bg-white/5 border border-white/10 rounded-xl p-6 hover:bg-white/10 transition-all duration-300">

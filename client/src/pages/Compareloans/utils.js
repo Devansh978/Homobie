@@ -13,7 +13,7 @@ export const calculateTotalInterest = (principal, emi, years) => {
 };
 
 export const calculateProcessingFee = (principal, feePercent) => {
-  return (principal * feePercent) / 100;
+  return 0;
 };
 
 export const calculateTotalCost = (principal, totalInterest, processingFee) => {

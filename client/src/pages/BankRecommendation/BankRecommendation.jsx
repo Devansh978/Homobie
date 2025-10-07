@@ -8,7 +8,7 @@ import {
   Building2,
   TrendingUp,
   Calendar,
-  DollarSign,
+  IndianRupee ,
 } from "lucide-react";
 import ViewDetails from "./ViewDetails";
 
@@ -295,7 +295,7 @@ const BankRecommendation = () => {
               { icon: Building2, value: banks.length, label: "Banks Found" },
               { icon: TrendingUp, value: "8.5%", label: "Best Rate" },
               { icon: Calendar, value: "30Y", label: "Max Tenure" },
-              { icon: DollarSign, value: "₹1Cr", label: "Max Amount" },
+              { icon: IndianRupee , value: "1Cr", label: "Max Amount" },
             ].map((stat, idx) => (
               <div
                 key={idx}
@@ -324,7 +324,7 @@ const BankRecommendation = () => {
                 className="flex items-center gap-1 sm:gap-2 text-sm sm:text-base text-red-500 hover:text-red-400"
               >
                 <X size={16} />
-                Clear All
+                Clear All Filters
               </button>
             </div>
 
@@ -351,7 +351,7 @@ const BankRecommendation = () => {
                       value={type}
                       className="bg-black/40 text-white"
                     >
-                      {type.charAt(0) + type.slice(1).toLowerCase()}
+                      {type.charAt(0) + type.slice(1).toUpperCase()}
                     </option>
                   ))}
                 </select>
@@ -419,44 +419,44 @@ const BankRecommendation = () => {
                 {
                   label: "Min Loan Amount (₹)",
                   key: "minLoanAmount",
-                  placeholder: "e.g., 100000",
+                  placeholder: "eg, 100000",
                 },
                 {
                   label: "Max Loan Amount (₹)",
                   key: "maxLoanAmount",
-                  placeholder: "e.g., 5000000",
+                  placeholder: "eg, 5000000",
                 },
                 {
                   label: "Min Interest Rate (%)",
                   key: "minInterestRate",
-                  placeholder: "e.g., 8.0",
+                  placeholder: "eg, 4",
                 },
                 {
                   label: "Max Interest Rate (%)",
                   key: "maxInterestRate",
-                  placeholder: "e.g., 12.0",
+                  placeholder: "eg, 8",
                 },
                 {
                   label: "Max Tenure (months)",
                   key: "maxTenure",
-                  placeholder: "e.g., 240",
+                  placeholder: "eg, 240",
                 },
                 {
                   label: "Min Income Required (₹)",
                   key: "minIncomeRequired",
-                  placeholder: "e.g., 50000",
+                  placeholder: "eg, 50000",
                 },
                 {
                   label: "Min CIBIL Score",
                   key: "minCibilScore",
-                  placeholder: "e.g., 700",
+                  placeholder: "eg, 700",
                 },
-                { label: "Min Age", key: "minAge", placeholder: "e.g., 21" },
-                { label: "Max Age", key: "maxAge", placeholder: "e.g., 65" },
+                { label: "Min Age", key: "minAge", placeholder: "eg, 21" },
+                { label: "Max Age", key: "maxAge", placeholder: "eg, 65" },
                 {
                   label: "Min Turnover (₹)",
                   key: "minTurnover",
-                  placeholder: "e.g., 1000000",
+                  placeholder: "eg, 1000000",
                 },
               ].map((field) => (
                 <div key={field.key}>
@@ -601,6 +601,9 @@ const BankRecommendation = () => {
                         </h3>
                         <p className="text-sm text-gray-300">
                           {bank.bankType} Bank
+                        </p>
+                        <p className="text-sm text-gray-300">
+                          {bank.maxInterestRate}
                         </p>
                       </div>
                     </div>

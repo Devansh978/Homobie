@@ -10,7 +10,6 @@ const PropertyFilters = ({
   const [buttonPosition, setButtonPosition] = useState({ top: 0, left: 0 });
   const buttonRef = useRef(null);
 
-  // Property types based on your API
   const propertyTypes = [
     "RESIDENTIAL",
     "COMMERCIAL", 
@@ -40,19 +39,17 @@ const PropertyFilters = ({
     "FULLY_FURNISHED"
   ];
 
-  // Function to update dropdown position
   const updatePosition = () => {
     if (buttonRef.current) {
       const rect = buttonRef.current.getBoundingClientRect();
       setButtonPosition({
         top: rect.bottom + 8,
-        left: Math.max(8, rect.left), // Ensure it doesn't go off-screen
+        left: Math.max(8, rect.left), 
         width: Math.max(320, rect.width)
       });
     }
   };
 
-  // Update dropdown position when button moves or on scroll
   useEffect(() => {
     if (isOpen) {
       updatePosition();
@@ -67,7 +64,6 @@ const PropertyFilters = ({
     }
   }, [isOpen]);
 
-  // Close dropdown when clicking outside
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (buttonRef.current && !buttonRef.current.contains(event.target)) {
@@ -84,12 +80,10 @@ const PropertyFilters = ({
     }
   }, [isOpen]);
 
-  // Handle filter change
   const handleFilterChange = (name, value) => {
     onFilterChange(name, value);
   };
 
-  // Clear all filters
   const clearAll = () => {
     const clearedFilters = {
       bedrooms: "",
@@ -106,18 +100,15 @@ const PropertyFilters = ({
       propertyStatus: ""
     };
     
-    // Call onFilterChange for each filter to clear them
     Object.entries(clearedFilters).forEach(([key, value]) => {
       onFilterChange(key, value);
     });
   };
 
-  // Count active filters
   const activeFilterCount = Object.values(filters).filter(
     value => value !== "" && value !== null && value !== undefined
   ).length;
 
-  // Format display text for select options
   const formatOptionText = (text) => {
     return text.replace(/_/g, ' ')
               .toLowerCase()
@@ -138,7 +129,6 @@ const PropertyFilters = ({
         zIndex: 999999,
       }}
     >
-      {/* Header */}
       <div className="flex justify-between items-center p-6 border-b border-gray-700/50 bg-gray-800/50">
         <h3 className="text-lg font-semibold text-white flex items-center gap-2">
           <Filter className="w-5 h-5 text-blue-400" />
@@ -152,9 +142,8 @@ const PropertyFilters = ({
         </button>
       </div>
 
-      {/* Scrollable Content */}
       <div className="p-6 space-y-6 max-h-96 overflow-y-auto custom-scrollbar">
-        {/* Property Type & Bedrooms Row */}
+     
         <div className="grid grid-cols-2 gap-4">
           <div>
             <label className="block text-sm font-medium text-gray-300 mb-2">Property Type</label>
@@ -194,7 +183,6 @@ const PropertyFilters = ({
           </div>
         </div>
 
-        {/* Price Range */}
         <div>
           <label className="block text-sm font-medium text-gray-300 mb-2">Price Range (₹)</label>
           <div className="grid grid-cols-2 gap-4">
@@ -223,7 +211,6 @@ const PropertyFilters = ({
           </div>
         </div>
 
-        {/* Location Fields */}
         <div className="space-y-4">
           <div>
             <label className="block text-sm font-medium text-gray-300 mb-2">City</label>
@@ -263,7 +250,6 @@ const PropertyFilters = ({
           </div>
         </div>
 
-        {/* Status & Furnishing Row */}
         <div className="grid grid-cols-2 gap-4">
           <div>
             <label className="block text-sm font-medium text-gray-300 mb-2">Construction Status</label>
@@ -304,7 +290,6 @@ const PropertyFilters = ({
           </div>
         </div>
 
-        {/* Availability */}
         <div>
           <label className="block text-sm font-medium text-gray-300 mb-2">Availability</label>
           <div className="relative">
@@ -325,7 +310,6 @@ const PropertyFilters = ({
         </div>
       </div>
 
-      {/* Footer Actions */}
       <div className="flex gap-3 p-6 border-t border-gray-700/50 bg-gray-800/30">
         <button
           type="button"
@@ -344,7 +328,6 @@ const PropertyFilters = ({
         </button>
       </div>
 
-      {/* Custom Scrollbar Styles */}
       <style jsx>{`
         .custom-scrollbar::-webkit-scrollbar {
           width: 6px;
@@ -381,7 +364,6 @@ const PropertyFilters = ({
         )}
       </button>
 
-      {/* Portal-rendered Dropdown */}
       {isOpen && createPortal(dropdownContent, document.body)}
     </div>
   );

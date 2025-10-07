@@ -44,7 +44,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
 
-  // Load user from localStorage
   useEffect(() => {
     const loadUserFromStorage = () => {
       try {
@@ -107,7 +106,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         description: `Welcome back, ${userData.fullName}!`,
       });
 
-      // --- Role-based redirect ---
       if (userData.role && userData.role !== "USER") {
         window.location.href =
           "https://homobie-partner-portal.vercel.app/builder";
@@ -163,7 +161,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         description: `Welcome to Homobie, ${userData.fullName}!`,
       });
 
-      // --- Role-based redirect ---
       if (userData.role && userData.role !== "USER") {
         window.location.href =
           "https://homobie-partner-portal.vercel.app/builder";

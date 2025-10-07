@@ -1,15 +1,17 @@
-import React, { useState } from 'react';
-import CategorySelection from './CategorySelection';
-import LoanSelection from './LoanSelection';
-import ComparisonTable from './ComparisonTable';
-import { loanDatabase, loanCategories } from './loanData';
+import React, { useState, useEffect } from "react";
+import CategorySelection from "./CategorySelection";
+import LoanSelection from "./LoanSelection";
+import ComparisonTable from "./ComparisonTable";
+import { loanCategories } from "./loanData";
 
 const CompareLoans = () => {
-  const [selectedCategory, setSelectedCategory] = useState('');
+  const [selectedCategory, setSelectedCategory] = useState("");
   const [showComparison, setShowComparison] = useState(false);
   const [showLoanList, setShowLoanList] = useState(false);
   const [selectedLoans, setSelectedLoans] = useState([]);
-  const [sortBy, setSortBy] = useState('emi');
+  const [sortBy, setSortBy] = useState("emi");
+  const [availableLoans, setAvailableLoans] = useState([]);
+  const [loading, setLoading] = useState(false);
 
   const handleCategorySelect = (category) => {
     setSelectedCategory(category);
@@ -19,10 +21,10 @@ const CompareLoans = () => {
   };
 
   const handleLoanSelection = (loan) => {
-    setSelectedLoans(prevSelected => {
-      const isAlreadySelected = prevSelected.find(l => l.id === loan.id);
+    setSelectedLoans((prevSelected) => {
+      const isAlreadySelected = prevSelected.find((l) => l.id === loan.id);
       if (isAlreadySelected) {
-        return prevSelected.filter(l => l.id !== loan.id);
+        return prevSelected.filter((l) => l.id !== loan.id);
       } else {
         return [...prevSelected, loan];
       }
@@ -35,40 +37,79 @@ const CompareLoans = () => {
     }
   };
 
-  const getCurrentLoans = () => {
-    return loanDatabase[selectedCategory] || [];
-  };
-
   const getCategoryDisplayName = () => {
-    const category = loanCategories.find(cat => cat.key === selectedCategory);
-    return category ? category.name : '';
+    const category = loanCategories.find((cat) => cat.key === selectedCategory);
+    return category ? category.name : "";
   };
 
   const resetToCategories = () => {
     setShowComparison(false);
     setShowLoanList(false);
     setSelectedLoans([]);
-    setSelectedCategory('');
+    setSelectedCategory("");
+    setAvailableLoans([]);
   };
 
   const backToLoanSelection = () => {
     setShowComparison(false);
   };
 
-  // Home screen - Category selection
+  useEffect(() => {
+  if (!selectedCategory) return;
+  const fetchLoans = async () => {
+    setLoading(true);
+    try {
+      const response = await fetch(
+        `${
+          import.meta.env.VITE_BASE_URL
+        }/banks/compare?loanType=${selectedCategory}`,
+        {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      if (!response.ok) throw new Error("Failed to fetch loans");
+      const data = await response.json();
+      
+      // reform
+       const transformedLoans = Array.isArray(data) ? data.map((loan, index) => ({
+        id: `${loan.bankName}-${index}`,
+        name: loan.bankName,
+        bankType: loan.bankType,
+        principal: loan.minLoanAmount || 0,
+        maxLoanAmount: loan.maxLoanAmount,
+        interestRate: loan.interestRate,
+        termYears: loan.maxTenure,
+        creditScoreMin: loan.minCibilScore,
+        approvalTime: "N/A", 
+        minIncomeRequired: loan.minIncomeRequired,
+      })) : [];
+
+      setAvailableLoans(transformedLoans);
+      
+    } catch (error) {
+      console.error("Error fetching loans:", error);
+      setAvailableLoans([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+  fetchLoans();
+}, [selectedCategory]);
+
   if (!showLoanList && !showComparison) {
     return (
-      <CategorySelection 
-        categories={loanCategories} 
+      <CategorySelection
+        categories={loanCategories}
         onCategorySelect={handleCategorySelect}
       />
     );
   }
 
-  // Loan list screen - Individual loan selection
   if (showLoanList && !showComparison) {
-    const availableLoans = getCurrentLoans();
-
     return (
       <LoanSelection
         selectedCategory={selectedCategory}
@@ -78,11 +119,11 @@ const CompareLoans = () => {
         onCompare={handleCompareLoans}
         onBack={resetToCategories}
         getCategoryDisplayName={getCategoryDisplayName}
+        loading={loading}
       />
     );
   }
 
-  // Comparison screen
   if (showComparison) {
     return (
       <ComparisonTable
@@ -94,6 +135,8 @@ const CompareLoans = () => {
       />
     );
   }
+
+  return null;
 };
 
 export default CompareLoans;

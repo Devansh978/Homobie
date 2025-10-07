@@ -50,7 +50,7 @@ import {
   Check,
   ChartLine,
   Calendar,
-  DollarSign,
+  IndianRupee,
   TrendingUp,
   PieChart,
   BarChart,
@@ -394,7 +394,7 @@ export default function SipPage() {
 
                   <div className="flex items-start">
                     <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center mt-1 mr-4">
-                      <DollarSign className="text-white" />
+                      <IndianRupee className="text-white" />
                     </div>
                     <div>
                       <h3 className="font-semibold text-lg mb-1 text-white">

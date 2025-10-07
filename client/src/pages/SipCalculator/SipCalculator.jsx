@@ -59,7 +59,6 @@ const SipCalculator = () => {
       document.removeEventListener("fullscreenchange", handleFullscreenChange);
     };
   }, []);
-  
 
   const [activeSection, setActiveSection] = useState("calculator");
   const [activeCalculator, setActiveCalculator] = useState("sip");
@@ -111,9 +110,17 @@ const SipCalculator = () => {
   const calculateLoan = () => {
     const monthlyRate = loanRate / 12 / 100;
     const months = loanDuration * 12;
-    const emi =
-      (loanAmount * monthlyRate * Math.pow(1 + monthlyRate, months)) /
-      (Math.pow(1 + monthlyRate, months) - 1);
+
+    let emi;
+
+    // Handle 0% interest rate case
+    if (loanRate === 0) {
+      emi = loanAmount / months;
+    } else {
+      emi =
+        (loanAmount * monthlyRate * Math.pow(1 + monthlyRate, months)) /
+        (Math.pow(1 + monthlyRate, months) - 1);
+    }
 
     let balance = loanAmount;
     const results = [];
@@ -139,7 +146,8 @@ const SipCalculator = () => {
     setTotalLoanInterest(emi * months - loanAmount);
   };
 
-  const createCombinedChart = () => {
+ const createCombinedChart = () => {
+    // Use the max duration for both calculations
     const maxDuration = Math.max(sipDuration, loanDuration);
     const chartLabels = [];
     const sipInvestedData = [];
@@ -147,47 +155,46 @@ const SipCalculator = () => {
     const loanBalanceData = [];
     const loanInterestData = [];
 
-    // Calculate SIP data
     const sipMonthlyRate = sipRate / 12 / 100;
-    const sipMonths = sipDuration * 12;
+    const sipMonths = maxDuration * 12;
     let sipValue = 0;
 
     // Calculate Loan data
     const loanMonthlyRate = loanRate / 12 / 100;
-    const loanMonths = loanDuration * 12;
-    const emi = (loanAmount * loanMonthlyRate * Math.pow(1 + loanMonthlyRate, loanMonths)) /
+    const loanMonths = maxDuration * 12;
+    const emi =
+      (loanAmount *
+        loanMonthlyRate *
+        Math.pow(1 + loanMonthlyRate, loanMonths)) /
       (Math.pow(1 + loanMonthlyRate, loanMonths) - 1);
     let loanBalance = loanAmount;
 
     for (let year = 1; year <= maxDuration; year++) {
       const month = year * 12;
-      
+
       chartLabels.push(isMobile ? `${year}Y` : `Year ${year}`);
 
-      // SIP calculations
-      if (month <= sipMonths) {
-        for (let i = (year - 1) * 12 + 1; i <= month; i++) {
-          sipValue = (sipValue + sipAmount) * (1 + sipMonthlyRate);
-        }
-        sipInvestedData.push(sipAmount * month);
-        sipFutureValueData.push(sipValue);
-      } else {
-        sipInvestedData.push(sipAmount * sipMonths);
-        sipFutureValueData.push(sipValue);
+      for (let i = (year - 1) * 12 + 1; i <= month; i++) {
+        sipValue = (sipValue + sipAmount) * (1 + sipMonthlyRate);
       }
+      
+      // sipDuration
+      sipInvestedData.push(sipAmount * Math.min(month, sipDuration * 12));
+      sipFutureValueData.push(sipValue);
 
-      // Loan calculations
-      if (month <= loanMonths && loanBalance > 0) {
+      if (loanBalance > 0) {
         for (let i = (year - 1) * 12 + 1; i <= month; i++) {
           const interest = loanBalance * loanMonthlyRate;
           const principal = emi - interest;
           loanBalance -= principal;
         }
         loanBalanceData.push(loanBalance > 0 ? loanBalance : 0);
-        loanInterestData.push((emi * month) - (loanAmount - (loanBalance > 0 ? loanBalance : 0)));
+        loanInterestData.push(
+          emi * month - (loanAmount - (loanBalance > 0 ? loanBalance : 0))
+        );
       } else {
         loanBalanceData.push(0);
-        loanInterestData.push(loanMonths > 0 ? (emi * loanMonths) - loanAmount : 0);
+        loanInterestData.push(emi * loanMonths - loanAmount);
       }
     }
 
@@ -202,7 +209,7 @@ const SipCalculator = () => {
           borderWidth: 3,
           fill: true,
           tension: 0.3,
-          yAxisID: 'y',
+          yAxisID: "y",
           hidden: true,
         },
         {
@@ -213,7 +220,7 @@ const SipCalculator = () => {
           borderWidth: 3,
           fill: true,
           tension: 0.4,
-          yAxisID: 'y',
+          yAxisID: "y",
         },
         {
           label: "Loan Principal Balance",
@@ -223,17 +230,18 @@ const SipCalculator = () => {
           borderWidth: 3,
           fill: true,
           tension: 0.4,
-          yAxisID: 'y',
+          yAxisID: "y",
         },
         {
-          label: "Cumulative Interest Paid",
+          label: "Total Interest Paid",
           data: loanInterestData,
           borderColor: "#DD6B20",
           backgroundColor: "rgba(221, 107, 32, 0.2)",
           borderWidth: 3,
           fill: true,
           tension: 0.4,
-          yAxisID: 'y',
+          yAxisID: "y",
+          hidden: true,
         },
       ],
     });
@@ -243,7 +251,7 @@ const SipCalculator = () => {
     responsive: true,
     maintainAspectRatio: false,
     interaction: {
-      mode: 'index',
+      mode: "index",
       intersect: false,
     },
     plugins: {
@@ -275,7 +283,7 @@ const SipCalculator = () => {
         },
         callbacks: {
           label: (context) => {
-            const label = context.dataset.label || '';
+            const label = context.dataset.label || "";
             const value = `₹${context.raw.toLocaleString("en-IN")}`;
             return `${label}: ${value}`;
           },
@@ -284,9 +292,9 @@ const SipCalculator = () => {
     },
     scales: {
       y: {
-        type: 'linear',
+        type: "linear",
         display: true,
-        position: 'left',
+        position: "left",
         beginAtZero: true,
         grid: {
           color: "rgba(255,255,255,0.1)",
@@ -355,6 +363,7 @@ const SipCalculator = () => {
     </nav>
   );
 
+  
   const CalculatorNav = () => (
     <div className="flex mb-4 rounded-lg overflow-hidden shadow-sm border border-gray-600">
       <button
@@ -389,45 +398,70 @@ const SipCalculator = () => {
     min,
     max,
     step,
-  }) => (
-    <div className="mb-6">
-      <label className="block text-sm font-bold text-white mb-2">{label}</label>
-      <div className="flex items-center bg-gray-800 rounded-lg border-2 border-gray-600 focus-within:border-white focus-within:ring-2 focus-within:ring-gray-600 transition-all duration-200">
-        {prefix && <span className="ml-3 text-white font-bold">{prefix}</span>}
-        <input
-          type="number"
-          value={value}
-          onChange={(e) => onChange(Number(e.target.value))}
-          min={min}
-          max={max}
-          step={step}
-          className="flex-1 py-3 px-3 bg-transparent outline-none font-bold text-white w-full"
-        />
-        {suffix && <span className="mr-3 text-white font-bold">{suffix}</span>}
-      </div>
-      <div className="mt-3">
-        <input
-          type="range"
-          min={min}
-          max={max}
-          step={step}
-          value={value}
-          onChange={(e) => onChange(Number(e.target.value))}
-          className="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:h-4 [&::-webkit-slider-thumb]:w-4 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-white"
-        />
-        <div className="flex justify-between text-xs font-medium text-gray-300 mt-1">
-          <span>
-            {min}
-            {suffix}
-          </span>
-          <span>
-            {max}
-            {suffix}
-          </span>
+  }) => {
+    const [localValue, setLocalValue] = useState(value);
+    const timeoutRef = useRef(null);
+
+    useEffect(() => {
+      setLocalValue(value);
+    }, [value]);
+
+    const handleChange = (newValue) => {
+      setLocalValue(newValue);
+      
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+      }
+      
+      timeoutRef.current = setTimeout(() => {
+        onChange(newValue);
+      }, 1000);
+    };
+
+    return (
+      <div className="mb-6">
+        <label className="block text-sm font-bold text-white mb-2">{label}</label>
+        <div className="flex items-center bg-gray-800 rounded-lg border-2 border-gray-600 focus-within:border-white focus-within:ring-2 focus-within:ring-gray-600 transition-all duration-200">
+          {prefix && <span className="ml-3 text-white font-bold">{prefix}</span>}
+          <input
+            type="number"
+            value={localValue}
+            onChange={(e) => handleChange(Number(e.target.value))}
+            min={min}
+            max={max}
+            step={step}
+            className="flex-1 py-3 px-3 bg-transparent outline-none font-bold text-white w-full"
+          />
+          {suffix && <span className="mr-3 text-white font-bold">{suffix}</span>}
+        </div>
+        <div className="mt-3">
+          <input
+            type="range"
+            min={min}
+            max={max}
+            step={step}
+            value={localValue}
+            onChange={(e) => {
+              const val = Number(e.target.value);
+              setLocalValue(val);
+              onChange(val);
+            }}
+            className="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:h-4 [&::-webkit-slider-thumb]:w-4 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-white"
+          />
+          <div className="flex justify-between text-xs font-medium text-gray-300 mt-1">
+            <span>
+              {min}
+              {suffix}
+            </span>
+            <span>
+              {max}
+              {suffix}
+            </span>
+          </div>
         </div>
       </div>
-    </div>
-  );
+    );
+  };
 
   const SummaryCard = ({ title, value, variant = "primary" }) => {
     const cardStyles =
@@ -446,167 +480,182 @@ const SipCalculator = () => {
   };
 
   const CalculatorView = () => (
-  <div className=" p-4 rounded-lg shadow-lg border border-gray-800">
-    {isMobile && <CalculatorNav />}
+    <div className=" p-4 rounded-lg shadow-lg border border-gray-800">
+      {isMobile && <CalculatorNav />}
 
-    <div className={isMobile ? "" : "flex gap-6"}>
-      {/* SIP Calculator */}
-      <div
-        className={` rounded-lg w-full lg:w-1/2 ${
-          !isMobile || activeCalculator === "sip" ? "block" : "hidden"
-        }`}
-      >
-        <h2 className="text-lg sm:text-xl font-bold mb-4 flex items-center text-white">
-          <span className="w-3 h-3 bg-white rounded-full mr-2"></span>
-          SIP Calculator
-        </h2>
-
-        <div className={isMobile ? "" : "grid grid-cols-3 gap-4"}>
-          <InputField
-            label="Monthly Investment"
-            value={sipAmount}
-            onChange={setSipAmount}
-            prefix="₹"
-            min={1000}
-            max={100000}
-            step={1000}
-          />
-          <InputField
-            label="Expected Return"
-            value={sipRate}
-            onChange={setSipRate}
-            suffix="%"
-            min={1}
-            max={30}
-            step={0.5}
-          />
-          <InputField
-            label="Time Period"
-            value={sipDuration}
-            onChange={setSipDuration}
-            suffix="years"
-            min={1}
-            max={30}
-            step={1}
-          />
-        </div>
-
+      <div className={isMobile ? "" : "flex gap-6"}>
+        {/* SIP Calculator */}
         <div
-          className={
-            isMobile ? "grid grid-cols-2 gap-3 mt-4" : "flex gap-4 mt-6"
-          }
+          className={` rounded-lg w-full lg:w-1/2 ${
+            !isMobile || activeCalculator === "sip" ? "block" : "hidden"
+          }`}
         >
-          <SummaryCard
-            title="Total Invested"
-            value={`₹${(sipAmount * sipDuration * 12).toLocaleString(
-              "en-IN"
-            )}`}
-          />
-          <SummaryCard
-            title="Est. Returns"
-            value={`₹${(
-              sipFutureValue -
-              sipAmount * sipDuration * 12
-            ).toLocaleString("en-IN")}`}
-            variant="secondary"
-          />
-          {!isMobile && (
-            <SummaryCard
-              title="Future Value"
-              value={`₹${sipFutureValue.toLocaleString("en-IN")}`}
+          <h2 className="text-lg sm:text-xl font-bold mb-4 flex items-center text-white">
+            <span className="w-3 h-3 bg-white rounded-full mr-2"></span>
+            SIP Calculator
+          </h2>
+
+          <div className={isMobile ? "" : "grid grid-cols-3 gap-4"}>
+            <InputField
+              label="Monthly Investment"
+              value={sipAmount}
+              onChange={setSipAmount}
+              prefix="₹"
+              min={1000}
+              max={100000}
+              step={1000}
             />
-          )}
-        </div>
-      </div>
+            <InputField
+              label="Expected Return"
+              value={sipRate}
+              onChange={setSipRate}
+              suffix="%"
+              min={1}
+              max={30}
+              step={0.5}
+            />
+            <InputField
+              label="Time Period"
+              value={sipDuration}
+              onChange={setSipDuration}
+              suffix="years"
+              min={1}
+              max={30}
+              step={1}
+            />
+          </div>
 
-      {/* Loan Calculator */}
-      <div
-        className={` rounded-lg w-full lg:w-1/2 ${
-          isMobile
-            ? activeCalculator === "loan"
-              ? "block"
-              : "hidden"
-            : "block"
-        }`}
-      >
-        <h2 className="text-lg sm:text-xl font-bold mb-4 flex items-center text-white">
-          <span className="w-3 h-3 bg-white rounded-full mr-2"></span>
-          Loan Calculator
-        </h2>
-
-        <div className={isMobile ? "" : "grid grid-cols-3 gap-4"}>
-          <InputField
-            label="Loan Amount"
-            value={loanAmount}
-            onChange={setLoanAmount}
-            prefix="₹"
-            min={100000}
-            max={10000000}
-            step={10000}
-          />
-          <InputField
-            label="Interest Rate"
-            value={loanRate}
-            onChange={setLoanRate}
-            suffix="%"
-            min={5}
-            max={20}
-            step={0.1}
-          />
-          <InputField
-            label="Loan Tenure"
-            value={loanDuration}
-            onChange={setLoanDuration}
-            suffix="years"
-            min={1}
-            max={30}
-            step={1}
-          />
-        </div>
-
-        <div
-          className={
-            isMobile ? "grid grid-cols-2 gap-3 mt-4" : "flex gap-4 mt-6"
-          }
-        >
-          <SummaryCard
-            title="Monthly EMI"
-            value={`₹${loanEmi.toLocaleString("en-IN")}`}
-          />
-          <SummaryCard
-            title="Total Interest"
-            value={`₹${totalLoanInterest.toLocaleString("en-IN")}`}
-            variant="secondary"
-          />
-          {!isMobile && (
+          <div
+            className={
+              isMobile ? "grid grid-cols-2 gap-3 mt-4" : "flex gap-4 mt-6 justify-center"
+            }
+          >
             <SummaryCard
-              title="Total Payment"
-              value={`₹${(loanAmount + totalLoanInterest).toLocaleString(
-                "en-IN"
+              title="Total Invested"
+              value={`₹${(sipAmount * sipDuration * 12).toLocaleString(
+                "en-IN",
+                {
+                  maximumFractionDigits: 0,
+                }
               )}`}
             />
-          )}
-        </div>
-      </div>
-    </div>
 
-    {/* Combined Chart */}
-    {combinedChartData && (
-      <div className="mt-8">
-        <h2 className="text-lg sm:text-xl font-bold mb-4 flex items-center text-white">
-          <span className="w-3 h-3 bg-white rounded-full mr-2"></span>
-           Financial Overview
-        </h2>
+            <SummaryCard
+              title="Est. Returns"
+              value={`₹${(
+                sipFutureValue -
+                sipAmount * sipDuration * 12
+              ).toLocaleString("en-IN", {
+                maximumFractionDigits: 0,
+              })}`}
+              variant="secondary"
+            />
+            {!isMobile && (
+              <SummaryCard
+                title="Future Value"
+                value={`₹${sipFutureValue.toLocaleString("en-IN", {
+                  maximumFractionDigits: 0,
+                })}`}
+              />
+            )}
+          </div>
+        </div>
+
+        {/* Loan Calculator */}
         <div
-          className="bg-gradient-to-br from-gray-900 to-black p-4 rounded-xl border border-white shadow-lg"
-          style={{ height: isMobile ? "350px" : "450px" }}
+          className={` rounded-lg w-full lg:w-1/2 ${
+            isMobile
+              ? activeCalculator === "loan"
+                ? "block"
+                : "hidden"
+              : "block"
+          }`}
         >
-          <Line data={combinedChartData} options={chartOptions} />
+          <h2 className="text-lg sm:text-xl font-bold mb-4 flex items-center text-white">
+            <span className="w-3 h-3 bg-white rounded-full mr-2"></span>
+            Loan Calculator
+          </h2>
+
+          <div className={isMobile ? "" : "grid grid-cols-3 gap-4"}>
+            <InputField
+              label="Loan Amount"
+              value={loanAmount}
+              onChange={setLoanAmount}
+              prefix="₹"
+              min={100000}
+              max={10000000}
+              step={10000}
+            />
+            <InputField
+              label="Interest Rate"
+              value={loanRate}
+              onChange={setLoanRate}
+              suffix="%"
+              min={5}
+              max={20}
+              step={0.1}
+            />
+            <InputField
+              label="Loan Tenure"
+              value={loanDuration}
+              onChange={setLoanDuration}
+              suffix="years"
+              min={1}
+              max={30}
+              step={1}
+            />
+          </div>
+
+          <div
+            className={
+              isMobile ? "grid grid-cols-2 gap-3 mt-4" : "flex gap-4 mt-6 justify-center"
+            }
+          >
+            <SummaryCard
+              title="Monthly EMI"
+              value={`₹${loanEmi.toLocaleString("en-IN", {
+                maximumFractionDigits: 0,
+              })}`}
+            />
+            <SummaryCard
+              title="Total Interest"
+              value={`₹${totalLoanInterest.toLocaleString("en-IN", {
+                maximumFractionDigits: 0,
+              })}`}
+              variant="secondary"
+            />
+            {!isMobile && (
+              <SummaryCard
+                title="Total Payment"
+                value={`₹${(loanAmount + totalLoanInterest).toLocaleString(
+                  "en-IN",
+                  {
+                    maximumFractionDigits: 0,
+                  }
+                )}`}
+              />
+            )}
+          </div>
         </div>
       </div>
-    )}
-  </div>
-);
+
+      {/* Combined Chart */}
+      {combinedChartData && (
+        <div className="mt-8">
+          <h2 className="text-lg sm:text-xl font-bold mb-4 flex items-center text-white">
+            <span className="w-3 h-3 bg-white rounded-full mr-2"></span>
+            Financial Overview
+          </h2>
+          <div
+            className="bg-gradient-to-br from-gray-900 to-black p-4 rounded-xl border border-white shadow-lg"
+            style={{ height: isMobile ? "350px" : "450px" }}
+          >
+            <Line data={combinedChartData} options={chartOptions} />
+          </div>
+        </div>
+      )}
+    </div>
+  );
 
   const TablesView = () => (
     <div className=" p-4 rounded-lg shadow-lg border border-gray-800 w-full overflow-hidden">

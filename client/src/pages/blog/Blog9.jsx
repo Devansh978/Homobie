@@ -8,7 +8,7 @@ import {
   Users,
   CheckCircle,
   TrendingUp,
-  DollarSign,
+  IndianRupee,
   Globe,
 } from "lucide-react";
 
@@ -64,8 +64,8 @@ const Blog9 = () => {
     { title: "4. Home Extension Loan", icon: Layers, text: "Add rooms/floors; suitable for growing families; easy approval." },
     { title: "5. Plot or Land Purchase Loan", icon: FileText, text: "Buy residential land; 70-85% funding; good for future construction." },
     { title: "6. Composite Loan (Plot + Construction)", icon: Layers, text: "Merge plot + construction; single repayment schedule." },
-    { title: "7. Balance Transfer Loan", icon: DollarSign, text: "Switch to lower interest lender; reduce EMI/tenure; check fees." },
-    { title: "8. Top-up Loan on Existing Home Loan", icon: DollarSign, text: "Extra funds on current loan; ideal for renovation, education, emergencies." },
+    { title: "7. Balance Transfer Loan", icon: IndianRupee, text: "Switch to lower interest lender; reduce EMI/tenure; check fees." },
+    { title: "8. Top-up Loan on Existing Home Loan", icon: IndianRupee, text: "Extra funds on current loan; ideal for renovation, education, emergencies." },
     { title: "9. Loan Against Property (LAP)", icon: Home, text: "Secured by property; higher amounts; good for business or debt consolidation." },
     { title: "10. NRI Home Loans", icon: Globe, text: "For NRIs buying in India; special documentation; top lenders offer compliance." },
   ];

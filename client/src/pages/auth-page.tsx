@@ -38,7 +38,6 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Shield } from "lucide-react";
 import OAuth from "./OAuth";
 
-// Update to include BUILDER in allowed roles for login
 const registerSchema = z
   .object({
     user: z.object({
@@ -50,10 +49,14 @@ const registerSchema = z
         .min(10, "Phone number must be at least 10 digits"),
     }),
     roleData: z.object({
-      roleType: z.enum(["USER", "BROKER", "CA", "ADMIN", "BUILDER"], {
-        required_error: "You need to select a role.",
-      }),
+      roleType: z.enum(
+        ["USER", "BROKER", "CA", "ADMIN", "BUILDER", "TELECALLER"],
+        {
+          required_error: "You need to select a role.",
+        }
+      ),
       companyName: z.string().optional(),
+      shift: z.enum(["MORNING", "EVENING", "NIGHT"]).optional(),
       location: z.object({
         country: z.string().min(1, "Country is required"),
         state: z.string().min(1, "State is required"),
@@ -67,7 +70,6 @@ const registerSchema = z
     }),
   })
   .superRefine(({ roleData }, ctx) => {
-    // Remove BUILDER-specific validation since it's no longer an option in registration
     if (
       roleData.roleType === "BROKER" &&
       (!roleData.companyName || roleData.companyName.trim().length === 0)
@@ -76,6 +78,17 @@ const registerSchema = z
         code: "custom",
         message: "Company name is required for Brokers",
         path: ["roleData.companyName"],
+      });
+    }
+
+    if (
+      roleData.roleType === "TELECALLER" &&
+      (!roleData.shift || roleData.shift.trim().length === 0)
+    ) {
+      ctx.addIssue({
+        code: "custom",
+        message: "Shift is required for Telecallers",
+        path: ["roleData.shift"],
       });
     }
   });
@@ -111,12 +124,10 @@ export const resetSchema = z
 type RegisterFormData = z.infer<typeof registerSchema>;
 type LoginFormData = z.infer<typeof loginSchema>;
 
-// Helper function to extract user-friendly error messages
 const getErrorMessage = (error: unknown): string => {
   if (axios.isAxiosError(error)) {
     const responseData = error.response?.data;
 
-    // Handle different error response formats
     if (typeof responseData === "string") {
       return responseData;
     } else if (responseData?.message) {
@@ -154,20 +165,33 @@ export default function AuthPage() {
   const loginMutation = useMutation({
     mutationFn: (credentials: LoginCredentials) =>
       authService.login(credentials),
-    onSuccess: (response) => {
-      toast.success(response.message || "Login successful!");
-      const user = authService.getUser();
-      setUser(user);
-      const role = user?.role?.toUpperCase();
 
-      if (role && role !== "USER") {
-        window.location.href =
-          "https://homobie-partner-portal.vercel.app/builder";
-      } else {
-         window.location.href =
-          "https://homobie-partner-portal.vercel.app";
-      }
-    },
+   onSuccess: (response) => {
+  toast.success(response.message || "Login successful!");
+
+  if (response.user) {
+    localStorage.setItem("user", JSON.stringify(response.user));
+  }
+  if (response.token) {
+    localStorage.setItem("token", response.token);
+  }
+
+  const user = response.user || authService.getUser();
+  setUser(user);
+
+  const role = user?.role?.toUpperCase();
+
+  if (role === "TELECALLER") {
+    window.location.href =
+      "https://homobie-partner-portal.vercel.app/telecaller";
+  } else if (role && role !== "USER") {
+    window.location.href =
+      "https://homobie-partner-portal.vercel.app/builder";
+  } else {
+    window.location.href = "https://homobie-partner-portal.vercel.app";
+  }
+},
+
     onError: (error: Error) => {
       toast.error(getErrorMessage(error));
     },
@@ -179,7 +203,6 @@ export default function AuthPage() {
         console.log("=== REGISTRATION DEBUG ===");
         console.log("Raw form data:", data);
 
-        // Validate required fields
         if (
           !data.roleData.location.country ||
           !data.roleData.location.state ||
@@ -200,6 +223,7 @@ export default function AuthPage() {
             ...(data.roleData.companyName && {
               companyName: String(data.roleData.companyName).trim(),
             }),
+            ...(data.roleData.shift && { shift: data.roleData.shift }), // include shift
             location: {
               country: String(data.roleData.location.country || "").trim(),
               state: String(data.roleData.location.state || "").trim(),
@@ -213,7 +237,7 @@ export default function AuthPage() {
         };
 
         const response = await axios.post(
-           `${import.meta.env.VITE_BASE_URL}/register/user`,
+          `${import.meta.env.VITE_BASE_URL}/register/user`,
           cleanPayload,
           {
             headers: {
@@ -243,7 +267,7 @@ export default function AuthPage() {
   const forgotMutation = useMutation({
     mutationFn: async (data: { email: string }) => {
       const res = await axios.post(
-         `${import.meta.env.VITE_BASE_URL}/request-forgotPassword`,
+        `${import.meta.env.VITE_BASE_URL}/request-forgotPassword`,
         null,
         {
           params: {
@@ -271,7 +295,7 @@ export default function AuthPage() {
       source: string;
     }) => {
       const res = await axios.post(
-         `${import.meta.env.VITE_BASE_URL}/reset-password`,
+        `${import.meta.env.VITE_BASE_URL}/reset-password`,
         null,
         {
           params: {
@@ -298,12 +322,16 @@ export default function AuthPage() {
 
   const otpMutation = useMutation({
     mutationFn: async (data: { email: string; otp: string }) => {
-      const res = await axios.post( `${import.meta.env.VITE_BASE_URL}/verify-Otp`, null, {
-        params: {
-          email: data.email,
-          otp: data.otp,
-        },
-      });
+      const res = await axios.post(
+        `${import.meta.env.VITE_BASE_URL}/verify-Otp`,
+        null,
+        {
+          params: {
+            email: data.email,
+            otp: data.otp,
+          },
+        }
+      );
       return res.data;
     },
     onSuccess: () => {
@@ -333,6 +361,7 @@ export default function AuthPage() {
       roleData: {
         roleType: "USER",
         companyName: "",
+        shift: "",
         location: {
           country: "",
           state: "",
@@ -851,7 +880,7 @@ export default function AuthPage() {
                             )}
                           />
 
-                          {/* Role - BUILDER removed from registration options */}
+                          {/* Role */}
                           <FormField
                             control={registerForm.control}
                             name="roleData.roleType"
@@ -894,14 +923,58 @@ export default function AuthPage() {
                                     >
                                       Admin
                                     </SelectItem>
+                                    <SelectItem
+                                      value="TELECALLER"
+                                      className="hover:bg-gray-800"
+                                    >
+                                      Lead Manager
+                                    </SelectItem>
                                   </SelectContent>
                                 </Select>
                                 <FormMessage className="text-red-400" />
                               </FormItem>
                             )}
                           />
+                          {/* Shift  */}
+                          {selectedRole === "TELECALLER" && (
+                            <FormField
+                              control={registerForm.control}
+                              name="roleData.shift"
+                              render={({ field }) => (
+                                <FormItem>
+                                  <FormLabel className="text-white">
+                                    Shift
+                                  </FormLabel>
+                                  <Select
+                                    onValueChange={(value) =>
+                                      field.onChange(value)
+                                    }
+                                    value={field.value}
+                                  >
+                                    <FormControl>
+                                      <SelectTrigger className="text-white border border-white">
+                                        <SelectValue placeholder="Select Shift" />
+                                      </SelectTrigger>
+                                    </FormControl>
+                                    <SelectContent className="bg-black text-white border border-white max-h-60 overflow-y-auto">
+                                      <SelectItem value="MORNING">
+                                        Morning
+                                      </SelectItem>
+                                      <SelectItem value="EVENING">
+                                        Evening
+                                      </SelectItem>
+                                      <SelectItem value="NIGHT">
+                                        Night
+                                      </SelectItem>
+                                    </SelectContent>
+                                  </Select>
+                                  <FormMessage className="text-red-400" />
+                                </FormItem>
+                              )}
+                            />
+                          )}
 
-                          {/* Company (only for BROKER now) */}
+                          {/* Company */}
                           {selectedRole === "BROKER" && (
                             <FormField
                               control={registerForm.control}
@@ -949,7 +1022,6 @@ export default function AuthPage() {
                             )}
                           />
 
-                          {/* Country / State / City */}
                           <div className="grid grid-cols-3 gap-4">
                             {/* Country */}
                             <FormField

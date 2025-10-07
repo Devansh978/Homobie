@@ -5,7 +5,7 @@ import {
   Upload,
   MapPin,
   Home,
-  DollarSign,
+  IndianRupee,
   Bed,
   Bath,
   Square,
@@ -608,7 +608,7 @@ const FormProperties = ({ onAddProperty }) => {
                 {/* Pricing */}
                 <div className="space-y-4">
                   <h3 className="text-lg font-semibold text-white border-b border-white pb-2 flex items-center gap-2">
-                    <DollarSign size={20} />
+                    <IndianRupee size={20} />
                     Pricing
                   </h3>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

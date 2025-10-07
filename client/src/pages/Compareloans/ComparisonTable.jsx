@@ -60,19 +60,12 @@ const ComparisonTable = ({
     const lowestRate = [...sortedSelectedLoans].sort(
       (a, b) => a.interestRate - b.interestRate
     )[0];
-    const fastestApproval = [...sortedSelectedLoans].sort((a, b) => {
-      const aTime = a.approvalTime.includes("hour")
-        ? 1
-        : parseInt(a.approvalTime.split("-")[0]);
-      const bTime = b.approvalTime.includes("hour")
-        ? 1
-        : parseInt(b.approvalTime.split("-")[0]);
-      return aTime - bTime;
-    })[0];
+   const highestLoan = [...sortedSelectedLoans].sort(
+    (a, b) => (b.maxLoanAmount || 0) - (a.maxLoanAmount || 0)
+  )[0];
 
-    return { bestEMI, lowestRate, fastestApproval };
-  };
-
+  return { bestEMI, lowestRate, highestLoan };
+};
   const recommendations = getRecommendations();
 
   return (
@@ -128,12 +121,6 @@ const ComparisonTable = ({
                 style={{ backgroundColor: "black", color: "white" }}
               >
                 Total Cost (Low to High)
-              </option>
-              <option
-                value="processingFee"
-                style={{ backgroundColor: "black", color: "white" }}
-              >
-                Processing Fee (Low to High)
               </option>
             </select>
           </div>
@@ -283,33 +270,6 @@ const ComparisonTable = ({
                     );
                   })}
                 </tr>
-
-                {/* Processing Fee Row */}
-                <tr className="hover:bg-white/10 transition-colors duration-300 border-b border-white/20">
-                  <td className="p-4 font-semibold text-white sticky left-0 border-r border-white/20 bg-white/5">
-                    Processing Fee
-                  </td>
-                  {sortedSelectedLoans.map((loan, index) => {
-                    const processingFee = calculateProcessingFee(
-                      loan.principal,
-                      loan.processingFee
-                    );
-                    return (
-                      <td
-                        key={loan.id}
-                        className={`p-4 text-center border-r border-white/20 border-b border-white/20`}
-                      >
-                        <div className="text-orange-400">
-                          {formatCurrency(processingFee)}
-                        </div>
-                        <div className="text-xs text-gray-400">
-                          ({loan.processingFee}%)
-                        </div>
-                      </td>
-                    );
-                  })}
-                </tr>
-
                 {/* Total Cost Row */}
                 <tr className="hover:bg-white/10 transition-colors duration-300 border-b border-white/20">
                   <td className="p-4 font-semibold text-white sticky left-0 border-r border-white/20 bg-white/5">
@@ -367,20 +327,6 @@ const ComparisonTable = ({
                   ))}
                 </tr>
 
-                {/* Approval Time Row */}
-                <tr className="hover:bg-white/10 transition-colors duration-300">
-                  <td className="p-4 font-semibold text-white sticky left-0 border-r border-white/20 bg-white/5">
-                    Approval Time
-                  </td>
-                  {sortedSelectedLoans.map((loan, index) => (
-                    <td
-                      key={loan.id}
-                      className={`p-4 text-center border-r border-white/20`}
-                    >
-                      <div className="text-[#4f46e5]">{loan.approvalTime}</div>
-                    </td>
-                  ))}
-                </tr>
               </tbody>
             </table>
           </div>
@@ -407,11 +353,11 @@ const ComparisonTable = ({
             subtitle="per annum"
           />
           <RecommendationCard
-            title="Fastest Approval"
-            loan={recommendations.fastestApproval}
-            value={recommendations.fastestApproval.approvalTime}
-            subtitle="processing time"
-          />
+    title="Maximum Loan"
+    loan={recommendations.highestLoan}
+    value={formatCurrency(recommendations.highestLoan.maxLoanAmount)}
+    subtitle="available"
+  />
         </div>
       </div>
     </div>

@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import LoanCard from "./LoanCard";
 
 const LoanSelection = ({
@@ -10,6 +10,12 @@ const LoanSelection = ({
   onBack,
   getCategoryDisplayName,
 }) => {
+  const [loading, setLoading] = useState(true);
+   useEffect(() => {
+    if (availableLoans && availableLoans.length > 0) {
+      setLoading(false);
+    }
+  }, [availableLoans]);
   return (
     <div className="min-h-screen bg-black text-white p-6 relative overflow-hidden">
       {/* Background blur elements */}
@@ -20,7 +26,6 @@ const LoanSelection = ({
       </div>
 
       <div className="max-w-7xl mx-auto pt-20 relative z-10">
-        {/* Header */}
         <div className="flex flex-col md:flex-row items-start justify-between mb-8">
           <div>
             <button
@@ -37,7 +42,6 @@ const LoanSelection = ({
             </p>
           </div>
 
-          {/* Compare Button */}
           <div className="mt-4 md:mt-0">
             <button
               onClick={onCompare}
@@ -53,7 +57,11 @@ const LoanSelection = ({
           </div>
         </div>
 
-        {/* Loan Cards */}
+ {loading ? (
+          <div className="flex justify-center items-center h-64">
+            <div className="w-12 h-12 border-4 border-white-500 border-t-transparent rounded-full animate-spin"></div>
+          </div>
+        ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {availableLoans.map((loan) => (
             <LoanCard
@@ -62,9 +70,10 @@ const LoanSelection = ({
               isSelected={selectedLoans.find((l) => l.id === loan.id)}
               onSelect={onLoanSelect}
               className="backdrop-blur-md bg-white/5 border border-white/10 rounded-xl shadow-2xl transition-all duration-300 hover:bg-white/10"
-            />
-          ))}
-        </div>
+          />
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );

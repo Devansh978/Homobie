@@ -199,7 +199,7 @@ const blogData = [
     title: "How to Know If You’re Eligible for a Home Loan – Fast & Easy Checklist",
     date: "JULY 24TH 2025",
     tags: ["E-commerce", "Market Data", "Key numbers & facts", "Innovation trends"],
-    image: "/assets/blog-sample.jpg",
+    image: "/assets/blog1.png",
     readTime: "5 min read"
   },
   { 
@@ -208,7 +208,7 @@ const blogData = [
     title: "What is the Best CIBIL Score for a Loan Approval? A Complete Guide for 2025",
     date: "JULY 21ST 2025",
     tags: ["Corporate News", "Payment acceptance"],
-    image: "/assets/blog-sample.jpg",
+    image: "/assets/blog2.png",
     readTime: "5 min read"
   },
   { 
@@ -217,7 +217,7 @@ const blogData = [
     title: " Prepay Your Home Loan or Invest in SIP? A Dilemma Solved",
     date: "JULY 16TH 2025",
     tags: ["Innovation trends", "Corporate News"],
-    image: "/assets/blog-sample.jpg",
+    image: "/assets/blog3.png",
     readTime: "7 min read"
   },
   { 
@@ -226,7 +226,7 @@ const blogData = [
     title: "Home Loan Takeover Explained: RBI Guidelines Every Borrower Should Know",
     date: "JULY 12TH 2025",
     tags: ["Healthcare", "Digital Transformation", "Innovation trends"],
-    image: "/assets/blog-sample.jpg",
+    image: "/assets/blog4.png",
     readTime: "8 min read"
   },
   { 
@@ -235,7 +235,7 @@ const blogData = [
     title: "How Does Taking Out a Home Loan Affect Your Income Tax?",
     date: "JULY 8TH 2025",
     tags: ["Sustainability", "Technology", "Future trends"],
-    image: "/assets/blog-sample.jpg",
+    image: "/assets/blog5.png",
     readTime: "6 min read"
   },
   { 
@@ -244,7 +244,7 @@ const blogData = [
     title: "Home Loan Insurance: Essential for New Buyers in 2025",
     date: "JULY 8TH 2025",
     tags: ["Sustainability", "Technology", "Future trends"],
-    image: "/assets/blog-sample.jpg",
+    image: "/assets/blog6.png",
     readTime: "6 min read"
   },
   { 
@@ -253,7 +253,7 @@ const blogData = [
     title: "Which Bank or Finance Service Is Best for a Housing Loan?",
     date: "JULY 8TH 2025",
     tags: ["Sustainability", "Technology", "Future trends"],
-    image: "/assets/blog-sample.jpg",
+    image: "/assets/blog7.png",
     readTime: "6 min read"
   },
   { 
@@ -262,7 +262,7 @@ const blogData = [
     title: "What Documents Are Essential for Home Loan Approval?",
     date: "JULY 8TH 2025",
     tags: ["Sustainability", "Technology", "Future trends"],
-    image: "/assets/blog-sample.jpg",
+    image: "/assets/blog8.png",
     readTime: "6 min read"
   },
   { 
@@ -271,7 +271,7 @@ const blogData = [
     title: "Which Home Loan Type Should You Choose? A Simple Guide for Indian Buyers",
     date: "JULY 8TH 2025",
     tags: ["Sustainability", "Technology", "Future trends"],
-    image: "/assets/blog-sample.jpg",
+    image: "/assets/blog9.png",
     readTime: "6 min read"
   },
   { 
@@ -280,7 +280,7 @@ const blogData = [
     title: "How to Pay Off Your Home Loan in 10 Years: Smart Strategies for Indian Borrowers",
     date: "JULY 8TH 2025",
     tags: ["Sustainability", "Technology", "Future trends"],
-    image: "/assets/blog-sample.jpg",
+    image: "/assets/blog10.png",
     readTime: "6 min read"
   },
 ];
