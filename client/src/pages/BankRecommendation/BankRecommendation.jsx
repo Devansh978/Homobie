@@ -161,7 +161,7 @@ const BankRecommendation = () => {
       setBanks(data);
     } catch (error) {
       console.error("Error fetching banks:", error);
-      alert("Failed to fetch banks. Please check your connection.");
+      alert("Failed to fetch banks. Please Login to continue.");
     } finally {
       setLoading(false);
     }
