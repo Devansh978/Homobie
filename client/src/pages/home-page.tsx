@@ -377,8 +377,8 @@ export default function HomePage() {
                     transition={{ delay: 0.6 }}
                     className="text-xl md:text-2xl font-medium mb-3 leading-relaxed p-1 text-center tracking-tight text-white"
                   >
-                    <div>Home loans, mortgage loans, SIP plans?</div>
-                    <div>We speak fluent finance, so we can assist you</div>
+                    <div>From home loans to SIPs,</div>
+                    <div>Tailored finance for your brighter future.</div>
                   </motion.h1>
 
                   <motion.div
