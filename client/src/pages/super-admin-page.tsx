@@ -125,7 +125,7 @@ export default function SuperAdminPage() {
   if (!user || user.role !== 'superadmin') {
     return (
       <div>
-        <main className="flex items-center justify-center min-h-[80vh]">
+        <main className="flex items-center justify-center min-h-[80dvh]">
           <Alert className="max-w-md">
             <Shield className="h-4 w-4" />
             <AlertTitle>Access Denied</AlertTitle>

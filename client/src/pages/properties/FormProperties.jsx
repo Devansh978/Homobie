@@ -425,7 +425,7 @@ const FormProperties = ({ onAddProperty }) => {
 
       {isFormOpen && (
         <div className="relative inset-0 bg-black bg-opacity-50 flex items-start justify-center z-100 md:p-4 pt-1">
-          <div className="bg-black rounded-xl shadow-2xl w-full md:max-w-5xl max-h-[90vh] overflow-y-auto border border-white">
+          <div className="bg-black rounded-xl shadow-2xl w-full md:max-w-5xl max-h-[90dvh] overflow-y-auto border border-white">
             <div className="sticky top-0 bg-black border-b border-white px-6 py-4 flex items-center justify-between rounded-t-xl">
               <h2 className="text-2xl font-bold text-white flex items-center gap-2">
                 <Home size={24} />

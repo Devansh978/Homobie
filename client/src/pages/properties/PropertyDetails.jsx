@@ -837,7 +837,7 @@ const PropertyDetail = () => {
               <PropertyImage
                 src={property.imageUrls[selectedImageIndex]}
                 alt={`${property.title} ${selectedImageIndex + 1}`}
-                className="max-w-full max-h-[90vh] object-contain rounded-lg"
+                className="max-w-full max-h-[90dvh] object-contain rounded-lg"
                 loading="eager"
               />
               {property.imageUrls.length > 1 && (

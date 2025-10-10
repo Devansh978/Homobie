@@ -209,7 +209,7 @@
   position: fixed;
   top: 0;
   right: 0;
-  height: 100vh;
+  height: 100dvh;
   width: 85%;
   max-width: 360px;
   background: rgba(255, 255, 255, 0.8); /* Glass effect */

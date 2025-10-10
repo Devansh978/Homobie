@@ -225,7 +225,7 @@ const displayBank = bankDetails
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm">
-      <div className="relative w-full max-w-4xl max-h-[90vh] overflow-hidden bg-white/10 backdrop-blur-lg border border-white/20 rounded-2xl shadow-2xl">
+      <div className="relative w-full max-w-4xl max-h-[90dvh] overflow-hidden bg-white/10 backdrop-blur-lg border border-white/20 rounded-2xl shadow-2xl">
         {/* Header */}
         <div className="sticky top-0 z-10 bg-[#292727] backdrop-blur-md border-b border-white/20 p-6">
           <div className="flex items-start justify-between">
@@ -292,7 +292,7 @@ const displayBank = bankDetails
         </div>
 
         {/* Content */}
-        <div className="overflow-y-auto p-6 pb-36 max-h-[calc(90vh-200px)]">
+        <div className="overflow-y-auto p-6 pb-36 max-h-[calc(90dvh-200px)]">
           {!selectedLoanType ? (
             <div className="text-center py-12">
               <p className="text-gray-300">

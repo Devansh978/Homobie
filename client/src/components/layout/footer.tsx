@@ -307,7 +307,7 @@ export function Footer() {
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.9 }}
             transition={{ duration: 0.2 }}
-            className="bg-white rounded-lg p-6 w-full max-w-md max-h-[90vh] overflow-y-auto"
+            className="bg-white rounded-lg p-6 w-full max-w-md max-h-[90dvh] overflow-y-auto"
           >
             <div className="flex justify-between items-center mb-4">
               <h3 className="text-xl font-bold text-gray-800">

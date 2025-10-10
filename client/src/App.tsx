@@ -59,7 +59,7 @@ function Router() {
       <Route path="/about" component={AboutPage} />
       <Route path="/ourteam" component={OurTeamPage} />
       <Route path="/compare-loans" component={CompareLoans} />
-      <Route path="/bank-recommendation" component={BankRecommendation} />
+      {/* <Route path="/bank-recommendation" component={BankRecommendation} /> */}
 
       <Route path="/properties" component={Properties} />
       <Route path="/properties/:propertyId" component={PropertyDetails} />

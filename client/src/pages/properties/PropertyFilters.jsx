@@ -125,7 +125,7 @@ const PropertyFilters = ({
         left: buttonPosition.left,
         width: buttonPosition.width,
         maxWidth: '420px',
-        maxHeight: '80vh',
+        maxHeight: '80dvh',
         zIndex: 999999,
       }}
     >
