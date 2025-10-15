@@ -50,13 +50,13 @@ const registerSchema = z
     }),
     roleData: z.object({
       roleType: z.enum(
-        ["USER", "BROKER", "CA", "ADMIN", "BUILDER", "TELECALLER"],
+        ["USER", "BROKER", "CA", "ADMIN", "BUILDER", "TELECALLER", "SALES"],
         {
           required_error: "You need to select a role.",
         }
       ),
       companyName: z.string().optional(),
-      shift: z.enum(["MORNING", "EVENING", "NIGHT"]).optional(),
+      shift: z.string().optional(),
       location: z.object({
         country: z.string().min(1, "Country is required"),
         state: z.string().min(1, "State is required"),
@@ -92,7 +92,6 @@ const registerSchema = z
       });
     }
   });
-
 const loginSchema = z.object({
   username: z.string().min(1, "Username is required"),
   password: z.string().min(1, "Password is required"),
@@ -162,35 +161,38 @@ export default function AuthPage() {
   const [selectedState, setSelectedState] = useState("");
   const [selectedCity, setSelectedCity] = useState("");
 
-  const loginMutation = useMutation({
+ const loginMutation = useMutation({
     mutationFn: (credentials: LoginCredentials) =>
       authService.login(credentials),
 
-   onSuccess: (response) => {
-  toast.success(response.message || "Login successful!");
+    onSuccess: (response) => {
+      toast.success(response.message || "Login successful!");
 
-  if (response.user) {
-    localStorage.setItem("user", JSON.stringify(response.user));
-  }
-  if (response.token) {
-    localStorage.setItem("token", response.token);
-  }
+      if (response.user) {
+        localStorage.setItem("user", JSON.stringify(response.user));
+      }
+      if (response.token) {
+        localStorage.setItem("token", response.token);
+      }
 
-  const user = response.user || authService.getUser();
-  setUser(user);
+      const user = response.user || authService.getUser();
+      setUser(user);
 
-  const role = user?.role?.toUpperCase();
+      const role = user?.role?.toUpperCase();
 
-  if (role === "TELECALLER") {
-    window.location.href =
-      "https://homobie-partner-portal.vercel.app/telecaller";
-  } else if (role && role !== "USER") {
-    window.location.href =
-      "https://homobie-partner-portal.vercel.app/builder";
-  } else {
-    window.location.href = "https://homobie-partner-portal.vercel.app";
-  }
-},
+      if (role === "TELECALLER") {
+        window.location.href =
+          "https://homobie-partner-portal.vercel.app/telecaller";
+      } else if (role === "SALES") {
+        window.location.href =
+          "https://homobie-partner-portal.vercel.app/sales";
+      } else if (role && role !== "USER") {
+        window.location.href =
+          "https://homobie-partner-portal.vercel.app/builder";
+      } else {
+        window.location.href = "https://homobie-partner-portal.vercel.app";
+      }
+    },
 
     onError: (error: Error) => {
       toast.error(getErrorMessage(error));
@@ -928,6 +930,12 @@ export default function AuthPage() {
                                       className="hover:bg-gray-800"
                                     >
                                       Lead Manager
+                                    </SelectItem>
+                                    <SelectItem
+                                      value="SALES"
+                                      className="hover:bg-gray-800"
+                                    >
+                                      Sales
                                     </SelectItem>
                                   </SelectContent>
                                 </Select>

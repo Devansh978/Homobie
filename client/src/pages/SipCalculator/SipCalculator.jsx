@@ -113,7 +113,6 @@ const SipCalculator = () => {
 
     let emi;
 
-    // Handle 0% interest rate case
     if (loanRate === 0) {
       emi = loanAmount / months;
     } else {
@@ -147,7 +146,7 @@ const SipCalculator = () => {
   };
 
  const createCombinedChart = () => {
-    // Use the max duration for both calculations
+    //max for both 
     const maxDuration = Math.max(sipDuration, loanDuration);
     const chartLabels = [];
     const sipInvestedData = [];
@@ -327,7 +326,6 @@ const SipCalculator = () => {
     },
   };
 
-  // Subcomponents
   const MainNav = () => (
     <nav className="flex overflow-x-auto py-2 mb-4 scrollbar-hide sticky top-0  z-10">
       <button
@@ -362,7 +360,6 @@ const SipCalculator = () => {
       </button>
     </nav>
   );
-
   
   const CalculatorNav = () => (
     <div className="flex mb-4 rounded-lg overflow-hidden shadow-sm border border-gray-600">

@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import { ChevronDown, Menu, X, User, LogOut } from "lucide-react";
-import { useAuth } from "../../hooks/use-auth"; 
+import { useAuth } from "../../hooks/use-auth";
 
 // --- Data definitions ---
 const navData = [
@@ -38,35 +38,43 @@ const navData = [
       { label: "EMI Calculator", path: "/tools/emi-calculator" },
       { label: "SIP & Loan Calculator", path: "/tools/sip-loan-calculator" },
       { label: "Budget Planning Tool", path: "/tools/budget-planner" },
+      { label: "Compare Loans", path: "/compare-loans" },
     ],
   },
 ];
 
 const basePartnerUrl = "https://homobie-partner-portal.vercel.app";
-const partnerRoles = ["Builder", "Broker", "User", "Telecaller"];
+const partnerRoles = ["Builder", "Broker", "User", "Telecaller", "Sales"];
 
 const getPartnerLoginUrl = (role = null) => {
   try {
-    const userRole = role || localStorage.getItem('userRole') || localStorage.getItem('role') || localStorage.getItem('user_role');
-    
+    const userRole =
+      role ||
+      localStorage.getItem("userRole") ||
+      localStorage.getItem("role") ||
+      localStorage.getItem("user_role");
+
     if (!userRole) {
       return `${basePartnerUrl}/user`;
     }
-    
+
     const normalizedRole = userRole.toLowerCase();
-    
+
     switch (normalizedRole) {
-      case 'builder':
+      case "builder":
         return `${basePartnerUrl}/builder`;
-      case 'user':
+      case "user":
         return `${basePartnerUrl}/user`;
-      case 'broker':
-      case 'telecaller':
+      case "broker":
+      case "telecaller":
+        return `${basePartnerUrl}/telecaller`;
+      case "sales":
+        return `${basePartnerUrl}/sales`;
       default:
         return `${basePartnerUrl}/builder`;
     }
   } catch (error) {
-    console.error('Error accessing localStorage:', error);
+    console.error("Error accessing localStorage:", error);
     return `${basePartnerUrl}/user`;
   }
 };
@@ -208,7 +216,7 @@ export const Header = () => {
 
   const handleLogout = () => {
     setLoginDropdownOpen(false);
-    logoutMutation.mutate(); 
+    logoutMutation.mutate();
   };
 
   const handleDropdownHover = (index) => {
@@ -249,7 +257,7 @@ export const Header = () => {
 
   const handlePartnerLogin = (role) => {
     const dynamicUrl = getPartnerLoginUrl(role);
-    window.open(dynamicUrl, '_blank', 'noopener,noreferrer');
+    window.open(dynamicUrl, "_blank", "noopener,noreferrer");
   };
 
   const handleUserLogin = () => {
@@ -285,9 +293,10 @@ export const Header = () => {
     <>
       <nav
         className={`fixed top-0 left-0 right-0 z-40 transition-all duration-500 font-bold
-          ${scrolled
-            ? "bg-black/60 backdrop-blur-xl border-b border-white/10 shadow-lg"
-            : "bg-black/40 backdrop-blur-xl border-b border-white/5"
+          ${
+            scrolled
+              ? "bg-black/60 backdrop-blur-xl border-b border-white/10 shadow-lg"
+              : "bg-black/40 backdrop-blur-xl border-b border-white/5"
           } ${activeDropdown !== null ? "pb-6" : ""}`}
       >
         <div className="max-w-8xl mx-auto px-2 sm:px-4 lg:px-6 relative">
@@ -362,7 +371,7 @@ export const Header = () => {
                       >
                         Settings
                       </a>
-                      <button 
+                      <button
                         onClick={handleLogout}
                         disabled={logoutMutation.isPending}
                         className="w-full text-left px-4 py-3 text-red-400 hover:text-red-300 hover:bg-red-500/20 rounded-lg transition-all duration-200 flex items-center disabled:opacity-50"
@@ -572,16 +581,23 @@ export const Header = () => {
                 <div className="space-y-4">
                   <div className="flex items-center space-x-3 p-4 bg-white/10 rounded-xl backdrop-blur-sm">
                     <div className="w-10 h-10 rounded-full bg-blue-600 flex items-center justify-center text-white font-bold">
-                      {user.fullName.split(' ').map(n => n[0]).join('')}
+                      {user?.fullName
+                        ? user.fullName
+                            .split(" ")
+                            .map((n) => n[0])
+                            .join("")
+                        : "U"}
                     </div>
                     <div>
                       <div className="text-white font-medium">
-                        {user.fullName}
+                        {user?.fullName || "Unknown User"}
                       </div>
-                      <div className="text-white/70 text-[14px]">{user.role || 'User'}</div>
+                      <div className="text-white/70 text-[14px]">
+                        {user?.role || "User"}
+                      </div>
                     </div>
                   </div>
-                  
+
                   {/* Mobile Logout Button */}
                   <button
                     onClick={() => {
@@ -632,7 +648,7 @@ export const Header = () => {
                       }}
                       className="block w-full px-4 py-3 text-center text-white bg-white/10 hover:bg-white/20 rounded-lg transition-all duration-300 backdrop-blur-sm"
                     >
-                      User Login 
+                      User Login
                     </button>
                   ) : (
                     <div className="space-y-2">

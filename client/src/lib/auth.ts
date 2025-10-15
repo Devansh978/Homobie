@@ -19,7 +19,9 @@ export type UserRole =
   | "builder"
   | "broker"
   | "user"
-  | "telecaller";
+  | "telecaller"
+  | "sales"
+  ;
 
 export interface LoginCredentials {
   username: string;
