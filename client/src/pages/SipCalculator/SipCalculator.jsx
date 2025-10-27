@@ -412,7 +412,7 @@ const SipCalculator = () => {
       
       timeoutRef.current = setTimeout(() => {
         onChange(newValue);
-      }, 3000);
+      }, 2000);
     };
 
     return (
