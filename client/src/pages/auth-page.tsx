@@ -161,7 +161,7 @@ export default function AuthPage() {
   const [selectedState, setSelectedState] = useState("");
   const [selectedCity, setSelectedCity] = useState("");
 
- const loginMutation = useMutation({
+  const loginMutation = useMutation({
     mutationFn: (credentials: LoginCredentials) =>
       authService.login(credentials),
 
@@ -180,18 +180,17 @@ export default function AuthPage() {
 
       const role = user?.role?.toUpperCase();
 
-      if (role === "TELECALLER") {
-        window.location.href =
-          "https://homobie-partner-portal.vercel.app/telecaller";
-      } else if (role === "SALES") {
-        window.location.href =
-          "https://homobie-partner-portal.vercel.app/sales";
-      } else if (role && role !== "USER") {
-        window.location.href =
-          "https://homobie-partner-portal.vercel.app/builder";
-      } else {
-        window.location.href = "https://homobie-partner-portal.vercel.app";
+      if (role !== "USER") {
+        toast.error(
+          "Only client users are allowed to login. Please login with partner login"
+        );
+        localStorage.removeItem("user");
+        localStorage.removeItem("token");
+        setUser(null);
+        return;
       }
+
+      window.location.href = "https://homobie-partner-portal.vercel.app/user";
     },
 
     onError: (error: Error) => {
@@ -215,25 +214,20 @@ export default function AuthPage() {
 
         const cleanPayload = {
           user: {
-            firstName: String(data.user.firstName || "").trim(),
-            lastName: String(data.user.lastName || "").trim(),
-            email: String(data.user.email || "").trim(),
-            phoneNumber: String(data.user.phoneNumber || "").trim(),
+            firstName: data.user.firstName.trim(),
+            lastName: data.user.lastName.trim(),
+            email: data.user.email.trim(),
+            phoneNumber: data.user.phoneNumber.trim(),
           },
           roleData: {
-            roleType: data.roleData.roleType,
-            ...(data.roleData.companyName && {
-              companyName: String(data.roleData.companyName).trim(),
-            }),
-            ...(data.roleData.shift && { shift: data.roleData.shift }), // include shift
+            roleType: "USER",
+
             location: {
-              country: String(data.roleData.location.country || "").trim(),
-              state: String(data.roleData.location.state || "").trim(),
-              city: String(data.roleData.location.city || "").trim(),
-              pincode: String(data.roleData.location.pincode || "").trim(),
-              addressLine1: String(
-                data.roleData.location.addressLine1 || ""
-              ).trim(),
+              country: data.roleData.location.country.trim(),
+              state: data.roleData.location.state.trim(),
+              city: data.roleData.location.city.trim(),
+              pincode: data.roleData.location.pincode.trim(),
+              addressLine1: data.roleData.location.addressLine1.trim(),
             },
           },
         };
@@ -887,64 +881,11 @@ export default function AuthPage() {
                             control={registerForm.control}
                             name="roleData.roleType"
                             render={({ field }) => (
-                              <FormItem>
-                                <FormLabel className="text-white">
-                                  Role
-                                </FormLabel>
-                                <Select
-                                  onValueChange={field.onChange}
-                                  value={field.value}
-                                >
-                                  <FormControl>
-                                    <SelectTrigger className="text-white border border-white">
-                                      <SelectValue placeholder="Select your role" />
-                                    </SelectTrigger>
-                                  </FormControl>
-                                  <SelectContent className="bg-black text-white border border-white max-h-60 overflow-y-auto">
-                                    <SelectItem
-                                      value="USER"
-                                      className="hover:bg-gray-800"
-                                    >
-                                      Client
-                                    </SelectItem>
-                                    <SelectItem
-                                      value="BROKER"
-                                      className="hover:bg-gray-800"
-                                    >
-                                      Broker
-                                    </SelectItem>
-                                    <SelectItem
-                                      value="CA"
-                                      className="hover:bg-gray-800"
-                                    >
-                                      Chartered Accountant
-                                    </SelectItem>
-                                    <SelectItem
-                                      value="ADMIN"
-                                      className="hover:bg-gray-800"
-                                    >
-                                      Admin
-                                    </SelectItem>
-                                    <SelectItem
-                                      value="TELECALLER"
-                                      className="hover:bg-gray-800"
-                                    >
-                                      Lead Manager
-                                    </SelectItem>
-                                    <SelectItem
-                                      value="SALES"
-                                      className="hover:bg-gray-800"
-                                    >
-                                      Sales
-                                    </SelectItem>
-                                  </SelectContent>
-                                </Select>
-                                <FormMessage className="text-red-400" />
-                              </FormItem>
+                              <input type="hidden" value="USER" {...field} />
                             )}
                           />
                           {/* Shift  */}
-                          {selectedRole === "TELECALLER" && (
+                          {/* {selectedRole === "TELECALLER" && (
                             <FormField
                               control={registerForm.control}
                               name="roleData.shift"
@@ -980,10 +921,10 @@ export default function AuthPage() {
                                 </FormItem>
                               )}
                             />
-                          )}
+                          )} */}
 
                           {/* Company */}
-                          {selectedRole === "BROKER" && (
+                          {/* {selectedRole === "BROKER" && (
                             <FormField
                               control={registerForm.control}
                               name="roleData.companyName"
@@ -1003,7 +944,7 @@ export default function AuthPage() {
                                 </FormItem>
                               )}
                             />
-                          )}
+                          )} */}
 
                           {/* Address Details */}
                           <h3 className="text-sm font-medium pt-2 text-white">

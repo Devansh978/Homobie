@@ -395,45 +395,70 @@ const SipCalculator = () => {
     min,
     max,
     step,
-  }) => (
-    <div className="mb-6">
-      <label className="block text-sm font-bold text-white mb-2">{label}</label>
-      <div className="flex items-center bg-gray-800 rounded-lg border-2 border-gray-600 focus-within:border-white focus-within:ring-2 focus-within:ring-gray-600 transition-all duration-200">
-        {prefix && <span className="ml-3 text-white font-bold">{prefix}</span>}
-        <input
-          type="number"
-          value={value}
-          onChange={(e) => onChange(Number(e.target.value))}
-          min={min}
-          max={max}
-          step={step}
-          className="flex-1 py-3 px-3 bg-transparent outline-none font-bold text-white w-full"
-        />
-        {suffix && <span className="mr-3 text-white font-bold">{suffix}</span>}
-      </div>
-      <div className="mt-3">
-        <input
-          type="range"
-          min={min}
-          max={max}
-          step={step}
-          value={value}
-          onChange={(e) => onChange(Number(e.target.value))}
-          className="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:h-4 [&::-webkit-slider-thumb]:w-4 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-white"
-        />
-        <div className="flex justify-between text-xs font-medium text-gray-300 mt-1">
-          <span>
-            {min}
-            {suffix}
-          </span>
-          <span>
-            {max}
-            {suffix}
-          </span>
+  }) => {
+     const [localValue, setLocalValue] = useState(value);
+    const timeoutRef = useRef(null);
+
+    useEffect(() => {
+      setLocalValue(value);
+    }, [value]);
+
+    const handleChange = (newValue) => {
+      setLocalValue(newValue);
+      
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+      }
+      
+      timeoutRef.current = setTimeout(() => {
+        onChange(newValue);
+      }, 1000);
+    };
+
+    return (
+      <div className="mb-6">
+        <label className="block text-sm font-bold text-white mb-2">{label}</label>
+        <div className="flex items-center bg-gray-800 rounded-lg border-2 border-gray-600 focus-within:border-white focus-within:ring-2 focus-within:ring-gray-600 transition-all duration-200">
+          {prefix && <span className="ml-3 text-white font-bold">{prefix}</span>}
+          <input
+            type="number"
+            value={localValue}
+            onChange={(e) => handleChange(Number(e.target.value))}
+            min={min}
+            max={max}
+            step={step}
+            className="flex-1 py-3 px-3 bg-transparent outline-none font-bold text-white w-full"
+          />
+          {suffix && <span className="mr-3 text-white font-bold">{suffix}</span>}
+        </div>
+        <div className="mt-3">
+          <input
+            type="range"
+            min={min}
+            max={max}
+            step={step}
+            value={localValue}
+            onChange={(e) => {
+              const val = Number(e.target.value);
+              setLocalValue(val);
+              onChange(val);
+            }}
+            className="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:h-4 [&::-webkit-slider-thumb]:w-4 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-white"
+          />
+          <div className="flex justify-between text-xs font-medium text-gray-300 mt-1">
+            <span>
+              {min}
+              {suffix}
+            </span>
+            <span>
+              {max}
+              {suffix}
+            </span>
+          </div>
         </div>
       </div>
-    </div>
-  );
+    );
+  };
 
   const SummaryCard = ({ title, value, variant = "primary" }) => {
     const cardStyles =

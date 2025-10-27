@@ -10,7 +10,6 @@ import Blog8 from "./blog/Blog8";
 import Blog9 from "./blog/Blog9";
 import Blog10 from "./blog/Blog10";
 
-// --- STYLES (CSS-in-JS) ---
 const styles = {
   body: {
     backgroundColor: "#000",
@@ -45,9 +44,10 @@ const styles = {
   },
   cardsContainer: {
     display: "grid",
-    gridTemplateColumns: "repeat(auto-fit, minmax(350px, 1fr))",
+    gridTemplateColumns: "repeat(auto-fill, minmax(350px, 1fr))",
     gap: "30px",
     marginBottom: "50px",
+    justifyContent: "center",
   },
   card: {
     backgroundColor: "#1e1e1e",
@@ -191,117 +191,121 @@ const styles = {
   },
 };
 
-// Blog data with metadata
 const blogData = [
-  { 
-    id: 1, 
+  {
+    id: 1,
     component: Blog1,
-    title: "How to Know If You’re Eligible for a Home Loan – Fast & Easy Checklist",
-    date: "JULY 24TH 2025",
-    tags: ["E-commerce", "Market Data", "Key numbers & facts", "Innovation trends"],
+    title:
+      "How to Know If You’re Eligible for a Home Loan – Fast & Easy Checklist",
+    date: "AUGUST 24TH 2025",
+    tags: ["Sustainability", "Technology", "Future trends"],
     image: "/assets/blog1.png",
-    readTime: "5 min read"
+    readTime: "5 min read",
   },
-  { 
-    id: 2, 
+  {
+    id: 2,
     component: Blog2,
-    title: "What is the Best CIBIL Score for a Loan Approval? A Complete Guide for 2025",
+    title:
+      "What is the Best CIBIL Score for a Loan Approval? A Complete Guide for 2025",
     date: "JULY 21ST 2025",
-    tags: ["Corporate News", "Payment acceptance"],
+    tags: ["Sustainability", "Technology", "Future trends"],
     image: "/assets/blog2.png",
-    readTime: "5 min read"
+    readTime: "5 min read",
   },
-  { 
-    id: 3, 
+  {
+    id: 3,
     component: Blog3,
-    title: " Prepay Your Home Loan or Invest in SIP? A Dilemma Solved",
-    date: "JULY 16TH 2025",
-    tags: ["Innovation trends", "Corporate News"],
+    title: "Prepay Your Home Loan or Invest in SIP? A Dilemma Solved",
+    date: "JULY 18TH 2025",
+    tags: ["Sustainability", "Technology", "Future trends"],
     image: "/assets/blog3.png",
-    readTime: "7 min read"
+    readTime: "7 min read",
   },
-  { 
-    id: 4, 
+  {
+    id: 4,
     component: Blog4,
-    title: "Home Loan Takeover Explained: RBI Guidelines Every Borrower Should Know",
-    date: "JULY 12TH 2025",
-    tags: ["Healthcare", "Digital Transformation", "Innovation trends"],
+    title:
+      "Home Loan Takeover Explained: RBI Guidelines Every Borrower Should Know",
+    date: "JULY 15TH 2025",
+    tags: ["Sustainability", "Technology", "Future trends"],
     image: "/assets/blog4.png",
-    readTime: "8 min read"
+    readTime: "8 min read",
   },
-  { 
-    id: 5, 
+  {
+    id: 5,
     component: Blog5,
     title: "How Does Taking Out a Home Loan Affect Your Income Tax?",
-    date: "JULY 8TH 2025",
+    date: "JULY 12TH 2025",
     tags: ["Sustainability", "Technology", "Future trends"],
     image: "/assets/blog5.png",
-    readTime: "6 min read"
+    readTime: "6 min read",
   },
-  { 
-    id: 6, 
+  {
+    id: 6,
     component: Blog6,
     title: "Home Loan Insurance: Essential for New Buyers in 2025",
-    date: "JULY 8TH 2025",
+    date: "JULY 10TH 2025",
     tags: ["Sustainability", "Technology", "Future trends"],
     image: "/assets/blog6.png",
-    readTime: "6 min read"
+    readTime: "6 min read",
   },
-  { 
-    id: 7, 
+  {
+    id: 7,
     component: Blog7,
     title: "Which Bank or Finance Service Is Best for a Housing Loan?",
-    date: "JULY 8TH 2025",
+    date: "JULY 7TH 2025",
     tags: ["Sustainability", "Technology", "Future trends"],
     image: "/assets/blog7.png",
-    readTime: "6 min read"
+    readTime: "6 min read",
   },
-  { 
-    id: 8, 
+  {
+    id: 8,
     component: Blog8,
     title: "What Documents Are Essential for Home Loan Approval?",
-    date: "JULY 8TH 2025",
+    date: "JUNE 4TH 2025",
     tags: ["Sustainability", "Technology", "Future trends"],
     image: "/assets/blog8.png",
-    readTime: "6 min read"
+    readTime: "6 min read",
   },
-  { 
-    id: 9, 
+  {
+    id: 9,
     component: Blog9,
-    title: "Which Home Loan Type Should You Choose? A Simple Guide for Indian Buyers",
-    date: "JULY 8TH 2025",
+    title:
+      "Which Home Loan Type Should You Choose? A Simple Guide for Indian Buyers",
+    date: "MAY 2ND 2024",
     tags: ["Sustainability", "Technology", "Future trends"],
     image: "/assets/blog9.png",
-    readTime: "6 min read"
+    readTime: "6 min read",
   },
-  { 
-    id: 10, 
+  {
+    id: 10,
     component: Blog10,
-    title: "How to Pay Off Your Home Loan in 10 Years: Smart Strategies for Indian Borrowers",
-    date: "JULY 8TH 2025",
+    title:
+      "How to Pay Off Your Home Loan in 10 Years: Smart Strategies for Indian Borrowers",
+    date: "APRIL 30TH 2024",
     tags: ["Sustainability", "Technology", "Future trends"],
     image: "/assets/blog10.png",
-    readTime: "6 min read"
+    readTime: "6 min read",
   },
 ];
 
-// --- CARD COMPONENT ---
 const BlogCard = ({ blog, onClick, isHovered, onHover, onLeave }) => (
   <div
     style={{
       ...styles.card,
-      ...(isHovered ? styles.cardHover : {})
+      ...(isHovered ? styles.cardHover : {}),
     }}
     onClick={() => onClick(blog.id)}
     onMouseEnter={onHover}
     onMouseLeave={onLeave}
   >
-    <img 
-      src={blog.image} 
+    <img
+      src={blog.image}
       alt={blog.title}
       style={styles.cardImage}
       onError={(e) => {
-        e.target.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAwIiBoZWlnaHQ9IjIwMCIgdmlld0JveD0iMCAwIDQwMCAyMDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSI0MDAiIGhlaWdodD0iMjAwIiBmaWxsPSIjMzMzMzMzIi8+Cjx0ZXh0IHg9IjIwMCIgeT0iMTAwIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmaWxsPSIjNjY2NjY2IiBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iMTQiPkJsb2cgSW1hZ2U8L3RleHQ+Cjwvc3ZnPg==';
+        e.target.src =
+          "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAwIiBoZWlnaHQ9IjIwMCIgdmlld0JveD0iMCAwIDQwMCAyMDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSI0MDAiIGhlaWdodD0iMjAwIiBmaWxsPSIjMzMzMzMzIi8+Cjx0ZXh0IHg9IjIwMCIgeT0iMTAwIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmaWxsPSIjNjY2NjY2IiBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iMTQiPkJsb2cgSW1hZ2U8L3RleHQ+Cjwvc3ZnPg==";
       }}
     />
     <div style={styles.cardContent}>
@@ -309,56 +313,70 @@ const BlogCard = ({ blog, onClick, isHovered, onHover, onLeave }) => (
       <h3 style={styles.cardTitle}>{blog.title}</h3>
       <div style={styles.cardMeta}>
         {blog.tags.slice(0, 3).map((tag, index) => (
-          <span key={index} style={styles.cardTag}>{tag}</span>
+          <span key={index} style={styles.cardTag}>
+            {tag}
+          </span>
         ))}
       </div>
       <div style={styles.cardReadMore}>
-        READ MORE 
-        <span style={{
-          ...styles.arrow,
-          transform: isHovered ? 'translateX(4px)' : 'translateX(0)'
-        }}>→</span>
+        READ MORE
+        <span
+          style={{
+            ...styles.arrow,
+            transform: isHovered ? "translateX(4px)" : "translateX(0)",
+          }}
+        >
+          →
+        </span>
       </div>
     </div>
   </div>
 );
 
-// --- MAIN APP COMPONENT ---
 function App() {
   const [selectedBlog, setSelectedBlog] = useState(null);
   const [hoveredCard, setHoveredCard] = useState(null);
+
+  const [selectedYear, setSelectedYear] = useState("Years");
+  const [selectedMonth, setSelectedMonth] = useState("Months");
+  const [selectedTopic, setSelectedTopic] = useState("Topics");
 
   React.useEffect(() => {
     Object.assign(document.body.style, styles.body);
   }, []);
 
-  const handleCardClick = (blogId) => {
-    setSelectedBlog(blogId);
+  const handleCardClick = (blogId) => setSelectedBlog(blogId);
+  const handleBackToCards = () => setSelectedBlog(null);
+
+  const getMonthFromDate = (dateStr) => {
+    const month = dateStr.split(" ")[0];
+    return month.charAt(0).toUpperCase() + month.slice(1).toLowerCase();
   };
 
-  const handleBackToCards = () => {
-    setSelectedBlog(null);
-  };
+  const filteredBlogs = blogData.filter((blog) => {
+    const blogYear = blog.date.split(" ").pop();
+    const blogMonth = getMonthFromDate(blog.date);
+
+    const matchYear = selectedYear === "Years" || blogYear === selectedYear;
+    const matchMonth =
+      selectedMonth === "Months" || blogMonth === selectedMonth;
+    const matchTopic =
+      selectedTopic === "Topics" ||
+      blog.tags.some((tag) =>
+        tag.toLowerCase().includes(selectedTopic.toLowerCase())
+      );
+
+    return matchYear && matchMonth && matchTopic;
+  });
 
   if (selectedBlog) {
-    const blog = blogData.find(b => b.id === selectedBlog);
+    const blog = blogData.find((b) => b.id === selectedBlog);
     const BlogComponent = blog.component;
-    
+
     return (
       <div style={styles.mainContainer}>
-        <button 
-          style={styles.backButton}
-          onClick={handleBackToCards}
-          onMouseOver={(e) => {
-            e.target.style.backgroundColor = "#444";
-            e.target.style.borderColor = "#666";
-          }}
-          onMouseOut={(e) => {
-            e.target.style.backgroundColor = "#333";
-            e.target.style.borderColor = "#555";
-          }}
-        >
-          ← Back 
+        <button style={styles.backButton} onClick={handleBackToCards}>
+          ← Back
         </button>
         <div style={styles.blogPost}>
           <BlogComponent styles={styles} />
@@ -369,39 +387,61 @@ function App() {
 
   return (
     <div style={styles.mainContainer}>
-      {/* Filter Dropdowns */}
       <div style={styles.filtersContainer}>
-        <select style={styles.filterDropdown}>
+        <select
+          style={styles.filterDropdown}
+          value={selectedYear}
+          onChange={(e) => setSelectedYear(e.target.value)}
+        >
           <option>Years</option>
           <option>2025</option>
           <option>2024</option>
         </select>
-        <select style={styles.filterDropdown}>
+
+        <select
+          style={styles.filterDropdown}
+          value={selectedMonth}
+          onChange={(e) => setSelectedMonth(e.target.value)}
+        >
           <option>Months</option>
+          <option>August</option>
           <option>July</option>
           <option>June</option>
           <option>May</option>
+          <option>April</option>
         </select>
-        <select style={styles.filterDropdown}>
+
+        <select
+          style={styles.filterDropdown}
+          value={selectedTopic}
+          onChange={(e) => setSelectedTopic(e.target.value)}
+        >
           <option>Topics</option>
           <option>E-commerce</option>
           <option>Technology</option>
           <option>Innovation</option>
+          <option>Corporate News</option>
+          <option>Sustainability</option>
         </select>
       </div>
 
-      {/* Blog Cards */}
       <div style={styles.cardsContainer}>
-        {blogData.map((blog) => (
-          <BlogCard
-            key={blog.id}
-            blog={blog}
-            onClick={handleCardClick}
-            isHovered={hoveredCard === blog.id}
-            onHover={() => setHoveredCard(blog.id)}
-            onLeave={() => setHoveredCard(null)}
-          />
-        ))}
+        {filteredBlogs.length > 0 ? (
+          filteredBlogs.map((blog) => (
+            <BlogCard
+              key={blog.id}
+              blog={blog}
+              onClick={handleCardClick}
+              isHovered={hoveredCard === blog.id}
+              onHover={() => setHoveredCard(blog.id)}
+              onLeave={() => setHoveredCard(null)}
+            />
+          ))
+        ) : (
+          <p style={{ textAlign: "center", color: "#aaa", gridColumn: "1/-1" }}>
+            No blogs found for selected filters.
+          </p>
+        )}
       </div>
     </div>
   );

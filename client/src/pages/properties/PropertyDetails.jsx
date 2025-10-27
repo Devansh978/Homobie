@@ -350,7 +350,7 @@ const PropertyDetail = () => {
   const [error, setError] = useState(null);
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
   const [showImageModal, setShowImageModal] = useState(false);
-  const [isFavorite, setIsFavorite] = useState(false);
+  // const [isFavorite, setIsFavorite] = useState(false);
 
   const goBack = () => {
     window.history.back();
@@ -443,9 +443,9 @@ const PropertyDetail = () => {
     );
   };
 
-  const toggleFavorite = () => {
-    setIsFavorite(!isFavorite);
-  };
+  // const toggleFavorite = () => {
+  //   setIsFavorite(!isFavorite);
+  // };
 
   const shareProperty = async () => {
     const shareData = {
@@ -520,7 +520,7 @@ const PropertyDetail = () => {
   return (
     <div className="bg-black min-h-screen text-white pt-[80px]">
       {/* Header */}
-      <div className="border-b border-white/10 bg-transparent/20 backdrop-blur-xl sticky top-0 z-40">
+      <div className="border-b border-white/10 bg-transparent/20 backdrop-blur-xl sticky top-0 z-10">
         <div className="max-w-7xl mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
             <button
@@ -531,7 +531,7 @@ const PropertyDetail = () => {
               Back to Properties
             </button>
             <div className="flex items-center gap-3">
-              <button
+              {/* <button
                 onClick={toggleFavorite}
                 aria-label={
                   isFavorite ? "Remove from favorites" : "Add to favorites"
@@ -545,7 +545,7 @@ const PropertyDetail = () => {
                 <Heart
                   className={`w-5 h-5 ${isFavorite ? "fill-current" : ""}`}
                 />
-              </button>
+              </button> */}
               <button
                 onClick={shareProperty}
                 aria-label="Share property"
