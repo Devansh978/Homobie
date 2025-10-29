@@ -271,9 +271,7 @@ const SipCalculator = () => {
     });
   };
 
-  // --- Handler to synchronize staged state to live state and run calculations (Requirement 3) ---
   const onCalculate = () => {
-    // 1. Copy staged state values into the live state variables
     setSipAmountLive(sipAmountStaged);
     setSipRateLive(sipRateStaged);
     setSipDurationLive(sipDurationStaged);
@@ -282,9 +280,6 @@ const SipCalculator = () => {
     setLoanRateLive(loanRateStaged);
     setLoanDurationLive(loanDurationStaged);
 
-    // 2. & 3. Call calculation and chart functions using staged states (or wait for live state to update, passing the values directly is safer for sync)
-    // We pass the STAGED values directly to ensure the calculations run immediately with the latest input,
-    // even before React finishes batching the live state updates.
     calculateSip(sipAmountStaged, sipRateStaged, sipDurationStaged);
     calculateLoan(loanAmountStaged, loanRateStaged, loanDurationStaged);
     createCombinedChart(
@@ -296,17 +291,23 @@ const SipCalculator = () => {
       loanDurationStaged
     );
   };
-
-  // --- Initial Calculation on Mount (Requirement 7) ---
   useEffect(() => {
-    // Run calculation once on mount for initial rendering
+    calculateSip(sipAmountStaged, sipRateStaged, sipDurationStaged);
+    calculateLoan(loanAmountStaged, loanRateStaged, loanDurationStaged);
+    createCombinedChart(
+      sipAmountStaged,
+      sipRateStaged,
+      sipDurationStaged,
+      loanAmountStaged,
+      loanRateStaged,
+      loanDurationStaged
+    );
+  }, []); 
+
+  useEffect(() => {
     onCalculate();
-    // The dependency array is empty, so this runs only on mount.
-  }, []); // [] is crucial here!
+  }, []); 
 
-  // --- Removed: Old auto-recalculation effect
-
-  // --- InputField Component (Updated - Requirement 4) ---
   const InputField = ({
     label,
     value, // This is the STAGED value
@@ -719,7 +720,7 @@ const SipCalculator = () => {
             {/* Calculate Button (Requirement 5) */}
             <button
               onClick={onCalculate}
-              className="bg-blue-500 hover:bg-green-600 text-white font-extrabold p-3 rounded-lg transition duration-200 ease-in-out shadow-lg transform hover:scale-[1.02] active:scale-[0.98] mt-2 mb-4 w-full"
+              className="bg-blue-500 hover:bg-green-600 text-white font-extrabold p-3 rounded-lg transition duration-200 ease-in-out shadow-lg transform hover:scale-[1.02] active:scale-[0.98] mt-2 mb-4 ml-[390px] w-[30%]"
             >
               Calculate Results
             </button>
