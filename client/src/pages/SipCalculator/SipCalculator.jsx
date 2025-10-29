@@ -63,13 +63,23 @@ const SipCalculator = () => {
   const [activeSection, setActiveSection] = useState("calculator");
   const [activeCalculator, setActiveCalculator] = useState("sip");
 
-  const [sipAmount, setSipAmount] = useState(5000);
-  const [sipRate, setSipRate] = useState(12);
-  const [sipDuration, setSipDuration] = useState(5);
+  // --- Staged State (Inputs read/write these immediately) ---
+  const [sipAmountStaged, setSipAmountStaged] = useState(5000);
+  const [sipRateStaged, setSipRateStaged] = useState(12);
+  const [sipDurationStaged, setSipDurationStaged] = useState(5);
 
-  const [loanAmount, setLoanAmount] = useState(500000);
-  const [loanRate, setLoanRate] = useState(8.5);
-  const [loanDuration, setLoanDuration] = useState(5);
+  const [loanAmountStaged, setLoanAmountStaged] = useState(500000);
+  const [loanRateStaged, setLoanRateStaged] = useState(8.5);
+  const [loanDurationStaged, setLoanDurationStaged] = useState(5);
+
+  // --- Live State (Calculations use these, updated only on "Calculate") ---
+  const [sipAmount, setSipAmountLive] = useState(5000);
+  const [sipRate, setSipRateLive] = useState(12);
+  const [sipDuration, setSipDurationLive] = useState(5);
+
+  const [loanAmount, setLoanAmountLive] = useState(500000);
+  const [loanRate, setLoanRateLive] = useState(8.5);
+  const [loanDuration, setLoanDurationLive] = useState(5);
 
   const [sipResults, setSipResults] = useState([]);
   const [loanResults, setLoanResults] = useState([]);
@@ -78,13 +88,8 @@ const SipCalculator = () => {
   const [loanEmi, setLoanEmi] = useState(0);
   const [totalLoanInterest, setTotalLoanInterest] = useState(0);
 
-  useEffect(() => {
-    calculateSip();
-    calculateLoan();
-    createCombinedChart();
-  }, [sipAmount, sipRate, sipDuration, loanAmount, loanRate, loanDuration]);
-
-  const calculateSip = () => {
+  // --- Calculation Functions using LIVE state parameters ---
+  const calculateSip = (sipAmount, sipRate, sipDuration) => {
     const monthlyRate = sipRate / 12 / 100;
     const months = sipDuration * 12;
     const results = [];
@@ -107,7 +112,7 @@ const SipCalculator = () => {
     setSipFutureValue(futureValue);
   };
 
-  const calculateLoan = () => {
+  const calculateLoan = (loanAmount, loanRate, loanDuration) => {
     const monthlyRate = loanRate / 12 / 100;
     const months = loanDuration * 12;
 
@@ -123,11 +128,13 @@ const SipCalculator = () => {
 
     let balance = loanAmount;
     const results = [];
+    let totalInterest = 0;
 
     for (let i = 1; i <= months; i++) {
       const interest = balance * monthlyRate;
       const principal = emi - interest;
       balance -= principal;
+      totalInterest += interest;
 
       if (i % 12 === 0 || i === months) {
         results.push({
@@ -142,11 +149,18 @@ const SipCalculator = () => {
 
     setLoanResults(results);
     setLoanEmi(emi);
-    setTotalLoanInterest(emi * months - loanAmount);
+    setTotalLoanInterest(totalInterest);
   };
 
- const createCombinedChart = () => {
-    //max for both 
+  const createCombinedChart = (
+    sipAmount,
+    sipRate,
+    sipDuration,
+    loanAmount,
+    loanRate,
+    loanDuration
+  ) => {
+    //max for both
     const maxDuration = Math.max(sipDuration, loanDuration);
     const chartLabels = [];
     const sipInvestedData = [];
@@ -161,37 +175,48 @@ const SipCalculator = () => {
     // Calculate Loan data
     const loanMonthlyRate = loanRate / 12 / 100;
     const loanMonths = maxDuration * 12;
+    // Handle loanRate=0 case for emi calculation
     const emi =
-      (loanAmount *
-        loanMonthlyRate *
-        Math.pow(1 + loanMonthlyRate, loanMonths)) /
-      (Math.pow(1 + loanMonthlyRate, loanMonths) - 1);
+      loanRate === 0
+        ? loanAmount / loanMonths
+        : (loanAmount *
+            loanMonthlyRate *
+            Math.pow(1 + loanMonthlyRate, loanMonths)) /
+          (Math.pow(1 + loanMonthlyRate, loanMonths) - 1);
     let loanBalance = loanAmount;
+    let totalLoanInterestPaid = 0;
 
     for (let year = 1; year <= maxDuration; year++) {
       const month = year * 12;
 
       chartLabels.push(isMobile ? `${year}Y` : `Year ${year}`);
 
+      // Calculate SIP Value up to this year
       for (let i = (year - 1) * 12 + 1; i <= month; i++) {
-        sipValue = (sipValue + sipAmount) * (1 + sipMonthlyRate);
+        // Only invest if within the sip duration
+        const contribution = i <= sipDuration * 12 ? sipAmount : 0;
+        sipValue = (sipValue + contribution) * (1 + sipMonthlyRate);
       }
-      
-      // sipDuration
+
       sipInvestedData.push(sipAmount * Math.min(month, sipDuration * 12));
       sipFutureValueData.push(sipValue);
 
-      if (loanBalance > 0) {
+      // Calculate Loan Balance/Interest up to this year
+      if (loanBalance > 0 && month <= loanMonths) {
         for (let i = (year - 1) * 12 + 1; i <= month; i++) {
           const interest = loanBalance * loanMonthlyRate;
           const principal = emi - interest;
           loanBalance -= principal;
+          totalLoanInterestPaid += interest;
         }
         loanBalanceData.push(loanBalance > 0 ? loanBalance : 0);
-        loanInterestData.push(
-          emi * month - (loanAmount - (loanBalance > 0 ? loanBalance : 0))
-        );
+        loanInterestData.push(totalLoanInterestPaid);
+      } else if (month > loanMonths) {
+        // After loan is paid off
+        loanBalanceData.push(0);
+        loanInterestData.push(totalLoanInterestPaid);
       } else {
+        // Loan not paid off yet, but balance is 0 or less due to rounding/final payment logic
         loanBalanceData.push(0);
         loanInterestData.push(emi * loanMonths - loanAmount);
       }
@@ -246,6 +271,121 @@ const SipCalculator = () => {
     });
   };
 
+  // --- Handler to synchronize staged state to live state and run calculations (Requirement 3) ---
+  const onCalculate = () => {
+    // 1. Copy staged state values into the live state variables
+    setSipAmountLive(sipAmountStaged);
+    setSipRateLive(sipRateStaged);
+    setSipDurationLive(sipDurationStaged);
+
+    setLoanAmountLive(loanAmountStaged);
+    setLoanRateLive(loanRateStaged);
+    setLoanDurationLive(loanDurationStaged);
+
+    // 2. & 3. Call calculation and chart functions using staged states (or wait for live state to update, passing the values directly is safer for sync)
+    // We pass the STAGED values directly to ensure the calculations run immediately with the latest input,
+    // even before React finishes batching the live state updates.
+    calculateSip(sipAmountStaged, sipRateStaged, sipDurationStaged);
+    calculateLoan(loanAmountStaged, loanRateStaged, loanDurationStaged);
+    createCombinedChart(
+      sipAmountStaged,
+      sipRateStaged,
+      sipDurationStaged,
+      loanAmountStaged,
+      loanRateStaged,
+      loanDurationStaged
+    );
+  };
+
+  // --- Initial Calculation on Mount (Requirement 7) ---
+  useEffect(() => {
+    // Run calculation once on mount for initial rendering
+    onCalculate();
+    // The dependency array is empty, so this runs only on mount.
+  }, []); // [] is crucial here!
+
+  // --- Removed: Old auto-recalculation effect
+
+  // --- InputField Component (Updated - Requirement 4) ---
+  const InputField = ({
+    label,
+    value, // This is the STAGED value
+    onStagedChange, // This is the STAGED setter (e.g., setSipAmountStaged)
+    prefix,
+    suffix,
+    min,
+    max,
+    step,
+  }) => {
+    const [localValue, setLocalValue] = useState(value);
+
+    // Sync local state when staged state (value) changes from outside (e.g., on initial load or "Calculate" button run)
+    useEffect(() => {
+      setLocalValue(value);
+    }, [value]);
+
+    // Handle change for the number input field (only updates local state)
+    const handleInputChange = (newValue) => {
+      setLocalValue(newValue);
+    };
+
+    // This handles blur/slider changes to immediately update the staged state
+    const handleStagedChange = (newValue) => {
+      // Use onStagedChange immediately (no debounce)
+      onStagedChange(newValue);
+    };
+
+    // Handle range slider change (updates local state AND staged state immediately)
+    const handleRangeChange = (e) => {
+      const val = Number(e.target.value);
+      setLocalValue(val);
+      handleStagedChange(val); // Slider updates staged state immediately (Requirement 4)
+    };
+
+    return (
+      <div className="mb-6">
+        <label className="block text-sm font-bold text-white mb-2">{label}</label>
+        <div className="flex items-center bg-gray-800 rounded-lg border-2 border-gray-600 focus-within:border-white focus-within:ring-2 focus-within:ring-gray-600 transition-all duration-200">
+          {prefix && <span className="ml-3 text-white font-bold">{prefix}</span>}
+          <input
+            type="number"
+            value={localValue}
+            onChange={(e) => handleInputChange(Number(e.target.value))}
+            onBlur={(e) => handleStagedChange(Number(e.target.value))} // Text input blur updates staged state
+            min={min}
+            max={max}
+            step={step}
+            className="flex-1 py-3 px-3 bg-transparent outline-none font-bold text-white w-full"
+          />
+          {suffix && <span className="mr-3 text-white font-bold">{suffix}</span>}
+        </div>
+        <div className="mt-3">
+          <input
+            type="range"
+            min={min}
+            max={max}
+            step={step}
+            value={localValue}
+            onChange={handleRangeChange} // Range slider updates staged state immediately
+            className="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:h-4 [&::-webkit-slider-thumb]:w-4 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-white"
+          />
+          <div className="flex justify-between text-xs font-medium text-gray-300 mt-1">
+            <span>
+              {min}
+              {suffix}
+            </span>
+            <span>
+              {max}
+              {suffix}
+            </span>
+          </div>
+        </div>
+      </div>
+    );
+  };
+  // --- END InputField Component ---
+
+  // ... (SummaryCard, MainNav, CalculatorNav components are unchanged)
   const chartOptions = {
     responsive: true,
     maintainAspectRatio: false,
@@ -327,7 +467,7 @@ const SipCalculator = () => {
   };
 
   const MainNav = () => (
-    <nav className="flex overflow-x-auto py-2 mb-4 scrollbar-hide sticky top-0  z-10">
+    <nav className="flex overflow-x-auto py-2 mb-4 scrollbar-hide sticky top-0  z-10">
       <button
         onClick={() => setActiveSection("calculator")}
         className={`px-4 py-2 mx-1 rounded-full whitespace-nowrap font-medium text-sm sm:text-base ${
@@ -360,7 +500,7 @@ const SipCalculator = () => {
       </button>
     </nav>
   );
-  
+
   const CalculatorNav = () => (
     <div className="flex mb-4 rounded-lg overflow-hidden shadow-sm border border-gray-600">
       <button
@@ -385,80 +525,6 @@ const SipCalculator = () => {
       </button>
     </div>
   );
-
-  const InputField = ({
-    label,
-    value,
-    onChange,
-    prefix,
-    suffix,
-    min,
-    max,
-    step,
-  }) => {
-     const [localValue, setLocalValue] = useState(value);
-    const timeoutRef = useRef(null);
-
-    useEffect(() => {
-      setLocalValue(value);
-    }, [value]);
-
-    const handleChange = (newValue) => {
-      setLocalValue(newValue);
-      
-      if (timeoutRef.current) {
-        clearTimeout(timeoutRef.current);
-      }
-      
-      timeoutRef.current = setTimeout(() => {
-        onChange(newValue);
-      }, 2000);
-    };
-
-    return (
-      <div className="mb-6">
-        <label className="block text-sm font-bold text-white mb-2">{label}</label>
-        <div className="flex items-center bg-gray-800 rounded-lg border-2 border-gray-600 focus-within:border-white focus-within:ring-2 focus-within:ring-gray-600 transition-all duration-200">
-          {prefix && <span className="ml-3 text-white font-bold">{prefix}</span>}
-          <input
-            type="number"
-            value={localValue}
-            onChange={(e) => handleChange(Number(e.target.value))}
-            min={min}
-            max={max}
-            step={step}
-            className="flex-1 py-3 px-3 bg-transparent outline-none font-bold text-white w-full"
-          />
-          {suffix && <span className="mr-3 text-white font-bold">{suffix}</span>}
-        </div>
-        <div className="mt-3">
-          <input
-            type="range"
-            min={min}
-            max={max}
-            step={step}
-            value={localValue}
-            onChange={(e) => {
-              const val = Number(e.target.value);
-              setLocalValue(val);
-              onChange(val);
-            }}
-            className="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:h-4 [&::-webkit-slider-thumb]:w-4 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-white"
-          />
-          <div className="flex justify-between text-xs font-medium text-gray-300 mt-1">
-            <span>
-              {min}
-              {suffix}
-            </span>
-            <span>
-              {max}
-              {suffix}
-            </span>
-          </div>
-        </div>
-      </div>
-    );
-  };
 
   const SummaryCard = ({ title, value, variant = "primary" }) => {
     const cardStyles =
@@ -495,8 +561,8 @@ const SipCalculator = () => {
           <div className={isMobile ? "" : "grid grid-cols-3 gap-4"}>
             <InputField
               label="Monthly Investment"
-              value={sipAmount}
-              onChange={setSipAmount}
+              value={sipAmountStaged}
+              onStagedChange={setSipAmountStaged}
               prefix="₹"
               min={1000}
               max={100000}
@@ -504,8 +570,8 @@ const SipCalculator = () => {
             />
             <InputField
               label="Expected Return"
-              value={sipRate}
-              onChange={setSipRate}
+              value={sipRateStaged}
+              onStagedChange={setSipRateStaged}
               suffix="%"
               min={1}
               max={30}
@@ -513,8 +579,8 @@ const SipCalculator = () => {
             />
             <InputField
               label="Time Period"
-              value={sipDuration}
-              onChange={setSipDuration}
+              value={sipDurationStaged}
+              onStagedChange={setSipDurationStaged}
               suffix="years"
               min={1}
               max={30}
@@ -539,6 +605,7 @@ const SipCalculator = () => {
 
             <SummaryCard
               title="Est. Returns"
+              // Use live state for calculation summary
               value={`₹${(
                 sipFutureValue -
                 sipAmount * sipDuration * 12
@@ -576,8 +643,8 @@ const SipCalculator = () => {
           <div className={isMobile ? "" : "grid grid-cols-3 gap-4"}>
             <InputField
               label="Loan Amount"
-              value={loanAmount}
-              onChange={setLoanAmount}
+              value={loanAmountStaged}
+              onStagedChange={setLoanAmountStaged}
               prefix="₹"
               min={100000}
               max={10000000}
@@ -585,8 +652,8 @@ const SipCalculator = () => {
             />
             <InputField
               label="Interest Rate"
-              value={loanRate}
-              onChange={setLoanRate}
+              value={loanRateStaged}
+              onStagedChange={setLoanRateStaged}
               suffix="%"
               min={5}
               max={20}
@@ -594,14 +661,26 @@ const SipCalculator = () => {
             />
             <InputField
               label="Loan Tenure"
-              value={loanDuration}
-              onChange={setLoanDuration}
+              value={loanDurationStaged}
+              onStagedChange={setLoanDurationStaged}
               suffix="years"
               min={1}
               max={30}
               step={1}
             />
           </div>
+
+          {/* Calculate button for mobile/loan-only view */}
+          {isMobile && activeCalculator === "loan" && (
+            <div className="mt-6">
+              <button
+                onClick={onCalculate}
+                className="bg-green-500 hover:bg-green-600 text-white font-extrabold py-3 px-6 rounded-lg transition duration-200 ease-in-out shadow-lg transform hover:scale-[1.02] active:scale-[0.98] mt-2 mb-4 w-full"
+              >
+                Calculate Results
+              </button>
+            </div>
+          )}
 
           <div
             className={
@@ -636,6 +715,15 @@ const SipCalculator = () => {
         </div>
       </div>
 
+          <div className="mt-6">
+            {/* Calculate Button (Requirement 5) */}
+            <button
+              onClick={onCalculate}
+              className="bg-blue-500 hover:bg-green-600 text-white font-extrabold p-3 rounded-lg transition duration-200 ease-in-out shadow-lg transform hover:scale-[1.02] active:scale-[0.98] mt-2 mb-4 w-full"
+            >
+              Calculate Results
+            </button>
+          </div>
       {/* Combined Chart */}
       {combinedChartData && (
         <div className="mt-8">
