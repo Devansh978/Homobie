@@ -13,7 +13,7 @@ import AdminPage from "@/pages/admin-page";
 import SuperAdminPage from "@/pages/super-admin-page";
 import AuditLogsPage from "@/pages/audit-logs-page";
 import LoanApplicationPage from "@/pages/loan-application-page";
-import LAPEnhanced from "@/pages/LAPEnhanced";
+import LAPEnhanced from "@/pages/LAPEnhanced/LAPEnhanced";
 import ConsultationPage from "@/pages/consultation-page";
 import SipPage from "@/pages/sip-page";
 import BlogPage from "@/pages/blog-page";

@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import Feedback from "./Feedback/Feedback";
 import SipCalculator from "./SipCalculator/SipCalculator";
 import { useAuth } from "../hooks/use-auth";
+import {Banner} from './Banner.jsx'
 const MemoizedSipCalculator = memo(SipCalculator);
 import {
   ArrowRight,
@@ -227,6 +228,7 @@ export default function HomePage() {
 
   return (
     <div className="relative min-h-screen overflow-hidden">
+      {/* <Banner/> */}
       <div className="fixed inset-0 z-0">
         <div className="absolute inset-0 bg-black" />
 

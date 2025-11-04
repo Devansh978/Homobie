@@ -17,18 +17,12 @@ import {
   Shield,
   Eye,
 } from "lucide-react";
+import { useRoute } from "wouter";
 
 // API Configuration
 const BASE_URL = `${import.meta.env.VITE_BASE_URL}`;
 
-// Function to get propertyId from localStorage
-const getPropertyIdFromLocalStorage = () => {
-  const propertyId = localStorage.getItem("currentPropertyId");
-  if (propertyId) {
-    return propertyId.replace(/^"|"$/g, "");
-  }
-  return null;
-};
+
 
 // Debug function to analyze image data
 const debugImageData = (imageData, index = 0) => {
@@ -345,6 +339,9 @@ const PropertyImage = ({ src, alt, className, onClick, loading = "lazy" }) => {
 };
 
 const PropertyDetail = () => {
+  const [match, params] = useRoute("/properties/:propertyId"); 
+  const propertyIdFromUrl = params?.propertyId;
+
   const [property, setProperty] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -371,10 +368,10 @@ const PropertyDetail = () => {
 
   useEffect(() => {
     const fetchPropertyDetail = async () => {
-      const propertyId = getPropertyIdFromLocalStorage();
+      const propertyId = propertyIdFromUrl;
 
       if (!propertyId) {
-        setError("Property ID not found. Please select a property to view.");
+        setError("Property ID not found in URL. Please select a property to view.");
         setIsLoading(false);
         return;
       }
@@ -582,7 +579,7 @@ const PropertyDetail = () => {
                   </div>
                 </div>
               </div>
-              <div className="hidden lg:grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-2 gap-4">
                 {property.imageUrls.slice(1, 5).map((imageUrl, index) => (
                   <div key={index} className="relative group">
                     <PropertyImage
