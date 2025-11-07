@@ -53,8 +53,8 @@ function Router() {
         }}
       </Route>
 
-      <Route path="/loan-application" component={LoanApplicationPage} />
-      {/* <Route path="/loan-application" component={LAPEnhanced} /> */}
+      {/* <Route path="/loan-application" component={LoanApplicationPage} /> */}
+      <Route path="/loan-application" component={LAPEnhanced} />
       <Route path="/consultation" component={ConsultationPage} />
       <Route path="/sip" component={SipPage} />
       <Route path="/blog" component={BlogPage} />
