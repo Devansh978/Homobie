@@ -10,6 +10,8 @@ import {
   Bath,
   Square,
   Loader2,
+  Star,
+  Image as ImageIcon,
 } from "lucide-react";
 import { Country, State, City } from "country-state-city";
 
@@ -20,6 +22,8 @@ const FormProperties = ({ onAddProperty }) => {
   const [selectedCity, setSelectedCity] = useState("");
   const [loadingLocation, setLoadingLocation] = useState(false);
   const [locationError, setLocationError] = useState("");
+  const [mainImageIndex, setMainImageIndex] = useState(0);
+  const [imagePreviewUrls, setImagePreviewUrls] = useState([]);
 
   const [formData, setFormData] = useState({
     files: [],
@@ -90,7 +94,6 @@ const FormProperties = ({ onAddProperty }) => {
             const cityName =
               data.address.city || data.address.town || data.address.village;
 
-            // Find matching country
             const countries = Country.getAllCountries();
             const matchedCountry = countries.find(
               (c) => c.isoCode === countryCode
@@ -99,7 +102,6 @@ const FormProperties = ({ onAddProperty }) => {
             if (matchedCountry) {
               setSelectedCountry(matchedCountry.isoCode);
 
-              // Find matching state
               const states = State.getStatesOfCountry(matchedCountry.isoCode);
               const matchedState = states.find(
                 (s) => s.name.toLowerCase() === stateName?.toLowerCase()
@@ -109,7 +111,6 @@ const FormProperties = ({ onAddProperty }) => {
                 setSelectedState(matchedState.isoCode);
               }
 
-              // Update form data
               setFormData((prev) => ({
                 ...prev,
                 property: {
@@ -174,17 +175,46 @@ const FormProperties = ({ onAddProperty }) => {
 
   const handleFileChange = (e) => {
     const selectedFiles = Array.from(e.target.files);
+    
+    // Create preview URLs for the new files
+    const newPreviewUrls = selectedFiles.map(file => URL.createObjectURL(file));
+    
     setFormData((prev) => ({
       ...prev,
       files: [...prev.files, ...selectedFiles],
     }));
+    
+    setImagePreviewUrls(prev => [...prev, ...newPreviewUrls]);
+    
+    // If this is the first image, set it as main
+    if (formData.files.length === 0 && selectedFiles.length > 0) {
+      setMainImageIndex(0);
+    }
   };
 
   const removeFile = (index) => {
+    // Revoke the object URL to free memory
+    if (imagePreviewUrls[index]) {
+      URL.revokeObjectURL(imagePreviewUrls[index]);
+    }
+    
     setFormData((prev) => ({
       ...prev,
       files: prev.files.filter((_, i) => i !== index),
     }));
+    
+    setImagePreviewUrls(prev => prev.filter((_, i) => i !== index));
+    
+    // Adjust main image index if needed
+    if (mainImageIndex === index) {
+      setMainImageIndex(0);
+    } else if (mainImageIndex > index) {
+      setMainImageIndex(prev => prev - 1);
+    }
+  };
+
+  const setAsMainImage = (index) => {
+    setMainImageIndex(index);
   };
 
   const handleInputChange = (e) => {
@@ -353,6 +383,11 @@ const FormProperties = ({ onAddProperty }) => {
   };
 
   const resetForm = () => {
+    // Clean up preview URLs
+    imagePreviewUrls.forEach(url => URL.revokeObjectURL(url));
+    setImagePreviewUrls([]);
+    setMainImageIndex(0);
+    
     setFormData({
       files: [],
       property: {
@@ -400,7 +435,20 @@ const FormProperties = ({ onAddProperty }) => {
     setIsSubmitting(true);
 
     try {
-      const success = await onAddProperty(formData);
+      // Reorder files with main image first
+      const orderedFiles = [...formData.files];
+      if (mainImageIndex !== 0 && orderedFiles.length > 0) {
+        const mainFile = orderedFiles[mainImageIndex];
+        orderedFiles.splice(mainImageIndex, 1);
+        orderedFiles.unshift(mainFile);
+      }
+
+      const orderedFormData = {
+        ...formData,
+        files: orderedFiles
+      };
+
+      const success = await onAddProperty(orderedFormData);
       if (success) {
         setIsFormOpen(false);
         resetForm();
@@ -426,7 +474,7 @@ const FormProperties = ({ onAddProperty }) => {
       {isFormOpen && (
         <div className="relative inset-0 bg-black bg-opacity-50 flex items-start justify-center z-100 md:p-4 pt-1">
           <div className="bg-black rounded-xl shadow-2xl w-full md:max-w-5xl max-h-[90dvh] overflow-y-auto border border-white">
-            <div className="sticky top-0 bg-black border-b border-white px-6 py-4 flex items-center justify-between rounded-t-xl">
+            <div className="sticky top-0 bg-black border-b border-white px-6 py-4 flex items-center justify-between rounded-t-xl z-10">
               <h2 className="text-2xl font-bold text-white flex items-center gap-2">
                 <Home size={24} />
                 Add New Property
@@ -702,7 +750,6 @@ const FormProperties = ({ onAddProperty }) => {
                       />
                     </div>
 
-                    {/* Country Dropdown */}
                     <div>
                       <label className="block text-sm font-medium text-white mb-1">
                         Country*
@@ -722,7 +769,6 @@ const FormProperties = ({ onAddProperty }) => {
                       </select>
                     </div>
 
-                    {/* State Dropdown */}
                     <div>
                       <label className="block text-sm font-medium text-white mb-1">
                         State*
@@ -746,7 +792,6 @@ const FormProperties = ({ onAddProperty }) => {
                       </select>
                     </div>
 
-                    {/* City Dropdown */}
                     <div>
                       <label className="block text-sm font-medium text-white mb-1">
                         City*
@@ -800,7 +845,7 @@ const FormProperties = ({ onAddProperty }) => {
                   </div>
                 </div>
 
-                {/* Photos and Videos */}
+                {/* Photos and Videos with Main Image Selection */}
                 <div className="space-y-4">
                   <h3 className="text-lg font-semibold text-white border-b border-white pb-2 flex items-center gap-2">
                     <Upload size={20} />
@@ -816,41 +861,94 @@ const FormProperties = ({ onAddProperty }) => {
                       accept="image/*,video/*"
                       onChange={handleFileChange}
                       className="w-full px-3 py-2 border border-white bg-black text-white rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-white file:bg-blue-600 file:hover:bg-blue-700 file:cursor-pointer"
-                      required
                     />
                     <p className="text-sm text-gray-400 mt-1">
-                      Select multiple images and videos (JPG, PNG, MP4, etc.)
+                      Select multiple images and videos. Click the star to set main image.
                     </p>
                   </div>
 
                   {formData.files.length > 0 && (
-                    <div className="space-y-2">
-                      <h4 className="text-sm font-medium text-white">
-                        Selected Files:
-                      </h4>
-                      <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+                    <div className="space-y-3">
+                      <div className="flex items-center justify-between">
+                        <h4 className="text-sm font-medium text-white">
+                          Selected Files ({formData.files.length})
+                        </h4>
+                        <div className="flex items-center gap-2 text-xs text-gray-400">
+                          <Star className="w-3 h-3 fill-yellow-400 text-yellow-400" />
+                          <span>Main Image</span>
+                        </div>
+                      </div>
+                      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
                         {formData.files.map((file, index) => (
                           <div
                             key={index}
-                            className="relative bg-gray-800 rounded-lg p-2"
+                            className={`relative bg-gray-800 rounded-lg overflow-hidden group ${
+                              mainImageIndex === index ? 'ring-2 ring-yellow-400' : ''
+                            }`}
                           >
-                            <div className="flex items-center justify-between">
-                              <span
+                            {/* Image Preview */}
+                            <div className="aspect-video w-full bg-gray-900 flex items-center justify-center">
+                              {file.type.startsWith('image/') ? (
+                                <img
+                                  src={imagePreviewUrls[index]}
+                                  alt={`Preview ${index + 1}`}
+                                  className="w-full h-full object-cover"
+                                />
+                              ) : (
+                                <div className="flex flex-col items-center justify-center text-white/60">
+                                  <ImageIcon size={32} />
+                                  <span className="text-xs mt-1">Video</span>
+                                </div>
+                              )}
+                            </div>
+
+                            {/* Main Image Badge */}
+                            {mainImageIndex === index && (
+                              <div className="absolute top-2 left-2 bg-yellow-400 text-black px-2 py-1 rounded text-xs font-semibold flex items-center gap-1">
+                                <Star className="w-3 h-3 fill-black" />
+                                Main
+                              </div>
+                            )}
+
+                            {/* Overlay Controls */}
+                            <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
+                              <button
+                                type="button"
+                                onClick={() => setAsMainImage(index)}
+                                className={`p-2 rounded-lg transition-colors ${
+                                  mainImageIndex === index
+                                    ? 'bg-yellow-400 text-black'
+                                    : 'bg-white/20 text-white hover:bg-white/30'
+                                }`}
+                                title="Set as main image"
+                              >
+                                <Star 
+                                  className={`w-4 h-4 ${
+                                    mainImageIndex === index ? 'fill-black' : ''
+                                  }`} 
+                                />
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => removeFile(index)}
+                                className="p-2 bg-red-500/80 hover:bg-red-600 text-white rounded-lg transition-colors"
+                                title="Remove image"
+                              >
+                                <X size={16} />
+                              </button>
+                            </div>
+
+                            {/* File Info */}
+                            <div className="p-2 bg-gray-900">
+                              <p
                                 className="text-xs text-white truncate"
                                 title={file.name}
                               >
                                 {file.name}
-                              </span>
-                              <button
-                                type="button"
-                                onClick={() => removeFile(index)}
-                                className="text-red-400 hover:text-red-600 ml-1"
-                              >
-                                <X size={14} />
-                              </button>
-                            </div>
-                            <div className="text-xs text-gray-400 mt-1">
-                              {(file.size / 1024 / 1024).toFixed(1)} MB
+                              </p>
+                              <p className="text-xs text-gray-400 mt-1">
+                                {(file.size / 1024 / 1024).toFixed(1)} MB
+                              </p>
                             </div>
                           </div>
                         ))}
@@ -951,7 +1049,10 @@ const FormProperties = ({ onAddProperty }) => {
                 <div className="flex justify-end gap-4 pt-6 border-t border-white">
                   <button
                     type="button"
-                    onClick={() => setIsFormOpen(false)}
+                    onClick={() => {
+                      setIsFormOpen(false);
+                      resetForm();
+                    }}
                     className="px-6 py-2 border border-white text-white bg-black rounded-lg hover:bg-gray-800 transition-colors"
                     disabled={isSubmitting}
                   >
@@ -959,7 +1060,7 @@ const FormProperties = ({ onAddProperty }) => {
                   </button>
                   <button
                     type="submit"
-                    className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2"
+                    className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2 disabled:bg-blue-400 disabled:cursor-not-allowed"
                     disabled={isSubmitting}
                   >
                     {isSubmitting ? (
@@ -987,7 +1088,10 @@ const FormProperties = ({ onAddProperty }) => {
                         Processing...
                       </>
                     ) : (
-                      "Add Property"
+                      <>
+                        <Plus size={18} />
+                        Add Property
+                      </>
                     )}
                   </button>
                 </div>
