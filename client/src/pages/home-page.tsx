@@ -183,12 +183,27 @@ export default function HomePage() {
       </div>
 
       {/* Glass Content Container */}
+      {/* Glass Content Container */}
       <div className="relative z-10">
         {/* Hero Section */}
         <section
           id="hero-section"
-          className="relative min-h-screen flex items-center justify-center overflow-hidden mt-12 bg-black opacity-90"
+          className="relative min-h-screen flex items-center justify-center overflow-hidden mt-12"
         >
+          {/* Background Video */}
+          <div className="absolute inset-0 z-0">
+            <video
+              autoPlay
+              loop
+              muted
+              playsInline
+              className="absolute inset-0 w-full h-full object-cover opacity-20"
+            >
+              <source src="/assets/homebgvideo.mp4" type="video/mp4" />
+            </video>
+            {/* Dark overlay for better text readability */}
+            <div className="absolute inset-0 bg-black/10" />
+          </div>
           <div className="container mx-auto px-4 z-10 relative flex items-center justify-between">
             {/* Left*/}
             <div className="w-[75%] flex-1 flex flex-col items-center text-center md:items-start md:text-center">
