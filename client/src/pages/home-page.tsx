@@ -6,6 +6,7 @@ import Feedback from "./Feedback/Feedback";
 import SipCalculator from "./SipCalculator/SipCalculator";
 import { useAuth } from "../hooks/use-auth";
 import { Banner } from "./Banner.jsx";
+import { Industries } from "./Industries.jsx";
 import { PartnerBanks } from "./PartnerBanks.jsx";
 const MemoizedSipCalculator = memo(SipCalculator);
 import {
@@ -661,6 +662,7 @@ export default function HomePage() {
           </div>
         </section>
         <PartnerBanks />
+        <Industries />
         <Feedback />
         {/* SIP Feature Section */}
         <section className="py-24 px-4">

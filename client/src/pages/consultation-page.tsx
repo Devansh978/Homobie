@@ -14,21 +14,21 @@ import {
   FormField,
   FormItem,
   FormLabel,
-  FormMessage
+  FormMessage,
 } from "@/components/ui/form";
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
-  CardTitle
+  CardTitle,
 } from "@/components/ui/card";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
-  SelectValue
+  SelectValue,
 } from "@/components/ui/select";
 import {
   Popover,
@@ -51,18 +51,19 @@ import {
   Mail,
   AlertCircle,
   Calendar,
-  Shield
+  Shield,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Calendar as CalendarComponent } from "@/components/ui/calendar";
-import { format } from "date-fns";
 import { toast } from "sonner";
-
+import { format, isValid } from "date-fns";
 // Simplified consultation form schema
 const consultationFormSchema = z.object({
-  topic: z.string({
-    required_error: "Please select a consultation topic",
-  }).min(1, "Topic cannot be blank"),
+  topic: z
+    .string({
+      required_error: "Please select a consultation topic",
+    })
+    .min(1, "Topic cannot be blank"),
   userId: z.string().min(1, "User ID is required"),
   timeSlotId: z.string().min(1, "Please select a time slot"),
   description: z.string().optional(),
@@ -105,7 +106,7 @@ type EmailVerifyValues = z.infer<typeof emailVerifySchema>;
 type CancelFormValues = z.infer<typeof cancelFormSchema>;
 type RescheduleFormValues = z.infer<typeof rescheduleFormSchema>;
 
-const BASE_URL =  `${import.meta.env.VITE_BASE_URL}`;
+const BASE_URL = `${import.meta.env.VITE_BASE_URL}`;
 
 export default function ConsultationPage() {
   const [location, navigate] = useLocation();
@@ -117,61 +118,70 @@ export default function ConsultationPage() {
   const [selectedDate, setSelectedDate] = useState<Date | undefined>();
   const [showCancelForm, setShowCancelForm] = useState(false);
   const [showRescheduleForm, setShowRescheduleForm] = useState(false);
-  const [selectedConsultationForAction, setSelectedConsultationForAction] = useState<any>(null);
+  const [selectedConsultationForAction, setSelectedConsultationForAction] =
+    useState<any>(null);
   const [apiErrors, setApiErrors] = useState<Record<string, string>>({});
-  const [authData, setAuthData] = useState<{ token: string | null; userId: string | null;  timeSlotId: string | null; user: any | null; }>({
+  const [authData, setAuthData] = useState<{
+    token: string | null;
+    userId: string | null;
+    timeSlotId: string | null;
+    user: any | null;
+  }>({
     token: null,
     userId: null,
     user: null,
     timeSlotId: null,
   });
 
-  const savedTimeslotId = localStorage.getItem('timeslotId');
-const savedTimeslot = JSON.parse(localStorage.getItem('selectedTimeslot') || 'null');
-// Save timeSlotId in localStorage
-const saveTimeSlotId = (timeSlotId: string) => {
-  localStorage.setItem("timeSlotId", timeSlotId);
-};
+  const savedTimeslotId = localStorage.getItem("timeslotId");
+  const savedTimeslot = JSON.parse(
+    localStorage.getItem("selectedTimeslot") || "null"
+  );
+  // Save timeSlotId in localStorage
+  const saveTimeSlotId = (timeSlotId: string) => {
+    localStorage.setItem("timeSlotId", timeSlotId);
+  };
 
-// Get timeSlotId from localStorage
-const getTimeSlotId = () => {
-  return localStorage.getItem("timeSlotId");
-};
+  // Get timeSlotId from localStorage
+  const getTimeSlotId = () => {
+    return localStorage.getItem("timeSlotId");
+  };
 
-// Remove timeSlotId from localStorage
-const removeTimeSlotId = () => {
-  localStorage.removeItem("timeSlotId");
-};
+  // Remove timeSlotId from localStorage
+  const removeTimeSlotId = () => {
+    localStorage.removeItem("timeSlotId");
+  };
   // Enhanced auth data retrieval with better error handling
   const getAuthDataFromStorage = () => {
     try {
-      const authToken = localStorage.getItem('auth_token');
-      const userIdFromStorage = localStorage.getItem('userId');
-      const userDataStr = localStorage.getItem('user');
+      const authToken = localStorage.getItem("auth_token");
+      const userIdFromStorage = localStorage.getItem("userId");
+      const userDataStr = localStorage.getItem("user");
 
       let userData = null;
       if (userDataStr) {
         try {
           userData = JSON.parse(userDataStr);
         } catch (parseError) {
-          console.error('Error parsing user data from localStorage:', parseError);
+          console.error(
+            "Error parsing user data from localStorage:",
+            parseError
+          );
         }
       }
-
-
 
       return {
         token: authToken,
         userId: userIdFromStorage || userData?.id,
-        user: userData
+        user: userData,
       };
     } catch (error) {
-      console.error('Error getting auth data from storage:', error);
-  
+      console.error("Error getting auth data from storage:", error);
+
       return {
         token: null,
         userId: null,
-        user: null
+        user: null,
       };
     }
   };
@@ -185,40 +195,46 @@ const removeTimeSlotId = () => {
   const { token, userId, user } = authData;
 
   // Consultation topics
-  const consultationTopics = [
-    "Home Loan",
-    
-  ];
+  const consultationTopics = ["Home Loan"];
 
   // Enhanced API request helper with comprehensive debugging
-  const authenticatedRequest = async (method: string, endpoint: string, data?: any) => {
+  const authenticatedRequest = async (
+    method: string,
+    endpoint: string,
+    data?: any
+  ) => {
     const requestId = Date.now().toString();
     const logMessage = (msg: string) => {
       const timeStamp = new Date().toLocaleTimeString();
       const logEntry = `[${timeStamp}][${requestId}] ${msg}`;
       console.log(logEntry);
-     
     };
 
     try {
       // Get fresh auth data for each request
-      const currentToken = localStorage.getItem('auth_token');
-      const currentUserId = localStorage.getItem('userId') || JSON.parse(localStorage.getItem('user') || '{}').id;
+      const currentToken = localStorage.getItem("auth_token");
+      const currentUserId =
+        localStorage.getItem("userId") ||
+        JSON.parse(localStorage.getItem("user") || "{}").id;
 
       logMessage(`=== ${method} ${endpoint} ===`);
-      logMessage(`Auth Token: ${currentToken ? `${currentToken.substring(0, 20)}...` : 'NOT FOUND'}`);
-      logMessage(`User ID: ${currentUserId || 'NOT FOUND'}`);
+      logMessage(
+        `Auth Token: ${
+          currentToken ? `${currentToken.substring(0, 20)}...` : "NOT FOUND"
+        }`
+      );
+      logMessage(`User ID: ${currentUserId || "NOT FOUND"}`);
 
       if (!currentToken) {
-        const errorMsg = 'Authentication token missing';
+        const errorMsg = "Authentication token missing";
         logMessage(`ERROR: ${errorMsg}`);
         throw new Error(errorMsg);
       }
 
       const headers: Record<string, string> = {
-        'Content-Type': 'application/json',
-        'Accept': 'application/json',
-        'Authorization': `Bearer ${currentToken}`,
+        "Content-Type": "application/json",
+        Accept: "application/json",
+        Authorization: `Bearer ${currentToken}`,
       };
 
       logMessage(`Authorization header set with token`);
@@ -226,10 +242,13 @@ const removeTimeSlotId = () => {
       const config: RequestInit = {
         method,
         headers,
-        credentials: 'include',
+        credentials: "include",
       };
 
-      if (data && (method === 'POST' || method === 'PUT' || method === 'PATCH')) {
+      if (
+        data &&
+        (method === "POST" || method === "PUT" || method === "PATCH")
+      ) {
         config.body = JSON.stringify(data);
         logMessage(`Request payload: ${JSON.stringify(data, null, 2)}`);
       }
@@ -246,10 +265,12 @@ const removeTimeSlotId = () => {
       response.headers.forEach((value, key) => {
         responseHeaders[key] = value;
       });
-      logMessage(`Response headers: ${JSON.stringify(responseHeaders, null, 2)}`);
+      logMessage(
+        `Response headers: ${JSON.stringify(responseHeaders, null, 2)}`
+      );
 
       if (!response.ok) {
-        let errorText = '';
+        let errorText = "";
         let errorData = null;
 
         try {
@@ -259,51 +280,63 @@ const removeTimeSlotId = () => {
           if (errorText) {
             try {
               errorData = JSON.parse(errorText);
-              logMessage(`Parsed error data: ${JSON.stringify(errorData, null, 2)}`);
+              logMessage(
+                `Parsed error data: ${JSON.stringify(errorData, null, 2)}`
+              );
             } catch (parseError) {
-              logMessage(`Could not parse error response as JSON: ${parseError.message}`);
+              logMessage(
+                `Could not parse error response as JSON: ${parseError.message}`
+              );
             }
           }
         } catch (textError) {
           logMessage(`Could not read error response: ${textError.message}`);
         }
 
-        const errorMessage = errorData?.message || errorData?.error || errorText || `HTTP ${response.status}`;
+        const errorMessage =
+          errorData?.message ||
+          errorData?.error ||
+          errorText ||
+          `HTTP ${response.status}`;
         logMessage(`ERROR: ${errorMessage}`);
         throw new Error(`API Error [${response.status}]: ${errorMessage}`);
       }
 
-      const contentType = response.headers.get('content-type');
+      const contentType = response.headers.get("content-type");
       let responseData;
 
-      if (contentType && contentType.includes('application/json')) {
+      if (contentType && contentType.includes("application/json")) {
         const responseText = await response.text();
         logMessage(`Success response body: ${responseText}`);
 
         if (responseText) {
           try {
             responseData = JSON.parse(responseText);
-            logMessage(`Parsed success data: ${JSON.stringify(responseData, null, 2)}`);
+            logMessage(
+              `Parsed success data: ${JSON.stringify(responseData, null, 2)}`
+            );
           } catch (parseError) {
-            logMessage(`Could not parse success response as JSON: ${parseError.message}`);
+            logMessage(
+              `Could not parse success response as JSON: ${parseError.message}`
+            );
             responseData = { success: true, rawResponse: responseText };
           }
         } else {
           responseData = { success: true };
         }
       } else {
-        logMessage('Non-JSON response received');
+        logMessage("Non-JSON response received");
         responseData = { success: true };
       }
 
       logMessage(`=== REQUEST COMPLETED SUCCESSFULLY ===`);
       return responseData;
-
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      const errorMessage =
+        error instanceof Error ? error.message : "Unknown error";
       logMessage(`=== REQUEST FAILED: ${errorMessage} ===`);
 
-      if (error instanceof Error && error.message.startsWith('API Error')) {
+      if (error instanceof Error && error.message.startsWith("API Error")) {
         throw error;
       } else {
         throw new Error(`Network error: ${errorMessage}`);
@@ -312,60 +345,91 @@ const removeTimeSlotId = () => {
   };
 
   // Fetch available time slots
-const { data: availableSlots, isLoading: slotsLoading, error: slotsError } = useQuery({
-  queryKey: ['consultation-available-slots', selectedDate],
-  queryFn: async () => {
-    if (!selectedDate) {
-      throw new Error("No date selected");
-    }
-    
-    const dateStr = selectedDate.toISOString().split('T')[0];
-    const timezone = 'Asia/Kolkata';
+  const {
+    data: availableSlots,
+    isLoading: slotsLoading,
+    error: slotsError,
+  } = useQuery({
+    queryKey: ["consultation-available-slots", selectedDate],
+    queryFn: async () => {
+      if (!selectedDate) {
+        throw new Error("No date selected");
+      }
 
-    const response = await authenticatedRequest('GET', `/consultation/available-slots?date=${dateStr}&timezone=${timezone}`);
-    
-    // Process the response and save timeslotId if available
-    const slots = Array.isArray(response) ? response : response?.slots || response?.data || [];
-    
-    // If you want to save a specific timeslotId from the first available slot
-    if (slots.length > 0 && slots[0].timeslotId) {
-      localStorage.setItem('timeslotId', slots[0].timeslotId);
-    }
-    
-    return slots;
-  },
-  enabled: !!selectedDate && !!token,
-  retry: 2,
-  onError: (error) => {
-    console.error("Error fetching available slots:", error);
-    toast.error("Failed to load available time slots");
-    setApiErrors(prev => ({ ...prev, slots: error instanceof Error ? error.message : 'Unknown error' }));
-  }
-});
+      // Create a new Date object at start of day in local timezone
+      const localDate = new Date(
+        selectedDate.getFullYear(),
+        selectedDate.getMonth(),
+        selectedDate.getDate()
+      );
+      const dateStr = format(localDate, "yyyy-MM-dd");
+      const timezone = "Asia/Kolkata";
 
- // Fetch user's consultations
-const { data: userConsultations, refetch: refetchConsultations, error: consultationsError } = useQuery({
-  queryKey: ['user-consultations', userId],
-  queryFn: async () => {
-    const storedUserId = localStorage.getItem('userId');
-    const token = localStorage.getItem('token');
-    
-    if (!token || !storedUserId) {
-      throw new Error("User not authenticated");
-    }
+      const response = await authenticatedRequest(
+        "GET",
+        `/consultation/available-slots?date=${dateStr}&timezone=${timezone}`
+      );
 
-    // Try using template literal in URL instead of params
-    const response = await authenticatedRequest('GET', `/consultation/all-bookings?userId=${storedUserId}`);
-    return Array.isArray(response) ? response : response?.consultations || response?.data || [];
-  },
-  enabled: !!localStorage.getItem('token') && !!localStorage.getItem('userId'),
-  retry: 2,
-  onError: (error) => {
-    console.error("Error fetching user consultations:", error);
-    toast.error("Failed to load your consultations");
-    setApiErrors(prev => ({ ...prev, consultations: error instanceof Error ? error.message : 'Unknown error' }));
-  }
-});
+      // Process the response and save timeslotId if available
+      const slots = Array.isArray(response)
+        ? response
+        : response?.slots || response?.data || [];
+
+      // If you want to save a specific timeslotId from the first available slot
+      if (slots.length > 0 && slots[0].timeslotId) {
+        localStorage.setItem("timeslotId", slots[0].timeslotId);
+      }
+
+      return slots;
+    },
+    enabled: !!selectedDate && !!token,
+    retry: 2,
+    onError: (error) => {
+      console.error("Error fetching available slots:", error);
+      toast.error("Failed to load available time slots");
+      setApiErrors((prev) => ({
+        ...prev,
+        slots: error instanceof Error ? error.message : "Unknown error",
+      }));
+    },
+  });
+
+  // Fetch user's consultations
+  const {
+    data: userConsultations,
+    refetch: refetchConsultations,
+    error: consultationsError,
+  } = useQuery({
+    queryKey: ["user-consultations", userId],
+    queryFn: async () => {
+      const storedUserId = localStorage.getItem("userId");
+      const token = localStorage.getItem("token");
+
+      if (!token || !storedUserId) {
+        throw new Error("User not authenticated");
+      }
+
+      // Try using template literal in URL instead of params
+      const response = await authenticatedRequest(
+        "GET",
+        `/consultation/all-bookings?userId=${storedUserId}`
+      );
+      return Array.isArray(response)
+        ? response
+        : response?.consultations || response?.data || [];
+    },
+    enabled:
+      !!localStorage.getItem("token") && !!localStorage.getItem("userId"),
+    retry: 2,
+    onError: (error) => {
+      console.error("Error fetching user consultations:", error);
+      toast.error("Failed to load your consultations");
+      setApiErrors((prev) => ({
+        ...prev,
+        consultations: error instanceof Error ? error.message : "Unknown error",
+      }));
+    },
+  });
 
   // Initialize forms with proper default values
   const form = useForm<ConsultationFormValues>({
@@ -425,34 +489,40 @@ const { data: userConsultations, refetch: refetchConsultations, error: consultat
         verificationCode: data.verificationCode,
       };
 
-      console.log('Sending email verification payload:', payload);
+      console.log("Sending email verification payload:", payload);
       // Use POST method for email verification
-      return await authenticatedRequest('POST', '/auth/email-verify', payload);
+      return await authenticatedRequest("POST", "/auth/email-verify", payload);
     },
     onSuccess: (data) => {
       setIsSubmitting(false);
       toast.success("Email verified successfully!");
       setShowEmailVerify(false);
       emailVerifyForm.reset();
-      setApiErrors(prev => ({ ...prev, emailVerify: "" }));
+      setApiErrors((prev) => ({ ...prev, emailVerify: "" }));
     },
     onError: (error) => {
       console.error("Error verifying email:", error);
       setIsSubmitting(false);
-      toast.error(`Email verification failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      toast.error(
+        `Email verification failed: ${
+          error instanceof Error ? error.message : "Unknown error"
+        }`
+      );
 
-      setApiErrors(prev => ({
+      setApiErrors((prev) => ({
         ...prev,
-        emailVerify: error instanceof Error ? error.message : 'Unknown error'
+        emailVerify: error instanceof Error ? error.message : "Unknown error",
       }));
-    }
+    },
   });
 
   // Create consultation mutation
   const createConsultationMutation = useMutation({
     mutationFn: async (data: ConsultationFormValues) => {
-      const currentToken = localStorage.getItem('auth_token');
-      const currentUserId = localStorage.getItem('userId') || JSON.parse(localStorage.getItem('user') || '{}').id;
+      const currentToken = localStorage.getItem("auth_token");
+      const currentUserId =
+        localStorage.getItem("userId") ||
+        JSON.parse(localStorage.getItem("user") || "{}").id;
 
       if (!currentToken || !currentUserId) {
         throw new Error("Authentication required. Please log in.");
@@ -469,12 +539,12 @@ const { data: userConsultations, refetch: refetchConsultations, error: consultat
         clientName: user?.fullName || user?.name || guestData.name,
         clientEmail: user?.email || guestData.email,
         clientPhone: user?.phone || guestData.phone,
-        status: 'PENDING',
+        status: "PENDING",
         createdAt: new Date().toISOString(),
       };
-      
-      console.log('Sending consultation booking payload:', payload);
-      return await authenticatedRequest('POST', '/consultation/book', payload);
+
+      console.log("Sending consultation booking payload:", payload);
+      return await authenticatedRequest("POST", "/consultation/book", payload);
     },
     onSuccess: (data) => {
       if (userConsultations) {
@@ -482,7 +552,11 @@ const { data: userConsultations, refetch: refetchConsultations, error: consultat
       }
       setIsSubmitting(false);
 
-      const responseId = data?.consultationId || data?.id || data?.data?.consultationId || data?.data?.id;
+      const responseId =
+        data?.consultationId ||
+        data?.id ||
+        data?.data?.consultationId ||
+        data?.data?.id;
       setConsultationId(responseId);
 
       if (responseId) {
@@ -493,25 +567,31 @@ const { data: userConsultations, refetch: refetchConsultations, error: consultat
         toast.success("Consultation booked successfully!");
       }
 
-      setApiErrors(prev => ({ ...prev, booking: "" }));
+      setApiErrors((prev) => ({ ...prev, booking: "" }));
     },
     onError: (error) => {
       console.error("Error creating consultation:", error);
       setIsSubmitting(false);
-      toast.error(`Failed to book consultation: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      toast.error(
+        `Failed to book consultation: ${
+          error instanceof Error ? error.message : "Unknown error"
+        }`
+      );
 
-      setApiErrors(prev => ({
+      setApiErrors((prev) => ({
         ...prev,
-        booking: error instanceof Error ? error.message : 'Unknown error'
+        booking: error instanceof Error ? error.message : "Unknown error",
       }));
-    }
+    },
   });
 
   // Cancel consultation mutation
   const cancelConsultationMutation = useMutation({
     mutationFn: async (data: CancelFormValues) => {
-      const currentToken = localStorage.getItem('auth_token');
-      const currentUserId = localStorage.getItem('userId') || JSON.parse(localStorage.getItem('user') || '{}').id;
+      const currentToken = localStorage.getItem("auth_token");
+      const currentUserId =
+        localStorage.getItem("userId") ||
+        JSON.parse(localStorage.getItem("user") || "{}").id;
 
       if (!currentToken || !currentUserId) {
         throw new Error("Authentication required. Please log in.");
@@ -526,8 +606,12 @@ const { data: userConsultations, refetch: refetchConsultations, error: consultat
         cancelledBy: currentUserId,
       };
 
-      console.log('Sending consultation cancel payload:', payload);
-      return await authenticatedRequest('POST', '/consultation/cancel', payload);
+      console.log("Sending consultation cancel payload:", payload);
+      return await authenticatedRequest(
+        "POST",
+        "/consultation/cancel",
+        payload
+      );
     },
     onSuccess: () => {
       refetchConsultations();
@@ -535,24 +619,30 @@ const { data: userConsultations, refetch: refetchConsultations, error: consultat
       setSelectedConsultationForAction(null);
       cancelForm.reset();
       toast.success("Consultation cancelled successfully");
-      setApiErrors(prev => ({ ...prev, cancel: "" }));
+      setApiErrors((prev) => ({ ...prev, cancel: "" }));
     },
     onError: (error) => {
       console.error("Error cancelling consultation:", error);
-      toast.error(`Failed to cancel consultation: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      toast.error(
+        `Failed to cancel consultation: ${
+          error instanceof Error ? error.message : "Unknown error"
+        }`
+      );
 
-      setApiErrors(prev => ({
+      setApiErrors((prev) => ({
         ...prev,
-        cancel: error instanceof Error ? error.message : 'Unknown error'
+        cancel: error instanceof Error ? error.message : "Unknown error",
       }));
-    }
+    },
   });
 
   // Reschedule consultation mutation
   const rescheduleConsultationMutation = useMutation({
     mutationFn: async (data: RescheduleFormValues) => {
-      const currentToken = localStorage.getItem('auth_token');
-      const currentUserId = localStorage.getItem('userId') || JSON.parse(localStorage.getItem('user') || '{}').id;
+      const currentToken = localStorage.getItem("auth_token");
+      const currentUserId =
+        localStorage.getItem("userId") ||
+        JSON.parse(localStorage.getItem("user") || "{}").id;
       const timeSlotId = getTimeSlotId();
 
       if (!currentToken || !currentUserId) {
@@ -569,8 +659,12 @@ const { data: userConsultations, refetch: refetchConsultations, error: consultat
         rescheduledBy: currentUserId,
       };
 
-      console.log('Sending consultation reschedule payload:', payload);
-      return await authenticatedRequest('POST', '/consultation/reschedule', payload);
+      console.log("Sending consultation reschedule payload:", payload);
+      return await authenticatedRequest(
+        "POST",
+        "/consultation/reschedule",
+        payload
+      );
     },
     onSuccess: () => {
       refetchConsultations();
@@ -579,48 +673,50 @@ const { data: userConsultations, refetch: refetchConsultations, error: consultat
       rescheduleForm.reset();
       setSelectedDate(undefined);
       toast.success("Consultation rescheduled successfully");
-      setApiErrors(prev => ({ ...prev, reschedule: "" }));
+      setApiErrors((prev) => ({ ...prev, reschedule: "" }));
     },
     onError: (error) => {
       console.error("Error rescheduling consultation:", error);
-      toast.error(`Failed to reschedule consultation: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      toast.error(
+        `Failed to reschedule consultation: ${
+          error instanceof Error ? error.message : "Unknown error"
+        }`
+      );
 
-      setApiErrors(prev => ({
+      setApiErrors((prev) => ({
         ...prev,
-        reschedule: error instanceof Error ? error.message : 'Unknown error'
+        reschedule: error instanceof Error ? error.message : "Unknown error",
       }));
-    }
+    },
   });
 
- // Handle payment success
-const handlePaymentSuccess = (paymentData: any) => {
-  console.log("Payment successful:", paymentData);
-  setIsSuccess(true);
-  toast.success("Payment completed successfully!");
+  // Handle payment success
+  const handlePaymentSuccess = (paymentData: any) => {
+    console.log("Payment successful:", paymentData);
+    setIsSuccess(true);
+    toast.success("Payment completed successfully!");
 
-  setTimeout(() => {
-    const storedUser = localStorage.getItem("user");
-    let role: string | null = null;
+    setTimeout(() => {
+      const storedUser = localStorage.getItem("user");
+      let role: string | null = null;
 
-    if (storedUser) {
-      try {
-        const parsedUser = JSON.parse(storedUser);
-        role = parsedUser.role || null;
-      } catch (err) {
-        console.error("Error parsing user from localStorage:", err);
+      if (storedUser) {
+        try {
+          const parsedUser = JSON.parse(storedUser);
+          role = parsedUser.role || null;
+        } catch (err) {
+          console.error("Error parsing user from localStorage:", err);
+        }
       }
-    }
 
-    if (role && role !== "USER") {
-      window.location.href =
-        "https://homobie-partner-portal.vercel.app/builder";
-    } else {
-      window.location.href =
-        "https://homobie-partner-portal.vercel.app";
-    }
-  }, 3000);
-};
-
+      if (role && role !== "USER") {
+        window.location.href =
+          "https://homobie-partner-portal.vercel.app/builder";
+      } else {
+        window.location.href = "https://homobie-partner-portal.vercel.app";
+      }
+    }, 3000);
+  };
 
   // Handle payment failure
   const handlePaymentFailure = (error: any) => {
@@ -632,7 +728,7 @@ const handlePaymentSuccess = (paymentData: any) => {
   // Handle email verification
   const onSubmitEmailVerify = async (data: EmailVerifyValues) => {
     setIsSubmitting(true);
-    setApiErrors(prev => ({ ...prev, emailVerify: "" }));
+    setApiErrors((prev) => ({ ...prev, emailVerify: "" }));
 
     try {
       await emailVerifyMutation.mutateAsync(data);
@@ -645,8 +741,10 @@ const handlePaymentSuccess = (paymentData: any) => {
   // Handle consultation booking
   const onSubmitConsultation = async (data: ConsultationFormValues) => {
     // Check authentication first
-    const currentToken = localStorage.getItem('auth_token');
-    const currentUserId = localStorage.getItem('userId') || JSON.parse(localStorage.getItem('user') || '{}').id;
+    const currentToken = localStorage.getItem("auth_token");
+    const currentUserId =
+      localStorage.getItem("userId") ||
+      JSON.parse(localStorage.getItem("user") || "{}").id;
 
     if (!currentToken || !currentUserId) {
       toast.error("Please log in to book a consultation");
@@ -664,7 +762,7 @@ const handlePaymentSuccess = (paymentData: any) => {
     }
 
     setIsSubmitting(true);
-    setApiErrors(prev => ({ ...prev, booking: "" }));
+    setApiErrors((prev) => ({ ...prev, booking: "" }));
 
     try {
       await createConsultationMutation.mutateAsync({
@@ -679,10 +777,12 @@ const handlePaymentSuccess = (paymentData: any) => {
 
   // Handle consultation cancellation
   const onSubmitCancel = async (data: CancelFormValues) => {
-    setApiErrors(prev => ({ ...prev, cancel: "" }));
+    setApiErrors((prev) => ({ ...prev, cancel: "" }));
 
     try {
-      const currentUserId = localStorage.getItem('userId') || JSON.parse(localStorage.getItem('user') || '{}').id;
+      const currentUserId =
+        localStorage.getItem("userId") ||
+        JSON.parse(localStorage.getItem("user") || "{}").id;
       await cancelConsultationMutation.mutateAsync({
         ...data,
         userId: currentUserId,
@@ -694,10 +794,12 @@ const handlePaymentSuccess = (paymentData: any) => {
 
   // Handle consultation rescheduling
   const onSubmitReschedule = async (data: RescheduleFormValues) => {
-    setApiErrors(prev => ({ ...prev, reschedule: "" }));
+    setApiErrors((prev) => ({ ...prev, reschedule: "" }));
 
     try {
-      const currentUserId = localStorage.getItem('userId') || JSON.parse(localStorage.getItem('user') || '{}').id;
+      const currentUserId =
+        localStorage.getItem("userId") ||
+        JSON.parse(localStorage.getItem("user") || "{}").id;
       await rescheduleConsultationMutation.mutateAsync({
         ...data,
         userId: currentUserId,
@@ -710,38 +812,48 @@ const handlePaymentSuccess = (paymentData: any) => {
   // Handle cancel consultation action
   const handleCancelConsultation = (consultation: any) => {
     setSelectedConsultationForAction(consultation);
-    const currentUserId = localStorage.getItem('userId') || JSON.parse(localStorage.getItem('user') || '{}').id;
-    cancelForm.setValue('consultationId', consultation.consultationId || consultation.id);
-    cancelForm.setValue('userId', currentUserId || '');
+    const currentUserId =
+      localStorage.getItem("userId") ||
+      JSON.parse(localStorage.getItem("user") || "{}").id;
+    cancelForm.setValue(
+      "consultationId",
+      consultation.consultationId || consultation.id
+    );
+    cancelForm.setValue("userId", currentUserId || "");
     setShowCancelForm(true);
   };
 
   // Handle reschedule consultation action
   const handleRescheduleConsultation = (consultation: any) => {
     setSelectedConsultationForAction(consultation);
-    const currentUserId = localStorage.getItem('userId') || JSON.parse(localStorage.getItem('user') || '{}').id;
-    rescheduleForm.setValue('consultationId', consultation.consultationId || consultation.id);
-    rescheduleForm.setValue('userId', currentUserId || '');
+    const currentUserId =
+      localStorage.getItem("userId") ||
+      JSON.parse(localStorage.getItem("user") || "{}").id;
+    rescheduleForm.setValue(
+      "consultationId",
+      consultation.consultationId || consultation.id
+    );
+    rescheduleForm.setValue("userId", currentUserId || "");
     setShowRescheduleForm(true);
   };
 
   // Update forms when auth data changes
   useEffect(() => {
     if (userId) {
-      form.setValue('userId', userId);
-      cancelForm.setValue('userId', userId);
-      rescheduleForm.setValue('userId', userId);
+      form.setValue("userId", userId);
+      cancelForm.setValue("userId", userId);
+      rescheduleForm.setValue("userId", userId);
     }
   }, [userId, form, cancelForm, rescheduleForm]);
 
   // Reset time slot when date changes
   useEffect(() => {
-    form.setValue('timeSlotId', '');
-    rescheduleForm.setValue('timeSlotId', '');
+    form.setValue("timeSlotId", "");
+    rescheduleForm.setValue("timeSlotId", "");
   }, [selectedDate, form, rescheduleForm]);
 
   return (
-    <div className='bg-black'>
+    <div className="bg-black">
       <main className=" pt-20">
         <div className="container mx-auto px-4">
           <div className="max-w-6xl mx-auto">
@@ -785,31 +897,33 @@ const handlePaymentSuccess = (paymentData: any) => {
                     confirmation email shortly.
                   </p>
                   <Button
-  onClick={() => {
-    const storedUser = localStorage.getItem("user");
-    let role: string | null = null;
+                    onClick={() => {
+                      const storedUser = localStorage.getItem("user");
+                      let role: string | null = null;
 
-    if (storedUser) {
-      try {
-        const parsedUser = JSON.parse(storedUser);
-        role = parsedUser.role || null;
-      } catch (err) {
-        console.error("Error parsing user from localStorage:", err);
-      }
-    }
+                      if (storedUser) {
+                        try {
+                          const parsedUser = JSON.parse(storedUser);
+                          role = parsedUser.role || null;
+                        } catch (err) {
+                          console.error(
+                            "Error parsing user from localStorage:",
+                            err
+                          );
+                        }
+                      }
 
-    if (role && role !== "USER") {
-      window.location.href =
-        "https://homobie-partner-portal.vercel.app/builder";
-    } else {
-      window.location.href =
-        "https://homobie-partner-portal.vercel.app";
-    }
-  }}
->
-  Go to Dashboard
-</Button>
-
+                      if (role && role !== "USER") {
+                        window.location.href =
+                          "https://homobie-partner-portal.vercel.app/builder";
+                      } else {
+                        window.location.href =
+                          "https://homobie-partner-portal.vercel.app";
+                      }
+                    }}
+                  >
+                    Go to Dashboard
+                  </Button>
                 </CardContent>
               </Card>
             ) : /* Payment State */
@@ -1229,21 +1343,54 @@ const handlePaymentSuccess = (paymentData: any) => {
                                         key={slot.timeSlotId || slot.id}
                                         value={slot.timeSlotId || slot.id}
                                       >
-                                        {format(
-                                          new Date(
-                                            slot.slotTime || slot.startTime
-                                          ),
-                                          "HH:mm"
-                                        )}{" "}
-                                        -{" "}
-                                        {format(
-                                          new Date(
-                                            new Date(
-                                              slot.slotTime || slot.startTime
-                                            ).getTime() +
-                                              60 * 60 * 1000
-                                          ),
-                                          "HH:mm"
+                                        {(() => {
+                                          const timeStr =
+                                            slot.slotTime || slot.startTime;
+                                          if (!timeStr)
+                                            return "Time not available";
+
+                                          try {
+                                            // If timeStr is just time (HH:mm:ss), combine with selected date
+                                            let startTime;
+                                            if (
+                                              timeStr.match(
+                                                /^\d{2}:\d{2}:\d{2}$/
+                                              )
+                                            ) {
+                                              const [hours, minutes] =
+                                                timeStr.split(":");
+                                              startTime = new Date(
+                                                selectedDate
+                                              );
+                                              startTime.setHours(
+                                                parseInt(hours),
+                                                parseInt(minutes),
+                                                0,
+                                                0
+                                              );
+                                            } else {
+                                              startTime = new Date(timeStr);
+                                            }
+
+                                            if (isNaN(startTime.getTime()))
+                                              return "Invalid time";
+
+                                            const endTime = new Date(
+                                              startTime.getTime() +
+                                                60 * 60 * 1000
+                                            );
+                                            return `${format(
+                                              startTime,
+                                              "HH:mm"
+                                            )} - ${format(endTime, "HH:mm")}`;
+                                          } catch (error) {
+                                            return "Time format error";
+                                          }
+                                        })()}
+                                        {slot.isToday && (
+                                          <span className="ml-2 text-xs bg-green-100 text-green-800 px-1 rounded">
+                                            Today
+                                          </span>
                                         )}
                                       </SelectItem>
                                     ))
@@ -1710,24 +1857,58 @@ const handlePaymentSuccess = (paymentData: any) => {
                                               key={slot.timeSlotId || slot.id}
                                               value={slot.timeSlotId || slot.id}
                                             >
-                                              {format(
-                                                new Date(
+                                              {(() => {
+                                                const timeStr =
                                                   slot.slotTime ||
-                                                    slot.startTime
-                                                ),
-                                                "HH:mm"
-                                              )}{" "}
-                                              -{" "}
-                                              {format(
-                                                new Date(
-                                                  new Date(
-                                                    slot.slotTime ||
-                                                      slot.startTime
-                                                  ).getTime() +
-                                                    60 * 60 * 1000
-                                                ),
-                                                "HH:mm"
-                                              )}
+                                                  slot.startTime;
+                                                if (!timeStr)
+                                                  return "Time not available";
+
+                                                try {
+                                                  // If timeStr is just time (HH:mm:ss), combine with selected date
+                                                  let startTime;
+                                                  if (
+                                                    timeStr.match(
+                                                      /^\d{2}:\d{2}:\d{2}$/
+                                                    )
+                                                  ) {
+                                                    const [hours, minutes] =
+                                                      timeStr.split(":");
+                                                    startTime = new Date(
+                                                      selectedDate
+                                                    );
+                                                    startTime.setHours(
+                                                      parseInt(hours),
+                                                      parseInt(minutes),
+                                                      0,
+                                                      0
+                                                    );
+                                                  } else {
+                                                    startTime = new Date(
+                                                      timeStr
+                                                    );
+                                                  }
+
+                                                  if (
+                                                    isNaN(startTime.getTime())
+                                                  )
+                                                    return "Invalid time";
+
+                                                  const endTime = new Date(
+                                                    startTime.getTime() +
+                                                      60 * 60 * 1000
+                                                  );
+                                                  return `${format(
+                                                    startTime,
+                                                    "HH:mm"
+                                                  )} - ${format(
+                                                    endTime,
+                                                    "HH:mm"
+                                                  )}`;
+                                                } catch (error) {
+                                                  return "Time format error";
+                                                }
+                                              })()}
                                               {slot.isToday && (
                                                 <span className="ml-2 text-xs bg-green-100 text-green-800 px-1 rounded">
                                                   Today
@@ -1878,40 +2059,41 @@ const handlePaymentSuccess = (paymentData: any) => {
                             ))}
 
                           {userConsultations.length > 3 && (
-                           <Button
-  variant="outline"
-  size="sm"
-  className="w-full"
-  onClick={() => {
-    const storedUser = localStorage.getItem("user");
-    let role: string | null = null;
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              className="w-full"
+                              onClick={() => {
+                                const storedUser = localStorage.getItem("user");
+                                let role: string | null = null;
 
-    if (storedUser) {
-      try {
-        const parsedUser = JSON.parse(storedUser);
-        role = parsedUser.role || null;
-      } catch (err) {
-        console.error("Error parsing user from localStorage:", err);
-      }
-    }
+                                if (storedUser) {
+                                  try {
+                                    const parsedUser = JSON.parse(storedUser);
+                                    role = parsedUser.role || null;
+                                  } catch (err) {
+                                    console.error(
+                                      "Error parsing user from localStorage:",
+                                      err
+                                    );
+                                  }
+                                }
 
-    if (role && role !== "USER") {
-      window.location.href =
-        "https://homobie-partner-portal.vercel.app/builder";
-    } else {
-      window.location.href =
-        "https://homobie-partner-portal.vercel.app";
-    }
-  }}
->
-  View All ({userConsultations.length})
-</Button>
-
+                                if (role && role !== "USER") {
+                                  window.location.href =
+                                    "https://homobie-partner-portal.vercel.app/builder";
+                                } else {
+                                  window.location.href =
+                                    "https://homobie-partner-portal.vercel.app";
+                                }
+                              }}
+                            >
+                              View All ({userConsultations.length})
+                            </Button>
                           )}
                         </CardContent>
                       </Card>
                     )}
-
 
                     <Card className="bg-primary text-white">
                       <CardHeader>
